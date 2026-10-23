@@ -12,6 +12,7 @@ const valid = {
   PAYOS_API_KEY: 'key',
   PAYOS_CHECKSUM_KEY: 'checksum',
   INTERNAL_CRON_TOKEN: 'x'.repeat(32),
+  APP_ENCRYPTION_KEY: 'ab'.repeat(32),
 };
 
 describe('parseEnv', () => {
@@ -26,6 +27,11 @@ describe('parseEnv', () => {
     expect(() => parseEnv({ ...valid, PAYOS_PAYOUT_CLIENT_ID: 'id' })).toThrow(/PAYOS_PAYOUT_API_KEY/);
     const keys = { PAYOS_PAYOUT_CLIENT_ID: 'a', PAYOS_PAYOUT_API_KEY: 'b', PAYOS_PAYOUT_CHECKSUM_KEY: 'c' };
     expect(() => parseEnv({ ...valid, ...keys })).not.toThrow();
+  });
+
+  it('production bắt buộc khoá mã hoá 64 ký tự hex', () => {
+    expect(() => parseEnv({ ...valid, APP_ENCRYPTION_KEY: undefined })).toThrow(/APP_ENCRYPTION_KEY/);
+    expect(() => parseEnv({ ...valid, APP_ENCRYPTION_KEY: 'ngan-qua' })).toThrow(/64 ký tự hex/);
   });
 
   it('báo rõ tên biến bị thiếu', () => {

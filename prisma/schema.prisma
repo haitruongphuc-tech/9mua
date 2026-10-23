@@ -620,3 +620,48 @@ model Notification {
 
   @@index([userId, readAt, createdAt])
 }
+
+// ===== Admin (SPEC-admin.md) =====
+// Xác thực 2 lớp. Bí mật TOTP mã hoá bằng APP_ENCRYPTION_KEY; mã dự phòng lưu dạng băm.
+model AdminTotp {
+  userId       String    @id
+  secretEnc    String
+  backupHashes String[]
+  lastTimeStep Int? // chống dùng lại mã vừa dùng
+  enabledAt    DateTime? // null = đang cài, chưa xác nhận
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model AdminTotpAttempt {
+  id        String   @id @default(cuid(2))
+  userId    String
+  success   Boolean
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+// Phiên đăng nhập nào đã nhập mã 2 lớp, lúc nào (hết hạn sau 12 giờ).
+model AdminSessionVerification {
+  sessionId  String   @id
+  userId     String
+  verifiedAt DateTime
+}
+
+// Nhật ký thao tác admin: chỉ thêm, không sửa, không xoá.
+model AdminAuditLog {
+  id         String   @id @default(cuid(2))
+  adminId    String
+  action     String
+  targetType String
+  targetId   String
+  reason     String?
+  before     Json?
+  after      Json?
+  ip         String?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([targetType, targetId])
+}

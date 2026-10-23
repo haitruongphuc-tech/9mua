@@ -35,6 +35,14 @@ const schema = z
     PAYOS_PAYOUT_CLIENT_ID: z.string().optional(),
     PAYOS_PAYOUT_API_KEY: z.string().optional(),
     PAYOS_PAYOUT_CHECKSUM_KEY: z.string().optional(),
+    // Khoá AES-256 (64 ký tự hex) mã hoá bí mật TOTP của admin. Tạo: openssl rand -hex 32
+    APP_ENCRYPTION_KEY: z.preprocess(
+      (v) => (v === '' ? undefined : v),
+      z
+        .string()
+        .regex(/^[0-9a-f]{64}$/i, 'APP_ENCRYPTION_KEY phải là 64 ký tự hex (openssl rand -hex 32)')
+        .optional(),
+    ),
     // Token bí mật cho cron gọi /api/internal/* (Docker che IP người gọi nên không dựa vào IP).
     INTERNAL_CRON_TOKEN: z.string().optional(),
   })
@@ -77,6 +85,13 @@ const schema = z
           message: `${key} thiếu: cần đủ 3 khoá kênh chi hộ PayOS`,
         });
     }
+    if (v.NODE_ENV === 'production' && !v.TEST_MODE && !v.APP_ENCRYPTION_KEY) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['APP_ENCRYPTION_KEY'],
+        message: 'APP_ENCRYPTION_KEY là bắt buộc ở production',
+      });
+    }
     if (v.NODE_ENV === 'production' && (v.INTERNAL_CRON_TOKEN ?? '').length < 32) {
       ctx.addIssue({
         code: 'custom',
@@ -99,11 +114,14 @@ const schema = z
       PAYMENTS_DRIVER: paymentsDriver(v),
       PAYOS_CHECKSUM_KEY: v.PAYOS_CHECKSUM_KEY ?? (paymentsDriver(v) === 'fake' ? FAKE_CHECKSUM_KEY : ''),
       APP_URL: appUrl,
+      // Dev/test/E2E dùng khoá cố định công khai; production bắt buộc khoá riêng (kiểm ở trên).
+      APP_ENCRYPTION_KEY: v.APP_ENCRYPTION_KEY ?? DEV_ENCRYPTION_KEY,
       ROOT_DOMAIN: new URL(appUrl).hostname,
     };
   });
 
 export const FAKE_CHECKSUM_KEY = 'fake-checksum-key-9mua';
+const DEV_ENCRYPTION_KEY = '9a'.repeat(32);
 
 function paymentsDriver(v: { NODE_ENV: string; PAYMENTS_DRIVER?: 'payos' | 'fake' }) {
   return v.PAYMENTS_DRIVER ?? (v.NODE_ENV === 'production' ? 'payos' : 'fake');

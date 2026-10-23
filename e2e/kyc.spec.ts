@@ -1,9 +1,7 @@
-import { execFileSync } from 'node:child_process';
 import { expect, test } from '@playwright/test';
+import { promoteToAdmin, setUpAdminTotp } from './helpers/admin';
 import { e2eDb } from './helpers/db';
 import { signUpWithKiot } from './helpers/seller';
-
-const DB = process.env.DATABASE_URL_E2E ?? 'postgresql://ninemua:ninemua@localhost:5432/ninemua_dev';
 
 test('KYC: người bán nộp CCCD; ảnh không xem được công khai; chỉ CEO xem được', async ({ page, browser }) => {
   const { phone } = await signUpWithKiot(page, 'Kiot KYC');
@@ -26,11 +24,10 @@ test('KYC: người bán nộp CCCD; ảnh không xem được công khai; chỉ
   // Chính người nộp (tài khoản thường) cũng không xem được qua route admin.
   expect((await page.goto(`/api/admin/kyc/${sub.id}/front`))?.status()).toBe(404);
 
-  // Nâng tài khoản thành CEO → xem được.
-  execFileSync('node', ['dist/scripts/create-admin.mjs', '--phone', phone], {
-    input: '\n',
-    env: { ...process.env, DATABASE_URL: DB },
-  });
+  // Nâng tài khoản thành CEO: chưa qua 2 lớp vẫn 404; cài 2 lớp xong thì xem được.
+  promoteToAdmin(phone);
+  expect((await page.goto(`/api/admin/kyc/${sub.id}/front`))?.status()).toBe(404);
+  await setUpAdminTotp(page);
   const asAdmin = await page.goto(`/api/admin/kyc/${sub.id}/front`);
   expect(asAdmin?.status()).toBe(200);
   expect(asAdmin?.headers()['content-type']).toBe('image/webp');

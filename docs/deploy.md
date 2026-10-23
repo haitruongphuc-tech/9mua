@@ -32,6 +32,8 @@ cp .env.example .env && chmod 600 .env   # rồi điền giá trị thật
 Tối thiểu cần điền trong `.env`:
 - `POSTGRES_PASSWORD`: tạo bằng `openssl rand -hex 24`.
 - `INTERNAL_CRON_TOKEN`: tạo bằng `openssl rand -hex 32`.
+- `APP_ENCRYPTION_KEY`: tạo bằng `openssl rand -hex 32`. Mã hoá bí mật 2 lớp của CEO; **mất khoá này thì
+  CEO phải cài lại 2 lớp**, nên chép một bản cất riêng (không để chung với bản sao lưu DB).
 - `APP_URL=https://9mua.com`.
 - `PAYOS_*` (kênh nhận tiền) và, khi PayOS đã mở kênh chi hộ cho 9MUA CO.,LTD, `PAYOS_PAYOUT_*`. Để trống
   `PAYOS_PAYOUT_*` thì mọi yêu cầu rút vào hàng chờ CEO duyệt tay (chuyển bằng QR VietQR).

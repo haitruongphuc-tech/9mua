@@ -484,7 +484,7 @@
 
 ## Phase 8 — Trang CEO (`SPEC-admin.md`)
 
-- [ ] **T31: Khung admin + 2 lớp + audit log** (M)
+- [x] **T31: Khung admin + 2 lớp + audit log** (M)
   - Model `AdminTotp`, `AdminAuditLog`. Thêm `src/lib/audit.ts`, cài và kiểm TOTP (`otplib`), mã dự
     phòng, phiên admin 12 giờ, layout `/admin`. **Test quét mọi route admin.**
   - Acceptance:
@@ -495,6 +495,12 @@
   - Deps: T7
   - Files: `src/modules/admin/{totp,guard}.ts` + test, `src/lib/audit.ts`, `src/app/admin/{layout,xac-thuc/page}.tsx`,
     `tests/admin-routes.test.ts`
+  - Ghi chú: `otplib` 13.5.0 (bản cố định). Bí mật TOTP mã hoá AES-256-GCM bằng `APP_ENCRYPTION_KEY`
+    (bắt buộc ở production), chống dùng lại mã (time step), sai 5 lần khoá 15 phút, 10 mã dự phòng băm.
+    Trạng thái "phiên đã qua 2 lớp" lưu ở bảng riêng của admin (không sửa bảng Session của identity).
+    Nhật ký thao tác ghi ở tầng action của admin (`src/lib/audit.ts`) thay vì sửa từng hàm của module
+    khác — không phải đổi hợp đồng `index.ts` của các module, mà mỗi thao tác trên giao diện CEO vẫn có
+    đúng 1 dòng nhật ký.
 
 - [ ] **T32: Tổng quan + hộp "Cần xử lý"** (S)
   - Số liệu Hôm nay / 7 / 30 ngày, biểu đồ SVG doanh thu, các bộ đếm hàng chờ có link.

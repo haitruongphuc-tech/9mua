@@ -15,6 +15,7 @@ describe('chốt chặn trong database', () => {
         'order_event_append_only',
         'order_item_append_only',
         'ProductSale_append_only',
+        'AdminAuditLog_append_only',
         'Product_search_name',
       ]),
     );

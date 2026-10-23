@@ -2,6 +2,7 @@
 // Mọi route/trang có thể làm tiền vào (webhook, đối soát, trang QR) PHẢI import từ đây, không import
 // thẳng '@/modules/payments', để handler luôn có mặt trong đúng bundle đang chạy.
 import { onKiotFeePaid } from '@/modules/billing';
+import { onOrderPaid } from '@/modules/orders';
 import { registerPaymentHandler } from '@/modules/payments';
 
 let registered = false;
@@ -10,7 +11,7 @@ function registerAll() {
   if (registered) return;
   registered = true;
   registerPaymentHandler('kiot_fee', onKiotFeePaid);
-  // orders nối vào ở T19.
+  registerPaymentHandler('order', onOrderPaid);
 }
 
 registerAll();

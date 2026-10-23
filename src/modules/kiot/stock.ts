@@ -27,3 +27,17 @@ export async function restoreStock(tx: Tx, lines: StockLine[]): Promise<void> {
     await tx.$executeRaw`UPDATE "Product" SET stock = stock + ${line.qty}, "updatedAt" = now() WHERE id = ${line.productId}`;
   }
 }
+
+// Thử giữ hàng mà KHÔNG ném lỗi (dùng khi tiền vào muộn sau khi đơn đã tự huỷ): khoá các dòng sản phẩm,
+// kiểm đủ hàng cho mọi món rồi mới trừ; thiếu một món thì không trừ món nào.
+export async function tryDecrementStock(tx: Tx, lines: StockLine[]): Promise<boolean> {
+  const sorted = [...lines].sort((a, b) => a.productId.localeCompare(b.productId));
+  for (const line of sorted) {
+    const rows = await tx.$queryRaw<{ stock: number; deleted: boolean }[]>`
+      SELECT stock, "deletedAt" IS NOT NULL AS deleted FROM "Product" WHERE id = ${line.productId} FOR UPDATE`;
+    const row = rows[0];
+    if (!row || row.deleted || row.stock < line.qty) return false;
+  }
+  await decrementStock(tx, sorted);
+  return true;
+}

@@ -60,3 +60,31 @@ describe('tồn kho', () => {
     expect((await db.product.findUniqueOrThrow({ where: { id: p.id } })).stock).toBe(2);
   });
 });
+
+describe('tryDecrementStock (giữ lại hàng khi trả muộn)', () => {
+  it('đủ hàng mọi món thì trừ hết và trả true; thiếu một món thì không trừ gì và trả false', async () => {
+    const { tryDecrementStock } = await import('./stock');
+    const { kiotId } = await createSeller({ active: true });
+    const a = await product(kiotId, 5);
+    const b = await product(kiotId, 1);
+    expect(
+      await db.$transaction((tx) =>
+        tryDecrementStock(tx, [
+          { productId: a.id, qty: 2 },
+          { productId: b.id, qty: 2 },
+        ]),
+      ),
+    ).toBe(false);
+    expect((await db.product.findUniqueOrThrow({ where: { id: a.id } })).stock).toBe(5);
+    expect(
+      await db.$transaction((tx) =>
+        tryDecrementStock(tx, [
+          { productId: a.id, qty: 2 },
+          { productId: b.id, qty: 1 },
+        ]),
+      ),
+    ).toBe(true);
+    expect((await db.product.findUniqueOrThrow({ where: { id: a.id } })).stock).toBe(3);
+    expect((await db.product.findUniqueOrThrow({ where: { id: b.id } })).stock).toBe(0);
+  });
+});

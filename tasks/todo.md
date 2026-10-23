@@ -281,7 +281,7 @@
   - Deps: T12, T7
   - Files: `src/modules/orders/{cart,shipping}.ts` + test, `src/app/gio-hang/page.tsx`, `src/components/AddToCart.tsx`
 
-- [ ] **T19: Đặt hàng + thanh toán 1 QR nhiều Kiot** (M)
+- [x] **T19: Đặt hàng + thanh toán 1 QR nhiều Kiot** (M)
   - Model `Checkout`, `Order`, `OrderItem`. `placeOrder` trong 1 transaction (đọc lại giá, giữ hàng,
     chụp lại thông tin món và tỉ lệ phí sàn), địa chỉ nhận hàng, trang QR. Handler `onPaid`, xử lý
     trường hợp trả muộn.

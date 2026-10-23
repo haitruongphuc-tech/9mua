@@ -32,6 +32,7 @@ model User {
   resetTokens        PasswordResetToken[]
   kiot               Kiot?
   cartItems          CartItem[]
+  address            BuyerAddress?
 }
 
 model PasswordResetToken {
@@ -261,4 +262,110 @@ model CartItem {
   updatedAt     DateTime @updatedAt
 
   @@id([userId, productId])
+}
+
+enum OrderStatus {
+  pending_payment
+  paid
+  confirmed
+  shipping
+  delivered
+  completed
+  cancelled
+  refund_pending
+  refunded
+  disputed
+}
+
+// Địa chỉ nhận hàng mặc định của người mua.
+model BuyerAddress {
+  userId    String   @id
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  phone     String
+  province  String
+  district  String
+  ward      String
+  line      String
+  updatedAt DateTime @updatedAt
+}
+
+// Một lần thanh toán (1 QR) cho các đơn của nhiều Kiot.
+model Checkout {
+  id        String   @id @default(cuid(2))
+  buyerId   String
+  total     Int
+  intentId  String?
+  status    String   @default("pending") // pending | paid | cancelled
+  createdAt DateTime @default(now())
+  orders    Order[]
+
+  @@index([buyerId, createdAt])
+}
+
+model Order {
+  id              String      @id @default(cuid(2))
+  code            String      @unique // DH + số, dễ đọc qua điện thoại
+  checkoutId      String
+  checkout        Checkout    @relation(fields: [checkoutId], references: [id])
+  kiotId          String
+  buyerId         String
+  status          OrderStatus @default(pending_payment)
+  subtotal        Int
+  shippingFee     Int
+  total           Int
+  platformFeeRate Int // basis point lúc đặt hàng: 500 = 5%
+  shipTo          Json
+  note            String?
+  trackingCode    String?
+  carrier         String?
+  paidAt          DateTime?
+  confirmedAt     DateTime?
+  shippedAt       DateTime?
+  deliveredAt     DateTime?
+  completedAt     DateTime?
+  cancelledAt     DateTime?
+  refundAccount   Json?
+  refundRef       String?
+  refundedAt      DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  items           OrderItem[]
+  events          OrderEvent[]
+
+  @@index([kiotId, status])
+  @@index([buyerId, createdAt])
+  @@index([status, updatedAt])
+}
+
+// Ảnh chụp sản phẩm lúc mua: không bao giờ sửa sau khi tạo.
+model OrderItem {
+  id            String  @id @default(cuid(2))
+  orderId       String
+  order         Order   @relation(fields: [orderId], references: [id])
+  productId     String
+  name          String
+  price         Int
+  qty           Int
+  imageUrl      String?
+  sourceVideoId String?
+
+  @@index([productId])
+  @@index([sourceVideoId])
+}
+
+// Lịch sử chuyển trạng thái: ai, lúc nào, từ đâu sang đâu, vì sao. Chỉ thêm.
+model OrderEvent {
+  id        String   @id @default(cuid(2))
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id])
+  from      String?
+  to        String
+  action    String
+  actorId   String?
+  actorRole String // buyer | seller | admin | system
+  reason    String?
+  createdAt DateTime @default(now())
+
+  @@index([orderId, createdAt])
 }

@@ -44,3 +44,30 @@ export function sampleImage(color = '#fc6f15', width = 800, height = 600): Promi
     .jpeg()
     .toBuffer();
 }
+
+export async function createProduct(
+  kiotId: string,
+  data: { name?: string; price?: number; stock?: number } = {},
+) {
+  return db.product.create({
+    data: {
+      kiotId,
+      name: data.name ?? 'Thanh long ruột đỏ',
+      price: data.price ?? 45_000,
+      stock: data.stock ?? 10,
+      category: 'nong-san',
+      images: {
+        create: { kiotId, url: '/uploads/p.webp', thumbUrl: '/uploads/p-400.webp', width: 1, height: 1 },
+      },
+    },
+  });
+}
+
+export const sampleAddress = {
+  name: 'Trần Thị Mua',
+  phone: '0912345678',
+  province: 'TP. Hồ Chí Minh',
+  district: 'Quận Tân Phú',
+  ward: 'Phường Phú Thọ Hòa',
+  line: '115 Nguyễn Hậu',
+};

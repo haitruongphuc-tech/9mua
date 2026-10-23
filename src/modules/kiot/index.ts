@@ -42,7 +42,7 @@ export {
   normalizeAccountName,
   type SetPayoutAccountResult,
 } from './payout-account';
-export { decrementStock, restoreStock, OutOfStockError, type StockLine } from './stock';
+export { decrementStock, tryDecrementStock, restoreStock, OutOfStockError, type StockLine } from './stock';
 export {
   lockKiot,
   unlockKiot,

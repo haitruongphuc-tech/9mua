@@ -17,6 +17,12 @@ export function SiteHeader() {
           <Link href="/video" className="rounded-full px-3 py-2 hover:bg-surface-muted">
             Video
           </Link>
+          <Link
+            href="/kiot-cua-toi"
+            className="hidden rounded-full px-3 py-2 hover:bg-surface-muted sm:inline"
+          >
+            Bán hàng
+          </Link>
           <UserMenu />
         </nav>
       </div>

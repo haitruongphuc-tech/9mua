@@ -130,7 +130,7 @@
 
 ## Phase 2 — Kiot (`SPEC-kiot.md`)
 
-- [ ] **T8: Tạo Kiot (bản nháp)** (M)
+- [x] **T8: Tạo Kiot (bản nháp)** (M)
   - Model `Kiot`, tạo slug bỏ dấu tiếng Việt, danh sách slug cấm, kiểm slug trùng ngay khi gõ,
     `/kiot-cua-toi/tao`, bảng điều khiển `/kiot-cua-toi` (trạng thái nháp), `isKiotActive`.
   - Acceptance:

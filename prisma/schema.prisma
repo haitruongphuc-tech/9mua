@@ -30,6 +30,7 @@ model User {
   updatedAt          DateTime  @updatedAt
   sessions           Session[]
   resetTokens        PasswordResetToken[]
+  kiot               Kiot?
 }
 
 model PasswordResetToken {
@@ -62,4 +63,27 @@ model LoginAttempt {
   createdAt  DateTime @default(now())
 
   @@index([identifier, createdAt])
+}
+
+// ─── kiot (SPEC-kiot.md) ─────────────────────────────────────────────────────
+
+model Kiot {
+  id           String    @id @default(cuid(2))
+  ownerId      String    @unique // MVP: mỗi tài khoản 1 Kiot
+  owner        User      @relation(fields: [ownerId], references: [id])
+  slug         String    @unique // tenkiot.9mua.com — cố định sau lần kích hoạt đầu tiên
+  name         String
+  description  String    @default("")
+  contactPhone String // +84…, dùng cho nút gọi/Zalo
+  logoUrl      String?
+  coverUrl     String?
+  province     String?
+  district     String?
+  addressLine  String?
+  // Trạng thái active/expired tính từ activeUntil (module billing gia hạn); null = nháp
+  activeUntil  DateTime?
+  lockedAt     DateTime?
+  lockReason   String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }

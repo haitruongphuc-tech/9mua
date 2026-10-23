@@ -5,6 +5,7 @@ import { notFound, permanentRedirect } from 'next/navigation';
 import { cache } from 'react';
 import { ContactButtons } from '@/components/kiot/ContactButtons';
 import { PreviewBanner } from '@/components/kiot/PreviewBanner';
+import { ReportProduct } from '@/components/market/ReportProduct';
 import { AddToCart } from '@/components/orders/AddToCart';
 import { env } from '@/lib/env';
 import { formatVnd } from '@/lib/format';
@@ -12,9 +13,10 @@ import { getCurrentUser } from '@/modules/identity';
 import { categoryName, getPublicProduct, productPath } from '@/modules/kiot';
 import { kiotBasePath, kiotCanonical } from '../../../kiot-context';
 
+const viewer = cache(getCurrentUser);
 const load = cache(async (slug: string, path: string) => {
   const id = path.split('-')[0] ?? '';
-  return getPublicProduct(slug, id, (await getCurrentUser())?.id ?? null);
+  return getPublicProduct(slug, id, (await viewer())?.id ?? null);
 });
 
 type Params = { params: Promise<{ slug: string; productPath: string }> };
@@ -99,6 +101,16 @@ export default async function ProductPage({ params }: Params) {
         {product.description ? (
           <div className="whitespace-pre-line leading-relaxed">{product.description}</div>
         ) : null}
+        {preview ? null : (
+          <ReportProduct
+            productId={product.id}
+            loginUrl={
+              (await viewer())
+                ? null
+                : `${env().APP_URL}/dang-nhap?next=${encodeURIComponent(`/k/${slug}${productPath(product)}`)}`
+            }
+          />
+        )}
       </div>
     </article>
   );

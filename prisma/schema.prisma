@@ -134,6 +134,8 @@ model Product {
   cartItems       CartItem[]
 
   @@index([kiotId, deletedAt])
+  // Khai báo ở đây để Prisma không tự xoá chỉ mục tìm kiếm khi sinh migration.
+  @@index([searchName(ops: raw("gin_trgm_ops"))], type: Gin, map: "Product_searchName_trgm")
 }
 
 // Ảnh tải lên trước (productId = null) rồi mới gắn vào sản phẩm khi lưu.
@@ -502,4 +504,20 @@ model ProductSalesStat {
   updatedAt DateTime @updatedAt
 
   @@index([sold30d])
+}
+
+// Báo cáo vi phạm sản phẩm (SPEC-marketplace.md mục 6). Mỗi người chỉ báo 1 lần cho mỗi sản phẩm.
+model ProductReport {
+  id           String    @id @default(cuid(2))
+  productId    String
+  reporterId   String
+  reason       String // hang_gia | cam_ban | lua_dao | khac
+  message      String    @default("")
+  status       String    @default("open") // open | dismissed | actioned
+  reviewedById String?
+  reviewedAt   DateTime?
+  createdAt    DateTime  @default(now())
+
+  @@unique([productId, reporterId])
+  @@index([status, createdAt])
 }

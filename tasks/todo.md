@@ -413,7 +413,7 @@
     Trang danh mục dùng cache 60 giây trong tiến trình thay cho ISR (lúc build Docker chưa có DB).
     "Đã bán" lấy từ sổ `ProductSale` (chỉ thêm) + `ProductSalesStat`; cron 3:10 tính lại 30 ngày.
 
-- [ ] **T27: Trang chủ, danh bạ Kiot, báo cáo vi phạm, SEO** (M)
+- [x] **T27: Trang chủ, danh bạ Kiot, báo cáo vi phạm, SEO** (M)
   - Trang chủ thật (khẩu hiệu, nút "Tạo Kiot – 26.000đ/năm", danh mục, bán chạy, mới, Kiot nổi bật,
     chỗ cho khối video), `/cho/kiot`, `reportProduct` (5 người thì tự ẩn), `sitemap.xml`, `robots.txt`.
   - Acceptance:
@@ -424,6 +424,11 @@
   - Deps: T26
   - Files: `src/app/page.tsx`, `src/app/cho/kiot/page.tsx`, `src/modules/marketplace/{home,reports}.ts` + test,
     `src/app/{sitemap,robots}.ts`
+  - Ghi chú: chưa Kiot nào có đơn hoàn tất 30 ngày thì khối đổi tên thành "Kiot mới mở" (không giả số).
+    Nút "Tạo Kiot" lấy phí thật từ cài đặt; đã đăng nhập thì /dang-ky chuyển thẳng tới trang cần tới.
+    Sitemap gồm link tenkiot.9mua.com — CEO cần xác minh 9mua.com dạng Domain property trên Search Console.
+    Thêm `tests/db-guards.test.ts`: Prisma từng tự sinh lệnh xoá chỉ mục tìm kiếm (đã chặn bằng khai báo
+    `@@index(... type: Gin)`), test này bắt mọi migration lỡ xoá trigger/CHECK/chỉ mục viết tay.
 
 ## Phase 7 — Creator video (`SPEC-creator.md`), làm song song với Phase 6
 

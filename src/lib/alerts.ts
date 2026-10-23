@@ -14,6 +14,7 @@ export const ALERT_LABELS: Record<string, string> = {
   payout_rejected: 'PayOS từ chối lệnh chi',
   payout_stuck: 'Lệnh chi PayOS bị treo',
   payout_fund_low: 'Quỹ chi PayOS sắp hết',
+  product_auto_hidden: 'Sản phẩm bị tự ẩn do nhiều báo cáo',
 };
 
 // Không bao giờ ném lỗi: cảnh báo hỏng không được làm hỏng luồng tiền đang chạy.

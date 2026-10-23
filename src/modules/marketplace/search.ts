@@ -75,16 +75,19 @@ function decodeCursor(raw: string | undefined): Cursor | null {
 
 // Chỉ sản phẩm đang hiện của Kiot đang hoạt động và không bị khoá (SPEC-marketplace.md mục 4).
 // Chợ chỉ ĐỌC bảng của kiot; điều kiện ở đây phải giống PUBLIC_PRODUCT_WHERE + isKiotActive.
+// Dùng với bí danh p = "Product", k = "Kiot".
+export function visibleOnMarket(at: Date): Prisma.Sql {
+  return Prisma.sql`p.visible = true AND p."deletedAt" IS NULL AND p."hiddenByAdminAt" IS NULL
+    AND k."activeUntil" > ${at} AND k."lockedAt" IS NULL`;
+}
+
 export async function searchProducts(params: SearchParams, limit = PAGE_SIZE): Promise<Page<MarketCard>> {
   const q = params.q ? normalizeQuery(params.q) : '';
   const sort: Sort = params.sort === 'phu-hop' && !q ? 'moi-nhat' : params.sort;
   const cursor = decodeCursor(params.cursor);
   const at = now();
 
-  const filters: Prisma.Sql[] = [
-    Prisma.sql`p.visible = true AND p."deletedAt" IS NULL AND p."hiddenByAdminAt" IS NULL`,
-    Prisma.sql`k."activeUntil" > ${at} AND k."lockedAt" IS NULL`,
-  ];
+  const filters: Prisma.Sql[] = [visibleOnMarket(at)];
   if (q) filters.push(matchClause(q));
   if (params.category) filters.push(Prisma.sql`p.category = ${params.category}`);
   if (params.province) filters.push(Prisma.sql`k.province = ${params.province}`);

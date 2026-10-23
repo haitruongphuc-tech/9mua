@@ -96,6 +96,11 @@ sudo nginx -t && sudo systemctl reload nginx
 
 DNS cần có: `A 9mua.com → IP VPS` và `A *.9mua.com → IP VPS` (hoặc `CNAME * → 9mua.com`).
 
+## 3b. Google Search Console
+
+Xác minh `9mua.com` dạng **Domain property** (bản ghi DNS TXT) để Google nhận cả các link
+`tenkiot.9mua.com` trong `https://9mua.com/sitemap.xml`, rồi gửi sitemap đó.
+
 ## 4. Cron
 
 File mẫu: `deploy/cron/9mua.cron`. Các route được bổ sung dần theo task T15, T17, T21, T25, T35.

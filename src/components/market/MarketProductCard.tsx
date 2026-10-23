@@ -28,7 +28,7 @@ export function MarketProductCard({ p }: { p: MarketCard }) {
         <span className="flex flex-wrap items-baseline gap-x-2">
           <span className="font-extrabold text-brand-deep">{formatVnd(p.price)}</span>
           {p.compareAtPrice ? (
-            <span className="text-xs text-black/50 line-through">{formatVnd(p.compareAtPrice)}</span>
+            <span className="text-xs text-black/60 line-through">{formatVnd(p.compareAtPrice)}</span>
           ) : null}
         </span>
         <span className="truncate text-xs text-black/60">

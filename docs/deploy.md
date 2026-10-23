@@ -123,14 +123,24 @@ Cron gọi thẳng `127.0.0.1:3009` kèm header `X-Internal-Token: $INTERNAL_CRO
 
 ## 5. Sao lưu database
 
-`scripts/backup-db.sh` (task T37) dump hằng ngày lúc 2:00 vào `/srv/9mua/backups`, giữ 14 bản.
-**Nên chép thêm ra ngoài VPS** (Google Drive, S3…).
+`scripts/backup-db.sh` chạy lúc 2:00 (dòng cuối `deploy/cron/9mua.cron`): dump DB nén vào
+`/srv/9mua/backups/db-<ngày-giờ>.sql.gz` (kiểm đọc lại được mới giữ, giữ 14 ngày) và đồng bộ `uploads/`,
+`private/` (ảnh CCCD) sang `/srv/9mua/backups/files/`. Thư mục sao lưu chỉ root đọc được.
+**Nên chép thêm ra ngoài VPS** (Google Drive, ổ khác) — mất VPS là mất cả bản sao lưu.
 
-Khôi phục thử:
+Đã thử khôi phục trọn bộ (T36): số dòng mọi bảng khớp, đủ trigger chỉ-thêm, tìm kiếm chạy.
+
+Khôi phục **thử** vào một database phụ (không đụng dữ liệu đang chạy):
 
 ```bash
-gunzip -c /srv/9mua/backups/<file>.sql.gz | docker compose exec -T db psql -U ninemua -d ninemua
+docker compose exec -T db createdb -U ninemua ninemua_restore
+gunzip -c /srv/9mua/backups/db-<ngày-giờ>.sql.gz | docker compose exec -T db psql -q -v ON_ERROR_STOP=1 -U ninemua -d ninemua_restore
+docker compose exec -T db psql -U ninemua -d ninemua_restore -c 'select count(*) from "Order"'
+docker compose exec -T db dropdb -U ninemua ninemua_restore
 ```
+
+Khôi phục **thật** (sự cố): dừng `app` và `worker`, tạo lại database `ninemua` rỗng, nạp bản sao lưu như trên
+vào `ninemua`, chép lại `files/uploads` và `files/private` về `/srv/9mua/`, rồi `docker compose up -d`.
 
 ## 6. Kiểm tra sau deploy
 
@@ -138,3 +148,6 @@ gunzip -c /srv/9mua/backups/<file>.sql.gz | docker compose exec -T db psql -U ni
 - [ ] `https://9mua.com/api/internal/x` trả 404.
 - [ ] `docker compose ps`: `app` healthy, `db` healthy, `worker` running.
 - [ ] `docker compose port db 5432` không trả gì (database không mở ra ngoài).
+- [ ] `docker compose run --rm worker ffmpeg -version` chạy được (worker có ffmpeg).
+- [ ] Gửi liên tục 7 lần form đăng nhập sai: lần thứ 7 trở đi nhận lỗi 429 (giới hạn theo IP).
+- [ ] `sh scripts/backup-db.sh` chạy tay 1 lần thành công, rồi khôi phục thử như mục 5.

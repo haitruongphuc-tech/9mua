@@ -478,7 +478,7 @@
 - [x] Success Criteria `SPEC-marketplace.md` và `SPEC-creator.md` đạt (trừ chỉ số đo trên VPS thật):
   tìm không dấu/sai nhẹ, không lộ Kiot hết hạn/bị khoá, số liệu thật, link lọc chia sẻ được; video iPhone
   chuyển mã H.264, mua từ video ghi đúng nguồn, worker tách riêng.
-- [ ] `/webperf` cho trang chủ, Chợ, feed video → làm cùng T36 (đo LCP/CLS bằng Playwright).
+- [x] `/webperf` cho trang chủ, Chợ, feed video → đã đo ở T36 (`e2e/perf.spec.ts`), đều đạt.
 
 ---
 
@@ -566,7 +566,7 @@
 
 ## Phase 9 — Ra mắt
 
-- [ ] **T36: Kiểm thử toàn bộ + review bảo mật + hiệu năng** (M)
+- [x] **T36: Kiểm thử toàn bộ + review bảo mật + hiệu năng** (M)
   - Chạy toàn bộ E2E. Chạy `/review` và `security-and-hardening` (OWASP, `npm audit`, header bảo mật,
     CSP). Thêm rate-limit theo IP ở Nginx cho `/dang-nhap`, `/dang-ky`, `/quen-mat-khau` (từ review ở
     Checkpoint B). Đánh giá nâng Prisma 7 để hết cảnh báo `deepmerge-ts` của Prisma CLI. Theo dõi log
@@ -578,6 +578,9 @@
   - Verify: báo cáo `/ship`.
   - Deps: T35
   - Files: tuỳ theo phát hiện, cùng `docs/launch-checklist.md`
+  - Kết quả: xem `docs/launch-checklist.md` (GO có điều kiện: hoàn thành T37). Phát hiện và đã sửa:
+    trang Kiot lỗi 500 sau HTTPS nếu `HOSTNAME=127.0.0.1`; worker/CLI thiếu thư viện trong image Docker;
+    bản sao lưu không khôi phục được (hàm tìm kiếm chưa ghi rõ schema); thanh trên tràn ngang ở 375px.
 
 - [ ] **T37: Deploy VPS + thử tiền thật** (M)
   - Theo `docs/deploy.md`:

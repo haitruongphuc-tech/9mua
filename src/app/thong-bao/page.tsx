@@ -27,7 +27,7 @@ export default async function NotificationsPage() {
                 <span>{n.title}</span>
               )}
               {n.body ? <span className="text-sm font-normal text-black/70">{n.body}</span> : null}
-              <span className="text-xs font-normal text-black/50">{formatDateTimeVN(n.createdAt)}</span>
+              <span className="text-xs font-normal text-black/60">{formatDateTimeVN(n.createdAt)}</span>
             </li>
           ))}
         </ul>

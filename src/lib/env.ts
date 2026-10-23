@@ -50,6 +50,15 @@ const schema = z
     if (v.NODE_ENV === 'production' && !v.APP_URL) {
       ctx.addIssue({ code: 'custom', path: ['APP_URL'], message: 'APP_URL là bắt buộc ở production' });
     }
+    // TEST_MODE mở cổng thanh toán giả và hộp thư giả — chỉ cho máy chạy E2E (http://9mua.test), không bao giờ
+    // cho một địa chỉ HTTPS thật như https://9mua.com.
+    if (v.TEST_MODE && v.APP_URL?.startsWith('https://')) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['TEST_MODE'],
+        message: 'TEST_MODE không được bật trên địa chỉ HTTPS thật',
+      });
+    }
     const driver = mailDriver(v);
     if (v.NODE_ENV === 'production' && !v.TEST_MODE && (driver === 'memory' || driver === 'file')) {
       ctx.addIssue({

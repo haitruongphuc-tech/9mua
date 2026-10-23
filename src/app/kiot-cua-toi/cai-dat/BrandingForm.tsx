@@ -76,7 +76,11 @@ export function BrandingForm({ logoUrl, coverUrl }: { logoUrl: string | null; co
   return (
     <div className="flex flex-col gap-4">
       {error ? (
-        <p role="alert" className="rounded-xl bg-danger/10 px-4 py-3 text-sm font-bold text-danger">
+        <p
+          role="alert"
+          data-testid="branding-error"
+          className="rounded-xl bg-danger/10 px-4 py-3 text-sm font-bold text-danger"
+        >
           {error}
         </p>
       ) : null}

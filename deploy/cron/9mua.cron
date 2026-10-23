@@ -24,3 +24,6 @@ ENVFILE=/opt/9mua/.env
 
 # T35 — bản tin CEO + nhắc người mua nhập tài khoản hoàn tiền lúc 8:05 mỗi sáng
 5 8 * * * root . $ENVFILE; curl -fsS -m 300 -H "X-Internal-Token: $INTERNAL_CRON_TOKEN" $APP/api/internal/admin/digest >/dev/null
+
+# T37 — sao lưu DB + ảnh lúc 2:00 mỗi đêm (giữ 14 ngày)
+0 2 * * * root sh /opt/9mua/scripts/backup-db.sh >> /var/log/9mua-backup.log 2>&1

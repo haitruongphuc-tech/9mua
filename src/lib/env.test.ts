@@ -34,6 +34,13 @@ describe('parseEnv', () => {
     expect(() => parseEnv({ ...valid, APP_ENCRYPTION_KEY: 'ngan-qua' })).toThrow(/64 ký tự hex/);
   });
 
+  it('TEST_MODE (cổng thanh toán giả) bị cấm trên địa chỉ HTTPS thật', () => {
+    expect(() => parseEnv({ ...valid, TEST_MODE: 'e2e', PAYMENTS_DRIVER: 'fake' })).toThrow(/TEST_MODE/);
+    expect(() =>
+      parseEnv({ ...valid, APP_URL: 'http://9mua.test:3100', TEST_MODE: 'e2e', PAYMENTS_DRIVER: 'fake' }),
+    ).not.toThrow();
+  });
+
   it('báo rõ tên biến bị thiếu', () => {
     expect(() => parseEnv({ ...valid, DATABASE_URL: undefined })).toThrow(/DATABASE_URL/);
   });
@@ -63,14 +70,16 @@ describe('parseEnv', () => {
   it('production chặn driver mail của test, trừ khi chạy E2E', () => {
     expect(() => parseEnv({ ...valid, MAIL_DRIVER: 'file' })).toThrow(/MAIL_DRIVER/);
     expect(() => parseEnv({ ...valid, MAIL_DRIVER: 'memory' })).toThrow(/MAIL_DRIVER/);
-    expect(parseEnv({ ...valid, MAIL_DRIVER: 'file', TEST_MODE: 'e2e' }).MAIL_DRIVER).toBe('file');
+    const e2e = { APP_URL: 'http://9mua.test:3100', TEST_MODE: 'e2e' };
+    expect(parseEnv({ ...valid, ...e2e, MAIL_DRIVER: 'file' }).MAIL_DRIVER).toBe('file');
   });
 
   it('production: PayOS thật bắt buộc đủ khoá; driver fake bị chặn trừ khi chạy E2E', () => {
     expect(parseEnv(valid).PAYMENTS_DRIVER).toBe('payos');
     expect(() => parseEnv({ ...valid, PAYOS_CHECKSUM_KEY: undefined })).toThrow(/PAYOS_CHECKSUM_KEY/);
     expect(() => parseEnv({ ...valid, PAYMENTS_DRIVER: 'fake' })).toThrow(/PAYMENTS_DRIVER/);
-    expect(parseEnv({ ...valid, PAYMENTS_DRIVER: 'fake', TEST_MODE: 'e2e' }).PAYMENTS_DRIVER).toBe('fake');
+    const e2e = { APP_URL: 'http://9mua.test:3100', TEST_MODE: 'e2e' };
+    expect(parseEnv({ ...valid, ...e2e, PAYMENTS_DRIVER: 'fake' }).PAYMENTS_DRIVER).toBe('fake');
   });
 
   it('production bắt buộc INTERNAL_CRON_TOKEN đủ dài', () => {

@@ -7,7 +7,7 @@ export function ProductGrid({ items, basePath }: { items: ProductCard[]; basePat
   return (
     <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4" data-testid="product-grid">
       {items.map((p) => (
-        <li key={p.id} className={p.stock > 0 ? '' : 'opacity-50'}>
+        <li key={p.id} className={p.stock > 0 ? '' : 'opacity-60'}>
           <Link href={`${basePath}${p.path}`} className="flex flex-col gap-2">
             <span className="relative aspect-square overflow-hidden rounded-2xl bg-surface-muted">
               {p.thumbUrl ? (
@@ -30,7 +30,7 @@ export function ProductGrid({ items, basePath }: { items: ProductCard[]; basePat
             <span className="flex items-baseline gap-2">
               <span className="font-extrabold text-brand-deep">{formatVnd(p.price)}</span>
               {p.compareAtPrice ? (
-                <span className="text-xs text-black/50 line-through">{formatVnd(p.compareAtPrice)}</span>
+                <span className="text-xs text-black/60 line-through">{formatVnd(p.compareAtPrice)}</span>
               ) : null}
             </span>
           </Link>

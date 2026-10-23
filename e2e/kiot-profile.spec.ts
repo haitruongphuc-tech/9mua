@@ -11,7 +11,7 @@ test('Kiot: logo, ảnh bìa, địa chỉ lấy hàng; trang công khai chỉ h
   await page.setInputFiles('[data-testid=cover-input]', 'e2e/fixtures/anh-den.jpg');
   await expect(page.getByRole('img', { name: 'Ảnh bìa' })).toBeVisible();
   await page.setInputFiles('[data-testid=cover-input]', 'e2e/fixtures/khong-phai-anh.jpg');
-  await expect(page.getByRole('alert')).toBeVisible();
+  await expect(page.getByTestId('branding-error')).toBeVisible();
 
   await page.selectOption('#kiot-province', 'lam-dong');
   await page.fill('#kiot-district', 'Đà Lạt');

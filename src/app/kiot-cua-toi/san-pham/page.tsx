@@ -22,7 +22,7 @@ export default async function ProductsPage({
       <header className="flex items-center justify-between gap-3">
         <h1 className="text-xl font-extrabold">
           Sản phẩm{' '}
-          <span className="text-black/50">
+          <span className="text-black/60">
             ({products.length}/{MAX_PRODUCTS_PER_KIOT})
           </span>
         </h1>

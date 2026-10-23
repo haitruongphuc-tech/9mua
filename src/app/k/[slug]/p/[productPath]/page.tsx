@@ -88,7 +88,7 @@ export default async function ProductPage({ params }: Params) {
             {formatVnd(product.price)}
           </span>
           {product.compareAtPrice ? (
-            <span className="text-black/50 line-through">{formatVnd(product.compareAtPrice)}</span>
+            <span className="text-black/60 line-through">{formatVnd(product.compareAtPrice)}</span>
           ) : null}
         </p>
         <p className="text-sm text-black/70">

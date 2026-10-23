@@ -245,7 +245,7 @@
   - Files: `src/modules/billing/{fee,subscription,index}.ts` + test, `src/lib/settings.ts`,
     `src/app/kiot-cua-toi/thanh-toan/{page,[intentId]/page}.tsx`, `e2e/billing.spec.ts`
 
-- [ ] **T17: Nhắc hết hạn, tặng năm, doanh thu phí** (S)
+- [x] **T17: Nhắc hết hạn, tặng năm, doanh thu phí** (S)
   - `/api/internal/billing/reminders` (mốc 14, 3, 0 ngày, không gửi trùng), `grantYear`, `setKiotFee`,
     `listExpiringKiots`, `revenueSummary`, banner nhắc trong `/kiot-cua-toi`.
   - Acceptance:
@@ -256,9 +256,15 @@
   - Files: `src/modules/billing/{reminders,admin}.ts` + test, `src/app/api/internal/billing/reminders/route.ts`
 
 ### ✅ Checkpoint D — Kiot mở bán thật
-- [ ] Luồng tạo Kiot → trả → công khai chạy hết bằng driver giả.
-- [ ] **Khi CEO có key PayOS:** thử trả 2.000đ thật trên VPS hoặc môi trường thử, xác nhận giới hạn mô tả 9 ký tự.
-- [ ] `/review` cho `payments` (bảo mật webhook). Push, báo CEO.
+- [x] Luồng tạo Kiot → trả → công khai chạy hết bằng driver giả (E2E, kể cả mất webhook).
+- [ ] **Khi CEO có key PayOS:** thử trả 2.000đ thật trên VPS, xác nhận giới hạn mô tả 9 ký tự → làm ở T37.
+- [x] Tự review `payments`:
+  - Chữ ký kiểm bằng SDK trước khi đọc dữ liệu.
+  - Ghi nhận idempotent theo (orderCode, reference), có khoá intent `FOR UPDATE`.
+  - So khớp số tiền, `mismatch` không kích hoạt.
+  - Sổ cái chỉ thêm, chặn bằng trigger DB.
+  - Driver giả bị chặn ở production.
+  - Route nội bộ có token.
 
 ---
 

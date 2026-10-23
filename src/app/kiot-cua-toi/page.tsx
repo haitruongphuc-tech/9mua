@@ -1,18 +1,17 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import QRCode from 'qrcode';
+import { now } from '@/lib/clock';
 import { env } from '@/lib/env';
 import { kiotOrigin } from '@/lib/urls';
 import { requireUser } from '@/modules/identity';
 import { getKiotByOwner, kiotStatus } from '@/modules/kiot';
 import { getKiotFee } from '@/modules/billing';
-import { formatVnd } from '@/lib/format';
+import { formatDateVN, formatVnd } from '@/lib/format';
 import { StatusBadge } from './StatusBadge';
 import { startKiotPaymentAction } from './thanh-toan/actions';
 
 export const metadata: Metadata = { title: 'Kiot của tôi', robots: { index: false } };
-
-const dateVN = (d: Date) => d.toLocaleDateString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
 
 export default async function SellerDashboard({
   searchParams,
@@ -61,7 +60,7 @@ export default async function SellerDashboard({
         </div>
         {kiot.activeUntil && status !== 'locked' ? (
           <p className="text-sm text-black/70">
-            {status === 'active' ? 'Hoạt động đến' : 'Đã hết hạn ngày'} {dateVN(kiot.activeUntil)}
+            {status === 'active' ? 'Hoạt động đến' : 'Đã hết hạn ngày'} {formatDateVN(kiot.activeUntil)}
           </p>
         ) : null}
         {status === 'locked' ? (

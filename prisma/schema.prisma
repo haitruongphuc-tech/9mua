@@ -233,3 +233,13 @@ model KiotSubscription {
 
   @@index([kiotId, createdAt])
 }
+
+// Mỗi mốc nhắc gia hạn chỉ gửi 1 lần cho mỗi kỳ hạn (cron chạy lại cũng không gửi trùng).
+model BillingReminder {
+  kiotId    String
+  milestone String // d14 | d3 | d0
+  periodEnd DateTime
+  sentAt    DateTime @default(now())
+
+  @@id([kiotId, milestone, periodEnd])
+}

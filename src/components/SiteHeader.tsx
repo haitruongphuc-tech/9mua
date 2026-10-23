@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { UserMenu } from './UserMenu';
 
 export function SiteHeader() {
   return (
@@ -16,12 +17,7 @@ export function SiteHeader() {
           <Link href="/video" className="rounded-full px-3 py-2 hover:bg-surface-muted">
             Video
           </Link>
-          <Link
-            href="/dang-nhap"
-            className="rounded-full border-2 border-brand-ink bg-brand px-4 py-2 text-brand-ink"
-          >
-            Đăng nhập
-          </Link>
+          <UserMenu />
         </nav>
       </div>
     </header>

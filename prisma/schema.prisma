@@ -28,4 +28,25 @@ model User {
   lockedAt           DateTime?
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
+  sessions           Session[]
+}
+
+model Session {
+  id         String   @id @default(cuid(2))
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash  String   @unique // SHA-256 của token, không bao giờ lưu token gốc
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+}
+
+// Lần đăng nhập sai, để khoá 15 phút sau 5 lần (theo định danh đã chuẩn hoá).
+model LoginAttempt {
+  id         String   @id @default(cuid(2))
+  identifier String
+  createdAt  DateTime @default(now())
+
+  @@index([identifier, createdAt])
 }

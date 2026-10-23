@@ -1,7 +1,7 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { register } from '@/modules/identity';
+import { register, startSession } from '@/modules/identity';
 import { safeNextPath } from '@/lib/safe-next-path';
 
 export type RegisterFormState = {
@@ -26,7 +26,7 @@ export async function registerAction(_prev: RegisterFormState, form: FormData): 
     return { values, fields: result.fields };
   }
 
-  // T5 sẽ đăng nhập luôn sau khi đăng ký (SPEC-identity.md mục 1).
-  const next = safeNextPath(form.get('next'));
-  redirect(`/dang-nhap?da-dang-ky=1&next=${encodeURIComponent(next)}`);
+  // Đăng ký xong thì đăng nhập luôn và quay lại trang trước đó (SPEC-identity.md mục 1).
+  await startSession(result.userId);
+  redirect(safeNextPath(form.get('next')));
 }

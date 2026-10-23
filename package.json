@@ -16,7 +16,8 @@
     "test:watch": "vitest",
     "postinstall": "prisma generate",
     "db:migrate": "prisma migrate dev",
-    "db:deploy": "prisma migrate deploy"
+    "db:deploy": "prisma migrate deploy",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@fontsource/be-vietnam-pro": "5.3.0",

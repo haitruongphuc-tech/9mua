@@ -72,7 +72,7 @@
   - Files: `prisma/schema.prisma`, `src/modules/identity/{identifier,password,register}.ts` + test,
     `src/app/(auth)/dang-ky/page.tsx`
 
-- [ ] **T5: Đăng nhập, phiên, khoá sau 5 lần sai** (M)
+- [x] **T5: Đăng nhập, phiên, khoá sau 5 lần sai** (M)
   - Model `Session` (lưu mã băm token), cookie `.9mua.com`, `login/logout/getCurrentUser/requireUser`,
     rate-limit theo định danh, `/dang-nhap`, header hiện tên người dùng.
   - Acceptance:

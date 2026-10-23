@@ -10,6 +10,8 @@ import { renderEmail } from './mail/templates';
 export const ALERT_WINDOW_MINUTES = 15;
 
 export const ALERT_LABELS: Record<string, string> = {
+  payment_mismatch: 'Thanh toán lệch tiền',
+  dispute_new: 'Khiếu nại mới',
   payout_failed: 'Lệnh chi PayOS lỗi',
   payout_rejected: 'PayOS từ chối lệnh chi',
   payout_stuck: 'Lệnh chi PayOS bị treo',

@@ -21,3 +21,6 @@ ENVFILE=/opt/9mua/.env
 
 # T26 — tính lại "bán chạy 30 ngày" của Chợ lúc 3:10 mỗi đêm
 10 3 * * * root . $ENVFILE; curl -fsS -m 300 -H "X-Internal-Token: $INTERNAL_CRON_TOKEN" $APP/api/internal/marketplace/stats >/dev/null
+
+# T35 — bản tin CEO + nhắc người mua nhập tài khoản hoàn tiền lúc 8:05 mỗi sáng
+5 8 * * * root . $ENVFILE; curl -fsS -m 300 -H "X-Internal-Token: $INTERNAL_CRON_TOKEN" $APP/api/internal/admin/digest >/dev/null

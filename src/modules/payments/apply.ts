@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client';
+import { alertCeo } from '@/lib/alerts';
 import { now } from '@/lib/clock';
 import { db } from '@/lib/db';
 import type { GatewayTransaction } from './gateway';
@@ -82,5 +83,23 @@ export async function applyTransaction(
   );
   // Chỉ chạy khi transaction đã commit; lỗi ở đây (vd. gửi mail) không làm mất giao dịch đã ghi nhận.
   if (afterCommit) await afterCommit().catch((e) => console.error('[payments] afterCommit lỗi:', e));
+  // Tiền vào bất thường: báo CEO ngay (SPEC-admin.md mục 6). alertCeo không bao giờ ném lỗi.
+  if (
+    outcome === 'partial' ||
+    outcome === 'mismatch' ||
+    outcome === 'orphan' ||
+    outcome === 'duplicate_payment'
+  )
+    await alertCeo(
+      'payment_mismatch',
+      `${ISSUE_LABEL[outcome]}: mã ${orderCode}, nhận ${t.amount.toLocaleString('vi-VN')}đ${t.counterAccountName ? ` từ ${t.counterAccountName}` : ''}${t.reference ? ` (GD ${t.reference})` : ''}.`,
+    );
   return outcome;
 }
+
+const ISSUE_LABEL = {
+  partial: 'Chuyển thiếu tiền',
+  mismatch: 'Chuyển thừa/sai số tiền',
+  orphan: 'Tiền vào không khớp đơn nào',
+  duplicate_payment: 'Trả 2 lần',
+} as const;

@@ -1,5 +1,6 @@
 import { randomBytes } from 'node:crypto';
 import { z } from 'zod';
+import { alertCeo } from '@/lib/alerts';
 import { now } from '@/lib/clock';
 import { db } from '@/lib/db';
 import { imageStore } from '@/lib/media/image-store';
@@ -85,6 +86,10 @@ export async function submitDispute(
     if (error instanceof InvalidTransition) return { ok: false, error: 'INVALID_TRANSITION' };
     throw error;
   }
+  await alertCeo(
+    'dispute_new',
+    `Đơn ${order.code} (${order.total.toLocaleString('vi-VN')}đ) có khiếu nại mới: “${message.slice(0, 120)}”`,
+  );
   return { ok: true };
 }
 

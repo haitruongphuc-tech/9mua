@@ -32,6 +32,8 @@ test('mọi route cron đều cần token; đúng token thì chạy', async ({ r
     'orders/tick',
     'billing/reminders',
     'marketplace/stats',
+    'admin/digest',
+    'video/process',
   ]) {
     expect((await request.get(`${APP}/api/internal/${path}`)).status(), path).toBe(404);
   }

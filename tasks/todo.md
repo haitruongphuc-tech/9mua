@@ -541,7 +541,7 @@
   - Ghi chú: gộp tra cứu người dùng/Kiot/đơn vào một trang `/admin/tra-cuu`. Mật khẩu tạm hiện ngay trên
     trang (không đưa lên URL để không lọt vào log). CSV chặn chèn công thức Excel; mỗi lần xuất ghi nhật ký.
 
-- [ ] **T35: Email cảnh báo + bản tin 8:00** (S)
+- [x] **T35: Email cảnh báo + bản tin 8:00** (S)
   - Model `AlertThrottle`. Báo ngay: lệch tiền, chi lỗi, quỹ chi thấp, khiếu nại mới. Bản tin hằng
     ngày qua `/api/internal/admin/digest`.
   - Acceptance:
@@ -550,6 +550,9 @@
   - Verify: vitest admin (hộp thư giả).
   - Deps: T34
   - Files: `src/modules/admin/{alerts,digest}.ts` + test, `src/app/api/internal/admin/digest/route.ts`
+  - Ghi chú: phần gộp/hạn mức cảnh báo đã làm ở T25 (`src/lib/alerts.ts`). T35 thêm báo ngay khi tiền vào
+    bất thường (thiếu/thừa/không khớp/trả 2 lần) và khiếu nại mới; bản tin 8:05 kèm nhắc người mua nhập tài
+    khoản nhận hoàn tiền (đơn chờ hoàn > 24 giờ).
 
 ### ✅ Checkpoint H — Trang CEO
 - [ ] Success Criteria `SPEC-admin.md` đạt.

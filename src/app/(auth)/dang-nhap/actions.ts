@@ -18,5 +18,5 @@ export async function loginAction(_prev: LoginFormState, form: FormData): Promis
   if (!result.ok) return { identifier, message: MESSAGES[result.error] };
 
   await startSession(result.userId);
-  redirect(safeNextPath(form.get('next')));
+  redirect(result.mustChangePassword ? '/tai-khoan?doi-mat-khau=1' : safeNextPath(form.get('next')));
 }

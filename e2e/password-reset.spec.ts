@@ -11,7 +11,7 @@ test('quên mật khẩu → mở link trong email → đặt mật khẩu mới
   await page.click('button[type=submit]');
   await expect(page.getByTestId('user-menu')).toBeVisible();
   await page.goto('/tai-khoan');
-  await page.getByRole('button', { name: 'Đăng xuất' }).click();
+  await page.getByRole('button', { name: 'Đăng xuất', exact: true }).click();
 
   await page.goto('/dang-nhap');
   await page.getByRole('link', { name: 'Quên mật khẩu?' }).click();

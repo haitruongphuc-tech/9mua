@@ -4,6 +4,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+// Phát sự kiện này sau khi đổi tên/đăng nhập để header cập nhật mà không cần tải lại trang.
+export const ME_CHANGED_EVENT = 'nm:me-changed';
+
 type Me = { displayName: string; role: 'user' | 'admin' } | null;
 
 export function UserMenu() {
@@ -12,12 +15,16 @@ export function UserMenu() {
 
   useEffect(() => {
     let alive = true;
-    fetch('/api/auth/me', { cache: 'no-store' })
-      .then((r) => r.json())
-      .then((d: { user: Me }) => alive && setMe(d.user))
-      .catch(() => alive && setMe(null));
+    const load = () =>
+      fetch('/api/auth/me', { cache: 'no-store' })
+        .then((r) => r.json())
+        .then((d: { user: Me }) => alive && setMe(d.user))
+        .catch(() => alive && setMe(null));
+    load();
+    window.addEventListener(ME_CHANGED_EVENT, load);
     return () => {
       alive = false;
+      window.removeEventListener(ME_CHANGED_EVENT, load);
     };
   }, [pathname]);
 

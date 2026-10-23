@@ -19,13 +19,14 @@ ARG APP_URL=https://9mua.com
 ENV APP_URL=$APP_URL NEXT_TELEMETRY_DISABLED=1
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN npm run build
+RUN npm run build && npm run build:scripts
 
 FROM base AS runner
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 HOSTNAME=0.0.0.0 PORT=3000
 COPY --from=build --chown=node:node /app/.next/standalone ./
 COPY --from=build --chown=node:node /app/.next/static ./.next/static
 COPY --from=build --chown=node:node /app/public ./public
+COPY --from=build --chown=node:node /app/dist/scripts ./dist/scripts
 COPY --chown=node:node deploy/docker/entrypoint.sh /usr/local/bin/entrypoint
 RUN mkdir -p /data/uploads /data/private && chown -R node:node /data
 USER node

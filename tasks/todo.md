@@ -96,7 +96,7 @@
   - Files: `src/lib/mail/{index,templates}.ts`, `src/modules/identity/reset.ts` + test,
     `src/app/(auth)/{quen-mat-khau,dat-lai-mat-khau}/page.tsx`
 
-- [ ] **T7: Trang tài khoản, quyền admin, lệnh tạo CEO** (M)
+- [x] **T7: Trang tài khoản, quyền admin, lệnh tạo CEO** (M)
   - `/tai-khoan` (sửa thông tin, thêm email, đổi mật khẩu, đăng xuất mọi thiết bị). Thêm `lockUser`,
     `resetPassword`, `requireAdmin` (trả 404), và script `user:create-admin` (nhập mật khẩu ẩn).
   - Acceptance:

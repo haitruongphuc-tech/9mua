@@ -1,5 +1,5 @@
 import { cookies, headers } from 'next/headers';
-import { redirect } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { cache } from 'react';
 import { env } from '@/lib/env';
 import { SESSION_COOKIE, sessionCookieOptions } from './cookie';
@@ -25,10 +25,17 @@ export async function getCurrentSessionId(): Promise<string | null> {
 
 export async function requireUser(): Promise<SessionUser> {
   const user = await getCurrentUser();
-  if (!user) {
-    const path = (await headers()).get('x-pathname') ?? '/';
-    redirect(`/dang-nhap?next=${encodeURIComponent(path)}`);
-  }
+  const path = (await headers()).get('x-pathname') ?? '/';
+  if (!user) redirect(`/dang-nhap?next=${encodeURIComponent(path)}`);
+  // Đang dùng mật khẩu tạm do CEO cấp → phải đổi trước khi làm việc khác (SPEC-identity.md mục 5).
+  if (user.mustChangePassword && !path.startsWith('/tai-khoan')) redirect('/tai-khoan?doi-mat-khau=1');
+  return user;
+}
+
+// Không phải admin → 404, để người ngoài không biết trang quản trị tồn tại (SPEC-admin.md).
+export async function requireAdmin(): Promise<SessionUser> {
+  const user = await getCurrentUser();
+  if (user?.role !== 'admin') notFound();
   return user;
 }
 

@@ -41,6 +41,9 @@ docker compose up -d --build db
 docker compose run --rm migrate        # áp migration database
 docker compose up -d --build           # app + worker
 curl -s 127.0.0.1:3009/api/health      # → {"ok":true}
+
+# Tạo tài khoản CEO (hỏi mật khẩu ẩn; tài khoản đã có thì chỉ nâng quyền)
+docker compose run --rm app node dist/scripts/create-admin.mjs --phone 0979393916 --name "Nguyễn Hải"
 ```
 
 **Cập nhật phiên bản mới**:

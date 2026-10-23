@@ -1,14 +1,17 @@
+import path from 'node:path';
 import { defineConfig, devices } from '@playwright/test';
 
 const PORT = 3100;
 // Tên miền giả trỏ về 127.0.0.1 để test cookie dùng chung *.9mua.test giống hệt *.9mua.com
 // (Chromium không chia sẻ cookie Domain=localhost sang abc.localhost).
 const ORIGIN = `http://9mua.test:${PORT}`;
-export const MAIL_DIR = 'test-results/mail';
+// Đường dẫn tuyệt đối: server.js của bản standalone tự chuyển thư mục làm việc.
+export const MAIL_DIR = path.resolve('test-results/mail');
 
 export default defineConfig({
   testDir: 'e2e',
   fullyParallel: false,
+  workers: 1,
   retries: 0,
   reporter: 'list',
   use: {
@@ -19,10 +22,12 @@ export default defineConfig({
   },
   projects: [{ name: 'mobile-chromium', use: { browserName: 'chromium' } }],
   webServer: {
-    command: `npx next start -p ${PORT}`,
+    // Chạy đúng server.js của bản standalone như trong Docker production.
+    command: 'sh scripts/start-standalone.sh',
     url: `http://localhost:${PORT}/api/health`,
     reuseExistingServer: false,
     env: {
+      PORT: String(PORT),
       APP_URL: ORIGIN,
       TEST_MODE: 'e2e',
       MAIL_DRIVER: 'file',

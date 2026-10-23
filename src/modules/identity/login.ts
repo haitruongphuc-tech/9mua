@@ -7,7 +7,7 @@ const MAX_FAILURES = 5;
 const WINDOW_MS = 15 * 60_000;
 
 export type LoginResult =
-  | { ok: true; userId: string }
+  | { ok: true; userId: string; mustChangePassword: boolean }
   | { ok: false; error: 'INVALID_CREDENTIALS' | 'TOO_MANY_ATTEMPTS' | 'ACCOUNT_LOCKED' };
 
 // Chuỗi băm giả để thời gian phản hồi giống nhau dù tài khoản có tồn tại hay không.
@@ -32,5 +32,5 @@ export async function login(input: { identifier: string; password: string }): Pr
   if (user.lockedAt) return { ok: false, error: 'ACCOUNT_LOCKED' };
 
   await db.loginAttempt.deleteMany({ where: { identifier: key } });
-  return { ok: true, userId: user.id };
+  return { ok: true, userId: user.id, mustChangePassword: user.mustChangePassword };
 }

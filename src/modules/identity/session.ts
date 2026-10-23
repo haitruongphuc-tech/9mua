@@ -61,3 +61,7 @@ export async function invalidateAllSessions(
     where: { userId, ...(options.except ? { id: { not: options.except } } : {}) },
   });
 }
+
+export function invalidateOtherSessions(userId: string, currentSessionId: string): Promise<void> {
+  return invalidateAllSessions(userId, { except: currentSessionId });
+}

@@ -15,7 +15,11 @@ async function setup() {
 describe('login', () => {
   it('đăng nhập bằng mọi cách viết SĐT', async () => {
     const userId = await setup();
-    expect(await login({ identifier: '+84 979 393 916', password })).toEqual({ ok: true, userId });
+    expect(await login({ identifier: '+84 979 393 916', password })).toEqual({
+      ok: true,
+      userId,
+      mustChangePassword: false,
+    });
   });
 
   it('sai mật khẩu và tài khoản không tồn tại trả cùng một lỗi', async () => {
@@ -41,7 +45,11 @@ describe('login', () => {
     const userId = await setup();
     for (let i = 0; i < 5; i++) await login({ identifier: '0979393916', password: 'sai' });
     advanceClock({ minutes: 15, seconds: 1 });
-    expect(await login({ identifier: '0979393916', password })).toEqual({ ok: true, userId });
+    expect(await login({ identifier: '0979393916', password })).toEqual({
+      ok: true,
+      userId,
+      mustChangePassword: false,
+    });
   });
 
   it('khoá theo định danh, không ảnh hưởng tài khoản khác', async () => {

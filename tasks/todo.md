@@ -163,7 +163,7 @@
   - Deps: T8, T9
   - Files: `src/modules/kiot/{product,categories}.ts` + test, `src/app/kiot-cua-toi/san-pham/**`
 
-- [ ] **T11: Tên miền phụ + trang Kiot công khai** (M)
+- [x] **T11: Tên miền phụ + trang Kiot công khai** (M)
   - `middleware.ts` chuyển `<slug>.9mua.com` sang `/k/<slug>`. Trang Kiot, trang sản phẩm, thẻ OG,
     trang "Kiot tạm ngưng" (404), nút tạo QR link Kiot.
   - Acceptance:
@@ -499,7 +499,8 @@
 - [ ] **T36: Kiểm thử toàn bộ + review bảo mật + hiệu năng** (M)
   - Chạy toàn bộ E2E. Chạy `/review` và `security-and-hardening` (OWASP, `npm audit`, header bảo mật,
     CSP). Thêm rate-limit theo IP ở Nginx cho `/dang-nhap`, `/dang-ky`, `/quen-mat-khau` (từ review ở
-    Checkpoint B). Đánh giá nâng Prisma 7 để hết cảnh báo `deepmerge-ts` của Prisma CLI. Đo LCP và CLS trang Kiot, Chợ, trang chủ. Chạy checklist `/ship`.
+    Checkpoint B). Đánh giá nâng Prisma 7 để hết cảnh báo `deepmerge-ts` của Prisma CLI. Theo dõi log
+    `uncaughtException: aborted (ECONNRESET)` khi client huỷ request: thấy ở T11, không làm sập server. Đo LCP và CLS trang Kiot, Chợ, trang chủ. Chạy checklist `/ship`.
   - Acceptance:
     - Không còn lỗi Critical/High.
     - LCP < 2,5 giây trên giả lập 4G.

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import QRCode from 'qrcode';
 import { env } from '@/lib/env';
 import { kiotOrigin } from '@/lib/urls';
 import { requireUser } from '@/modules/identity';
@@ -36,6 +37,7 @@ export default async function SellerDashboard({
 
   const status = kiotStatus(kiot);
   const url = kiotOrigin(kiot.slug);
+  const qrSvg = await QRCode.toString(url, { type: 'svg', margin: 1, errorCorrectionLevel: 'M' });
   const justCreated = Boolean((await searchParams)['moi-tao']);
   return (
     <section className="flex flex-col gap-5 px-4 py-6">
@@ -73,6 +75,26 @@ export default async function SellerDashboard({
         <a href={url} className="rounded-2xl border-2 border-black/10 p-4 font-bold hover:border-brand-ink">
           Xem trang Kiot →
         </a>
+      </div>
+      <div className="flex items-center gap-4 rounded-2xl border-2 border-black/10 p-4">
+        {/* SVG do thư viện qrcode tạo từ URL của chính Kiot, không chứa dữ liệu người dùng nhập. */}
+        <div
+          className="h-28 w-28 shrink-0"
+          aria-label={`Mã QR tới ${url}`}
+          role="img"
+          dangerouslySetInnerHTML={{ __html: qrSvg }}
+        />
+        <div className="flex flex-col gap-2">
+          <p className="font-bold">QR trang Kiot</p>
+          <p className="text-sm text-black/70">In dán tại quầy để khách quét vào xem sản phẩm.</p>
+          <a
+            href="/api/kiot/qr"
+            className="self-start rounded-full border-2 border-brand-ink px-4 py-1.5 text-sm font-bold"
+            download
+          >
+            Tải QR (PNG)
+          </a>
+        </div>
       </div>
     </section>
   );

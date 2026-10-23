@@ -24,3 +24,13 @@ export {
   type ProductInput,
   type OwnerProduct,
 } from './product';
+export {
+  getPublicKiot,
+  getPublicProduct,
+  listPublicProducts,
+  productPath,
+  PUBLIC_PRODUCT_WHERE,
+  type PublicKiot,
+  type ProductCard,
+  type Page,
+} from './public';

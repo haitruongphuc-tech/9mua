@@ -130,10 +130,8 @@ removeVideo(videoId, adminId, reason): Promise<void>     // cho admin
 - [ ] Mua hàng từ video được ghi nhận đúng video nguồn, và creator thấy trong thống kê.
 - [ ] Đang xử lý video thì trang web vẫn nhanh bình thường (worker tách riêng).
 
-## Open Questions
+## Quyết định đã chốt
 
-1. Đồng ý dùng **ffmpeg chuyển mã video**? Spec cũ ghi "chưa nén/chuyển mã", nhưng nếu bỏ bước này thì
-   video iPhone không xem được trên Android. Đề xuất **có**.
-2. **Bình luận** dưới video: đề xuất **chưa làm** trong MVP vì cần kiểm duyệt. Chỉ có Thích và Chia sẻ.
-3. Creator được gắn **sản phẩm của mọi Kiot** (không chỉ Kiot của mình): đề xuất **có**, làm nền cho
-   hoa hồng sau này.
+1. Dùng ffmpeg chuyển mã video (service `worker` riêng).
+2. Chưa có bình luận trong MVP.
+3. Creator được gắn sản phẩm của mọi Kiot đang hoạt động.

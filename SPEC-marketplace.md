@@ -20,7 +20,7 @@ Chợ chỉ **đọc** dữ liệu của `kiot`, không sở hữu dữ liệu s
    - "Kiot nổi bật": Kiot có nhiều đơn hoàn tất nhất 30 ngày qua.
    - Khối "Video hot" do module `creator` cung cấp.
    - Mọi con số hiển thị (số Kiot, số sản phẩm) là **số thật từ DB**, không có bộ đếm giả.
-   - Màu cam `#FF6B00`.
+   - Màu và logo theo `docs/BRAND.md`.
 2. **Chợ `/cho`**:
    - Lưới sản phẩm, cuộn vô hạn (phân trang bằng con trỏ, 24 sản phẩm mỗi lần).
    - Lọc: danh mục, khoảng giá, tỉnh/thành của Kiot.

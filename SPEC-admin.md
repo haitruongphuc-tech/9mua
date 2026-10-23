@@ -126,8 +126,7 @@ trong các module đó nhận `adminId` và tự ghi `AdminAuditLog` qua `src/li
 - [ ] Xuất CSV giao dịch tháng mở được bằng Excel, dùng được cho kế toán.
 - [ ] CEO nhận email ngay khi có sự cố tiền, và bản tin mỗi sáng.
 
-## Open Questions
+## Quyết định đã chốt
 
-1. **Xác thực 2 lớp bắt buộc** cho admin (cần cài Google Authenticator trên điện thoại): đề xuất **có**,
-   vì trang này điều khiển tiền.
-2. MVP chỉ có **một cấp admin** (toàn quyền). Phân quyền kế toán hoặc vận hành để sau.
+1. Bắt buộc xác thực 2 lớp (TOTP) cho admin. Dùng thư viện `otplib`.
+2. MVP chỉ có một cấp admin toàn quyền.

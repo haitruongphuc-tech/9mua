@@ -31,7 +31,7 @@ Thứ tự xây:
 4. VPS Ubuntu có sẵn Nginx + Node.js. Sẽ cài thêm **PostgreSQL**. Ảnh và video lưu trên ổ đĩa VPS,
    do Nginx phục vụ. Cần **chứng chỉ wildcard `*.9mua.com`** (Let's Encrypt, DNS challenge).
 5. Video MVP: tải lên ≤60 giây, ≤100MB, chuyển mã về MP4 H.264 720p bằng ffmpeg (xem `SPEC-creator.md`). Chưa livestream.
-6. Giao diện tiếng Việt, ưu tiên điện thoại, màu cam `#FF6B00`.
+6. Giao diện tiếng Việt, ưu tiên điện thoại, màu và logo theo `docs/BRAND.md`.
 7. **Ngoài phạm vi MVP:** quà tặng / tiền thưởng creator, affiliate, đấu trường, AI mua/bán, tự đăng
    12 nền tảng, Quỹ AI, Visa ảo, blockchain, MISA, đa ngôn ngữ, chi trả tự động.
 8. **Phí sàn mặc định 5% mỗi đơn**, CEO chỉnh được trong trang admin (áp dụng cho đơn mới).

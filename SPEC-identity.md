@@ -77,7 +77,7 @@ type SessionUser = { id: string; displayName: string; role: 'user' | 'admin'; ph
 | ORM | Prisma 6 | Migration rõ ràng, type-safe |
 | Validation | Zod | Kiểm tra mọi input ở biên |
 | Mật khẩu | `@node-rs/argon2` (argon2id) | Chuẩn hiện hành, không cần build native |
-| UI | Tailwind CSS 4, mobile-first, màu chính `#FF6B00` | Đúng nhận diện cũ |
+| UI | Tailwind CSS 4, mobile-first, màu và logo theo `docs/BRAND.md` | Logo chính thức CEO duyệt 23/10/2026 |
 | Đóng gói | Dockerfile multi-stage (Next `output: 'standalone'`) + `docker-compose.yml` gồm `app` và `db` (Postgres 16, volume riêng) | Một lệnh để deploy, chạy giống nhau ở mọi máy |
 | Cổng | `app` chỉ mở `127.0.0.1:3009`. `db` không mở cổng ra ngoài | Không đụng tới các site khác đang chạy trên VPS |
 | Reverse proxy + HTTPS | **Nginx sẵn có trên VPS** proxy `9mua.com` và `*.9mua.com` → `127.0.0.1:3009`, giữ nguyên header `Host`. Chứng chỉ wildcard `*.9mua.com` cấp bằng certbot DNS-01. Mẫu cấu hình nằm ở `deploy/nginx/9mua.conf` | Giữ Nginx làm máy chủ chính như anh yêu cầu |

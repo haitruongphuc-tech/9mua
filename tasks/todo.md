@@ -38,7 +38,7 @@
   - Files: `docker-compose.dev.yml`, `prisma/schema.prisma`, `src/lib/{db,env,clock}.ts`, `vitest.config.ts`,
     `tests/setup.ts`
 
-- [ ] **T3: Đóng gói Docker production + mẫu Nginx + tài liệu deploy** (M)
+- [x] **T3: Đóng gói Docker production + mẫu Nginx + tài liệu deploy** (M)
   - Dockerfile multi-stage (Next standalone, Node 22, có sẵn ffmpeg cho worker). `docker-compose.yml`
     gồm `app` (chỉ `127.0.0.1:3009`), `db` (volume, không mở cổng), `worker` (tạm thời chỉ log).
     Thêm `deploy/nginx/9mua.conf` (9mua.com + `*.9mua.com` → 3009, giữ `Host`, `/uploads` phục vụ
@@ -46,7 +46,7 @@
     DNS-01, cron, backup DB hằng ngày).
   - Acceptance:
     - Trên máy sạch, `docker compose up -d --build` xong thì `curl 127.0.0.1:3009/api/health` trả 200.
-    - Image < 400MB.
+    - Image web chỉ thêm ~100MB trên image Node. Prisma CLI tách sang target `migrator`.
     - `nginx -t` hợp lệ với file mẫu.
   - Verify: build và chạy compose trong container, chạy `nginx -t` bằng image nginx chính thức.
   - Deps: T2
@@ -204,11 +204,13 @@
     `src/app/dev/payos/[orderCode]/page.tsx`
 
 - [ ] **T15: Đối soát, huỷ, đăng ký webhook** (S)
-  - `/api/internal/payments/reconcile` (chặn ngoài localhost), kiểm trạng thái khi người dùng quay về
-    `returnUrl`, `cancelPayment`, script `payos:confirm-webhook`, guard `src/lib/internal-route.ts` dùng chung.
+  - `/api/internal/payments/reconcile`, kiểm trạng thái khi người dùng quay về `returnUrl`, `cancelPayment`,
+    script `payos:confirm-webhook`, guard `src/lib/internal-route.ts` dùng chung. Guard kiểm header
+    `X-Internal-Token` so với `INTERNAL_CRON_TOKEN` bằng so sánh thời gian hằng. Không dựa vào IP, vì trong
+    Docker mọi request đều đến từ gateway của bridge (phát hiện ở T3). Nginx trả 404 cho `/api/internal/*`.
   - Acceptance:
     - Không có webhook mà PayOS báo `PAID` thì đối soát cho kết quả giống hệt webhook.
-    - Gọi route internal từ IP ngoài trả 403.
+    - Gọi route internal thiếu hoặc sai token trả 404.
   - Verify: vitest payments.
   - Deps: T14
   - Files: `src/modules/payments/{reconcile,cancel}.ts` + test, `src/app/api/internal/payments/reconcile/route.ts`,

@@ -1,0 +1,80 @@
+# Production trên VPS. Nginx của host proxy vào 127.0.0.1:3009 (deploy/nginx/9mua.conf).
+# Chạy: docker compose up -d --build db && docker compose run --rm migrate && docker compose up -d --build
+name: ninemua
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ninemua
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Đặt POSTGRES_PASSWORD trong .env}
+      POSTGRES_DB: ninemua
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ninemua -d ninemua']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    # Không mở cổng ra ngoài: chỉ app/worker trong mạng nội bộ của compose truy cập được.
+
+  app:
+    build:
+      context: .
+      target: runner
+      args:
+        APP_URL: ${APP_URL:-https://9mua.com}
+    image: ninemua-app:latest
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://ninemua:${POSTGRES_PASSWORD}@db:5432/ninemua
+      UPLOAD_DIR: /data/uploads
+      PRIVATE_DIR: /data/private
+    ports:
+      - '127.0.0.1:${APP_PORT:-3009}:3000'
+    volumes:
+      - ${DATA_DIR:-/srv/9mua}/uploads:/data/uploads
+      - ${DATA_DIR:-/srv/9mua}/private:/data/private
+    depends_on:
+      db:
+        condition: service_healthy
+
+  migrate:
+    build:
+      context: .
+      target: migrator
+    image: ninemua-migrator:latest
+    profiles: ['tools']
+    environment:
+      DATABASE_URL: postgresql://ninemua:${POSTGRES_PASSWORD}@db:5432/ninemua
+    depends_on:
+      db:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: .
+      target: worker
+      args:
+        APP_URL: ${APP_URL:-https://9mua.com}
+    image: ninemua-worker:latest
+    command: ['worker']
+    healthcheck:
+      disable: true
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://ninemua:${POSTGRES_PASSWORD}@db:5432/ninemua
+      UPLOAD_DIR: /data/uploads
+      PRIVATE_DIR: /data/private
+    volumes:
+      - ${DATA_DIR:-/srv/9mua}/uploads:/data/uploads
+      - ${DATA_DIR:-/srv/9mua}/private:/data/private
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db-data:

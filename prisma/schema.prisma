@@ -1,7 +1,8 @@
 // Schema dùng chung cho mọi module. Mỗi model ghi chú module sở hữu (xem CAPABILITY-MAP.md).
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
 datasource db {

@@ -1,0 +1,8 @@
+# /etc/cron.d/9mua — các tác vụ định kỳ của 9mua.com (giờ VPS nên đặt Asia/Ho_Chi_Minh)
+# Token đọc từ .env của ứng dụng. Các dòng được bật dần theo task trong tasks/todo.md.
+SHELL=/bin/sh
+APP=http://127.0.0.1:3009
+ENVFILE=/opt/9mua/.env
+
+# T15 — đối soát thanh toán PayOS mỗi 5 phút
+# */5 * * * * root . $ENVFILE; curl -fsS -H "X-Internal-Token: $INTERNAL_CRON_TOKEN" $APP/api/internal/payments/reconcile >/dev/null

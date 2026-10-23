@@ -4,7 +4,7 @@ import { advanceClock, now, setClock } from '@/lib/clock';
 import { db } from '@/lib/db';
 import { createUser } from '../../../tests/helpers/factories';
 import { isSessionVerified, markSessionVerified } from './guard';
-import { beginTotpSetup, confirmTotpSetup, getTotpStatus, verifyTotp } from './totp';
+import { beginTotpSetup, confirmTotpSetup, getTotpStatus, resetAdminTotp, verifyTotp } from './totp';
 
 const code = (secret: string) => generate({ secret, epoch: Math.floor(now().getTime() / 1000) });
 
@@ -76,5 +76,19 @@ describe('nhập mã mỗi phiên', () => {
     expect(await isSessionVerified('sess-1', 'nguoi-khac')).toBe(false);
     advanceClock({ hours: 12, seconds: 1 });
     expect(await isSessionVerified('sess-1', user.id)).toBe(false);
+  });
+});
+
+describe('khôi phục 2 lớp từ máy chủ', () => {
+  it('xoá cài đặt và phiên đã xác thực, có ghi nhật ký', async () => {
+    const { user } = await enabledAdmin();
+    await markSessionVerified('sess-x', user.id);
+    await resetAdminTotp(user.id);
+    expect(await getTotpStatus(user.id)).toBe('none');
+    expect(await isSessionVerified('sess-x', user.id)).toBe(false);
+    expect(await db.adminAuditLog.findFirstOrThrow()).toMatchObject({
+      action: 'admin.reset_2fa',
+      targetId: user.id,
+    });
   });
 });

@@ -151,3 +151,21 @@ export async function verifyTotp(userId: string, code: string): Promise<VerifyRe
 export async function backupCodesLeft(userId: string): Promise<number> {
   return (await db.adminTotp.findUnique({ where: { userId } }))?.backupHashes.length ?? 0;
 }
+
+// Chỉ dùng từ lệnh CLI trên VPS (người có quyền vào máy chủ): CEO mất cả điện thoại lẫn mã dự phòng.
+// Xoá cài đặt 2 lớp và mọi phiên đã xác thực; lần vào /admin kế tiếp phải cài lại từ đầu.
+export async function resetAdminTotp(userId: string): Promise<void> {
+  await db.$transaction([
+    db.adminTotp.deleteMany({ where: { userId } }),
+    db.adminSessionVerification.deleteMany({ where: { userId } }),
+    db.adminAuditLog.create({
+      data: {
+        adminId: 'cli',
+        action: 'admin.reset_2fa',
+        targetType: 'user',
+        targetId: userId,
+        createdAt: now(),
+      },
+    }),
+  ]);
+}

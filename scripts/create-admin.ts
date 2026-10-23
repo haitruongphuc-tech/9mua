@@ -1,9 +1,11 @@
 // Tạo hoặc nâng quyền tài khoản CEO. Chạy trên VPS:
 //   docker compose run --rm app node dist/scripts/create-admin.mjs --phone 0979393916 --name "Nguyễn Hải"
 // Mật khẩu được hỏi ẩn trong terminal, không bao giờ nhận qua tham số dòng lệnh.
+// Mất điện thoại 2 lớp và cả mã dự phòng: thêm --reset-2fa để cài lại 2 lớp ở lần vào /admin kế tiếp.
 import { parseArgs } from 'node:util';
 import { createInterface } from 'node:readline';
 import { db } from '@/lib/db';
+import { resetAdminTotp } from '@/modules/admin/totp';
 import { createAdmin } from '@/modules/identity/admin';
 
 // Một readline dùng chung cho mọi câu hỏi; ký tự gõ vào hiện thành *.
@@ -38,7 +40,12 @@ function createPrompter() {
 
 async function main() {
   const { values } = parseArgs({
-    options: { phone: { type: 'string' }, email: { type: 'string' }, name: { type: 'string' } },
+    options: {
+      phone: { type: 'string' },
+      email: { type: 'string' },
+      name: { type: 'string' },
+      'reset-2fa': { type: 'boolean' },
+    },
   });
   const identifier = values.phone ?? values.email;
   if (!identifier) {
@@ -65,6 +72,10 @@ async function main() {
   console.log(
     result.created ? 'Đã tạo tài khoản CEO.' : 'Tài khoản đã tồn tại — đã nâng quyền CEO (giữ mật khẩu cũ).',
   );
+  if (values['reset-2fa']) {
+    await resetAdminTotp(result.userId);
+    console.log('Đã xoá xác thực 2 lớp. Đăng nhập /admin để cài lại NGAY.');
+  } else console.log('Đăng nhập 9mua.com/admin và cài xác thực 2 lớp NGAY (lần đầu bắt buộc).');
 }
 
 main()

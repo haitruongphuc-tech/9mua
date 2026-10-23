@@ -55,8 +55,11 @@ curl -s 127.0.0.1:3009/api/health      # → {"ok":true}
 # Đăng ký webhook PayOS (cần PAYOS_* trong .env)
 docker compose run --rm app node dist/scripts/payos-confirm-webhook.mjs https://9mua.com/api/payos/webhook
 
-# Tạo tài khoản CEO (hỏi mật khẩu ẩn; tài khoản đã có thì chỉ nâng quyền)
+# Tạo tài khoản CEO (hỏi mật khẩu ẩn; tài khoản đã có thì chỉ nâng quyền).
+# Ngay sau đó đăng nhập 9mua.com/admin để cài xác thực 2 lớp (trước khi ai khác kịp đăng nhập).
 docker compose run --rm app node dist/scripts/create-admin.mjs --phone 0979393916 --name "Nguyễn Hải"
+# Mất điện thoại 2 lớp và cả 10 mã dự phòng: thêm --reset-2fa rồi cài lại
+# docker compose run --rm app node dist/scripts/create-admin.mjs --phone 0979393916 --reset-2fa
 ```
 
 **Cập nhật phiên bản mới**:

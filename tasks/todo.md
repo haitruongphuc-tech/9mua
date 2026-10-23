@@ -555,8 +555,12 @@
     khoản nhận hoàn tiền (đơn chờ hoàn > 24 giờ).
 
 ### ✅ Checkpoint H — Trang CEO
-- [ ] Success Criteria `SPEC-admin.md` đạt.
-- [ ] `/review` toàn bộ phân quyền admin. Push, báo CEO.
+- [x] Success Criteria `SPEC-admin.md` đạt (trên điện thoại ≤ 2 chạm; người ngoài nhận 404; lộ mật khẩu vẫn
+  cần mã 2 lớp; mọi thao tác có nhật ký; CSV mở bằng Excel; email cảnh báo + bản tin).
+- [x] Rà soát phân quyền admin: layout + từng trang + từng Server Action + API đều chặn (test quét tự động);
+  bước cài 2 lớp chỉ mở cho tài khoản đã là admin; mật khẩu tạm không đưa lên URL; thêm lệnh CLI
+  `--reset-2fa` khi CEO mất cả điện thoại lẫn mã dự phòng. Rủi ro còn lại: từ lúc chạy CLI nâng quyền tới lúc
+  CEO cài 2 lớp, ai có mật khẩu CEO có thể cài trước → hướng dẫn cài ngay (docs/deploy.md).
 
 ---
 

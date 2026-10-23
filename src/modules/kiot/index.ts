@@ -34,3 +34,20 @@ export {
   type ProductCard,
   type Page,
 } from './public';
+export { BANKS, findBank, type Bank } from './banks';
+export {
+  setPayoutAccount,
+  getPayoutAccount,
+  normalizeAccountName,
+  type SetPayoutAccountResult,
+} from './payout-account';
+export { decrementStock, restoreStock, OutOfStockError, type StockLine } from './stock';
+export {
+  lockKiot,
+  unlockKiot,
+  hideProduct,
+  unhideProduct,
+  extendActiveUntil,
+  getProductForCheckout,
+  type CheckoutProduct,
+} from './admin';

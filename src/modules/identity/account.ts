@@ -14,7 +14,8 @@ export async function updateProfile(
   return { ok: true };
 }
 
-async function checkPassword(userId: string, password: string): Promise<boolean> {
+// Xác nhận lại mật khẩu cho thao tác nhạy cảm (đổi email, đổi tài khoản nhận tiền).
+export async function verifyUserPassword(userId: string, password: string): Promise<boolean> {
   const user = await db.user.findUniqueOrThrow({ where: { id: userId } });
   return verifyPassword(user.passwordHash, password);
 }
@@ -24,7 +25,7 @@ export async function changeEmail(
   userId: string,
   input: { email: string; password: string },
 ): Promise<{ ok: true } | { ok: false; error: 'WRONG_PASSWORD' | 'INVALID_EMAIL' | 'EMAIL_TAKEN' }> {
-  if (!(await checkPassword(userId, input.password))) return { ok: false, error: 'WRONG_PASSWORD' };
+  if (!(await verifyUserPassword(userId, input.password))) return { ok: false, error: 'WRONG_PASSWORD' };
   const id = normalizeIdentifier(input.email);
   if (id?.kind !== 'email') return { ok: false, error: 'INVALID_EMAIL' };
   try {
@@ -46,7 +47,7 @@ export async function changePassword(
   if (!registerInput.shape.password.safeParse(input.newPassword).success) {
     return { ok: false, error: 'INVALID_PASSWORD' };
   }
-  if (!(await checkPassword(userId, input.oldPassword))) return { ok: false, error: 'WRONG_PASSWORD' };
+  if (!(await verifyUserPassword(userId, input.oldPassword))) return { ok: false, error: 'WRONG_PASSWORD' };
   const passwordHash = await hashPassword(input.newPassword);
   await db.$transaction([
     db.user.update({ where: { id: userId }, data: { passwordHash, mustChangePassword: false } }),

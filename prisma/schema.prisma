@@ -88,6 +88,22 @@ model Kiot {
   updatedAt    DateTime  @updatedAt
   products     Product[]
   images       ProductImage[]
+  payoutAccounts KiotPayoutAccount[]
+}
+
+// Lịch sử tài khoản nhận tiền: mỗi lần đổi thêm 1 dòng, bản mới nhất là bản đang dùng.
+// payouts dùng changedAt (= createdAt dòng mới nhất) để tạm giữ tiền sau khi đổi tài khoản.
+model KiotPayoutAccount {
+  id            String   @id @default(cuid(2))
+  kiotId        String
+  kiot          Kiot     @relation(fields: [kiotId], references: [id])
+  bankBin       String
+  accountNumber String
+  accountName   String // VIẾT HOA KHÔNG DẤU
+  createdById   String
+  createdAt     DateTime @default(now())
+
+  @@index([kiotId, createdAt])
 }
 
 model Product {

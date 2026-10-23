@@ -11,7 +11,7 @@ export {
   startSession,
   endSession,
 } from './current-user';
-export { updateProfile, changeEmail, changePassword } from './account';
+export { updateProfile, changeEmail, changePassword, verifyUserPassword } from './account';
 export { invalidateOtherSessions } from './session';
 export { lockUser, unlockUser, resetPassword, createAdmin, type CreateAdminResult } from './admin';
 export type { SessionUser } from './types';

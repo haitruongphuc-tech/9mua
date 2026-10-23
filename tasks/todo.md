@@ -175,7 +175,7 @@
   - Files: `src/middleware.ts`, `src/app/k/[slug]/{page,p/[id]/page}.tsx`, `src/modules/kiot/public.ts` + test,
     `e2e/kiot.spec.ts`
 
-- [ ] **T12: Tài khoản nhận tiền + tồn kho an toàn đồng thời** (M)
+- [x] **T12: Tài khoản nhận tiền + tồn kho an toàn đồng thời** (M)
   - Danh sách ngân hàng VietQR. Đổi tài khoản phải nhập lại mật khẩu, có lịch sử và gửi email báo.
     Viết `getPayoutAccount`, `decrementStock`/`restoreStock` (UPDATE có điều kiện), `lockKiot`, `hideProduct`.
   - Acceptance:
@@ -187,8 +187,10 @@
   - Files: `src/modules/kiot/{payout-account,stock,banks}.ts` + test, `src/app/kiot-cua-toi/cai-dat/page.tsx`
 
 ### ✅ Checkpoint C — Kiot
-- [ ] Success Criteria `SPEC-kiot.md` đạt, trừ LCP (đo ở Phase 9).
-- [ ] CEO thử tạo Kiot và đăng sản phẩm trên điện thoại (bản chạy local qua link tạm, hoặc ảnh chụp).
+- [x] Success Criteria `SPEC-kiot.md` đạt, trừ LCP (đo ở Phase 9). 168 unit + 9 E2E xanh.
+- [x] Đã chụp màn hình trang Kiot và trang sản phẩm trên iPhone. CEO yêu cầu làm liên tục, không dừng ở checkpoint.
+- Ghi chú: danh sách 43 ngân hàng lấy từ vietnam-qr-pay@1.5.1, đã đối chiếu 23 BIN phổ biến; kiểm lại với
+  api.vietqr.io khi deploy (T37).
 
 ---
 

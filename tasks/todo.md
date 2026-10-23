@@ -108,9 +108,23 @@
   - Files: `src/modules/identity/{account,admin}.ts` + test, `src/app/tai-khoan/page.tsx`, `scripts/create-admin.ts`
 
 ### ✅ Checkpoint B — Tài khoản
-- [ ] Mọi tiêu chí Success Criteria của `SPEC-identity.md` đạt.
-- [ ] E2E auth xanh. Review bảo mật nhanh phần phiên và cookie (`/review`).
-- [ ] Push và báo CEO.
+- [x] Mọi tiêu chí Success Criteria của `SPEC-identity.md` đạt. Riêng HTTPS và cookie `.9mua.com` thật
+      sẽ kiểm tra lại trên VPS ở T37.
+- [x] E2E auth xanh (5 kịch bản). Đã review bảo mật phần phiên và cookie, kết quả ở dưới.
+- [ ] Push lên GitHub: **bị chặn**, chờ CEO cài Claude GitHub App cho repo. Tạm thời gửi CEO bản git bundle.
+
+**Review bảo mật phiên và cookie (23/10/2026):**
+- OK — Token 32 byte ngẫu nhiên, DB chỉ lưu SHA-256. Cookie `httpOnly`, `SameSite=Lax`, `Secure` khi chạy HTTPS.
+- OK — Server Action của Next.js tự kiểm `Origin` khớp `Host`, cộng với SameSite=Lax là đủ chống CSRF.
+  Không mở `serverActions.allowedOrigins`.
+- OK — Chống open redirect (`safeNextPath`). Link đặt lại mật khẩu dùng `referrer: no-referrer`.
+- OK — Đăng nhập trả lỗi chung, thời gian phản hồi gần như nhau nhờ hash giả. Khoá theo định danh sau 5 lần sai.
+- Theo dõi — Chưa giới hạn theo IP: kẻ tấn công thử nhiều tài khoản, mỗi tài khoản một mật khẩu
+  (password spraying) vẫn lọt. Bổ sung rate-limit theo IP ở Nginx (`limit_req` cho `/dang-nhap`)
+  trong T36.
+- Theo dõi — Trang đăng ký báo "Tài khoản đã tồn tại", nên lộ được số điện thoại nào đã đăng ký. Đây là
+  đánh đổi chấp nhận được cho trải nghiệm người dùng. Giảm thiểu bằng rate-limit IP ở T36.
+- Theo dõi — Đổi email chưa xác minh quyền sở hữu (đã báo CEO). Làm sau MVP: gửi link xác nhận về email mới.
 
 ---
 
@@ -484,7 +498,8 @@
 
 - [ ] **T36: Kiểm thử toàn bộ + review bảo mật + hiệu năng** (M)
   - Chạy toàn bộ E2E. Chạy `/review` và `security-and-hardening` (OWASP, `npm audit`, header bảo mật,
-    CSP, rate limit). Đo LCP và CLS trang Kiot, Chợ, trang chủ. Chạy checklist `/ship`.
+    CSP). Thêm rate-limit theo IP ở Nginx cho `/dang-nhap`, `/dang-ky`, `/quen-mat-khau` (từ review ở
+    Checkpoint B). Đánh giá nâng Prisma 7 để hết cảnh báo `deepmerge-ts` của Prisma CLI. Đo LCP và CLS trang Kiot, Chợ, trang chủ. Chạy checklist `/ship`.
   - Acceptance:
     - Không còn lỗi Critical/High.
     - LCP < 2,5 giây trên giả lập 4G.

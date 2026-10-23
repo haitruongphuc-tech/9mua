@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   openGraph: { type: 'website', locale: 'vi_VN', siteName: '9MUA', images: ['/og-default.png'] },
 };
 
+// Mọi trang render theo request để gắn được nonce CSP vào script (T36).
+export const dynamic = 'force-dynamic';
+
 export const viewport: Viewport = { themeColor: '#fc6f15', width: 'device-width', initialScale: 1 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

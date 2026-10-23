@@ -29,6 +29,9 @@ cd /opt/9mua
 cp .env.example .env && chmod 600 .env   # rồi điền giá trị thật
 ```
 
+Không đặt `HOSTNAME` trong `.env`: image Docker dùng `HOSTNAME=0.0.0.0`. Đặt `127.0.0.1` sẽ làm mọi trang
+Kiot trên tên miền phụ lỗi 500 khi chạy sau Nginx/HTTPS (xem ghi chú trong `src/middleware.ts`).
+
 Tối thiểu cần điền trong `.env`:
 - `POSTGRES_PASSWORD`: tạo bằng `openssl rand -hex 24`.
 - `INTERNAL_CRON_TOKEN`: tạo bằng `openssl rand -hex 32`.

@@ -56,7 +56,9 @@ test('/admin: tài khoản thường thấy 404, CEO tạo bằng CLI vào đư�
     env: { ...process.env, DATABASE_URL: DB },
   });
 
+  // Lần đầu vào trang CEO: bắt buộc cài xác thực 2 lớp (T31).
   const ok = await page.goto('/admin');
   expect(ok?.status()).toBe(200);
-  await expect(page.getByRole('heading', { name: 'Trang CEO' })).toBeVisible();
+  expect(new URL(page.url()).pathname).toBe('/admin/xac-thuc/cai-dat');
+  await expect(page.getByRole('heading', { name: 'Cài xác thực 2 lớp' })).toBeVisible();
 });

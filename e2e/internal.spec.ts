@@ -47,3 +47,16 @@ test('mọi route cron đều cần token; đúng token thì chạy', async ({ r
   });
   expect(await flush.json()).toMatchObject({ sent: expect.any(Number) });
 });
+
+test('sau Nginx (X-Forwarded-Proto: https) trang Kiot trên tên miền phụ vẫn chạy, không lỗi 500', async ({
+  request,
+}) => {
+  const res = await request.get(`${APP}/`, {
+    headers: { host: 'khong-co-kiot-nay.9mua.test:3100', 'x-forwarded-proto': 'https' },
+  });
+  expect(res.status()).toBe(404);
+  const home = await request.get(`${APP}/`, {
+    headers: { host: '9mua.test:3100', 'x-forwarded-proto': 'https' },
+  });
+  expect(home.status()).toBe(200);
+});

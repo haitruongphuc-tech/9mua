@@ -31,6 +31,8 @@ export default defineConfig({
       PORT: String(PORT),
       APP_URL: ORIGIN,
       TEST_MODE: 'e2e',
+      // Giống image Docker (xem ghi chú trong src/middleware.ts).
+      HOSTNAME: '0.0.0.0',
       PAYMENTS_DRIVER: 'fake',
       INTERNAL_CRON_TOKEN: E2E_CRON_TOKEN,
       MAIL_DRIVER: 'file',

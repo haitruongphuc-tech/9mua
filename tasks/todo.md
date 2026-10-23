@@ -528,7 +528,7 @@
     Lớp `src/modules/admin/queues.ts` gọi hàm của module sở hữu và ghi nhật ký trước/sau. E2E Checkpoint F
     (rút lần 1 duyệt tay qua giao diện CEO) đã có trong `e2e/admin.spec.ts`.
 
-- [ ] **T34: Tra cứu, xuất CSV, cài đặt** (M)
+- [x] **T34: Tra cứu, xuất CSV, cài đặt** (M)
   - Tìm người dùng, Kiot, đơn hàng. Khoá/mở, tặng năm, điều chỉnh số dư. Sổ giao dịch xuất CSV
     (UTF-8 có BOM). Trang cài đặt có kiểm hợp lệ, công tắc chi tự động màu đỏ.
   - Acceptance:
@@ -538,6 +538,8 @@
   - Verify: vitest admin.
   - Deps: T33
   - Files: `src/app/admin/{nguoi-dung,kiot,don-hang,giao-dich,cai-dat}/**`, `src/modules/admin/export.ts` + test
+  - Ghi chú: gộp tra cứu người dùng/Kiot/đơn vào một trang `/admin/tra-cuu`. Mật khẩu tạm hiện ngay trên
+    trang (không đưa lên URL để không lọt vào log). CSV chặn chèn công thức Excel; mỗi lần xuất ghi nhật ký.
 
 - [ ] **T35: Email cảnh báo + bản tin 8:00** (S)
   - Model `AlertThrottle`. Báo ngay: lệch tiền, chi lỗi, quỹ chi thấp, khiếu nại mới. Bản tin hằng

@@ -106,3 +106,53 @@ test('CEO: mọi trang hàng chờ mở được, không lỗi', async ({ browse
     await expect(ceo.getByRole('heading', { level: 1 }), path).toHaveText(heading);
   }
 });
+
+test('CEO: tra cứu và khoá Kiot, cài đặt có kiểm hợp lệ, công tắc chi tự động, tải CSV', async ({
+  browser,
+  page,
+}) => {
+  const { slug } = await signUpWithKiot(page, 'Kiot Bị Khoá');
+  await e2eDb.kiot.update({ where: { slug }, data: { activeUntil: new Date(Date.now() + 86_400_000 * 30) } });
+
+  const ceo = await browser.newPage();
+  const phone = `07${String(Date.now()).slice(-8)}`;
+  await ceo.goto('/dang-ky?next=/');
+  await ceo.fill('#identifier', phone);
+  await ceo.fill('#displayName', 'CEO tra cứu');
+  await ceo.fill('#password', 'mat-khau-ceo-e2e-123');
+  await ceo.click('button[type=submit]');
+  await ceo.waitForURL((u) => u.pathname === '/');
+  promoteToAdmin(phone);
+  await setUpAdminTotp(ceo);
+  ceo.on('dialog', (d) => void d.accept());
+
+  await ceo.goto(`/admin/tra-cuu?loai=kiot&q=${slug}`);
+  const row = ceo.getByTestId('kiot-row');
+  await row.getByPlaceholder('Lý do khoá Kiot').fill('Bán hàng cấm');
+  await row.getByRole('button', { name: 'Khoá' }).click();
+  await expect(ceo.getByTestId('flash-ok')).toHaveText('Đã khoá Kiot.');
+  expect((await ceo.goto(`http://${slug}.9mua.test:3100/`))?.status()).toBe(404);
+  const locked = await e2eDb.kiot.findUniqueOrThrow({ where: { slug } });
+  expect(await e2eDb.adminAuditLog.count({ where: { action: 'kiot.lock', targetId: locked.id } })).toBe(1);
+
+  await ceo.goto('/admin/cai-dat');
+  await ceo.getByTestId('platform-fee').fill('31');
+  await ceo.getByRole('button', { name: 'Lưu cài đặt' }).click();
+  await expect(ceo.getByTestId('flash-error')).toContainText('Phí sàn phải từ 0 đến 3.000');
+
+  const wasOn = (await ceo.getByTestId('auto-switch').textContent())!.includes('ĐANG BẬT');
+  await ceo.getByTestId('toggle-auto').click();
+  await expect(ceo.getByTestId('auto-switch')).toContainText(wasOn ? 'ĐANG TẮT' : 'ĐANG BẬT');
+  await ceo.getByTestId('toggle-auto').click(); // trả lại như cũ cho các test khác
+  await expect(ceo.getByTestId('auto-switch')).toContainText(wasOn ? 'ĐANG BẬT' : 'ĐANG TẮT');
+
+  await ceo.goto('/admin/giao-dich');
+  const csv = await ceo.evaluate(async () => {
+    const res = await fetch(document.querySelector<HTMLAnchorElement>('[data-testid=export-in]')!.href);
+    return {
+      type: res.headers.get('content-type'),
+      first: new Uint8Array(await res.arrayBuffer()).slice(0, 3).join(','),
+    };
+  });
+  expect(csv).toEqual({ type: 'text/csv; charset=utf-8', first: '239,187,191' }); // BOM UTF-8
+});

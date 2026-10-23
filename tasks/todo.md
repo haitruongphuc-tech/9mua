@@ -350,7 +350,7 @@
   - Deps: T22, T9
   - Files: `src/modules/payouts/kyc.ts` + test, `src/app/kiot-cua-toi/xac-minh/page.tsx`, `src/app/api/admin/kyc/[id]/[side]/route.ts`
 
-- [ ] **T24: Yêu cầu rút + duyệt tay + QR VietQR** (M)
+- [x] **T24: Yêu cầu rút + duyệt tay + QR VietQR** (M)
   - Model `PayoutRequest`. `requestPayout` (kiểm tối thiểu, KYC, tài khoản đổi > 24 giờ, phí chi hộ,
     khoá theo Kiot), `cancelPayout`, `markPayoutPaid`, `rejectPayout`, tạo chuỗi VietQR EMVCo,
     giao diện rút tiền hiện "Bạn sẽ nhận X đ (phí Y đ)".

@@ -19,6 +19,45 @@ export async function creditCompletedOrder(tx: Tx, order: CompletedOrder): Promi
     ON CONFLICT ("orderId") DO NOTHING`;
 }
 
+// Mọi thao tác trừ số dư của một Kiot đi qua khoá này, nên không có hai lần trừ chạy chồng.
+export async function lockKiotBalance(tx: Tx, kiotId: string): Promise<void> {
+  await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`balance:${kiotId}`}))`;
+}
+
+export type AdjustResult =
+  | { ok: true }
+  | { ok: false; error: 'NOT_FOUND' | 'REASON_REQUIRED' | 'INVALID_AMOUNT' | 'WOULD_GO_NEGATIVE' };
+
+// CEO cộng/trừ số dư kèm lý do bắt buộc (SPEC-payouts.md mục 7). Không cho trừ quá số dư hiện có.
+export async function adjustBalance(
+  kiotId: string,
+  adminId: string,
+  amount: number,
+  reason: string,
+): Promise<AdjustResult> {
+  const note = reason.trim();
+  if (!note) return { ok: false, error: 'REASON_REQUIRED' };
+  if (!Number.isSafeInteger(amount) || amount === 0) return { ok: false, error: 'INVALID_AMOUNT' };
+  if (!(await db.kiot.count({ where: { id: kiotId } }))) return { ok: false, error: 'NOT_FOUND' };
+  return db.$transaction(async (tx): Promise<AdjustResult> => {
+    await lockKiotBalance(tx, kiotId);
+    if (amount < 0 && (await availableBalance(kiotId, tx)) + amount < 0)
+      return { ok: false, error: 'WOULD_GO_NEGATIVE' };
+    await tx.balanceEntry.create({
+      data: {
+        kiotId,
+        type: 'adjustment',
+        amount,
+        refId: randomUUID(),
+        note: note.slice(0, 300),
+        actorId: adminId,
+        createdAt: now(),
+      },
+    });
+    return { ok: true };
+  });
+}
+
 const PENDING_STATUSES = ['paid', 'confirmed', 'shipping', 'delivered', 'disputed'] as const;
 
 export async function availableBalance(kiotId: string, tx: Tx | typeof db = db): Promise<number> {

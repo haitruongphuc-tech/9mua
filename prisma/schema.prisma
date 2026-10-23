@@ -429,3 +429,32 @@ model KycSubmission {
   @@index([userId, createdAt])
   @@index([status, createdAt])
 }
+
+model PayoutRequest {
+  id                   String    @id @default(cuid(2))
+  code                 String    @unique // RT + số
+  kiotId               String
+  requestedById        String
+  amount               Int // số tiền rút (trừ khỏi số dư)
+  fee                  Int // phí chi hộ người bán chịu, chụp lúc tạo
+  netAmount            Int // số tiền chuyển = amount − fee
+  bankBin              String // chụp tài khoản nhận lúc tạo
+  accountNumber        String
+  accountName          String
+  status               String    @default("pending") // pending | processing | paid | failed | rejected | cancelled
+  mode                 String? // auto | manual
+  autoRuleReasons      Json      @default("[]") // lý do không được chi tự động
+  payosPayoutId        String?
+  payosState           String?
+  bankRef              String?
+  receiverNameFromBank String?
+  rejectReason         String?
+  processedById        String?
+  processedAt          DateTime?
+  paidAt               DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  @@index([kiotId, createdAt])
+  @@index([status, createdAt])
+}

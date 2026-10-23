@@ -5,6 +5,8 @@ export {
   getBalance,
   availableBalance,
   listBalanceEntries,
+  adjustBalance,
+  type AdjustResult,
   type BalanceEntryView,
 } from './ledger';
 export {
@@ -16,3 +18,16 @@ export {
   readKycImage,
   type KycResult,
 } from './kyc';
+export {
+  requestPayout,
+  cancelPayout,
+  rejectPayout,
+  markPayoutPaid,
+  listPayoutsForKiot,
+  manualTransferQr,
+  payoutQuote,
+  ACCOUNT_HOLD_HOURS,
+  type RequestPayoutError,
+  type RequestPayoutResult,
+  type PayoutActionResult,
+} from './request';

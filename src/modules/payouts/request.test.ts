@@ -256,8 +256,18 @@ describe('chốt chặn ở database', () => {
     const r = await requestPayout(s.kiotId, s.user.id, 100_000);
     if (!r.ok) throw new Error();
     const p = await db.payoutRequest.findUniqueOrThrow({ where: { id: r.payoutId } });
-    const { id: _id, code: _code, createdAt: _c, updatedAt: _u, autoRuleReasons: _a, ...rest } = p;
-    await expect(db.payoutRequest.create({ data: { ...rest, code: 'RT999999' } })).rejects.toThrow();
+    const copy = {
+      kiotId: p.kiotId,
+      requestedById: p.requestedById,
+      amount: p.amount,
+      fee: p.fee,
+      netAmount: p.netAmount,
+      bankBin: p.bankBin,
+      accountNumber: p.accountNumber,
+      accountName: p.accountName,
+      status: 'pending',
+    };
+    await expect(db.payoutRequest.create({ data: { ...copy, code: 'RT999999' } })).rejects.toThrow();
   });
 
   it('số tiền chuyển phải bằng số tiền rút trừ phí và lớn hơn 0', async () => {

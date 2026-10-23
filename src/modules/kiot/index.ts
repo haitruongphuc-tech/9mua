@@ -13,6 +13,8 @@ export {
   type KiotInput,
 } from './kiot';
 export { CATEGORIES, categoryName, type CategorySlug } from './categories';
+export { PROVINCES, provinceName, type ProvinceSlug } from './provinces';
+export { updateKiotAddress, setKiotImage, removeKiotImage, type KiotImageKind } from './profile';
 export {
   uploadProductImage,
   createProduct,

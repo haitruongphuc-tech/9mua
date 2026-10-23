@@ -5,6 +5,8 @@ import { requireUser } from '@/modules/identity';
 import { BANKS, getKiotByOwner, getPayoutAccount } from '@/modules/kiot';
 import { updateKiotAction } from '../actions';
 import { KiotForm } from '../KiotForm';
+import { AddressForm } from './AddressForm';
+import { BrandingForm } from './BrandingForm';
 import { PayoutAccountForm } from './PayoutAccountForm';
 import { ShippingForm } from './ShippingForm';
 
@@ -29,6 +31,20 @@ export default async function KiotSettingsPage() {
             slug: kiot.slug,
             description: kiot.description,
             contactPhone: '0' + kiot.contactPhone.slice(3),
+          }}
+        />
+      </div>
+      <div className="rounded-2xl border-2 border-black/10 p-5">
+        <h2 className="mb-4 text-lg font-extrabold">Logo và ảnh bìa</h2>
+        <BrandingForm logoUrl={kiot.logoUrl} coverUrl={kiot.coverUrl} />
+      </div>
+      <div className="rounded-2xl border-2 border-black/10 p-5">
+        <h2 className="mb-4 text-lg font-extrabold">Địa chỉ lấy hàng</h2>
+        <AddressForm
+          initial={{
+            province: kiot.province ?? '',
+            district: kiot.district ?? '',
+            addressLine: kiot.addressLine ?? '',
           }}
         />
       </div>

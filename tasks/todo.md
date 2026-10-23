@@ -391,6 +391,12 @@
 
 ## Phase 6 — Chợ (`SPEC-marketplace.md`)
 
+- [x] **T26a: Logo, ảnh bìa, địa chỉ lấy hàng của Kiot** (S) — bổ sung
+  - SPEC-kiot.md mục 2 đã duyệt nhưng kế hoạch T9–T12 bỏ sót; Chợ cần tỉnh/thành để lọc và hiện trên thẻ.
+  - 34 tỉnh/thành sau sắp xếp 01/07/2025 (lưu slug). Địa chỉ chi tiết không hiện công khai (chỉ tỉnh + quận).
+  - Logo dùng ảnh 400px, ảnh bìa 1200px; đổi/gỡ thì xoá file cũ.
+  - Verify: vitest `kiot/profile.test.ts`, E2E `kiot-profile.spec.ts`.
+
 - [ ] **T26: Tìm kiếm tiếng Việt + trang Chợ** (M)
   - Migration bật `unaccent` và `pg_trgm`, chỉ mục tìm kiếm. `searchProducts` (lọc, sắp xếp, con trỏ),
     bảng `ProductSalesStat` cập nhật qua `onOrderCompleted`. `/cho`, `/cho/[danh-muc]` giữ bộ lọc trên URL.

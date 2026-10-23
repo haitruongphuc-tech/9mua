@@ -60,8 +60,8 @@ describe('getPublicKiot', () => {
     const { slug } = await createSeller({ active: true });
     const result = await getPublicKiot(slug, null);
     expect(Object.keys(result!.kiot).sort()).toEqual(
+      // Địa chỉ lấy hàng chi tiết (addressLine) giữ riêng, chỉ hiện tỉnh và quận.
       [
-        'addressLine',
         'contactPhone',
         'coverUrl',
         'description',

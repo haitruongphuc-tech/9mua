@@ -15,7 +15,6 @@ const PUBLIC_KIOT = {
   coverUrl: true,
   province: true,
   district: true,
-  addressLine: true,
 } as const satisfies Prisma.KiotSelect;
 
 export type PublicKiot = Prisma.KiotGetPayload<{ select: typeof PUBLIC_KIOT }>;

@@ -13,16 +13,18 @@ export function UserMenu() {
   const pathname = usePathname();
   const [me, setMe] = useState<Me | undefined>(undefined);
   const [cartCount, setCartCount] = useState(0);
+  const [notifications, setNotifications] = useState(0);
 
   useEffect(() => {
     let alive = true;
     const load = () =>
       fetch('/api/auth/me', { cache: 'no-store' })
         .then((r) => r.json())
-        .then((d: { user: Me; cartCount?: number }) => {
+        .then((d: { user: Me; cartCount?: number; notifications?: number }) => {
           if (!alive) return;
           setMe(d.user);
           setCartCount(d.cartCount ?? 0);
+          setNotifications(d.notifications ?? 0);
         })
         .catch(() => alive && setMe(null));
     load();
@@ -37,6 +39,19 @@ export function UserMenu() {
   if (me) {
     return (
       <>
+        <Link
+          href="/thong-bao"
+          className="relative rounded-full px-2 py-2"
+          aria-label={`Thông báo (${notifications} chưa đọc)`}
+          data-testid="notifications-link"
+        >
+          🔔
+          {notifications > 0 ? (
+            <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-danger px-1 text-xs text-white">
+              {notifications}
+            </span>
+          ) : null}
+        </Link>
         <Link
           href="/gio-hang"
           className="relative rounded-full px-2 py-2"

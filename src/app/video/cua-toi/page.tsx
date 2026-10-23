@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { formatDateTimeVN } from '@/lib/format';
 import { requireUser } from '@/modules/identity';
 import { myVideoStats } from '@/modules/creator';
+import { deleteVideoAction } from './actions';
 
 export const metadata: Metadata = { title: 'Video của tôi', robots: { index: false } };
 
@@ -60,11 +61,25 @@ export default async function MyVideosPage({ searchParams }: { searchParams: Pro
                   {formatDateTimeVN(v.createdAt)} · {v.views} lượt xem · {v.likes} thích · {v.orders} đơn từ
                   video
                 </span>
-                {v.status === 'ready' ? (
-                  <Link href={`/v/${v.id}`} className="font-bold text-brand-deep">
-                    Xem video →
-                  </Link>
-                ) : null}
+                <div className="flex gap-4">
+                  {v.status === 'ready' ? (
+                    <Link href={`/v/${v.id}`} className="font-bold text-brand-deep">
+                      Xem video →
+                    </Link>
+                  ) : null}
+                  {v.status !== 'processing' ? (
+                    <form action={deleteVideoAction}>
+                      <input type="hidden" name="videoId" value={v.id} />
+                      <button
+                        type="submit"
+                        className="font-bold text-danger underline"
+                        data-testid="delete-video"
+                      >
+                        Xoá
+                      </button>
+                    </form>
+                  ) : null}
+                </div>
               </div>
             </li>
           ))}

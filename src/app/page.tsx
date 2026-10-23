@@ -3,9 +3,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { KiotCardList } from '@/components/market/KiotCardList';
 import { MarketProductCard } from '@/components/market/MarketProductCard';
+import { VideoGrid } from '@/components/video/VideoGrid';
 import { formatVnd } from '@/lib/format';
 import { cached } from '@/lib/ttl-cache';
 import { getKiotFee } from '@/modules/billing';
+import { getHotVideos } from '@/modules/creator';
 import { CATEGORIES } from '@/modules/kiot';
 import { getHomeSections } from '@/modules/marketplace';
 
@@ -34,9 +36,10 @@ function Section({ title, href, children }: { title: string; href?: string; chil
 }
 
 export default async function HomePage() {
-  const [home, fee] = await Promise.all([
+  const [home, fee, hot] = await Promise.all([
     cached('home', 60, getHomeSections),
     cached('kiot-fee', 60, getKiotFee),
+    cached('hot-videos', 60, () => getHotVideos(8)),
   ]);
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-6">
@@ -109,7 +112,11 @@ export default async function HomePage() {
         </Section>
       ) : null}
 
-      {/* Khối "Video hot" do module creator cung cấp (T30). */}
+      {hot.length > 0 ? (
+        <Section title="Video hot" href="/video">
+          <VideoGrid videos={hot.slice(0, 6)} showAuthor />
+        </Section>
+      ) : null}
 
       {home.newest.length > 0 ? (
         <Section title="Mới lên Chợ" href="/cho">

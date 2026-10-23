@@ -10,6 +10,13 @@ import type { FeedVideo } from '@/modules/creator';
 
 type ViewEntry = { videoId: string; watchedSeconds: number };
 
+const REPORT_REASONS = [
+  ['noi_dung_xau', 'Nội dung xấu, phản cảm'],
+  ['lua_dao', 'Lừa đảo'],
+  ['ban_quyen', 'Vi phạm bản quyền'],
+  ['khac', 'Khác'],
+] as const;
+
 // Feed video dọc toàn màn hình (SPEC-creator.md mục 3): vuốt lên/xuống, tự phát tắt tiếng, chạm để bật
 // tiếng, tải trước video kế tiếp, lượt xem gửi theo lô.
 export function VideoFeed({
@@ -26,6 +33,7 @@ export function VideoFeed({
   const [active, setActive] = useState(0);
   const [muted, setMuted] = useState(true);
   const [toast, setToast] = useState<string | null>(null);
+  const [reporting, setReporting] = useState<string | null>(null);
   const videos = useRef<(HTMLVideoElement | null)[]>([]);
   const watched = useRef(new Map<string, number>());
   const queue = useRef<ViewEntry[]>([]);
@@ -123,6 +131,26 @@ export function VideoFeed({
         show('Đã sao chép link video');
       }
     } catch {}
+  }
+
+  async function report(videoId: string, reason: string) {
+    setReporting(null);
+    const res = await fetch('/api/video/report', {
+      method: 'POST',
+      body: JSON.stringify({ videoId, reason }),
+    });
+    if (res.status === 401) {
+      window.location.href = `/dang-nhap?next=${encodeURIComponent(`/v/${videoId}`)}`;
+      return;
+    }
+    const data = (await res.json()) as { ok: boolean; error?: string };
+    show(
+      data.ok
+        ? 'Đã gửi báo cáo. 9MUA sẽ xem xét.'
+        : data.error === 'OWN_VIDEO'
+          ? 'Đây là video của bạn.'
+          : 'Không gửi được báo cáo',
+    );
   }
 
   async function addToCart(productId: string, videoId: string) {
@@ -271,9 +299,47 @@ export function VideoFeed({
               <span className="text-3xl">↗</span>
               Chia sẻ
             </button>
+            <button
+              type="button"
+              onClick={() => setReporting(v.id)}
+              aria-label="Báo cáo video"
+              className="text-2xl"
+              data-testid="feed-report"
+            >
+              ⋯
+            </button>
           </div>
         </section>
       ))}
+      {reporting ? (
+        <div className="fixed inset-0 z-30 flex items-end bg-black/50" onClick={() => setReporting(null)}>
+          <div
+            className="w-full rounded-t-3xl bg-white p-4 text-brand-ink"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-label="Báo cáo video"
+          >
+            <p className="mb-2 font-extrabold">Báo cáo video</p>
+            {REPORT_REASONS.map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => report(reporting, value)}
+                className="block w-full border-b border-black/10 py-3 text-left font-bold"
+              >
+                {label}
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={() => setReporting(null)}
+              className="mt-2 w-full py-3 text-center text-black/60"
+            >
+              Huỷ
+            </button>
+          </div>
+        </div>
+      ) : null}
       {toast ? (
         <p
           role="status"

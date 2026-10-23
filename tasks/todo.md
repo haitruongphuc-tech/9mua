@@ -464,7 +464,7 @@
     bằng sendBeacon. Nguồn video trong giỏ chỉ được ghi khi video thật sự gắn sản phẩm đó. Điểm feed tính lại
     mỗi 5 phút trong worker. Chromium của Playwright không giải mã H.264 nên E2E không đo thời gian xem.
 
-- [ ] **T30: Trang creator, thống kê, kiểm duyệt, Video hot** (S)
+- [x] **T30: Trang creator, thống kê, kiểm duyệt, Video hot** (S)
   - `/creator/[userId]`, `/video/cua-toi` (lượt xem, thích, số đơn từ video), xoá video, báo cáo
     (5 người thì tự ẩn), `removeVideo`, `getHotVideos`, khối "Video hot" trên trang chủ.
   - Acceptance:
@@ -475,8 +475,10 @@
   - Files: `src/modules/creator/{profile,moderation}.ts` + test, `src/app/creator/[userId]/page.tsx`, `src/app/video/cua-toi/page.tsx`
 
 ### ✅ Checkpoint G — Chợ + Creator
-- [ ] Success Criteria `SPEC-marketplace.md` và `SPEC-creator.md` đạt (trừ chỉ số đo trên VPS thật).
-- [ ] `/webperf` cho trang chủ, Chợ, feed video. Push, báo CEO.
+- [x] Success Criteria `SPEC-marketplace.md` và `SPEC-creator.md` đạt (trừ chỉ số đo trên VPS thật):
+  tìm không dấu/sai nhẹ, không lộ Kiot hết hạn/bị khoá, số liệu thật, link lọc chia sẻ được; video iPhone
+  chuyển mã H.264, mua từ video ghi đúng nguồn, worker tách riêng.
+- [ ] `/webperf` cho trang chủ, Chợ, feed video → làm cùng T36 (đo LCP/CLS bằng Playwright).
 
 ---
 

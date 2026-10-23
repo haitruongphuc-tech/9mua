@@ -25,3 +25,14 @@ export {
   type Viewer,
 } from './feed';
 export { recordViews, toggleLike, MIN_VIEW_SECONDS } from './engagement';
+export {
+  reportVideo,
+  deleteVideo,
+  removeVideo,
+  restoreVideo,
+  listVideoReports,
+  VIDEO_REPORT_REASONS,
+  VIDEO_AUTO_HIDE_REPORTERS,
+  type VideoActionResult,
+} from './moderation';
+export { getCreatorProfile, getHotVideos, type CreatorProfile, type VideoThumb } from './profile';

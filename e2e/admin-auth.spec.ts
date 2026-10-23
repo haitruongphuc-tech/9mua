@@ -29,7 +29,7 @@ test('trang CEO: người thường nhận 404; admin bắt buộc cài và nh�
   await ceo.waitForURL((u) => u.pathname === '/');
   promoteToAdmin(phone);
   const secret = await setUpAdminTotp(ceo);
-  await expect(ceo.getByTestId('admin-home')).toContainText('CEO thử');
+  await expect(ceo.getByTestId('todo-box')).toBeVisible();
 
   // Phiên đăng nhập mới (thiết bị khác): mật khẩu đúng vẫn phải nhập mã 2 lớp.
   const other = await browser.newPage();
@@ -45,5 +45,31 @@ test('trang CEO: người thường nhận 404; admin bắt buộc cài và nh�
   await other.fill('#totp-code', await totpCode(secret, 30));
   await other.getByRole('button', { name: 'Xác nhận' }).click();
   await other.waitForURL((u) => u.pathname === '/admin');
-  await expect(other.getByTestId('admin-home')).toBeVisible();
+  await expect(other.getByTestId('todo-box')).toBeVisible();
+});
+
+test('tổng quan CEO: hộp "Cần xử lý" và số liệu hiện gọn trên màn hình 375px', async ({ browser }) => {
+  const page = await browser.newPage({ viewport: { width: 375, height: 800 } });
+  const phone = `07${String(Date.now()).slice(-8)}`;
+  await page.goto('/dang-ky?next=/');
+  await page.fill('#identifier', phone);
+  await page.fill('#displayName', 'CEO số liệu');
+  await page.fill('#password', 'mat-khau-ceo-e2e-123');
+  await page.click('button[type=submit]');
+  await page.waitForURL((u) => u.pathname === '/');
+  promoteToAdmin(phone);
+  await setUpAdminTotp(page);
+  await expect(page.getByTestId('todo-box')).toBeVisible();
+  await expect(page.getByTestId('metrics')).toContainText('Tiền đang giữ hộ');
+  await page.getByRole('link', { name: '30 ngày' }).click();
+  await page.waitForURL((u) => u.searchParams.get('khoang') === '30-ngay');
+  // Không tràn ngang trên điện thoại.
+  const wide = await page.evaluate(() =>
+    [...document.querySelectorAll('body *')]
+      .filter((el) => el.getBoundingClientRect().right > 376 && !el.closest('[class*=overflow-x-auto]'))
+      .slice(0, 5)
+      .map((el) => `${el.tagName}.${(el as HTMLElement).className}`.slice(0, 120)),
+  );
+  expect(wide).toEqual([]);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
 });

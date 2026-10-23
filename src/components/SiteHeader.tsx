@@ -8,13 +8,14 @@ export function SiteHeader() {
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2" aria-label="9MUA - Trang chủ">
           <Image src="/brand/9mua-icon.png" alt="" width={32} height={32} priority />
-          <span className="text-xl font-extrabold tracking-tight">9MUA</span>
+          {/* Màn hình rất hẹp (≤ 400px) chỉ hiện biểu tượng để thanh trên không tràn ngang. */}
+          <span className="hidden text-xl font-extrabold tracking-tight min-[400px]:inline">9MUA</span>
         </Link>
-        <nav className="flex items-center gap-2 text-sm font-bold">
-          <Link href="/cho" className="rounded-full px-3 py-2 hover:bg-surface-muted">
+        <nav className="flex items-center gap-1 text-sm font-bold sm:gap-2">
+          <Link href="/cho" className="rounded-full px-2 py-2 hover:bg-surface-muted sm:px-3">
             Chợ
           </Link>
-          <Link href="/video" className="rounded-full px-3 py-2 hover:bg-surface-muted">
+          <Link href="/video" className="rounded-full px-2 py-2 hover:bg-surface-muted sm:px-3">
             Video
           </Link>
           <Link

@@ -70,7 +70,7 @@ export function UserMenu() {
         </Link>
         <Link
           href="/tai-khoan"
-          className="max-w-36 truncate rounded-full border-2 border-brand-ink px-4 py-2"
+          className="max-w-24 truncate rounded-full border-2 border-brand-ink px-3 py-2 sm:max-w-36 sm:px-4"
           data-testid="user-menu"
         >
           {me.displayName}

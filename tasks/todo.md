@@ -502,7 +502,7 @@
     khác — không phải đổi hợp đồng `index.ts` của các module, mà mỗi thao tác trên giao diện CEO vẫn có
     đúng 1 dòng nhật ký.
 
-- [ ] **T32: Tổng quan + hộp "Cần xử lý"** (S)
+- [x] **T32: Tổng quan + hộp "Cần xử lý"** (S)
   - Số liệu Hôm nay / 7 / 30 ngày, biểu đồ SVG doanh thu, các bộ đếm hàng chờ có link.
   - Acceptance:
     - Số liệu khớp dữ liệu mẫu đã biết trước kết quả.
@@ -510,6 +510,8 @@
   - Verify: vitest admin.
   - Deps: T31, T25, T30
   - Files: `src/modules/admin/metrics.ts` + test, `src/app/admin/page.tsx`, `src/components/admin/LineChart.tsx`
+  - Ghi chú: test E2E 375px phát hiện thanh trên của toàn site tràn ngang khi đã đăng nhập (thêm chuông
+    thông báo ở T30) — đã sửa: màn ≤ 400px chỉ hiện biểu tượng logo, thu gọn khoảng cách.
 
 - [ ] **T33: Các hàng chờ xử lý** (M)
   - Rút tiền (Chi qua PayOS / Chuyển tay + QR / Từ chối), KYC, Hoàn tiền, Khiếu nại, Lệch tiền, Báo cáo.

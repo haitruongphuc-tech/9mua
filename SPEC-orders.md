@@ -155,11 +155,9 @@ listRefundsPending(), listDisputes()          // cho admin
 - [ ] Mọi đơn bị kẹt đều được tự xử lý theo đúng mốc thời gian: chưa trả, không xác nhận, không bấm đã nhận.
 - [ ] Mỗi đơn có lịch sử đầy đủ ai làm gì lúc nào.
 
-## Open Questions
+## Quyết định đã chốt
 
-1. **Bắt buộc đăng nhập** mới thêm vào giỏ, có ổn không? Mua không cần tài khoản thì dễ hơn cho khách,
-   nhưng khó theo dõi đơn và hoàn tiền.
-2. **Phí ship** do người bán đặt một mức cố định cho mỗi đơn, kèm ngưỡng miễn phí ship. Có ổn cho MVP không?
-3. Các mốc thời gian: **48 giờ** để người bán xác nhận, **10 ngày** tự động "đã nhận", **7 ngày** khiếu nại.
-   Có cần đổi mốc nào không?
-4. Hoàn tiền: CEO chuyển khoản tay trong MVP. Sau này có thể dùng API chi hộ của PayOS để tự động.
+1. Bắt buộc đăng nhập mới thêm vào giỏ.
+2. Phí ship: người bán đặt một mức cố định cho mỗi đơn, kèm ngưỡng miễn phí ship.
+3. Các mốc: 48 giờ xác nhận, 10 ngày tự động "đã nhận", 7 ngày khiếu nại.
+4. Không có COD trong MVP. Hoàn tiền do CEO chuyển tay.

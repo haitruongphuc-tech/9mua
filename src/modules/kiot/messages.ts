@@ -6,4 +6,7 @@ export const KIOT_ERROR_MESSAGES = {
   SLUG_LOCKED: 'Kiot đã kích hoạt nên không đổi được địa chỉ (để link và QR đã in không bị hỏng).',
   ALREADY_HAS_KIOT: 'Tài khoản của bạn đã có Kiot.',
   NO_KIOT: 'Bạn chưa có Kiot.',
+  PRODUCT_LIMIT: 'Kiot đã đạt tối đa 500 sản phẩm.',
+  TOO_MANY_PENDING: 'Bạn đã tải quá nhiều ảnh chưa dùng. Hãy lưu sản phẩm trước rồi tải tiếp.',
+  NOT_FOUND: 'Không tìm thấy sản phẩm.',
 } as const;

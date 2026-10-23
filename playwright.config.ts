@@ -32,6 +32,8 @@ export default defineConfig({
       TEST_MODE: 'e2e',
       MAIL_DRIVER: 'file',
       MAIL_OUTBOX_DIR: MAIL_DIR,
+      UPLOAD_DIR: path.resolve('test-results/uploads'),
+      PRIVATE_DIR: path.resolve('test-results/private'),
       DATABASE_URL: process.env.DATABASE_URL_E2E ?? 'postgresql://ninemua:ninemua@localhost:5432/ninemua_dev',
     },
   },

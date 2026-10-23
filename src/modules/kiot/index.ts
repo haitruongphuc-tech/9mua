@@ -11,3 +11,16 @@ export {
   type KiotStatus,
   type KiotInput,
 } from './kiot';
+export { CATEGORIES, categoryName, type CategorySlug } from './categories';
+export {
+  uploadProductImage,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  listProductsForOwner,
+  getProductForOwner,
+  MAX_PRODUCTS_PER_KIOT,
+  MAX_IMAGES_PER_PRODUCT,
+  type ProductInput,
+  type OwnerProduct,
+} from './product';

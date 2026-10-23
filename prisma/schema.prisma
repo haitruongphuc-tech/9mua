@@ -86,4 +86,45 @@ model Kiot {
   lockReason   String?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+  products     Product[]
+  images       ProductImage[]
+}
+
+model Product {
+  id              String         @id @default(cuid(2))
+  kiotId          String
+  kiot            Kiot           @relation(fields: [kiotId], references: [id])
+  name            String
+  description     String         @default("")
+  price           Int // VNĐ
+  compareAtPrice  Int? // giá gốc gạch ngang
+  stock           Int            @default(0) // CHECK (stock >= 0) trong migration
+  category        String
+  visible         Boolean        @default(true) // người bán ẩn/hiện
+  hiddenByAdminAt DateTime? // CEO gỡ vì vi phạm
+  hiddenReason    String?
+  deletedAt       DateTime? // xoá mềm: đơn cũ vẫn tham chiếu
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  images          ProductImage[]
+
+  @@index([kiotId, deletedAt])
+}
+
+// Ảnh tải lên trước (productId = null) rồi mới gắn vào sản phẩm khi lưu.
+model ProductImage {
+  id        String   @id @default(cuid(2))
+  kiotId    String
+  kiot      Kiot     @relation(fields: [kiotId], references: [id])
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id])
+  url       String
+  thumbUrl  String
+  width     Int
+  height    Int
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([productId, position])
+  @@index([kiotId, productId])
 }

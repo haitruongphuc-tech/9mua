@@ -152,7 +152,7 @@
   - Deps: T2
   - Files: `src/lib/media/{image-store,process-image}.ts` + test, `tests/fixtures/*`
 
-- [ ] **T10: Quản lý sản phẩm** (M)
+- [x] **T10: Quản lý sản phẩm** (M)
   - Model `Product` + `ProductImage`, CRUD có kiểm chủ Kiot ở server, 12 danh mục, xoá mềm, sắp thứ
     tự ảnh, tối đa 500 sản phẩm, giao diện `/kiot-cua-toi/san-pham`.
   - Acceptance:

@@ -61,7 +61,7 @@
 
 ## Phase 1 — Tài khoản (`SPEC-identity.md`)
 
-- [ ] **T4: Đăng ký** (M)
+- [x] **T4: Đăng ký** (M)
   - Model `User`, chuẩn hoá SĐT/email, băm argon2id, `register()`, trang `/dang-ky`.
   - Acceptance:
     - SĐT và email đều đăng ký được.

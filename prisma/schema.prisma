@@ -9,3 +9,23 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+// ─── identity (SPEC-identity.md) ─────────────────────────────────────────────
+
+enum Role {
+  user
+  admin
+}
+
+model User {
+  id                 String    @id @default(cuid(2))
+  phone              String?   @unique // dạng +84xxxxxxxxx
+  email              String?   @unique // chữ thường
+  displayName        String
+  passwordHash       String
+  role               Role      @default(user)
+  mustChangePassword Boolean   @default(false)
+  lockedAt           DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+}

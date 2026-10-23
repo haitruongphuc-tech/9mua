@@ -379,8 +379,13 @@
 
 ### ✅ Checkpoint F — Dòng tiền khép kín
 - [ ] E2E: tạo Kiot → bán → hoàn tất → KYC → rút lần 1 (duyệt tay) → rút lần 2 (tự động).
-- [ ] Đối chiếu: tiền vào − hoàn − đã chi = tiền đang giữ (`custodyReport`).
-- [ ] `/review` + `security-and-hardening` cho `payouts`. Push, báo CEO.
+  - Đã có bản tích hợp (vitest `auto.test.ts`: lần 1 hàng chờ → "Chi qua PayOS" → paid → lần 2 tự động).
+    Bản E2E qua trình duyệt cần giao diện hàng chờ của CEO, làm cùng T33.
+- [x] Đối chiếu: tiền vào − hoàn − đã chi = tiền đang giữ (`custodyReport`, `report.test.ts`).
+- [x] Rà soát `payouts` (đúng sai, bảo mật): chặn ghi đè ở DB (1 yêu cầu mở/Kiot, CHECK số tiền, sổ chỉ thêm),
+  thời gian chờ PayOS ngắn lại để người bán không phải chờ lâu, giới hạn độ dài lý do và số tiền điều chỉnh.
+  Hàm admin (`rejectPayout`, `markPayoutPaid`, `approvePayoutViaPayos`, `adjustBalance`) chưa có giao diện;
+  T31/T33 phải gọi qua `requireAdmin` + 2FA và ghi audit log.
 
 ---
 

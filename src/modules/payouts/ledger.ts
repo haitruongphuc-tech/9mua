@@ -37,7 +37,8 @@ export async function adjustBalance(
 ): Promise<AdjustResult> {
   const note = reason.trim();
   if (!note) return { ok: false, error: 'REASON_REQUIRED' };
-  if (!Number.isSafeInteger(amount) || amount === 0) return { ok: false, error: 'INVALID_AMOUNT' };
+  if (!Number.isSafeInteger(amount) || amount === 0 || Math.abs(amount) > 1_000_000_000)
+    return { ok: false, error: 'INVALID_AMOUNT' };
   if (!(await db.kiot.count({ where: { id: kiotId } }))) return { ok: false, error: 'NOT_FOUND' };
   return db.$transaction(async (tx): Promise<AdjustResult> => {
     await lockKiotBalance(tx, kiotId);

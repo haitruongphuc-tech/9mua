@@ -146,7 +146,7 @@ export async function rejectPayout(
     await lockKiotBalance(tx, payout.kiotId);
     const moved = await moveFrom(tx, payoutId, 'pending', {
       status: 'rejected',
-      rejectReason: trimmed,
+      rejectReason: trimmed.slice(0, 500),
       processedById: adminId,
       processedAt: now(),
     });

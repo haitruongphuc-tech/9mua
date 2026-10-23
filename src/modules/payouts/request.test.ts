@@ -249,3 +249,41 @@ describe('CEO điều chỉnh tay', () => {
     );
   });
 });
+
+describe('chốt chặn ở database', () => {
+  it('không thể có 2 yêu cầu đang mở cho cùng Kiot, kể cả khi ghi thẳng vào DB', async () => {
+    const s = await readySeller();
+    const r = await requestPayout(s.kiotId, s.user.id, 100_000);
+    if (!r.ok) throw new Error();
+    const p = await db.payoutRequest.findUniqueOrThrow({ where: { id: r.payoutId } });
+    const { id: _id, code: _code, createdAt: _c, updatedAt: _u, autoRuleReasons: _a, ...rest } = p;
+    await expect(db.payoutRequest.create({ data: { ...rest, code: 'RT999999' } })).rejects.toThrow();
+  });
+
+  it('số tiền chuyển phải bằng số tiền rút trừ phí và lớn hơn 0', async () => {
+    const s = await readySeller();
+    const base = {
+      kiotId: s.kiotId,
+      requestedById: s.user.id,
+      bankBin: '970422',
+      accountNumber: '1',
+      accountName: 'A',
+      status: 'cancelled',
+    };
+    await expect(
+      db.payoutRequest.create({ data: { ...base, code: 'RT900001', amount: 100, fee: 0, netAmount: 200 } }),
+    ).rejects.toThrow();
+    await expect(
+      db.payoutRequest.create({ data: { ...base, code: 'RT900002', amount: 100, fee: 100, netAmount: 0 } }),
+    ).rejects.toThrow();
+  });
+
+  it('không sửa, không xoá được dòng sổ số dư', async () => {
+    const s = await readySeller();
+    const entry = await db.balanceEntry.findFirstOrThrow({ where: { kiotId: s.kiotId } });
+    await expect(
+      db.balanceEntry.update({ where: { id: entry.id }, data: { amount: 9_999_999 } }),
+    ).rejects.toThrow();
+    await expect(db.balanceEntry.delete({ where: { id: entry.id } })).rejects.toThrow();
+  });
+});

@@ -74,8 +74,9 @@ class PayOSPayoutClient implements PayoutClient {
       apiKey: e.PAYOS_PAYOUT_API_KEY!,
       checksumKey: e.PAYOS_PAYOUT_CHECKSUM_KEY!,
       logLevel: 'off',
-      timeout: 20_000,
-      maxRetries: 2, // SDK tự gửi lại với cùng header x-idempotency-key
+      // Người bán đang chờ trang phản hồi: lỗi thì để cron đồng bộ gửi lại, không chờ lâu ở đây.
+      timeout: 15_000,
+      maxRetries: 1, // SDK tự gửi lại với cùng header x-idempotency-key
     });
   }
 

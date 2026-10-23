@@ -26,6 +26,13 @@ const schema = z
     SMTP_USER: z.string().optional(),
     SMTP_PASS: z.string().optional(),
     MAIL_FROM: z.string().default('9MUA <no-reply@9mua.com>'),
+    // Thanh toán (SPEC-payments.md). Driver fake chỉ cho dev/test/E2E.
+    PAYMENTS_DRIVER: z.enum(['payos', 'fake']).optional(),
+    PAYOS_CLIENT_ID: z.string().optional(),
+    PAYOS_API_KEY: z.string().optional(),
+    PAYOS_CHECKSUM_KEY: z.string().optional(),
+    // Token bí mật cho cron gọi /api/internal/* (Docker che IP người gọi nên không dựa vào IP).
+    INTERNAL_CRON_TOKEN: z.string().optional(),
   })
   .superRefine((v, ctx) => {
     if (v.NODE_ENV === 'production' && !v.APP_URL) {
@@ -39,6 +46,27 @@ const schema = z
         message: `MAIL_DRIVER=${driver} không được dùng ở production`,
       });
     }
+    const payments = paymentsDriver(v);
+    if (v.NODE_ENV === 'production' && !v.TEST_MODE && payments === 'fake') {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['PAYMENTS_DRIVER'],
+        message: 'PAYMENTS_DRIVER=fake không được dùng ở production',
+      });
+    }
+    if (payments === 'payos') {
+      for (const key of ['PAYOS_CLIENT_ID', 'PAYOS_API_KEY', 'PAYOS_CHECKSUM_KEY'] as const) {
+        if (!v[key])
+          ctx.addIssue({ code: 'custom', path: [key], message: `${key} là bắt buộc khi dùng PayOS` });
+      }
+    }
+    if (v.NODE_ENV === 'production' && (v.INTERNAL_CRON_TOKEN ?? '').length < 32) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['INTERNAL_CRON_TOKEN'],
+        message: 'INTERNAL_CRON_TOKEN cần ít nhất 32 ký tự ở production',
+      });
+    }
     if (driver === 'smtp') {
       for (const key of ['SMTP_HOST', 'SMTP_USER', 'SMTP_PASS'] as const) {
         if (!v[key])
@@ -48,8 +76,21 @@ const schema = z
   })
   .transform((v) => {
     const appUrl = (v.APP_URL ?? 'http://localhost:3000').replace(/\/$/, '');
-    return { ...v, MAIL_DRIVER: mailDriver(v), APP_URL: appUrl, ROOT_DOMAIN: new URL(appUrl).hostname };
+    return {
+      ...v,
+      MAIL_DRIVER: mailDriver(v),
+      PAYMENTS_DRIVER: paymentsDriver(v),
+      PAYOS_CHECKSUM_KEY: v.PAYOS_CHECKSUM_KEY ?? (paymentsDriver(v) === 'fake' ? FAKE_CHECKSUM_KEY : ''),
+      APP_URL: appUrl,
+      ROOT_DOMAIN: new URL(appUrl).hostname,
+    };
   });
+
+export const FAKE_CHECKSUM_KEY = 'fake-checksum-key-9mua';
+
+function paymentsDriver(v: { NODE_ENV: string; PAYMENTS_DRIVER?: 'payos' | 'fake' }) {
+  return v.PAYMENTS_DRIVER ?? (v.NODE_ENV === 'production' ? 'payos' : 'fake');
+}
 
 // Production gửi thật qua SMTP (Brevo); dev in ra console; test bỏ vào hộp thư giả.
 function mailDriver(v: { NODE_ENV: string; MAIL_DRIVER?: 'smtp' | 'console' | 'memory' | 'file' }) {

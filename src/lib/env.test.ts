@@ -8,6 +8,10 @@ const valid = {
   SMTP_HOST: 'smtp-relay.brevo.com',
   SMTP_USER: 'user',
   SMTP_PASS: 'pass',
+  PAYOS_CLIENT_ID: 'id',
+  PAYOS_API_KEY: 'key',
+  PAYOS_CHECKSUM_KEY: 'checksum',
+  INTERNAL_CRON_TOKEN: 'x'.repeat(32),
 };
 
 describe('parseEnv', () => {
@@ -47,6 +51,23 @@ describe('parseEnv', () => {
     expect(() => parseEnv({ ...valid, MAIL_DRIVER: 'file' })).toThrow(/MAIL_DRIVER/);
     expect(() => parseEnv({ ...valid, MAIL_DRIVER: 'memory' })).toThrow(/MAIL_DRIVER/);
     expect(parseEnv({ ...valid, MAIL_DRIVER: 'file', TEST_MODE: 'e2e' }).MAIL_DRIVER).toBe('file');
+  });
+
+  it('production: PayOS thật bắt buộc đủ khoá; driver fake bị chặn trừ khi chạy E2E', () => {
+    expect(parseEnv(valid).PAYMENTS_DRIVER).toBe('payos');
+    expect(() => parseEnv({ ...valid, PAYOS_CHECKSUM_KEY: undefined })).toThrow(/PAYOS_CHECKSUM_KEY/);
+    expect(() => parseEnv({ ...valid, PAYMENTS_DRIVER: 'fake' })).toThrow(/PAYMENTS_DRIVER/);
+    expect(parseEnv({ ...valid, PAYMENTS_DRIVER: 'fake', TEST_MODE: 'e2e' }).PAYMENTS_DRIVER).toBe('fake');
+  });
+
+  it('production bắt buộc INTERNAL_CRON_TOKEN đủ dài', () => {
+    expect(() => parseEnv({ ...valid, INTERNAL_CRON_TOKEN: 'ngan' })).toThrow(/INTERNAL_CRON_TOKEN/);
+  });
+
+  it('dev mặc định dùng PayOS giả với checksum key riêng', () => {
+    const dev = parseEnv({ NODE_ENV: 'development', DATABASE_URL: valid.DATABASE_URL });
+    expect(dev.PAYMENTS_DRIVER).toBe('fake');
+    expect(dev.PAYOS_CHECKSUM_KEY).toBe('fake-checksum-key-9mua');
   });
 
   it('bắt buộc APP_URL ở production', () => {

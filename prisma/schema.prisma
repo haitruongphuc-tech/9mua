@@ -144,3 +144,64 @@ model ProductImage {
   @@index([productId, position])
   @@index([kiotId, productId])
 }
+
+// ─── payments (SPEC-payments.md) ─────────────────────────────────────────────
+
+enum PaymentStatus {
+  pending
+  paid
+  expired
+  cancelled
+  mismatch
+}
+
+model PaymentIntent {
+  id            String        @id @default(cuid(2))
+  orderCode     BigInt        @unique // từ sequence payment_order_code_seq
+  purpose       String // kiot_fee | order
+  refId         String
+  amount        Int
+  description   String
+  status        PaymentStatus @default(pending)
+  paymentLinkId String?
+  checkoutUrl   String
+  qrCode        String
+  expiresAt     DateTime
+  paidAt        DateTime?
+  amountPaid    Int?
+  lastCheckedAt DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([purpose, refId, status])
+  @@index([status, createdAt])
+}
+
+// Sổ cái tiền vào: chỉ thêm, không sửa, không xoá.
+model PaymentEvent {
+  id                     String   @id @default(cuid(2))
+  orderCode              BigInt
+  reference              String // mã giao dịch ngân hàng
+  amount                 Int
+  outcome                String // applied | partial | mismatch | duplicate_payment | orphan
+  source                 String // webhook | reconcile
+  transactionDateTime    String
+  counterAccountName     String?
+  counterAccountNumber   String?
+  counterAccountBankName String?
+  payload                Json
+  createdAt              DateTime @default(now())
+
+  @@unique([orderCode, reference])
+  @@index([outcome])
+}
+
+// Trạng thái link của driver PayOS giả (dev/test/E2E); không dùng khi chạy PayOS thật.
+model FakePayosLink {
+  orderCode    BigInt   @id
+  amount       Int
+  description  String
+  status       String
+  expiresAt    DateTime
+  transactions Json     @default("[]")
+}

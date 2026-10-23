@@ -196,7 +196,7 @@
 
 ## Phase 3 — Thu tiền PayOS + phí thuê (`SPEC-payments.md`, `SPEC-billing.md`)
 
-- [ ] **T13: Lõi payments + driver giả** (M)
+- [x] **T13: Lõi payments + driver giả** (M)
   - Model `PaymentIntent`, `PaymentEvent`, sequence `orderCode`. Wrapper `@payos/node` và driver `fake`
     (bị chặn ở production). `createPayment` không tạo trùng, `registerPaymentHandler`, chuẩn hoá mô tả 9 ký tự.
   - Acceptance:

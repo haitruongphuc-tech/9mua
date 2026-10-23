@@ -34,6 +34,10 @@ Ghi sổ chính xác tiền 9mua đang giữ cho từng người bán. Người 
    - Tạo yêu cầu thì ghi ngay `BalanceEntry(type = 'payout_reserve', amount = −số tiền)`, nên số dư giảm
      liền. Hai yêu cầu bấm cùng lúc không thể cùng qua: khoá theo Kiot bằng
      `pg_advisory_xact_lock(kiotId)`.
+   - **Phí chi hộ do người bán chịu**: `payout_fee_vnd` (CEO nhập theo biểu phí PayOS, mặc định 0 cho
+     tới khi có hợp đồng). Số tiền chuyển = số tiền rút − phí. Người bán thấy rõ "Bạn sẽ nhận X đ (phí Y đ)"
+     **trước khi bấm xác nhận**. Phí được chụp lại vào yêu cầu lúc tạo. Phí là chi phí trả cho PayOS, không
+     tính vào doanh thu sàn.
    - Yêu cầu **chụp lại** tài khoản nhận lúc tạo (ngân hàng, STK, tên). Đổi tài khoản sau đó không ảnh
      hưởng yêu cầu đang chờ.
    - Người bán huỷ được khi yêu cầu còn `pending`. Huỷ thì ghi
@@ -53,7 +57,7 @@ Ghi sổ chính xác tiền 9mua đang giữ cho từng người bán. Người 
 
      CEO chỉnh mọi mức trên trong trang admin (bảng `Setting`).
    - **Đạt luật**: yêu cầu chuyển `processing`, gọi `payos.payouts.create({ referenceId: code, amount,
-     description: '9MUA RUT ' + code, toBin, toAccountNumber }, idempotencyKey = payoutId)`.
+     description: '9MUA RUT ' + code, toBin, toAccountNumber }` với `amount = số tiền rút − phí`, idempotencyKey = payoutId)`.
      - Gọi lỗi mạng hoặc hết thời gian chờ thì **thử lại với cùng `idempotencyKey`**, nên PayOS không chi
        2 lần.
      - Lưu `payosPayoutId`.
@@ -108,7 +112,7 @@ custodyReport(range): Promise<{ held: number; pending: number; platformFees: num
 - `KycSubmission`: id, userId, fullName, idNumber, frontImage, backImage, status, reason, reviewedBy,
   reviewedAt.
 - `PayoutRequest`: id, code (`RT` + 6 số), kiotId, amount, bankBin, accountNumber, accountName, status
-  (`pending | processing | paid | failed | rejected | cancelled`), mode (`auto | manual`),
+  (`pending | processing | paid | failed | rejected | cancelled`), fee, netAmount, mode (`auto | manual`),
   autoRuleReasons, payosPayoutId, payosState, bankRef, receiverNameFromBank, rejectReason, các mốc thời
   gian, xử lý bởi.
 
@@ -126,6 +130,8 @@ Chưa có kênh chi thì hệ thống tự chạy chế độ duyệt tay.
 
 - **Unit:**
   - Tính phí sàn: 5% của 99.999đ được làm tròn đúng; phí ship không bị tính phí; tỉ lệ 0%.
+  - Phí chi hộ: rút 50.000đ, phí 2.000đ thì chuyển 48.000đ, số dư trừ 50.000đ. Đổi phí sau khi tạo
+    không ảnh hưởng yêu cầu cũ.
   - Tạo chuỗi VietQR, rồi đọc lại bằng bộ giải để kiểm đúng STK và số tiền.
   - So khớp tên CCCD với tên tài khoản ngân hàng.
 - **Integration:**
@@ -170,10 +176,9 @@ Chưa có kênh chi thì hệ thống tự chạy chế độ duyệt tay.
 - [ ] Không bao giờ chi 2 lần cho cùng một yêu cầu, kể cả khi mạng lỗi hoặc cron chạy chồng.
 - [ ] Báo cáo tiền giữ hộ đối chiếu được với số dư TK MB 979393916.
 
-## Open Questions
+## Quyết định đã chốt
 
-1. Rút tối thiểu **50.000đ**, **không thu phí rút**: có ổn không?
-2. Mức tự động mặc định: **5 triệu/lần, 10 triệu/Kiot/ngày, 50 triệu/toàn sàn/ngày**, **lần rút đầu duyệt tay**.
-   Có cần đổi không? (CEO chỉnh được sau trong admin.)
-3. Cần đăng ký **kênh chi hộ PayOS** và nạp tiền vào tài khoản chi. Phí chi hộ của PayOS 9mua chịu hay
-   trừ vào người bán? Đề xuất **9mua chịu** trong giai đoạn đầu.
+1. Rút tối thiểu 50.000đ, không thu thêm phí rút của 9mua.
+2. Hạn mức tự động 5 triệu/lần, 10 triệu/Kiot/ngày, 50 triệu/toàn sàn/ngày, lần rút đầu duyệt tay.
+3. **Phí chi hộ PayOS do người bán chịu**, trừ vào số tiền nhận, hiển thị trước khi xác nhận.
+4. Cam kết xử lý yêu cầu duyệt tay: trong 2 ngày làm việc.

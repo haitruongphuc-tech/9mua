@@ -1,0 +1,16 @@
+# Postgres cho máy dev: docker compose -f docker-compose.dev.yml up -d
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ninemua
+      POSTGRES_PASSWORD: ninemua
+      POSTGRES_DB: ninemua_dev
+    ports:
+      - '127.0.0.1:5432:5432'
+    volumes:
+      - db-dev:/var/lib/postgresql/data
+      - ./deploy/postgres/init-test-db.sql:/docker-entrypoint-initdb.d/init-test-db.sql:ro
+
+volumes:
+  db-dev:

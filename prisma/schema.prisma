@@ -1,0 +1,10 @@
+// Schema dùng chung cho mọi module. Mỗi model ghi chú module sở hữu (xem CAPABILITY-MAP.md).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}

@@ -26,7 +26,7 @@
   - Files: `package.json`, `next.config.ts`, `src/app/layout.tsx`, `src/app/page.tsx`, `src/app/globals.css`,
     `public/manifest.webmanifest`
 
-- [ ] **T2: Prisma + Postgres + bộ khung test** (M)
+- [x] **T2: Prisma + Postgres + bộ khung test** (M)
   - `docker-compose.dev.yml` (Postgres 16), `prisma/schema.prisma` rỗng có generator,
     `src/lib/db.ts`, `src/lib/env.ts` (Zod kiểm biến môi trường), Vitest với DB test tự reset mỗi file,
     đồng hồ giả `src/lib/clock.ts` để test các mốc 48 giờ / 7 ngày.

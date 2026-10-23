@@ -78,9 +78,10 @@ type SessionUser = { id: string; displayName: string; role: 'user' | 'admin'; ph
 | Validation | Zod | Kiểm tra mọi input ở biên |
 | Mật khẩu | `@node-rs/argon2` (argon2id) | Chuẩn hiện hành, không cần build native |
 | UI | Tailwind CSS 4, mobile-first, màu chính `#FF6B00` | Đúng nhận diện cũ |
-| Đóng gói | Dockerfile multi-stage (Next `output: 'standalone'`) + `docker-compose.yml` gồm `app`, `db` (Postgres 16, volume riêng), `caddy` | Một lệnh để deploy, chạy giống nhau ở mọi máy |
-| HTTPS | Caddy với *on-demand TLS*: tự cấp chứng chỉ cho từng `tenkiot.9mua.com` khi có truy cập lần đầu, chỉ cấp cho slug Kiot có thật (hỏi `GET /api/internal/tls-allowed`) | Không cần API của nhà cung cấp DNS cho chứng chỉ wildcard |
-| Email | nodemailer qua SMTP | Không bị khoá vào một nhà cung cấp |
+| Đóng gói | Dockerfile multi-stage (Next `output: 'standalone'`) + `docker-compose.yml` gồm `app` và `db` (Postgres 16, volume riêng) | Một lệnh để deploy, chạy giống nhau ở mọi máy |
+| Cổng | `app` chỉ mở `127.0.0.1:3009`. `db` không mở cổng ra ngoài | Không đụng tới các site khác đang chạy trên VPS |
+| Reverse proxy + HTTPS | **Nginx sẵn có trên VPS** proxy `9mua.com` và `*.9mua.com` → `127.0.0.1:3009`, giữ nguyên header `Host`. Chứng chỉ wildcard `*.9mua.com` cấp bằng certbot DNS-01. Mẫu cấu hình nằm ở `deploy/nginx/9mua.conf` | Giữ Nginx làm máy chủ chính như anh yêu cầu |
+| Email | nodemailer qua SMTP **Brevo** (`smtp-relay.brevo.com:587`), cấu hình bằng `SMTP_*` | Đổi nhà cung cấp không cần sửa code |
 | Test | Vitest (unit + integration với Postgres thật), Playwright (e2e) | |
 
 Không dùng Auth.js: chỉ cần đăng nhập bằng mật khẩu, nên tự viết ~200 dòng sẽ dễ kiểm soát cookie
@@ -100,7 +101,7 @@ npx prisma migrate deploy              # áp migration trên VPS
 npm run user:create-admin -- --phone 0979393916
 
 # Docker (local giống production)
-docker compose up -d --build          # app + db + caddy
+docker compose up -d --build          # app (127.0.0.1:3009) + db
 docker compose exec app npx prisma migrate deploy
 docker compose exec app node scripts/create-admin.js --phone 0979393916
 
@@ -123,7 +124,8 @@ src/lib/                      → Tiện ích dùng chung (db client, env, rate-
 src/components/               → UI dùng chung
 scripts/                      → CLI (create-admin…)
 e2e/                          → Playwright
-Dockerfile, docker-compose.yml, Caddyfile → Đóng gói và chạy
+Dockerfile, docker-compose.yml → Đóng gói và chạy
+deploy/nginx/9mua.conf        → Mẫu server block Nginx trên host
 .env.example                  → Danh sách biến môi trường (không chứa giá trị thật)
 docs/deploy.md                → Hướng dẫn deploy lên VPS bằng Docker
 ```
@@ -209,13 +211,10 @@ export async function register(raw: unknown): Promise<RegisterResult> {
 - [ ] `requireAdmin()` trả 404 cho tài khoản thường.
 - [ ] Quên mật khẩu: nhận được mail, link dùng được đúng 1 lần, hết hạn sau 30 phút, đặt lại xong thì mọi thiết
       bị khác bị đăng xuất. Nhập email chưa đăng ký vẫn thấy cùng một thông báo.
-- [ ] Trên VPS trắng chỉ có Docker: `docker compose up -d --build` xong thì `https://9mua.com` chạy và có HTTPS.
+- [ ] Trên VPS: `docker compose up -d --build` + bật `deploy/nginx/9mua.conf` xong thì `https://9mua.com` và `https://abc.9mua.com` đều chạy qua Nginx. Các site khác trên VPS không bị ảnh hưởng.
 - [ ] `npm run lint`, `npm test`, `npm run test:e2e` đều xanh.
 
 ## Open Questions
 
-1. **Cổng 80/443:** Caddy trong Docker cần dùng cổng 80/443, nên Nginx đang chạy trên VPS phải tắt
-   hoặc chuyển cổng. Nếu VPS đang chạy site khác bằng Nginx thì báo tôi: tôi sẽ để Nginx trên host
-   làm proxy vào container và dùng cách cấp SSL khác.
-2. **Nhà cung cấp email (SMTP):** đề xuất Resend (miễn phí 3.000 mail/tháng, cần xác minh tên miền
-   9mua.com bằng vài bản ghi DNS) hoặc Brevo (miễn phí 300 mail/ngày). Có thể quyết lúc deploy, code không phụ thuộc.
+1. Chứng chỉ wildcard `*.9mua.com` cần một API key DNS (hoặc thêm thủ công 1 bản ghi TXT mỗi 90 ngày).
+   Xử lý lúc deploy, không chặn việc viết code.

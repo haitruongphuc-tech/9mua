@@ -447,7 +447,7 @@
     khi xử lý; file bỏ dở xoá sau 24 giờ. Thêm bảng `Notification` (thông báo trong app).
     E2E dùng `/api/internal/video/process` (chỉ khi TEST_MODE=e2e) thay cho container worker.
 
-- [ ] **T29: Feed 9:16 + thích, xem, mua từ video** (M)
+- [x] **T29: Feed 9:16 + thích, xem, mua từ video** (M)
   - `/video` toàn màn hình (vuốt, tự phát tắt tiếng, tải trước video kế), `getFeed` theo công thức
     điểm, `recordView` (≥ 3 giây, 24 giờ), `toggleLike`, thẻ sản phẩm → `addToCart(sourceVideoId)`,
     trang chia sẻ `/v/[id]` có OG.
@@ -459,6 +459,10 @@
   - Deps: T28, T18
   - Files: `src/modules/creator/{feed,engagement}.ts` + test, `src/app/video/page.tsx`, `src/app/v/[id]/page.tsx`,
     `src/components/VideoFeed.tsx`
+  - Ghi chú: con trỏ feed mang danh sách video đã xem trong phiên (không lặp), cứ ~3 video theo điểm chèn
+    1 video mới nhất. Lượt xem tính theo ngày giờ VN (khoá videoId+người xem+ngày như spec), gửi theo lô
+    bằng sendBeacon. Nguồn video trong giỏ chỉ được ghi khi video thật sự gắn sản phẩm đó. Điểm feed tính lại
+    mỗi 5 phút trong worker. Chromium của Playwright không giải mã H.264 nên E2E không đo thời gian xem.
 
 - [ ] **T30: Trang creator, thống kê, kiểm duyệt, Video hot** (S)
   - `/creator/[userId]`, `/video/cua-toi` (lượt xem, thích, số đơn từ video), xoá video, báo cáo

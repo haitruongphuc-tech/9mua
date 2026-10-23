@@ -2,6 +2,7 @@
 
 import { redirect } from 'next/navigation';
 import { env } from '@/lib/env';
+import { isProductTagged } from '@/modules/creator';
 import { getCurrentUser } from '@/modules/identity';
 import { addToCart } from '@/modules/orders';
 import { CART_ERROR_MESSAGES } from '@/modules/orders/messages';
@@ -21,7 +22,10 @@ export async function addToCartAction(
     const next = `/gio-hang/them?sp=${encodeURIComponent(productId)}&sl=${qty}${sourceVideoId ? `&v=${encodeURIComponent(sourceVideoId)}` : ''}`;
     redirect(`${env().APP_URL}/dang-nhap?next=${encodeURIComponent(next)}`);
   }
-  const result = await addToCart(user.id, productId, qty, sourceVideoId ?? undefined);
+  // Chỉ ghi nguồn video khi video đó thật sự gắn sản phẩm này (thống kê creator không bị ghi giả).
+  const source =
+    sourceVideoId && (await isProductTagged(sourceVideoId, productId)) ? sourceVideoId : undefined;
+  const result = await addToCart(user.id, productId, qty, source);
   if (!result.ok) {
     return {
       message:

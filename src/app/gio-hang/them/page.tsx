@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { isProductTagged } from '@/modules/creator';
 import { requireUser } from '@/modules/identity';
 import { addToCart } from '@/modules/orders';
 
@@ -14,7 +15,8 @@ export default async function ContinueAddToCart({
   const user = await requireUser();
   const { sp, sl, v } = await searchParams;
   if (sp) {
-    const result = await addToCart(user.id, sp, Math.max(1, Math.min(1000, Number(sl) || 1)), v);
+    const source = v && (await isProductTagged(v, sp)) ? v : undefined;
+    const result = await addToCart(user.id, sp, Math.max(1, Math.min(1000, Number(sl) || 1)), source);
     if (!result.ok) redirect(`/gio-hang?loi=${result.error}`);
   }
   redirect('/gio-hang?da-them=1');

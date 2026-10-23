@@ -14,3 +14,14 @@ export { processNextJob, claimJob } from './jobs';
 export { extractHashtags } from './hashtags';
 export { feedScore } from './score';
 export { myVideoStats, type MyVideo } from './mine';
+export {
+  getFeed,
+  getVideo,
+  recomputeScores,
+  isProductTagged,
+  FEED_PAGE,
+  type FeedVideo,
+  type FeedProduct,
+  type Viewer,
+} from './feed';
+export { recordViews, toggleLike, MIN_VIEW_SECONDS } from './engagement';

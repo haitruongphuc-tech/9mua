@@ -149,9 +149,9 @@ Hai người mua cùng lúc món cuối cùng thì chỉ một người thành c
 - [ ] Chia sẻ link sản phẩm lên Zalo/Facebook hiện đúng ảnh, tên, giá.
 - [ ] Trang Kiot trên điện thoại 4G tải xong nội dung chính dưới 2,5 giây (LCP).
 
-## Open Questions
+## Quyết định đã chốt (trước đây là Open Questions)
 
-1. Mỗi tài khoản **1 Kiot** trong MVP: có ổn không?
-2. Danh sách 12 danh mục ở trên có cần thêm hoặc bớt mục nào không?
-3. Thông tin Kiot có cần giấy tờ hay CCCD (KYC) không? Tài liệu cũ nhắc "KYC + cọc 199k" chống Kiot ảo.
-   Đề xuất MVP chưa làm KYC, chỉ yêu cầu khi người bán **rút tiền lần đầu** (module `payouts`).
+1. Mỗi tài khoản **1 Kiot** trong MVP.
+2. Dùng 12 danh mục như đã liệt kê.
+3. Chưa yêu cầu KYC khi tạo Kiot. Xác minh CCCD khi người bán **rút tiền lần đầu** (module `payouts`).
+4. Thêm hai dependency `sharp` và `qrcode`.

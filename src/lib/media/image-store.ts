@@ -1,10 +1,12 @@
-import { mkdir, unlink, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, rename, unlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { env } from '@/lib/env';
 
 // Lưu file công khai. Production: ổ đĩa VPS (Nginx phục vụ /uploads). Sau này có thể thay bằng R2/Bunny.
 export interface ImageStore {
   save(key: string, data: Buffer): Promise<string>;
+  // Chuyển một file đã có (vd. video vừa chuyển mã) vào kho công khai; file nguồn bị xoá.
+  saveFile(key: string, sourcePath: string): Promise<string>;
   remove(url: string): Promise<void>;
 }
 
@@ -23,6 +25,18 @@ export class LocalImageStore implements ImageStore {
     if (!target) throw new Error(`Khoá file không hợp lệ: ${key}`);
     await mkdir(path.dirname(target), { recursive: true });
     await writeFile(target, data, { flag: 'wx' });
+    return `/uploads/${key}`;
+  }
+
+  async saveFile(key: string, sourcePath: string): Promise<string> {
+    const target = resolveUploadPath(this.root, key.split('/'));
+    if (!target) throw new Error(`Khoá file không hợp lệ: ${key}`);
+    await mkdir(path.dirname(target), { recursive: true });
+    // Thư mục tạm và UPLOAD_DIR có thể nằm trên 2 ổ khác nhau (2 volume Docker): rename lỗi thì chép rồi xoá.
+    await rename(sourcePath, target).catch(async () => {
+      await copyFile(sourcePath, target);
+      await unlink(sourcePath);
+    });
     return `/uploads/${key}`;
   }
 

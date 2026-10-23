@@ -35,6 +35,8 @@ describe('chốt chặn trong database', () => {
         'PlatformRevenue_fee_nonnegative',
         'ProductSale_qty_positive',
         'Kiot_shipping_fee_range',
+        'Video_counters_nonnegative',
+        'VideoProduct_position_range',
       ]),
     );
   });

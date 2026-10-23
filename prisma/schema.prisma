@@ -521,3 +521,102 @@ model ProductReport {
   @@unique([productId, reporterId])
   @@index([status, createdAt])
 }
+
+// ===== Creator video (SPEC-creator.md) =====
+model Video {
+  id             String         @id @default(cuid(2))
+  authorId       String
+  caption        String         @default("")
+  hashtags       String[]
+  status         String         @default("processing") // processing | ready | failed | hidden | removed | deleted
+  failReason     String?
+  moderationNote String? // lý do tự ẩn / CEO gỡ
+  durationSec    Float?
+  width          Int?
+  height         Int?
+  fileUrl        String?
+  posterUrl      String?
+  views          Int            @default(0)
+  qualifiedViews Int            @default(0) // xem ≥ 50% thời lượng
+  likes          Int            @default(0)
+  score          Float          @default(0)
+  readyAt        DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  products       VideoProduct[]
+
+  @@index([status, score])
+  @@index([status, readyAt])
+  @@index([authorId, createdAt])
+}
+
+model VideoProduct {
+  videoId   String
+  video     Video  @relation(fields: [videoId], references: [id])
+  productId String
+  position  Int
+
+  @@id([videoId, productId])
+}
+
+// Hàng đợi chuyển mã: worker lấy việc bằng FOR UPDATE SKIP LOCKED.
+model VideoJob {
+  id         String    @id @default(cuid(2))
+  videoId    String    @unique
+  sourcePath String // file gốc trong PRIVATE_DIR, xoá sau khi xử lý
+  status     String    @default("queued") // queued | running | done | failed
+  attempts   Int       @default(0)
+  lockedAt   DateTime?
+  error      String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([status, createdAt])
+}
+
+model VideoLike {
+  videoId   String
+  userId    String
+  createdAt DateTime @default(now())
+
+  @@id([videoId, userId])
+  @@index([userId])
+}
+
+// Mỗi người xem (tài khoản hoặc cookie ẩn danh) tính 1 lượt mỗi video mỗi ngày.
+model VideoView {
+  videoId   String
+  viewerKey String // u:<userId> | a:<anonId>
+  day       String // YYYY-MM-DD giờ Việt Nam
+  qualified Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@id([videoId, viewerKey, day])
+  @@index([viewerKey, createdAt])
+}
+
+model VideoReport {
+  id        String   @id @default(cuid(2))
+  videoId   String
+  userId    String
+  reason    String // noi_dung_xau | lua_dao | ban_quyen | khac
+  message   String   @default("")
+  status    String   @default("open") // open | dismissed | actioned
+  createdAt DateTime @default(now())
+
+  @@unique([videoId, userId])
+  @@index([status, createdAt])
+}
+
+// Thông báo trong app (video xử lý xong, bị gỡ…).
+model Notification {
+  id        String    @id @default(cuid(2))
+  userId    String
+  title     String
+  body      String    @default("")
+  url       String?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, readAt, createdAt])
+}

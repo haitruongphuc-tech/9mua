@@ -1,0 +1,150 @@
+import { randomBytes } from 'node:crypto';
+import { createWriteStream } from 'node:fs';
+import { mkdir, open, readdir, stat, unlink } from 'node:fs/promises';
+import path from 'node:path';
+import { Transform, type Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
+import { now, startOfVnDay } from '@/lib/clock';
+import { db } from '@/lib/db';
+import { env } from '@/lib/env';
+import { resolveUploadPath } from '@/lib/media/image-store';
+import { getProductForCheckout } from '@/modules/kiot';
+import { extractHashtags } from './hashtags';
+
+export const MAX_VIDEO_BYTES = 100 * 1024 * 1024;
+export const MAX_VIDEOS_PER_DAY = 10;
+export const MAX_PRODUCTS_PER_VIDEO = 3;
+export const MAX_CAPTION = 300;
+
+const UPLOAD_ID = /^[a-f0-9]{32}$/;
+
+// File gốc nằm trong PRIVATE_DIR (Nginx không phục vụ): không bao giờ phát video gốc chưa qua xử lý.
+function uploadPath(userId: string, uploadId: string): string | null {
+  if (!UPLOAD_ID.test(uploadId) || !/^[\w-]+$/.test(userId)) return null;
+  return resolveUploadPath(env().PRIVATE_DIR, ['video-uploads', userId, `${uploadId}.bin`]);
+}
+
+export async function videosToday(userId: string): Promise<number> {
+  return db.video.count({ where: { authorId: userId, createdAt: { gte: startOfVnDay() } } });
+}
+
+export class UploadTooLarge extends Error {}
+
+// Ghi luồng tải lên xuống đĩa, cắt ngay khi vượt 100MB (không giữ cả file trong RAM).
+export async function saveUpload(
+  userId: string,
+  body: Readable,
+): Promise<{ ok: true; uploadId: string; size: number } | { ok: false; error: 'TOO_LARGE' | 'DAILY_LIMIT' }> {
+  if ((await videosToday(userId)) >= MAX_VIDEOS_PER_DAY) return { ok: false, error: 'DAILY_LIMIT' };
+  const uploadId = randomBytes(16).toString('hex');
+  const target = uploadPath(userId, uploadId)!;
+  await mkdir(path.dirname(target), { recursive: true, mode: 0o750 });
+  let size = 0;
+  const limiter = new Transform({
+    transform(chunk: Buffer, _enc, done) {
+      size += chunk.length;
+      if (size > MAX_VIDEO_BYTES) return done(new UploadTooLarge());
+      done(null, chunk);
+    },
+  });
+  try {
+    await pipeline(body, limiter, createWriteStream(target, { flags: 'wx', mode: 0o640 }));
+  } catch (e) {
+    await unlink(target).catch(() => {});
+    if (e instanceof UploadTooLarge) return { ok: false, error: 'TOO_LARGE' };
+    throw e;
+  }
+  return { ok: true, uploadId, size };
+}
+
+// Nhận dạng nhanh bằng chữ ký đầu file (MP4/MOV có "ftyp", WebM/MKV có EBML). ffprobe kiểm kỹ ở worker.
+export async function looksLikeVideo(file: string): Promise<boolean> {
+  const fh = await open(file, 'r');
+  try {
+    const head = Buffer.alloc(12);
+    const { bytesRead } = await fh.read(head, 0, 12, 0);
+    if (bytesRead < 12) return false;
+    const box = head.subarray(4, 8).toString('latin1');
+    return ['ftyp', 'moov', 'mdat', 'wide', 'free'].includes(box) || head.readUInt32BE(0) === 0x1a45dfa3;
+  } finally {
+    await fh.close();
+  }
+}
+
+export type CreateVideoResult =
+  | { ok: true; videoId: string }
+  | {
+      ok: false;
+      error:
+        'NOT_FOUND' | 'TOO_LARGE' | 'DAILY_LIMIT' | 'BAD_FORMAT' | 'PRODUCT_INVALID' | 'CAPTION_TOO_LONG';
+    };
+
+// Tạo video từ file đã tải lên (SPEC-creator.md mục 1). Video ở trạng thái processing cho tới khi worker xong.
+export async function createVideoUpload(
+  userId: string,
+  uploadId: string,
+  meta: { caption: string; productIds: string[] },
+): Promise<CreateVideoResult> {
+  const file = uploadPath(userId, uploadId);
+  const info = file ? await stat(file).catch(() => null) : null;
+  if (!file || !info) return { ok: false, error: 'NOT_FOUND' };
+  const discard = async <T>(result: T) => {
+    await unlink(file).catch(() => {});
+    return result;
+  };
+  if (info.size > MAX_VIDEO_BYTES) return discard({ ok: false as const, error: 'TOO_LARGE' as const });
+  if (!(await looksLikeVideo(file))) return discard({ ok: false as const, error: 'BAD_FORMAT' as const });
+  const caption = meta.caption.trim();
+  if (caption.length > MAX_CAPTION) return { ok: false, error: 'CAPTION_TOO_LONG' };
+
+  const productIds = [...new Set(meta.productIds.filter(Boolean))];
+  if (productIds.length > MAX_PRODUCTS_PER_VIDEO) return { ok: false, error: 'PRODUCT_INVALID' };
+  for (const id of productIds) {
+    const p = await getProductForCheckout(id);
+    if (!p?.available) return { ok: false, error: 'PRODUCT_INVALID' };
+  }
+
+  return db.$transaction(async (tx): Promise<CreateVideoResult> => {
+    // Khoá theo người đăng để 2 lần đăng cùng lúc không vượt 10 video/ngày.
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`video:${userId}`}))`;
+    const today = await tx.video.count({ where: { authorId: userId, createdAt: { gte: startOfVnDay() } } });
+    if (today >= MAX_VIDEOS_PER_DAY) return discard({ ok: false as const, error: 'DAILY_LIMIT' as const });
+    const video = await tx.video.create({
+      data: {
+        authorId: userId,
+        caption,
+        hashtags: extractHashtags(caption),
+        createdAt: now(),
+        products: { create: productIds.map((productId, position) => ({ productId, position })) },
+      },
+    });
+    await tx.videoJob.create({ data: { videoId: video.id, sourcePath: file, createdAt: now() } });
+    return { ok: true, videoId: video.id };
+  });
+}
+
+// Dọn file tải lên bị bỏ dở (không thành video) sau 24 giờ.
+export async function cleanupStaleUploads(maxAgeMs = 24 * 3_600_000): Promise<number> {
+  const root = path.join(env().PRIVATE_DIR, 'video-uploads');
+  const users = await readdir(root).catch(() => [] as string[]);
+  const pending = new Set(
+    (
+      await db.videoJob.findMany({
+        where: { status: { in: ['queued', 'running'] } },
+        select: { sourcePath: true },
+      })
+    ).map((j) => j.sourcePath),
+  );
+  let removed = 0;
+  for (const u of users) {
+    for (const f of await readdir(path.join(root, u)).catch(() => [] as string[])) {
+      const full = path.join(root, u, f);
+      const s = await stat(full).catch(() => null);
+      if (s && !pending.has(full) && Date.now() - s.mtimeMs > maxAgeMs) {
+        await unlink(full).catch(() => {});
+        removed += 1;
+      }
+    }
+  }
+  return removed;
+}

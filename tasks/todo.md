@@ -432,7 +432,7 @@
 
 ## Phase 7 — Creator video (`SPEC-creator.md`), làm song song với Phase 6
 
-- [ ] **T28: Đăng video + worker ffmpeg** (M)
+- [x] **T28: Đăng video + worker ffmpeg** (M)
   - Model `Video`, `VideoProduct`, `VideoJob`. Route tải lên (≤ 100MB, ≤ 10 video/ngày), worker lấy
     việc bằng `SKIP LOCKED`, chạy ffprobe/ffmpeg với tham số cố định và giới hạn 5 phút, ra 720p
     H.264 + ảnh bìa, xoá file gốc. Có video mẫu trong `tests/fixtures`.
@@ -442,6 +442,10 @@
   - Verify: `npx vitest run src/modules/creator` (cần ffmpeg, chạy trong Docker).
   - Deps: T12, T3
   - Files: `src/modules/creator/{upload,transcode,jobs}.ts` + test, `worker/index.ts`, `src/app/video/dang/page.tsx`
+  - Ghi chú: tải lên 2 bước (PUT file thô có thanh tiến trình → tạo video). App chỉ kiểm chữ ký đầu file
+    (không cần ffmpeg trong image web); worker kiểm kỹ bằng ffprobe. File gốc nằm trong PRIVATE_DIR, xoá sau
+    khi xử lý; file bỏ dở xoá sau 24 giờ. Thêm bảng `Notification` (thông báo trong app).
+    E2E dùng `/api/internal/video/process` (chỉ khi TEST_MODE=e2e) thay cho container worker.
 
 - [ ] **T29: Feed 9:16 + thích, xem, mua từ video** (M)
   - `/video` toàn màn hình (vuốt, tự phát tắt tiếng, tải trước video kế), `getFeed` theo công thức

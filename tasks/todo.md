@@ -293,7 +293,7 @@
   - Deps: T18, T15
   - Files: `src/modules/orders/{place-order,on-paid}.ts` + test, `src/app/dat-hang/{page,[intentId]/page}.tsx`
 
-- [ ] **T20: Máy trạng thái đơn + màn hình người bán** (M)
+- [x] **T20: Máy trạng thái đơn + màn hình người bán** (M)
   - `transition()` với bảng chuyển trạng thái đầy đủ, ghi `OrderEvent`. `/kiot-cua-toi/don-hang`:
     xác nhận, từ chối, giao hàng (mã vận đơn), chỉ hiện thông tin người mua khi đơn đã trả. Email theo trạng thái.
   - Acceptance:

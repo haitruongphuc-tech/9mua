@@ -1,0 +1,2 @@
+-- AddForeignKey
+ALTER TABLE "Order" ADD CONSTRAINT "Order_kiotId_fkey" FOREIGN KEY ("kiotId") REFERENCES "Kiot"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

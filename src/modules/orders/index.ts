@@ -22,5 +22,13 @@ export {
   type PlaceOrderResult,
 } from './place-order';
 export { parseAddress, type Address, type AddressField } from './address';
+export {
+  transition,
+  listOrdersForKiot,
+  getOrderForSeller,
+  type TransitionResult,
+  type TransitionPayload,
+  type ActorInput,
+} from './transition';
 export { onOrderCompleted, type CompletedOrder, type CompletionHook } from './hooks';
 export { ORDER_STATUSES, nextStatus, type OrderAction, type ActorRole } from './state-machine';

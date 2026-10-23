@@ -71,3 +71,23 @@ export const sampleAddress = {
   ward: 'Phường Phú Thọ Hòa',
   line: '115 Nguyễn Hậu',
 };
+
+// Đơn đã thanh toán sẵn để test các bước sau (dùng thẳng các hàm của module orders/payments).
+export async function createPaidOrder(options: { qty?: number; price?: number; stock?: number } = {}) {
+  const { addToCart } = await import('@/modules/orders/cart');
+  const { placeOrder } = await import('@/modules/orders/place-order');
+  const { getPayment } = await import('@/server/payments');
+  const { simulatePaid } = await import('./payments');
+  const seller = await createSeller({ active: true });
+  const buyer = await createUser();
+  const product = await createProduct(seller.kiotId, {
+    price: options.price ?? 100_000,
+    stock: options.stock ?? 10,
+  });
+  await addToCart(buyer.id, product.id, options.qty ?? 1);
+  const r = await placeOrder(buyer.id, { address: sampleAddress, notes: {}, saveAddress: false });
+  if (!r.ok) throw new Error(`createPaidOrder: ${JSON.stringify(r)}`);
+  await simulatePaid((await getPayment(r.intentId))!.orderCode);
+  const order = await db.order.findFirstOrThrow({ where: { checkoutId: r.checkoutId } });
+  return { seller, buyer, product, order, checkoutId: r.checkoutId };
+}

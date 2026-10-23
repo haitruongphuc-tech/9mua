@@ -94,6 +94,7 @@ model Kiot {
   images       ProductImage[]
   payoutAccounts KiotPayoutAccount[]
   subscriptions  KiotSubscription[]
+  orders         Order[]
 }
 
 // Lịch sử tài khoản nhận tiền: mỗi lần đổi thêm 1 dòng, bản mới nhất là bản đang dùng.
@@ -309,6 +310,7 @@ model Order {
   checkoutId      String
   checkout        Checkout    @relation(fields: [checkoutId], references: [id])
   kiotId          String
+  kiot            Kiot        @relation(fields: [kiotId], references: [id])
   buyerId         String
   status          OrderStatus @default(pending_payment)
   subtotal        Int

@@ -69,6 +69,17 @@ export default async function SellerDashboard({
           </p>
         ) : null}
       </header>
+      {status === 'active' &&
+      kiot.activeUntil &&
+      kiot.activeUntil.getTime() - now().getTime() <= 14 * 86_400_000 ? (
+        <p
+          role="alert"
+          data-testid="expiry-banner"
+          className="rounded-xl bg-danger/10 px-4 py-3 text-sm font-bold text-danger"
+        >
+          Kiot sắp hết hạn ngày {formatDateVN(kiot.activeUntil)}. Gia hạn ngay để không bị gián đoạn bán hàng.
+        </p>
+      ) : null}
       {status !== 'locked' ? (
         <form
           action={startKiotPaymentAction}

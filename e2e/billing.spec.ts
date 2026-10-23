@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { activateKiot } from './helpers/db';
 import { signUpWithKiot } from './helpers/seller';
 
 test('kích hoạt Kiot: bấm nút → trang QR → (PayOS giả) trả tiền → trang tự chuyển "Kiot đã hoạt động" → Kiot công khai', async ({
@@ -50,4 +51,12 @@ test('mất webhook: trang QR vẫn tự phát hiện đã trả nhờ hỏi l�
   await payos.waitForLoadState('load');
   await payos.close();
   await expect(page.getByTestId('payment-success')).toBeVisible({ timeout: 20_000 });
+});
+
+test('banner nhắc gia hạn khi Kiot còn dưới 14 ngày', async ({ page }) => {
+  const { slug } = await signUpWithKiot(page, 'Kiot Sắp Hết Hạn');
+  await activateKiot(slug, 5);
+  await page.goto('/kiot-cua-toi');
+  await expect(page.getByTestId('expiry-banner')).toContainText('Kiot sắp hết hạn');
+  await expect(page.getByTestId('activate-kiot')).toContainText('Gia hạn thêm 1 năm');
 });

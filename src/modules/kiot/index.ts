@@ -3,6 +3,7 @@ export { slugify, validateSlug, SLUG_MIN, SLUG_MAX } from './slug';
 export {
   createKiot,
   updateKiot,
+  updateShipping,
   isSlugAvailable,
   getKiotByOwner,
   getKiotBySlug,

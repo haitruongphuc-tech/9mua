@@ -31,6 +31,7 @@ model User {
   sessions           Session[]
   resetTokens        PasswordResetToken[]
   kiot               Kiot?
+  cartItems          CartItem[]
 }
 
 model PasswordResetToken {
@@ -84,6 +85,8 @@ model Kiot {
   activeUntil  DateTime?
   lockedAt     DateTime?
   lockReason   String?
+  shippingFee           Int       @default(0) // phí ship cố định mỗi đơn (0–200.000đ)
+  freeShippingThreshold Int? // tiền hàng từ mức này trở lên thì miễn phí ship
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   products     Product[]
@@ -124,6 +127,7 @@ model Product {
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
   images          ProductImage[]
+  cartItems       CartItem[]
 
   @@index([kiotId, deletedAt])
 }
@@ -242,4 +246,19 @@ model BillingReminder {
   sentAt    DateTime @default(now())
 
   @@id([kiotId, milestone, periodEnd])
+}
+
+// ─── orders (SPEC-orders.md) ─────────────────────────────────────────────────
+
+model CartItem {
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId     String
+  product       Product  @relation(fields: [productId], references: [id])
+  qty           Int
+  sourceVideoId String? // món được thêm từ video Creator nào
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@id([userId, productId])
 }

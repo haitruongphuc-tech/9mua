@@ -52,10 +52,14 @@ export default async function KiotPage({
     <div className="mx-auto flex max-w-6xl flex-col gap-5 px-4 py-6">
       {preview ? <PreviewBanner /> : null}
       <header className="flex items-start gap-4">
-        <span className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl border-2 border-brand-ink bg-brand">
+        <span className="relative grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-2xl border-2 border-brand-ink bg-brand text-2xl font-extrabold text-brand-ink">
           {kiot.logoUrl ? (
             <Image src={kiot.logoUrl} alt="" fill sizes="64px" className="object-cover" unoptimized />
-          ) : null}
+          ) : (
+            <span aria-hidden data-testid="kiot-initial">
+              {kiot.name.trim().charAt(0).toUpperCase()}
+            </span>
+          )}
         </span>
         <div className="flex min-w-0 flex-col gap-2">
           <h1 className="text-2xl font-extrabold leading-tight">{kiot.name}</h1>

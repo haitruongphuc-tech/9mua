@@ -110,3 +110,25 @@ export function getKiotByOwner(userId: string): Promise<Kiot | null> {
 export function getKiotBySlug(slug: string): Promise<Kiot | null> {
   return db.kiot.findUnique({ where: { slug } });
 }
+
+const shippingInput = z.object({
+  shippingFee: z
+    .number()
+    .int('Phí ship là số nguyên')
+    .min(0, 'Phí ship không âm')
+    .max(200_000, 'Phí ship tối đa 200.000đ'),
+  freeShippingThreshold: z.number().int().positive('Ngưỡng miễn phí phải lớn hơn 0').nullable(),
+});
+
+// Phí ship cố định mỗi đơn và ngưỡng miễn phí ship (SPEC-orders.md mục 2).
+export async function updateShipping(
+  userId: string,
+  raw: { shippingFee: number; freeShippingThreshold: number | null },
+): Promise<
+  { ok: true } | { ok: false; error: 'NO_KIOT' } | { ok: false; error: 'INVALID_INPUT'; message: string }
+> {
+  const parsed = shippingInput.safeParse(raw);
+  if (!parsed.success) return { ok: false, error: 'INVALID_INPUT', message: parsed.error.issues[0]!.message };
+  const updated = await db.kiot.updateMany({ where: { ownerId: userId }, data: parsed.data });
+  return updated.count ? { ok: true } : { ok: false, error: 'NO_KIOT' };
+}

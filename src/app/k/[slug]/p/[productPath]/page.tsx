@@ -5,6 +5,8 @@ import { notFound, permanentRedirect } from 'next/navigation';
 import { cache } from 'react';
 import { ContactButtons } from '@/components/kiot/ContactButtons';
 import { PreviewBanner } from '@/components/kiot/PreviewBanner';
+import { AddToCart } from '@/components/orders/AddToCart';
+import { env } from '@/lib/env';
 import { formatVnd } from '@/lib/format';
 import { getCurrentUser } from '@/modules/identity';
 import { categoryName, getPublicProduct, productPath } from '@/modules/kiot';
@@ -90,7 +92,9 @@ export default async function ProductPage({ params }: Params) {
         <p className="text-sm text-black/70">
           {categoryName(product.category)} · {product.stock > 0 ? `Còn ${product.stock}` : 'Hết hàng'}
         </p>
-        {/* Nút "Thêm vào giỏ" do module orders gắn vào ở task T18. */}
+        {preview ? null : (
+          <AddToCart productId={product.id} maxQty={product.stock} cartUrl={`${env().APP_URL}/gio-hang`} />
+        )}
         <ContactButtons phone={kiot.contactPhone} />
         {product.description ? (
           <div className="whitespace-pre-line leading-relaxed">{product.description}</div>

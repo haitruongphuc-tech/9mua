@@ -6,6 +6,7 @@ import { BANKS, getKiotByOwner, getPayoutAccount } from '@/modules/kiot';
 import { updateKiotAction } from '../actions';
 import { KiotForm } from '../KiotForm';
 import { PayoutAccountForm } from './PayoutAccountForm';
+import { ShippingForm } from './ShippingForm';
 
 export const metadata: Metadata = { title: 'Cài đặt Kiot', robots: { index: false } };
 
@@ -30,6 +31,10 @@ export default async function KiotSettingsPage() {
             contactPhone: '0' + kiot.contactPhone.slice(3),
           }}
         />
+      </div>
+      <div className="rounded-2xl border-2 border-black/10 p-5">
+        <h2 className="mb-4 text-lg font-extrabold">Phí ship</h2>
+        <ShippingForm shippingFee={kiot.shippingFee} freeShippingThreshold={kiot.freeShippingThreshold} />
       </div>
       <div className="rounded-2xl border-2 border-black/10 p-5">
         <h2 className="mb-4 text-lg font-extrabold">Tài khoản nhận tiền</h2>

@@ -29,6 +29,7 @@ test('trang Kiot công khai: chủ xem trước bản nháp, khách thấy tạm
   const live = await guest.goto(kiotUrl);
   expect(live?.status()).toBe(200);
   await expect(guest.getByTestId('preview-banner')).toHaveCount(0);
+  await expect(guest.getByTestId('kiot-initial')).toHaveText('V');
   const cards = guest.getByTestId('product-grid').locator('li');
   await expect(cards.first()).toContainText('Thanh long ruột đỏ 1kg');
   await expect(cards.last()).toContainText('Hết hàng');

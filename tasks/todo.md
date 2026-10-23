@@ -270,7 +270,7 @@
 
 ## Phase 4 — Đơn hàng thu hộ (`SPEC-orders.md`)
 
-- [ ] **T18: Giỏ hàng + phí ship** (M)
+- [x] **T18: Giỏ hàng + phí ship** (M)
   - Model `CartItem`. `addToCart` (bắt đăng nhập rồi tự thêm lại), `/gio-hang` nhóm theo Kiot có cảnh báo
     hết hàng hoặc Kiot ngưng. Cài đặt phí ship và ngưỡng miễn phí trong Kiot. Nút "Thêm vào giỏ" trên trang sản phẩm.
   - Acceptance:

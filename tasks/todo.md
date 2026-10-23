@@ -207,7 +207,7 @@
   - Deps: T2
   - Files: `src/modules/payments/{client,fake-driver,create,registry,index}.ts` + test
 
-- [ ] **T14: Webhook PayOS** (M)
+- [x] **T14: Webhook PayOS** (M)
   - `POST /api/payos/webhook`: kiểm chữ ký, ghi sổ idempotent, so số tiền, gọi handler trong
     transaction, xử lý `mismatch` và webhook mồ côi. Trang `/dev/payos/<orderCode>` giả lập trả đủ/thiếu.
   - Acceptance:

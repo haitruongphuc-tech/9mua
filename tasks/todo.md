@@ -13,7 +13,7 @@
 
 ## Phase 0 — Nền móng
 
-- [ ] **T1: Khởi tạo app Next.js + giao diện thương hiệu** (M)
+- [x] **T1: Khởi tạo app Next.js + giao diện thương hiệu** (M)
   - Next 15 App Router, TS strict, Tailwind 4 với token trong `docs/BRAND.md`, font Be Vietnam Pro,
     ESLint + Prettier. Layout có header (icon túi số 9 + chữ 9MUA) và footer. Có `/api/health`, favicon,
     manifest PWA, OG mặc định.

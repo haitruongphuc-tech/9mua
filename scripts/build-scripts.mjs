@@ -3,7 +3,7 @@
 import { build } from 'esbuild';
 
 await build({
-  entryPoints: ['scripts/create-admin.ts'],
+  entryPoints: ['scripts/create-admin.ts', 'scripts/payos-confirm-webhook.ts'],
   outdir: 'dist/scripts',
   outExtension: { '.js': '.mjs' },
   bundle: true,
@@ -11,7 +11,7 @@ await build({
   format: 'esm',
   target: 'node22',
   // Gói có mã native hoặc engine riêng: dùng bản trong node_modules của image.
-  external: ['@prisma/client', '@node-rs/argon2', 'nodemailer'],
+  external: ['@prisma/client', '@node-rs/argon2', 'nodemailer', '@payos/node'],
   banner: {
     js: "import { createRequire } from 'node:module'; const require = createRequire(import.meta.url);",
   },

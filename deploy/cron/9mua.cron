@@ -5,4 +5,4 @@ APP=http://127.0.0.1:3009
 ENVFILE=/opt/9mua/.env
 
 # T15 — đối soát thanh toán PayOS mỗi 5 phút
-# */5 * * * * root . $ENVFILE; curl -fsS -H "X-Internal-Token: $INTERNAL_CRON_TOKEN" $APP/api/internal/payments/reconcile >/dev/null
+*/5 * * * * root . $ENVFILE; curl -fsS -m 120 -H "X-Internal-Token: $INTERNAL_CRON_TOKEN" $APP/api/internal/payments/reconcile >/dev/null

@@ -6,6 +6,7 @@ const PORT = 3100;
 // (Chromium không chia sẻ cookie Domain=localhost sang abc.localhost).
 const ORIGIN = `http://9mua.test:${PORT}`;
 // Đường dẫn tuyệt đối: server.js của bản standalone tự chuyển thư mục làm việc.
+export const E2E_CRON_TOKEN = 'e2e-internal-cron-token-9mua-0123456789';
 export const MAIL_DIR = path.resolve('test-results/mail');
 
 export default defineConfig({
@@ -30,6 +31,8 @@ export default defineConfig({
       PORT: String(PORT),
       APP_URL: ORIGIN,
       TEST_MODE: 'e2e',
+      PAYMENTS_DRIVER: 'fake',
+      INTERNAL_CRON_TOKEN: E2E_CRON_TOKEN,
       MAIL_DRIVER: 'file',
       MAIL_OUTBOX_DIR: MAIL_DIR,
       UPLOAD_DIR: path.resolve('test-results/uploads'),

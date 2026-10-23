@@ -219,7 +219,7 @@
   - Files: `src/app/api/payos/webhook/route.ts`, `src/modules/payments/{webhook,process-paid}.ts` + test,
     `src/app/dev/payos/[orderCode]/page.tsx`
 
-- [ ] **T15: Đối soát, huỷ, đăng ký webhook** (S)
+- [x] **T15: Đối soát, huỷ, đăng ký webhook** (S)
   - `/api/internal/payments/reconcile`, kiểm trạng thái khi người dùng quay về `returnUrl`, `cancelPayment`,
     script `payos:confirm-webhook`, guard `src/lib/internal-route.ts` dùng chung. Guard kiểm header
     `X-Internal-Token` so với `INTERNAL_CRON_TOKEN` bằng so sánh thời gian hằng. Không dựa vào IP, vì trong

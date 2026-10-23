@@ -303,7 +303,7 @@
   - Deps: T19
   - Files: `src/modules/orders/{state-machine,transition,notify}.ts` + test, `src/app/kiot-cua-toi/don-hang/**`
 
-- [ ] **T21: Người mua, khiếu nại, tác vụ định kỳ, hoàn tất** (M)
+- [x] **T21: Người mua, khiếu nại, tác vụ định kỳ, hoàn tất** (M)
   - `/don-mua` (đã nhận, báo vấn đề kèm 3 ảnh, nhập tài khoản hoàn tiền). `/api/internal/orders/tick`
     (15 phút, 48 giờ, 10 ngày, 7 ngày), hook `onOrderCompleted`, `listRefundsPending`, `listDisputes`.
   - Acceptance:
@@ -315,8 +315,15 @@
   - Files: `src/modules/orders/{tick,dispute,refund}.ts` + test, `src/app/don-mua/**`, `e2e/orders.spec.ts`
 
 ### ✅ Checkpoint E — Đơn hàng
-- [ ] Success Criteria `SPEC-orders.md` đạt.
-- [ ] `/review` cho `orders` (đúng sai, quyền xem dữ liệu, đồng thời). Push, báo CEO.
+- [x] Success Criteria `SPEC-orders.md` đạt (unit + E2E vòng đời đầy đủ).
+- [x] Tự review `orders`:
+  - Quyền sở hữu được kiểm ở server trong `transition()`.
+  - Người bán chỉ thấy địa chỉ/SĐT người mua khi đơn đã thanh toán.
+  - Đồng thời: khoá đơn `FOR UPDATE`, trừ kho có điều kiện, tick chạy chồng an toàn.
+  - `OrderItem`/`OrderEvent` chỉ thêm (trigger DB).
+  - Chủ Kiot không tự mua hàng của mình (quyết định thêm, cần báo CEO).
+- Theo dõi: email nhắc người mua nhập tài khoản hoàn tiền mới gửi 1 lần lúc chuyển `refund_pending`;
+  nhắc lặp lại để T35 (cảnh báo/bản tin).
 
 ---
 

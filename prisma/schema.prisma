@@ -334,6 +334,7 @@ model Order {
   updatedAt       DateTime    @updatedAt
   items           OrderItem[]
   events          OrderEvent[]
+  dispute         Dispute?
 
   @@index([kiotId, status])
   @@index([buyerId, createdAt])
@@ -370,4 +371,16 @@ model OrderEvent {
   createdAt DateTime @default(now())
 
   @@index([orderId, createdAt])
+}
+
+model Dispute {
+  id           String    @id @default(cuid(2))
+  orderId      String    @unique
+  order        Order     @relation(fields: [orderId], references: [id])
+  message      String
+  images       Json      @default("[]") // URL ảnh trong /uploads/disputes/<userId>/
+  resolution   String? // refund | release
+  resolvedById String?
+  resolvedAt   DateTime?
+  createdAt    DateTime  @default(now())
 }

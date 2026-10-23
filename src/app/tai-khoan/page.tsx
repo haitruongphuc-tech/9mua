@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { logoutAction, logoutOtherDevicesAction } from '@/app/(auth)/actions';
 import { requireUser } from '@/modules/identity';
 import { EmailForm, PasswordForm, ProfileForm } from './AccountForms';
@@ -19,6 +20,17 @@ export default async function AccountPage({
         <p className="text-black/70">{user.phone ?? user.email}</p>
       </header>
 
+      <nav className="grid grid-cols-2 gap-2 text-center font-bold">
+        <Link href="/don-mua" className="rounded-2xl border-2 border-black/10 p-3 hover:border-brand-ink">
+          📦 Đơn mua
+        </Link>
+        <Link
+          href="/kiot-cua-toi"
+          className="rounded-2xl border-2 border-black/10 p-3 hover:border-brand-ink"
+        >
+          🏪 Kiot của tôi
+        </Link>
+      </nav>
       {user.mustChangePassword ? <PasswordForm forced /> : null}
       <ProfileForm displayName={user.displayName} />
       <EmailForm email={user.email} />

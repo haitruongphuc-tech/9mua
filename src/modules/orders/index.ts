@@ -31,4 +31,15 @@ export {
   type ActorInput,
 } from './transition';
 export { onOrderCompleted, type CompletedOrder, type CompletionHook } from './hooks';
+export {
+  listOrdersForBuyer,
+  getOrderForBuyer,
+  uploadDisputeImage,
+  submitDispute,
+  setRefundAccount,
+  listRefundsPending,
+  listDisputes,
+  DISPUTE_WINDOW_DAYS,
+} from './buyer';
+export { runOrderTick } from './tick';
 export { ORDER_STATUSES, nextStatus, type OrderAction, type ActorRole } from './state-machine';

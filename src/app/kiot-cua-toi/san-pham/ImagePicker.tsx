@@ -11,10 +11,12 @@ export function ImagePicker({
   initial,
   max,
   error,
+  uploadUrl = '/api/kiot/images',
 }: {
   initial: PickedImage[];
   max: number;
   error?: string;
+  uploadUrl?: string;
 }) {
   const [images, setImages] = useState<PickedImage[]>(initial);
   const [uploading, setUploading] = useState<Uploading[]>([]);
@@ -29,7 +31,7 @@ export function ImagePicker({
       const body = new FormData();
       body.append('file', file);
       try {
-        const res = await fetch('/api/kiot/images', { method: 'POST', body });
+        const res = await fetch(uploadUrl, { method: 'POST', body });
         const data = (await res.json()) as { ok: boolean; image?: PickedImage; message?: string };
         if (data.ok && data.image) {
           setImages((list) => [...list, data.image!]);

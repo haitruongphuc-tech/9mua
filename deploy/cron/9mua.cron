@@ -9,3 +9,6 @@ ENVFILE=/opt/9mua/.env
 
 # T17 — email nhắc gia hạn Kiot lúc 8:00 mỗi ngày
 0 8 * * * root . $ENVFILE; curl -fsS -m 300 -H "X-Internal-Token: $INTERNAL_CRON_TOKEN" $APP/api/internal/billing/reminders >/dev/null
+
+# T21 — vòng đời đơn hàng mỗi 5 phút (huỷ quá hạn trả, 48h, 10 ngày, 7 ngày)
+*/5 * * * * root . $ENVFILE; curl -fsS -m 240 -H "X-Internal-Token: $INTERNAL_CRON_TOKEN" $APP/api/internal/orders/tick >/dev/null

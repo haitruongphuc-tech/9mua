@@ -5,7 +5,10 @@ import { env } from '@/lib/env';
 import { kiotOrigin } from '@/lib/urls';
 import { requireUser } from '@/modules/identity';
 import { getKiotByOwner, kiotStatus } from '@/modules/kiot';
+import { getKiotFee } from '@/modules/billing';
+import { formatVnd } from '@/lib/format';
 import { StatusBadge } from './StatusBadge';
+import { startKiotPaymentAction } from './thanh-toan/actions';
 
 export const metadata: Metadata = { title: 'Kiot của tôi', robots: { index: false } };
 
@@ -14,7 +17,7 @@ const dateVN = (d: Date) => d.toLocaleDateString('vi-VN', { timeZone: 'Asia/Ho_C
 export default async function SellerDashboard({
   searchParams,
 }: {
-  searchParams: Promise<{ 'moi-tao'?: string }>;
+  searchParams: Promise<{ 'moi-tao'?: string; 'loi-thanh-toan'?: string }>;
 }) {
   const user = await requireUser();
   const kiot = await getKiotByOwner(user.id);
@@ -38,7 +41,9 @@ export default async function SellerDashboard({
   const status = kiotStatus(kiot);
   const url = kiotOrigin(kiot.slug);
   const qrSvg = await QRCode.toString(url, { type: 'svg', margin: 1, errorCorrectionLevel: 'M' });
-  const justCreated = Boolean((await searchParams)['moi-tao']);
+  const params = await searchParams;
+  const justCreated = Boolean(params['moi-tao']);
+  const fee = await getKiotFee();
   return (
     <section className="flex flex-col gap-5 px-4 py-6">
       {justCreated ? (
@@ -65,6 +70,32 @@ export default async function SellerDashboard({
           </p>
         ) : null}
       </header>
+      {status !== 'locked' ? (
+        <form
+          action={startKiotPaymentAction}
+          className="flex flex-col gap-2 rounded-2xl border-2 border-brand-ink bg-brand/10 p-4"
+        >
+          <p className="text-sm">
+            {status === 'draft'
+              ? 'Kích hoạt để Kiot hiện công khai trên tenkiot.9mua.com và Chợ.'
+              : status === 'expired'
+                ? 'Kiot đang tạm ngưng. Gia hạn để mở lại ngay, sản phẩm vẫn còn nguyên.'
+                : 'Gia hạn sớm được cộng dồn, không mất ngày nào.'}
+          </p>
+          <button
+            type="submit"
+            data-testid="activate-kiot"
+            className="rounded-full border-2 border-brand-ink bg-brand py-3 font-extrabold text-brand-ink"
+          >
+            {status === 'draft'
+              ? `Kích hoạt Kiot – ${formatVnd(fee)}/năm`
+              : `Gia hạn thêm 1 năm – ${formatVnd(fee)}`}
+          </button>
+          {params['loi-thanh-toan'] ? (
+            <p className="text-sm text-danger">Không tạo được thanh toán. Vui lòng thử lại.</p>
+          ) : null}
+        </form>
+      ) : null}
       <div className="grid gap-3 sm:grid-cols-2">
         <Link
           href="/kiot-cua-toi/san-pham"

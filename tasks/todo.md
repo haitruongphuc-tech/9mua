@@ -232,7 +232,7 @@
   - Files: `src/modules/payments/{reconcile,cancel}.ts` + test, `src/app/api/internal/payments/reconcile/route.ts`,
     `src/lib/internal-route.ts`, `scripts/payos-confirm-webhook.ts`
 
-- [ ] **T16: Kích hoạt Kiot 26.000đ** (M)
+- [x] **T16: Kích hoạt Kiot 26.000đ** (M)
   - Bảng `Setting` (phí mặc định 26000) và `KiotSubscription`. `startKiotPayment`, handler `onPaid`
     (cộng dồn hạn, gọi `extendActiveUntil`), trang QR tự kiểm tra mỗi 3 giây, email biên nhận,
     lịch sử thanh toán.

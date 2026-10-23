@@ -25,7 +25,8 @@ export async function applyTransaction(
   source: 'webhook' | 'reconcile',
   payload: unknown,
 ): Promise<ApplyOutcome> {
-  return db.$transaction(
+  let afterCommit: (() => Promise<void>) | undefined;
+  const outcome = await db.$transaction(
     async (tx) => {
       const [intent] = await tx.$queryRaw<IntentRow[]>`
         SELECT id, status::text AS status, amount, "amountPaid", purpose, "refId"
@@ -66,7 +67,7 @@ export async function applyTransaction(
         where: { id: intent.id },
         data: { status: 'paid', amountPaid: total, paidAt },
       });
-      await handler(tx, {
+      const after = await handler(tx, {
         intentId: updated.id,
         orderCode,
         purpose: updated.purpose as Purpose,
@@ -74,8 +75,12 @@ export async function applyTransaction(
         amount: updated.amount,
         paidAt,
       });
+      if (typeof after === 'function') afterCommit = after;
       return 'applied';
     },
     { isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted, timeout: 15_000 },
   );
+  // Chỉ chạy khi transaction đã commit; lỗi ở đây (vd. gửi mail) không làm mất giao dịch đã ghi nhận.
+  if (afterCommit) await afterCommit().catch((e) => console.error('[payments] afterCommit lỗi:', e));
+  return outcome;
 }

@@ -167,6 +167,25 @@ describe('webhook', () => {
   });
 });
 
+describe('afterCommit', () => {
+  it('chạy sau khi commit; không chạy nếu transaction rollback', async () => {
+    const after = vi.fn(async () => {});
+    registerPaymentHandler('kiot_fee', async () => after);
+    const p = await createPayment(input);
+    await simulatePaid(p.orderCode);
+    expect(after).toHaveBeenCalledTimes(1);
+
+    const afterFail = vi.fn(async () => {});
+    registerPaymentHandler('kiot_fee', async (tx) => {
+      await tx.paymentIntent.count();
+      throw Object.assign(new Error('rollback'), { afterFail });
+    });
+    const q = await createPayment({ ...input, refId: 'kiot_2' });
+    await simulatePaid(q.orderCode);
+    expect(afterFail).not.toHaveBeenCalled();
+  });
+});
+
 describe('đối soát', () => {
   it('PayOS báo PAID mà chưa có webhook: kết quả giống hệt webhook; webhook đến sau không tính lại', async () => {
     const handler = spyHandler();

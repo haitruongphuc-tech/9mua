@@ -89,6 +89,7 @@ model Kiot {
   products     Product[]
   images       ProductImage[]
   payoutAccounts KiotPayoutAccount[]
+  subscriptions  KiotSubscription[]
 }
 
 // Lịch sử tài khoản nhận tiền: mỗi lần đổi thêm 1 dòng, bản mới nhất là bản đang dùng.
@@ -204,4 +205,31 @@ model FakePayosLink {
   status       String
   expiresAt    DateTime
   transactions Json     @default("[]")
+}
+
+// ─── cài đặt dùng chung (phí thuê, phí sàn, hạn mức chi…) ────────────────────
+
+model Setting {
+  key         String   @id
+  value       String
+  updatedById String?
+  updatedAt   DateTime @updatedAt
+}
+
+// ─── billing (SPEC-billing.md) ───────────────────────────────────────────────
+
+model KiotSubscription {
+  id          String   @id @default(cuid(2))
+  kiotId      String
+  kiot        Kiot     @relation(fields: [kiotId], references: [id])
+  source      String // payos | admin_grant
+  intentId    String?  @unique // 1 thanh toán = đúng 1 kỳ, chống cộng trùng
+  amount      Int
+  periodStart DateTime
+  periodEnd   DateTime
+  grantedById String?
+  note        String?
+  createdAt   DateTime @default(now())
+
+  @@index([kiotId, createdAt])
 }

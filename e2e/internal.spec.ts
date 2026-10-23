@@ -26,7 +26,13 @@ test('webhook PayOS từ chối chữ ký giả', async ({ request }) => {
 });
 
 test('mọi route cron đều cần token; đúng token thì chạy', async ({ request }) => {
-  for (const path of ['payouts/sync', 'alerts/flush', 'orders/tick', 'billing/reminders']) {
+  for (const path of [
+    'payouts/sync',
+    'alerts/flush',
+    'orders/tick',
+    'billing/reminders',
+    'marketplace/stats',
+  ]) {
     expect((await request.get(`${APP}/api/internal/${path}`)).status(), path).toBe(404);
   }
   const sync = await request.get(`${APP}/api/internal/payouts/sync`, {

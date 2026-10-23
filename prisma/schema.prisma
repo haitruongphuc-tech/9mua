@@ -117,6 +117,8 @@ model Product {
   kiotId          String
   kiot            Kiot           @relation(fields: [kiotId], references: [id])
   name            String
+  // Tên đã bỏ dấu, chữ thường cho tìm kiếm. Trigger DB tự điền từ name — không ghi tay.
+  searchName      String         @default("")
   description     String         @default("")
   price           Int // VNĐ
   compareAtPrice  Int? // giá gốc gạch ngang
@@ -476,4 +478,28 @@ model AlertEvent {
 model AlertThrottle {
   kind       String   @id
   lastSentAt DateTime
+}
+
+// Chợ (SPEC-marketplace.md). Mỗi dòng: một sản phẩm trong một đơn đã hoàn tất, ghi từ hook
+// orders.onOrderCompleted. Chỉ thêm. Là nguồn để tính "Bán chạy 30 ngày" và "Kiot nổi bật".
+model ProductSale {
+  orderId     String
+  productId   String
+  kiotId      String
+  qty         Int
+  completedAt DateTime
+
+  @@id([orderId, productId])
+  @@index([completedAt])
+  @@index([kiotId, completedAt])
+}
+
+// Bảng tổng hợp để Chợ không phải đếm lại đơn mỗi lần mở trang.
+model ProductSalesStat {
+  productId String   @id
+  sold30d   Int      @default(0)
+  soldTotal Int      @default(0)
+  updatedAt DateTime @updatedAt
+
+  @@index([sold30d])
 }

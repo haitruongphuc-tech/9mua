@@ -397,7 +397,7 @@
   - Logo dùng ảnh 400px, ảnh bìa 1200px; đổi/gỡ thì xoá file cũ.
   - Verify: vitest `kiot/profile.test.ts`, E2E `kiot-profile.spec.ts`.
 
-- [ ] **T26: Tìm kiếm tiếng Việt + trang Chợ** (M)
+- [x] **T26: Tìm kiếm tiếng Việt + trang Chợ** (M)
   - Migration bật `unaccent` và `pg_trgm`, chỉ mục tìm kiếm. `searchProducts` (lọc, sắp xếp, con trỏ),
     bảng `ProductSalesStat` cập nhật qua `onOrderCompleted`. `/cho`, `/cho/[danh-muc]` giữ bộ lọc trên URL.
   - Acceptance:
@@ -407,6 +407,11 @@
   - Verify: `npx vitest run src/modules/marketplace`, script đo hiệu năng.
   - Deps: T21
   - Files: `prisma/migrations/*search*`, `src/modules/marketplace/{search,stats}.ts` + test, `src/app/cho/**`
+  - Kết quả đo (sandbox, `PERF=1 npx vitest run tests/perf`): 100.000 sản phẩm, p50 54ms, p95 183ms.
+  - Ghi chú: tên khớp gần đúng (ngưỡng 0,4 để "thnah long" vẫn ra); mô tả chỉ khớp nguyên cụm; từ khoá
+    < 4 ký tự chỉ khớp đầu từ. Tên chuẩn hoá lưu ở cột `searchName` (trigger DB tự điền).
+    Trang danh mục dùng cache 60 giây trong tiến trình thay cho ISR (lúc build Docker chưa có DB).
+    "Đã bán" lấy từ sổ `ProductSale` (chỉ thêm) + `ProductSalesStat`; cron 3:10 tính lại 30 ngày.
 
 - [ ] **T27: Trang chủ, danh bạ Kiot, báo cáo vi phạm, SEO** (M)
   - Trang chủ thật (khẩu hiệu, nút "Tạo Kiot – 26.000đ/năm", danh mục, bán chạy, mới, Kiot nổi bật,

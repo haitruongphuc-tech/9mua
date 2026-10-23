@@ -18,3 +18,6 @@ ENVFILE=/opt/9mua/.env
 
 # T25 — gửi cảnh báo CEO đã gộp mỗi 5 phút
 */5 * * * * root . $ENVFILE; curl -fsS -m 60 -H "X-Internal-Token: $INTERNAL_CRON_TOKEN" $APP/api/internal/alerts/flush >/dev/null
+
+# T26 — tính lại "bán chạy 30 ngày" của Chợ lúc 3:10 mỗi đêm
+10 3 * * * root . $ENVFILE; curl -fsS -m 300 -H "X-Internal-Token: $INTERNAL_CRON_TOKEN" $APP/api/internal/marketplace/stats >/dev/null

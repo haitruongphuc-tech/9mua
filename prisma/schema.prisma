@@ -411,3 +411,21 @@ model PlatformRevenue {
 
   @@index([createdAt])
 }
+
+// Xác minh danh tính người bán trước lần rút tiền đầu tiên. Ảnh nằm trong PRIVATE_DIR (không công khai).
+model KycSubmission {
+  id           String    @id @default(cuid(2))
+  userId       String
+  fullName     String // VIẾT HOA KHÔNG DẤU như trên CCCD
+  idNumber     String // 12 số
+  frontImage   String // đường dẫn tương đối trong PRIVATE_DIR
+  backImage    String
+  status       String    @default("pending") // pending | approved | rejected
+  reason       String?
+  reviewedById String?
+  reviewedAt   DateTime?
+  createdAt    DateTime  @default(now())
+
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
+}

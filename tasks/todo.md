@@ -339,7 +339,7 @@
   - Deps: T21
   - Files: `src/modules/payouts/{ledger,fees,index}.ts` + test, `src/app/kiot-cua-toi/so-du/page.tsx`
 
-- [ ] **T23: Xác minh CCCD (KYC)** (S)
+- [x] **T23: Xác minh CCCD (KYC)** (S)
   - Model `KycSubmission`. Ảnh lưu thư mục riêng tư, route xem ảnh chỉ cho admin. `submitKyc`,
     `reviewKyc`, so tên CCCD với tên tài khoản ngân hàng.
   - Acceptance:

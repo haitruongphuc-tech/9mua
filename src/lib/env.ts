@@ -31,6 +31,10 @@ const schema = z
     PAYOS_CLIENT_ID: z.string().optional(),
     PAYOS_API_KEY: z.string().optional(),
     PAYOS_CHECKSUM_KEY: z.string().optional(),
+    // Kênh chi hộ (Payout) của PayOS có bộ khoá riêng. Chưa có thì mọi yêu cầu rút vào hàng chờ duyệt tay.
+    PAYOS_PAYOUT_CLIENT_ID: z.string().optional(),
+    PAYOS_PAYOUT_API_KEY: z.string().optional(),
+    PAYOS_PAYOUT_CHECKSUM_KEY: z.string().optional(),
     // Token bí mật cho cron gọi /api/internal/* (Docker che IP người gọi nên không dựa vào IP).
     INTERNAL_CRON_TOKEN: z.string().optional(),
   })
@@ -59,6 +63,19 @@ const schema = z
         if (!v[key])
           ctx.addIssue({ code: 'custom', path: [key], message: `${key} là bắt buộc khi dùng PayOS` });
       }
+    }
+    const payoutKeys = [
+      'PAYOS_PAYOUT_CLIENT_ID',
+      'PAYOS_PAYOUT_API_KEY',
+      'PAYOS_PAYOUT_CHECKSUM_KEY',
+    ] as const;
+    if (payoutKeys.some((k) => v[k]) && !payoutKeys.every((k) => v[k])) {
+      for (const key of payoutKeys.filter((k) => !v[k]))
+        ctx.addIssue({
+          code: 'custom',
+          path: [key],
+          message: `${key} thiếu: cần đủ 3 khoá kênh chi hộ PayOS`,
+        });
     }
     if (v.NODE_ENV === 'production' && (v.INTERNAL_CRON_TOKEN ?? '').length < 32) {
       ctx.addIssue({

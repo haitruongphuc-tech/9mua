@@ -451,10 +451,29 @@ model PayoutRequest {
   rejectReason         String?
   processedById        String?
   processedAt          DateTime?
+  dispatchedAt         DateTime? // lúc chuyển sang processing (gửi lệnh chi PayOS)
+  stuckAlertedAt       DateTime? // đã báo CEO lệnh treo (ON_HOLD / quá 2 giờ)
+  payosAttempt         Int       @default(0) // tăng khi PayOS xác nhận KHÔNG tạo lệnh, để gửi lại bằng khoá mới
   paidAt               DateTime?
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
 
   @@index([kiotId, createdAt])
   @@index([status, createdAt])
+}
+
+// Cảnh báo gửi CEO (SPEC-admin.md mục 6): mỗi loại tối đa 1 email / 15 phút, gộp các sự việc chờ gửi.
+model AlertEvent {
+  id        String    @id @default(cuid(2))
+  kind      String
+  message   String
+  createdAt DateTime  @default(now())
+  sentAt    DateTime?
+
+  @@index([kind, sentAt])
+}
+
+model AlertThrottle {
+  kind       String   @id
+  lastSentAt DateTime
 }

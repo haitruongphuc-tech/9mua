@@ -1,15 +1,14 @@
-import { randomUUID } from 'node:crypto';
-import type { PayoutRequest, Prisma } from '@prisma/client';
+import type { PayoutRequest } from '@prisma/client';
 import { now } from '@/lib/clock';
-import { db, type Tx } from '@/lib/db';
-import { env } from '@/lib/env';
+import { db } from '@/lib/db';
 import { formatVnd } from '@/lib/format';
-import { sendMail } from '@/lib/mail';
-import { renderEmail } from '@/lib/mail/templates';
 import { getIntSetting } from '@/lib/settings';
-import { findBank, getPayoutAccount } from '@/modules/kiot';
+import { getPayoutAccount } from '@/modules/kiot';
+import { evaluateAutoRules } from './auto-rules';
+import { dispatchPayout } from './dispatch';
 import { isKycApproved } from './kyc';
 import { availableBalance, lockKiotBalance } from './ledger';
+import { moveFrom, notifyPaid, notifySeller, reversePayout } from './state';
 import { buildVietQr } from './vietqr';
 
 export const ACCOUNT_HOLD_HOURS = 24;
@@ -54,7 +53,7 @@ export async function requestPayout(
   if (now().getTime() - account.changedAt.getTime() < ACCOUNT_HOLD_HOURS * 3_600_000)
     return { ok: false, error: 'ACCOUNT_RECENTLY_CHANGED' };
 
-  return db.$transaction(async (tx): Promise<RequestPayoutResult> => {
+  const created = await db.$transaction(async (tx): Promise<RequestPayoutResult> => {
     await lockKiotBalance(tx, kiotId);
     const [min, fee] = await Promise.all([
       getIntSetting('payout_min_vnd', tx),
@@ -80,7 +79,6 @@ export async function requestPayout(
         bankBin: account.bankBin,
         accountNumber: account.accountNumber,
         accountName: account.accountName,
-        mode: 'manual',
         createdAt: at,
       },
     });
@@ -97,26 +95,30 @@ export async function requestPayout(
     });
     return { ok: true, payoutId: payout.id, code: payout.code, mode: 'manual', reasons: [] };
   });
+  if (!created.ok) return created;
+  return { ...created, ...(await routePayout(created.payoutId)) };
 }
 
-// Trả số dư cho yêu cầu không chi (huỷ, từ chối, PayOS báo lỗi). Khoá duy nhất (type, refId) chặn hoàn 2 lần.
-export async function reversePayout(tx: Tx, payout: PayoutRequest, note: string, actorId: string | null) {
-  await tx.$executeRaw`
-    INSERT INTO "BalanceEntry" (id, "kiotId", type, amount, "refId", note, "actorId", "createdAt")
-    VALUES (${randomUUID()}, ${payout.kiotId}, 'payout_reversal', ${payout.amount}, ${payout.id}, ${note},
-      ${actorId}, ${now()})
-    ON CONFLICT (type, "refId") DO NOTHING`;
-}
-
-// Đổi trạng thái có điều kiện: chỉ một luồng thắng khi nhiều thao tác cùng nhắm vào một yêu cầu.
-async function moveFrom(
-  tx: Tx,
-  payoutId: string,
-  from: 'pending' | 'processing',
-  data: Prisma.PayoutRequestUncheckedUpdateManyInput,
-): Promise<PayoutRequest | null> {
-  const moved = await tx.payoutRequest.updateMany({ where: { id: payoutId, status: from }, data });
-  return moved.count === 1 ? tx.payoutRequest.findUniqueOrThrow({ where: { id: payoutId } }) : null;
+// Sau khi yêu cầu đã ghi sổ: đủ luật thì chi ngay qua PayOS, không thì vào hàng chờ CEO kèm lý do.
+async function routePayout(payoutId: string): Promise<{ mode: 'auto' | 'manual'; reasons: string[] }> {
+  let reasons: string[];
+  try {
+    const verdict = await evaluateAutoRules(payoutId);
+    reasons = verdict.reasons;
+    if (verdict.eligible) {
+      const dispatched = await dispatchPayout(payoutId, { mode: 'auto' });
+      if (dispatched.ok) return { mode: 'auto', reasons: [] };
+      reasons = [dispatched.message];
+    }
+  } catch (e) {
+    console.error('[payouts] kiểm luật tự động lỗi:', e);
+    reasons = ['Không kiểm được luật chi tự động'];
+  }
+  await db.payoutRequest.updateMany({
+    where: { id: payoutId, status: 'pending' },
+    data: { mode: 'manual', autoRuleReasons: reasons },
+  });
+  return { mode: 'manual', reasons };
 }
 
 export async function cancelPayout(payoutId: string, userId: string): Promise<PayoutActionResult> {
@@ -188,42 +190,6 @@ export async function markPayoutPaid(
   }
   await notifyPaid(payoutId);
   return { ok: true };
-}
-
-export async function notifyPaid(payoutId: string): Promise<void> {
-  await notifySeller(payoutId, (p) => ({
-    subject: `Đã chuyển ${formatVnd(p.netAmount)} cho yêu cầu rút ${p.code}`,
-    lines: [
-      `9MUA đã chuyển ${formatVnd(p.netAmount)} vào tài khoản ${findBank(p.bankBin)?.shortName ?? p.bankBin} ${p.accountNumber}.`,
-      p.fee > 0 ? `Phí chi hộ ${formatVnd(p.fee)} đã trừ vào số tiền rút ${formatVnd(p.amount)}.` : '',
-      p.bankRef ? `Mã giao dịch: ${p.bankRef}.` : '',
-    ].filter(Boolean),
-  }));
-}
-
-export async function notifySeller(
-  payoutId: string,
-  build: (p: PayoutRequest) => { subject: string; lines: string[] },
-): Promise<void> {
-  try {
-    const payout = await db.payoutRequest.findUniqueOrThrow({ where: { id: payoutId } });
-    const seller = await db.user.findUniqueOrThrow({ where: { id: payout.requestedById } });
-    if (!seller.email) return;
-    const { subject, lines } = build(payout);
-    await sendMail({
-      to: seller.email,
-      subject,
-      ...renderEmail({
-        title: subject,
-        greeting: `Chào ${seller.displayName},`,
-        paragraphs: lines,
-        action: { label: 'Xem số dư', url: `${env().APP_URL}/kiot-cua-toi/so-du` },
-      }),
-    });
-  } catch (e) {
-    // Thông báo hỏng không được làm hỏng thao tác tiền đã commit.
-    console.error('[payouts] gửi email lỗi:', e);
-  }
 }
 
 export async function listPayoutsForKiot(kiotId: string, take = 50) {

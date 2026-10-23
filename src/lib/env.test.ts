@@ -21,6 +21,13 @@ describe('parseEnv', () => {
     expect(env.ROOT_DOMAIN).toBe('9mua.com');
   });
 
+  it('kênh chi hộ PayOS: để trống cả 3 khoá được, khai báo thiếu thì báo lỗi', () => {
+    expect(() => parseEnv({ ...valid, PAYOS_PAYOUT_CLIENT_ID: '', PAYOS_PAYOUT_API_KEY: '' })).not.toThrow();
+    expect(() => parseEnv({ ...valid, PAYOS_PAYOUT_CLIENT_ID: 'id' })).toThrow(/PAYOS_PAYOUT_API_KEY/);
+    const keys = { PAYOS_PAYOUT_CLIENT_ID: 'a', PAYOS_PAYOUT_API_KEY: 'b', PAYOS_PAYOUT_CHECKSUM_KEY: 'c' };
+    expect(() => parseEnv({ ...valid, ...keys })).not.toThrow();
+  });
+
   it('báo rõ tên biến bị thiếu', () => {
     expect(() => parseEnv({ ...valid, DATABASE_URL: undefined })).toThrow(/DATABASE_URL/);
   });

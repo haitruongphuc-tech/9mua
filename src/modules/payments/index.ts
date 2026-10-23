@@ -5,3 +5,12 @@ export { handleWebhook, type WebhookResult } from './webhook';
 export { reconcilePending } from './reconcile';
 export { normalizeDescription } from './description';
 export type { Purpose, PaymentIntentView, PaidIntent } from './types';
+export {
+  payoutClient,
+  fakePayoutClient,
+  PayoutRejectedError,
+  PayoutUnknownError,
+  type PayoutClient,
+  type PayoutInfo,
+  type PayoutState,
+} from './payout-client';

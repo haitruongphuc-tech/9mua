@@ -24,3 +24,9 @@ export function advanceClock(by: {
 export function resetClock(): void {
   frozen = null;
 }
+
+// 0 giờ ngày hôm nay theo giờ Việt Nam (UTC+7, không đổi giờ theo mùa).
+export function startOfVnDay(at: Date = now()): Date {
+  const offset = 7 * 3_600_000;
+  return new Date(Math.floor((at.getTime() + offset) / 86_400_000) * 86_400_000 - offset);
+}

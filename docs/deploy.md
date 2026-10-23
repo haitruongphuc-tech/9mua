@@ -33,6 +33,14 @@ Tối thiểu cần điền trong `.env`:
 - `POSTGRES_PASSWORD`: tạo bằng `openssl rand -hex 24`.
 - `INTERNAL_CRON_TOKEN`: tạo bằng `openssl rand -hex 32`.
 - `APP_URL=https://9mua.com`.
+- `PAYOS_*` (kênh nhận tiền) và, khi PayOS đã mở kênh chi hộ cho 9MUA CO.,LTD, `PAYOS_PAYOUT_*`. Để trống
+  `PAYOS_PAYOUT_*` thì mọi yêu cầu rút vào hàng chờ CEO duyệt tay (chuyển bằng QR VietQR).
+
+Kênh chi hộ PayOS cần:
+- Nạp trước tiền vào tài khoản chi. Hệ thống báo CEO khi quỹ thấp hơn tổng yêu cầu đang chờ + 10.000.000đ.
+- Cho phép lệnh chi tạo qua API được duyệt tự động trên trang PayOS. Nếu PayOS bắt duyệt tay từng lệnh,
+  lệnh sẽ nằm ở trạng thái "đang chuyển" và hệ thống báo CEO sau 2 giờ.
+- Thêm IP của VPS vào danh sách IP được phép gọi API chi hộ (nếu PayOS yêu cầu).
 
 ## 2. Chạy ứng dụng
 

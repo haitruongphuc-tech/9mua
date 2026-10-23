@@ -362,7 +362,7 @@
   - Deps: T23
   - Files: `src/modules/payouts/{request,manual,vietqr}.ts` + test, `src/app/kiot-cua-toi/so-du/rut/page.tsx`
 
-- [ ] **T25: Chi tự động qua PayOS** (M)
+- [x] **T25: Chi tự động qua PayOS** (M)
   - Client chi hộ trong `payments` (kèm driver giả), `evaluateAutoRules` (đủ 8 luật), gửi lệnh với
     `idempotencyKey = payoutId`, `/api/internal/payouts/sync`, `approvePayoutViaPayos`, cảnh báo quỹ chi thấp.
   - Acceptance:
@@ -373,6 +373,9 @@
   - Deps: T24
   - Files: `src/modules/payments/payout-client.ts` + test, `src/modules/payouts/{auto-rules,auto-dispatch,sync}.ts` + test,
     `src/app/api/internal/payouts/sync/route.ts`
+  - Ghi chú: làm sớm phần `AlertThrottle` của T35 (`src/lib/alerts.ts` + `/api/internal/alerts/flush`) vì
+    T25 cần báo CEO. Lệnh PayOS từ chối rõ ràng (và tra lại theo mã RT không thấy) thì về hàng chờ CEO, gửi
+    lại dùng khoá `payoutId-rN`; lỗi mạng/không rõ thì giữ `processing`, cron hỏi lại hoặc gửi lại cùng khoá.
 
 ### ✅ Checkpoint F — Dòng tiền khép kín
 - [ ] E2E: tạo Kiot → bán → hoàn tất → KYC → rút lần 1 (duyệt tay) → rút lần 2 (tự động).

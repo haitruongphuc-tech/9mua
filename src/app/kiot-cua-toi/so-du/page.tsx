@@ -29,7 +29,7 @@ const PAYOUT_STATUS: Record<string, { label: string; tone: string }> = {
 export default async function BalancePage({
   searchParams,
 }: {
-  searchParams: Promise<{ 'da-gui'?: string }>;
+  searchParams: Promise<{ 'da-gui'?: string; 'tu-dong'?: string }>;
 }) {
   const user = await requireUser();
   const kiot = await getKiotByOwner(user.id);
@@ -39,13 +39,16 @@ export default async function BalancePage({
     listBalanceEntries(kiot.id),
     listPayoutsForKiot(kiot.id, 20),
   ]);
-  const sent = (await searchParams)['da-gui'];
+  const params = await searchParams;
+  const sent = params['da-gui'];
   return (
     <section className="flex flex-col gap-4 px-4 py-6">
       <h1 className="text-xl font-extrabold">Số dư</h1>
       {sent ? (
         <p role="status" className="rounded-xl bg-success/10 px-4 py-3 text-sm font-bold text-success">
-          Đã gửi yêu cầu rút {sent}. 9MUA sẽ chuyển tiền và báo qua email.
+          {params['tu-dong']
+            ? `Yêu cầu rút ${sent} đang được chuyển tự động, tiền sẽ về tài khoản trong vài phút.`
+            : `Đã gửi yêu cầu rút ${sent}. 9MUA sẽ duyệt và chuyển tiền trong 2 ngày làm việc, báo qua email.`}
         </p>
       ) : null}
       <div className="grid grid-cols-2 gap-3">

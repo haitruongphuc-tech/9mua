@@ -37,7 +37,7 @@ export async function requestPayoutAction(
     return { error, amount: raw };
   }
   revalidatePath('/kiot-cua-toi/so-du');
-  redirect(`/kiot-cua-toi/so-du?da-gui=${result.code}`);
+  redirect(`/kiot-cua-toi/so-du?da-gui=${result.code}${result.mode === 'auto' ? '&tu-dong=1' : ''}`);
 }
 
 export async function cancelPayoutAction(form: FormData): Promise<void> {

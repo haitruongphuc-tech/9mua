@@ -12,3 +12,9 @@ ENVFILE=/opt/9mua/.env
 
 # T21 — vòng đời đơn hàng mỗi 5 phút (huỷ quá hạn trả, 48h, 10 ngày, 7 ngày)
 */5 * * * * root . $ENVFILE; curl -fsS -m 240 -H "X-Internal-Token: $INTERNAL_CRON_TOKEN" $APP/api/internal/orders/tick >/dev/null
+
+# T25 — đồng bộ lệnh chi PayOS mỗi 2 phút (đang chuyển → đã chuyển / lỗi), kiểm quỹ chi
+*/2 * * * * root . $ENVFILE; curl -fsS -m 110 -H "X-Internal-Token: $INTERNAL_CRON_TOKEN" $APP/api/internal/payouts/sync >/dev/null
+
+# T25 — gửi cảnh báo CEO đã gộp mỗi 5 phút
+*/5 * * * * root . $ENVFILE; curl -fsS -m 60 -H "X-Internal-Token: $INTERNAL_CRON_TOKEN" $APP/api/internal/alerts/flush >/dev/null

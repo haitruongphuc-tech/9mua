@@ -24,3 +24,18 @@ test('webhook PayOS từ chối chữ ký giả', async ({ request }) => {
   });
   expect(res.status()).toBe(400);
 });
+
+test('mọi route cron đều cần token; đúng token thì chạy', async ({ request }) => {
+  for (const path of ['payouts/sync', 'alerts/flush', 'orders/tick', 'billing/reminders']) {
+    expect((await request.get(`${APP}/api/internal/${path}`)).status(), path).toBe(404);
+  }
+  const sync = await request.get(`${APP}/api/internal/payouts/sync`, {
+    headers: { 'x-internal-token': E2E_CRON_TOKEN },
+  });
+  expect(sync.status()).toBe(200);
+  expect(await sync.json()).toMatchObject({ checked: expect.any(Number) });
+  const flush = await request.get(`${APP}/api/internal/alerts/flush`, {
+    headers: { 'x-internal-token': E2E_CRON_TOKEN },
+  });
+  expect(await flush.json()).toMatchObject({ sent: expect.any(Number) });
+});

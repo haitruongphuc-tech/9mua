@@ -31,3 +31,7 @@ export {
   type RequestPayoutResult,
   type PayoutActionResult,
 } from './request';
+export { evaluateAutoRules } from './auto-rules';
+export { approvePayoutViaPayos, type DispatchResult, type DispatchError } from './dispatch';
+export { syncProcessingPayouts, checkPayoutFund } from './sync';
+export { custodyReport, type CustodyReport } from './report';

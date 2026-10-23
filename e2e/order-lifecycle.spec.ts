@@ -46,6 +46,11 @@ test('vòng đời: mua → xác nhận → giao → đã nhận → (8 ngày) c
   await buyer.reload();
   await expect(buyer.getByTestId('order-status')).toHaveText('Hoàn tất');
 
+  // Người bán thấy tiền vào số dư: 90.000đ − 5% phí sàn = 85.500đ.
+  await page.goto('/kiot-cua-toi/so-du');
+  await expect(page.getByTestId('balance-available')).toHaveText('85.500đ');
+  await expect(page.getByTestId('balance-entries')).toContainText('phí sàn 4.500đ');
+
   // Đơn 2: đã nhận rồi khiếu nại kèm ảnh.
   await addFirstProductOfKiot(buyer, slug);
   const checkout2 = await checkoutAndPay(buyer, browser);

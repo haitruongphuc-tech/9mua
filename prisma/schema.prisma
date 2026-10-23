@@ -384,3 +384,30 @@ model Dispute {
   resolvedAt   DateTime?
   createdAt    DateTime  @default(now())
 }
+
+// ─── payouts (SPEC-payouts.md) ───────────────────────────────────────────────
+
+// Sổ số dư người bán: chỉ thêm. Số dư = SUM(amount), không lưu cứng ở đâu khác.
+model BalanceEntry {
+  id        String   @id @default(cuid(2))
+  kiotId    String
+  type      String // order_credit | payout_reserve | payout_reversal | adjustment
+  amount    Int // có dấu: + cộng, − trừ
+  refId     String // orderId | payoutId | id điều chỉnh
+  note      String?
+  actorId   String?
+  createdAt DateTime @default(now())
+
+  @@unique([type, refId])
+  @@index([kiotId, createdAt])
+}
+
+// Phí sàn 9MUA thu trên mỗi đơn hoàn tất.
+model PlatformRevenue {
+  orderId   String   @id
+  kiotId    String
+  fee       Int
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}

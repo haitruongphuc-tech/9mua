@@ -6,6 +6,7 @@ const TABS = [
   { href: '/kiot-cua-toi', label: 'Tổng quan' },
   { href: '/kiot-cua-toi/san-pham', label: 'Sản phẩm' },
   { href: '/kiot-cua-toi/don-hang', label: 'Đơn hàng' },
+  { href: '/kiot-cua-toi/so-du', label: 'Số dư' },
   { href: '/kiot-cua-toi/thanh-toan', label: 'Thanh toán' },
   { href: '/kiot-cua-toi/cai-dat', label: 'Cài đặt' },
 ];

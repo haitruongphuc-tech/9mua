@@ -329,7 +329,7 @@
 
 ## Phase 5 — Số dư + chi trả (`SPEC-payouts.md`)
 
-- [ ] **T22: Sổ số dư + trang số dư** (M)
+- [x] **T22: Sổ số dư + trang số dư** (M)
   - Model `BalanceEntry`, `PlatformRevenue`. Đăng ký `onOrderCompleted` (tính phí sàn trên tiền hàng),
     `getBalance`, `/kiot-cua-toi/so-du`.
   - Acceptance:

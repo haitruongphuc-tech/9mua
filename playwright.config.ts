@@ -4,6 +4,7 @@ const PORT = 3100;
 // Tên miền giả trỏ về 127.0.0.1 để test cookie dùng chung *.9mua.test giống hệt *.9mua.com
 // (Chromium không chia sẻ cookie Domain=localhost sang abc.localhost).
 const ORIGIN = `http://9mua.test:${PORT}`;
+export const MAIL_DIR = 'test-results/mail';
 
 export default defineConfig({
   testDir: 'e2e',
@@ -23,6 +24,9 @@ export default defineConfig({
     reuseExistingServer: false,
     env: {
       APP_URL: ORIGIN,
+      TEST_MODE: 'e2e',
+      MAIL_DRIVER: 'file',
+      MAIL_OUTBOX_DIR: MAIL_DIR,
       DATABASE_URL: process.env.DATABASE_URL_E2E ?? 'postgresql://ninemua:ninemua@localhost:5432/ninemua_dev',
     },
   },

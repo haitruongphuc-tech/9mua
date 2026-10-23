@@ -5,6 +5,9 @@ const valid = {
   NODE_ENV: 'production',
   DATABASE_URL: 'postgresql://u:p@localhost:5432/db',
   APP_URL: 'https://9mua.com',
+  SMTP_HOST: 'smtp-relay.brevo.com',
+  SMTP_USER: 'user',
+  SMTP_PASS: 'pass',
 };
 
 describe('parseEnv', () => {
@@ -26,6 +29,24 @@ describe('parseEnv', () => {
     const env = parseEnv({ NODE_ENV: 'development', DATABASE_URL: valid.DATABASE_URL });
     expect(env.APP_URL).toBe('http://localhost:3000');
     expect(env.ROOT_DOMAIN).toBe('localhost');
+  });
+
+  it('production bắt buộc cấu hình SMTP', () => {
+    expect(() => parseEnv({ ...valid, SMTP_PASS: undefined })).toThrow(/SMTP_PASS/);
+    expect(parseEnv(valid).MAIL_DRIVER).toBe('smtp');
+  });
+
+  it('dev in mail ra console, test dùng hộp thư giả', () => {
+    expect(parseEnv({ NODE_ENV: 'development', DATABASE_URL: valid.DATABASE_URL }).MAIL_DRIVER).toBe(
+      'console',
+    );
+    expect(parseEnv({ NODE_ENV: 'test', DATABASE_URL: valid.DATABASE_URL }).MAIL_DRIVER).toBe('memory');
+  });
+
+  it('production chặn driver mail của test, trừ khi chạy E2E', () => {
+    expect(() => parseEnv({ ...valid, MAIL_DRIVER: 'file' })).toThrow(/MAIL_DRIVER/);
+    expect(() => parseEnv({ ...valid, MAIL_DRIVER: 'memory' })).toThrow(/MAIL_DRIVER/);
+    expect(parseEnv({ ...valid, MAIL_DRIVER: 'file', TEST_MODE: 'e2e' }).MAIL_DRIVER).toBe('file');
   });
 
   it('bắt buộc APP_URL ở production', () => {

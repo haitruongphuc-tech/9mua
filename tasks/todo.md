@@ -84,7 +84,7 @@
   - Files: `src/modules/identity/{session,login,rate-limit,index}.ts` + test, `src/app/(auth)/dang-nhap/page.tsx`,
     `e2e/auth.spec.ts`
 
-- [ ] **T6: Email + quên mật khẩu** (M)
+- [x] **T6: Email + quên mật khẩu** (M)
   - `src/lib/mail` (nodemailer SMTP Brevo, driver console/hộp thư giả cho dev/test, mẫu email có logo).
     Model `PasswordResetToken`, `/quen-mat-khau`, `/dat-lai-mat-khau`.
   - Acceptance:

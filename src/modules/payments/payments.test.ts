@@ -7,6 +7,7 @@ import { cancelPayment, createPayment, getPayment, listMismatches } from './crea
 import { fakeGateway } from './gateway';
 import { reconcilePending } from './reconcile';
 import { clearPaymentHandlers, registerPaymentHandler } from './registry';
+import type { PaidIntent } from './types';
 import { handleWebhook } from './webhook';
 
 afterEach(() => clearPaymentHandlers());
@@ -20,7 +21,7 @@ const input = {
 };
 
 function spyHandler() {
-  const handler = vi.fn(async () => {});
+  const handler = vi.fn(async (_tx: unknown, _intent: PaidIntent) => {});
   registerPaymentHandler('kiot_fee', handler);
   return handler;
 }

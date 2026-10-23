@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { advanceClock, setClock } from '@/lib/clock';
 import { db } from '@/lib/db';
 import { simulatePaid } from '../../../tests/helpers/payments';
-import { cancelPayment, createPayment, getPayment, listMismatches } from './create';
+import { cancelPayment, createPayment, getPayment, listMismatches, resolvePaymentIssue } from './create';
 import { fakeGateway } from './gateway';
 import { reconcilePending } from './reconcile';
 import { clearPaymentHandlers, registerPaymentHandler } from './registry';
@@ -114,7 +114,20 @@ describe('webhook', () => {
     await simulatePaid(p.orderCode, 20_000);
     expect(handler).not.toHaveBeenCalled();
     expect(await getPayment(p.intentId)).toMatchObject({ status: 'mismatch', amountPaid: 20_000 });
-    expect((await listMismatches()).map((m) => m.intentId)).toContain(p.intentId);
+    const [issue] = await listMismatches();
+    expect(issue).toMatchObject({ key: `intent:${p.intentId}`, expected: input.amount, received: 20_000 });
+    expect(issue!.counterAccount).toContain('NGUYEN VAN KHACH');
+    // CEO ghi cách xử lý rồi đánh dấu xong: hết hiện trong hàng chờ.
+    expect(await resolvePaymentIssue(issue!.key, 'admin', 'ok')).toEqual({
+      ok: false,
+      error: 'NOTE_REQUIRED',
+    });
+    expect(await resolvePaymentIssue('intent:khong-co', 'admin', 'Đã hoàn')).toEqual({
+      ok: false,
+      error: 'NOT_FOUND',
+    });
+    expect(await resolvePaymentIssue(issue!.key, 'admin', 'Đã hoàn 20.000đ cho khách')).toEqual({ ok: true });
+    expect(await listMismatches()).toEqual([]);
   });
 
   it('handler lỗi: rollback, trả 500, intent vẫn pending; gửi lại thì thành công', async () => {

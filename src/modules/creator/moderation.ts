@@ -136,3 +136,14 @@ export async function listVideoReports() {
     })
     .sort((a, b) => b.reporters - a.reporters);
 }
+
+// Video xử lý lỗi nhiều lần (lỗi hệ thống, không phải video quá dài) để CEO kiểm tra worker.
+export async function listFailedVideoJobs(days = 7) {
+  const since = new Date(now().getTime() - days * 86_400_000);
+  const jobs = await db.videoJob.findMany({
+    where: { status: 'failed', attempts: { gte: 3 }, updatedAt: { gte: since } },
+    orderBy: { updatedAt: 'desc' },
+    take: 50,
+  });
+  return jobs.map((j) => ({ videoId: j.videoId, attempts: j.attempts, error: j.error, at: j.updatedAt }));
+}

@@ -380,7 +380,7 @@
 ### ✅ Checkpoint F — Dòng tiền khép kín
 - [ ] E2E: tạo Kiot → bán → hoàn tất → KYC → rút lần 1 (duyệt tay) → rút lần 2 (tự động).
   - Đã có bản tích hợp (vitest `auto.test.ts`: lần 1 hàng chờ → "Chi qua PayOS" → paid → lần 2 tự động).
-    Bản E2E qua trình duyệt cần giao diện hàng chờ của CEO, làm cùng T33.
+    Bản E2E qua trình duyệt: `e2e/admin.spec.ts` (T33).
 - [x] Đối chiếu: tiền vào − hoàn − đã chi = tiền đang giữ (`custodyReport`, `report.test.ts`).
 - [x] Rà soát `payouts` (đúng sai, bảo mật): chặn ghi đè ở DB (1 yêu cầu mở/Kiot, CHECK số tiền, sổ chỉ thêm),
   thời gian chờ PayOS ngắn lại để người bán không phải chờ lâu, giới hạn độ dài lý do và số tiền điều chỉnh.
@@ -513,7 +513,7 @@
   - Ghi chú: test E2E 375px phát hiện thanh trên của toàn site tràn ngang khi đã đăng nhập (thêm chuông
     thông báo ở T30) — đã sửa: màn ≤ 400px chỉ hiện biểu tượng logo, thu gọn khoảng cách.
 
-- [ ] **T33: Các hàng chờ xử lý** (M)
+- [x] **T33: Các hàng chờ xử lý** (M)
   - Rút tiền (Chi qua PayOS / Chuyển tay + QR / Từ chối), KYC, Hoàn tiền, Khiếu nại, Lệch tiền, Báo cáo.
     Mỗi thao tác đều hỏi xác nhận và bắt nhập lý do khi cần.
   - Acceptance:
@@ -523,6 +523,10 @@
   - Deps: T32
   - Files: `src/app/admin/{rut-tien,kyc,hoan-tien,khieu-nai,lech-tien,bao-cao}/page.tsx`, `src/app/admin/actions.ts`,
     `e2e/admin.spec.ts`
+  - Ghi chú: thêm bảng `PaymentIssueResolution` (payments) để "đánh dấu đã xử lý" khoản lệch tiền;
+    `resolveProductReports` (marketplace), `listPayoutQueue` (payouts), `listFailedVideoJobs` (creator).
+    Lớp `src/modules/admin/queues.ts` gọi hàm của module sở hữu và ghi nhật ký trước/sau. E2E Checkpoint F
+    (rút lần 1 duyệt tay qua giao diện CEO) đã có trong `e2e/admin.spec.ts`.
 
 - [ ] **T34: Tra cứu, xuất CSV, cài đặt** (M)
   - Tìm người dùng, Kiot, đơn hàng. Khoá/mở, tặng năm, điều chỉnh số dư. Sổ giao dịch xuất CSV

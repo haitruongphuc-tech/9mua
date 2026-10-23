@@ -31,6 +31,7 @@ export {
   removeVideo,
   restoreVideo,
   listVideoReports,
+  listFailedVideoJobs,
   VIDEO_REPORT_REASONS,
   VIDEO_AUTO_HIDE_REPORTERS,
   type VideoActionResult,

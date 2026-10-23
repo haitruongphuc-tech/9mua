@@ -665,3 +665,11 @@ model AdminAuditLog {
   @@index([createdAt])
   @@index([targetType, targetId])
 }
+
+// CEO ghi chú cách xử lý một khoản tiền vào bất thường (lệch số, không khớp đơn, trả 2 lần) và đánh dấu xong.
+model PaymentIssueResolution {
+  issueKey     String   @id // intent:<id> | event:<id>
+  note         String
+  resolvedById String
+  resolvedAt   DateTime @default(now())
+}

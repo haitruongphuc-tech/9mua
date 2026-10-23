@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { db } from '@/lib/db';
 import { createProduct, createSeller, createUser } from '../../../tests/helpers/factories';
-import { listReports, reportProduct } from './reports';
+import { listReports, reportProduct, resolveProductReports } from './reports';
 import { searchProducts } from './search';
 
 describe('báo cáo vi phạm', () => {
@@ -53,5 +53,28 @@ describe('báo cáo vi phạm', () => {
     await db.product.update({ where: { id: p.id }, data: { visible: false } });
     expect(await reportProduct(u.id, p.id, 'khac', '')).toEqual({ ok: false, error: 'NOT_FOUND' });
     expect(await reportProduct(u.id, 'khong-co', 'khac', '')).toEqual({ ok: false, error: 'NOT_FOUND' });
+  });
+});
+
+describe('CEO xử lý báo cáo sản phẩm', () => {
+  it('Bỏ qua: hiện lại sản phẩm tự ẩn; Gỡ: ẩn hẳn kèm lý do', async () => {
+    const s = await createSeller({ active: true });
+    const p = await createProduct(s.kiotId);
+    for (let i = 0; i < 5; i++) await reportProduct((await createUser()).id, p.id, 'khac', '');
+    expect((await db.product.findUniqueOrThrow({ where: { id: p.id } })).hiddenByAdminAt).not.toBeNull();
+    expect(await resolveProductReports(p.id, 'admin', 'dismiss', '')).toEqual({ ok: true });
+    expect((await db.product.findUniqueOrThrow({ where: { id: p.id } })).hiddenByAdminAt).toBeNull();
+    expect(await listReports()).toEqual([]);
+
+    await reportProduct((await createUser()).id, p.id, 'hang_gia', '');
+    expect(await resolveProductReports(p.id, 'admin', 'remove', '')).toEqual({
+      ok: false,
+      error: 'REASON_REQUIRED',
+    });
+    expect(await resolveProductReports(p.id, 'admin', 'remove', 'Hàng giả')).toEqual({ ok: true });
+    expect(await db.product.findUniqueOrThrow({ where: { id: p.id } })).toMatchObject({
+      hiddenReason: '9MUA gỡ: Hàng giả',
+    });
+    expect(await db.productReport.count({ where: { status: 'actioned' } })).toBe(1);
   });
 });

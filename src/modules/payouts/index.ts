@@ -24,6 +24,7 @@ export {
   rejectPayout,
   markPayoutPaid,
   listPayoutsForKiot,
+  listPayoutQueue,
   manualTransferQr,
   payoutQuote,
   ACCOUNT_HOLD_HOURS,
@@ -32,6 +33,7 @@ export {
   type PayoutActionResult,
 } from './request';
 export { evaluateAutoRules } from './auto-rules';
+export { buildVietQr } from './vietqr';
 export { approvePayoutViaPayos, type DispatchResult, type DispatchError } from './dispatch';
 export { syncProcessingPayouts, checkPayoutFund } from './sync';
 export { custodyReport, type CustodyReport } from './report';

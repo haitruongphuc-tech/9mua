@@ -1,5 +1,12 @@
 // Hợp đồng public của module payments (SPEC-payments.md). Module khác chỉ import từ file này.
-export { createPayment, getPayment, cancelPayment, listMismatches, type PaymentIssue } from './create';
+export {
+  createPayment,
+  getPayment,
+  cancelPayment,
+  listMismatches,
+  resolvePaymentIssue,
+  type PaymentIssue,
+} from './create';
 export { registerPaymentHandler, type PaymentHandler, type AfterCommit } from './registry';
 export { handleWebhook, type WebhookResult } from './webhook';
 export { reconcilePending } from './reconcile';

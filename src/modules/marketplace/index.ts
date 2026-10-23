@@ -6,6 +6,7 @@ export { listSitemapEntries } from './sitemap';
 export {
   reportProduct,
   listReports,
+  resolveProductReports,
   REPORT_REASONS,
   AUTO_HIDE_REPORTERS,
   AUTO_HIDE_REASON,

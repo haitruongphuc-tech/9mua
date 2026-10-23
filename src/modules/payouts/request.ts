@@ -205,3 +205,31 @@ export function manualTransferQr(p: Pick<PayoutRequest, 'bankBin' | 'accountNumb
     description: `9MUA RUT ${p.code}`,
   });
 }
+
+// Hàng chờ rút tiền của CEO: kèm tên Kiot, tên trên CCCD để so với tên tài khoản nhận.
+export async function listPayoutQueue(status: 'pending' | 'processing' = 'pending') {
+  const payouts = await db.payoutRequest.findMany({
+    where: { status },
+    orderBy: { createdAt: 'asc' },
+    take: 200,
+  });
+  const [kiots, kycs] = await Promise.all([
+    db.kiot.findMany({
+      where: { id: { in: payouts.map((p) => p.kiotId) } },
+      select: { id: true, name: true, slug: true },
+    }),
+    db.kycSubmission.findMany({
+      where: { userId: { in: payouts.map((p) => p.requestedById) }, status: 'approved' },
+      select: { userId: true, fullName: true },
+    }),
+  ]);
+  const kiot = new Map(kiots.map((k) => [k.id, k]));
+  const kycName = new Map(kycs.map((k) => [k.userId, k.fullName]));
+  return payouts.map((p) => ({
+    ...p,
+    kiotName: kiot.get(p.kiotId)?.name ?? '',
+    kiotSlug: kiot.get(p.kiotId)?.slug ?? '',
+    kycName: kycName.get(p.requestedById) ?? null,
+    reasons: Array.isArray(p.autoRuleReasons) ? (p.autoRuleReasons as string[]) : [],
+  }));
+}

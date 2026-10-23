@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { alertCeo } from '@/lib/alerts';
 import { now } from '@/lib/clock';
 import { db } from '@/lib/db';
-import { getProductForCheckout, hideProduct } from '@/modules/kiot';
+import { getProductForCheckout, hideProduct, unhideProduct } from '@/modules/kiot';
 
 export const REPORT_REASONS = [
   { value: 'hang_gia', label: 'Hàng giả, hàng nhái' },
@@ -101,4 +101,31 @@ export async function listReports(
     };
   });
   return views.sort((a, b) => b.reporters - a.reporters || b.lastAt.getTime() - a.lastAt.getTime());
+}
+
+// CEO xử lý báo cáo sản phẩm: "Gỡ" (ẩn hẳn kèm lý do) hoặc "Bỏ qua" (hiện lại nếu đang tự ẩn vì báo cáo).
+export async function resolveProductReports(
+  productId: string,
+  adminId: string,
+  decision: 'remove' | 'dismiss',
+  reason: string,
+): Promise<{ ok: true } | { ok: false; error: 'NOT_FOUND' | 'REASON_REQUIRED' }> {
+  const note = reason.trim();
+  if (decision === 'remove' && !note) return { ok: false, error: 'REASON_REQUIRED' };
+  const open = await db.productReport.count({ where: { productId, status: 'open' } });
+  if (!open) return { ok: false, error: 'NOT_FOUND' };
+  if (decision === 'remove') await hideProduct(productId, `9MUA gỡ: ${note.slice(0, 300)}`);
+  else {
+    const p = await db.product.findUnique({ where: { id: productId }, select: { hiddenReason: true } });
+    if (p?.hiddenReason === AUTO_HIDE_REASON) await unhideProduct(productId);
+  }
+  await db.productReport.updateMany({
+    where: { productId, status: 'open' },
+    data: {
+      status: decision === 'remove' ? 'actioned' : 'dismissed',
+      reviewedById: adminId,
+      reviewedAt: now(),
+    },
+  });
+  return { ok: true };
 }

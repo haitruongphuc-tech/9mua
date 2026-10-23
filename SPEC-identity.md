@@ -30,8 +30,19 @@ Người dùng:
    - Chỉ lưu **mã băm** của token trong DB, nên lộ DB cũng không chiếm được phiên.
    - Đăng xuất xoá phiên trên server. Có nút "Đăng xuất khỏi mọi thiết bị".
 4. **Đổi mật khẩu** khi đã đăng nhập (nhập mật khẩu cũ). Đổi xong thì huỷ mọi phiên khác.
-5. **Quên mật khẩu (MVP)**: người dùng liên hệ CEO, CEO tạo mật khẩu tạm trong trang admin (module `admin`).
-   Module này cung cấp hàm `resetPassword(userId)` trả về mật khẩu tạm và buộc đổi ở lần đăng nhập sau.
+5. **Quên mật khẩu qua email** tại `/quen-mat-khau`:
+   - Người dùng nhập email. Hệ thống **luôn** trả lời "Nếu email tồn tại, chúng tôi đã gửi link đặt
+     lại mật khẩu", để không lộ email nào đã đăng ký.
+   - Link `/dat-lai-mat-khau?token=…` có token ngẫu nhiên 32 byte. DB chỉ lưu mã băm của token.
+     Link hết hạn sau 30 phút và chỉ dùng được 1 lần.
+   - Đặt mật khẩu mới thành công thì huỷ mọi phiên và mọi token đặt lại khác của tài khoản đó.
+   - Mỗi email được yêu cầu tối đa 3 lần/giờ.
+   - Tài khoản chỉ có SĐT có thể thêm email trong `/tai-khoan` để dùng tính năng này. Nếu không có
+     email thì liên hệ CEO: `resetPassword(userId)` trong trang admin tạo mật khẩu tạm và buộc đổi
+     ở lần đăng nhập sau.
+   - Gửi mail qua SMTP (nodemailer), cấu hình bằng biến môi trường `SMTP_*`. Đổi nhà cung cấp
+     (Resend, Brevo, Gmail…) không cần sửa code.
+   - Môi trường dev và test không gửi mail thật mà ghi ra console hoặc hộp thư giả.
 6. **Vai trò**: `user` (mặc định, mua và đăng video được), `admin`. Vai trò `seller` **không lưu** ở đây
    mà suy ra từ việc tài khoản có Kiot.
 7. **Khoá tài khoản**: cờ `lockedAt`. Tài khoản bị khoá thì không đăng nhập được và mọi phiên bị huỷ
@@ -54,20 +65,22 @@ type SessionUser = { id: string; displayName: string; role: 'user' | 'admin'; ph
 
 ### Trang
 
-`/dang-ky`, `/dang-nhap`, `/tai-khoan` (thông tin, đổi mật khẩu, đăng xuất mọi thiết bị).
+`/dang-ky`, `/dang-nhap`, `/quen-mat-khau`, `/dat-lai-mat-khau`, `/tai-khoan` (thông tin, thêm/sửa email, đổi mật khẩu, đăng xuất mọi thiết bị).
 
 ## Tech Stack (chung cho toàn dự án)
 
 | Thành phần | Lựa chọn | Lý do |
 |---|---|---|
-| Runtime | Node.js 22 LTS | Có sẵn trên VPS (cần xác nhận phiên bản) |
+| Runtime | Node.js 22 LTS **trong Docker image** | Không phụ thuộc phiên bản Node trên VPS |
 | Framework | Next.js 15 (App Router) + TypeScript `strict` | Một codebase cho web + API, SSR tốt cho SEO trang Kiot |
 | DB | PostgreSQL 16 | Giao dịch tiền cần ACID |
 | ORM | Prisma 6 | Migration rõ ràng, type-safe |
 | Validation | Zod | Kiểm tra mọi input ở biên |
 | Mật khẩu | `@node-rs/argon2` (argon2id) | Chuẩn hiện hành, không cần build native |
 | UI | Tailwind CSS 4, mobile-first, màu chính `#FF6B00` | Đúng nhận diện cũ |
-| Tiến trình | PM2 sau Nginx reverse proxy | Có sẵn trên VPS |
+| Đóng gói | Dockerfile multi-stage (Next `output: 'standalone'`) + `docker-compose.yml` gồm `app`, `db` (Postgres 16, volume riêng), `caddy` | Một lệnh để deploy, chạy giống nhau ở mọi máy |
+| HTTPS | Caddy với *on-demand TLS*: tự cấp chứng chỉ cho từng `tenkiot.9mua.com` khi có truy cập lần đầu, chỉ cấp cho slug Kiot có thật (hỏi `GET /api/internal/tls-allowed`) | Không cần API của nhà cung cấp DNS cho chứng chỉ wildcard |
+| Email | nodemailer qua SMTP | Không bị khoá vào một nhà cung cấp |
 | Test | Vitest (unit + integration với Postgres thật), Playwright (e2e) | |
 
 Không dùng Auth.js: chỉ cần đăng nhập bằng mật khẩu, nên tự viết ~200 dòng sẽ dễ kiểm soát cookie
@@ -85,6 +98,14 @@ npm run test:e2e                  # playwright
 npx prisma migrate dev --name <ten>    # tạo migration (local)
 npx prisma migrate deploy              # áp migration trên VPS
 npm run user:create-admin -- --phone 0979393916
+
+# Docker (local giống production)
+docker compose up -d --build          # app + db + caddy
+docker compose exec app npx prisma migrate deploy
+docker compose exec app node scripts/create-admin.js --phone 0979393916
+
+# Deploy lên VPS (chi tiết trong docs/deploy.md)
+git pull && docker compose up -d --build && docker compose exec app npx prisma migrate deploy
 ```
 
 ## Project Structure
@@ -102,7 +123,9 @@ src/lib/                      → Tiện ích dùng chung (db client, env, rate-
 src/components/               → UI dùng chung
 scripts/                      → CLI (create-admin…)
 e2e/                          → Playwright
-docs/deploy.md                → Hướng dẫn VPS, Nginx, SSL wildcard
+Dockerfile, docker-compose.yml, Caddyfile → Đóng gói và chạy
+.env.example                  → Danh sách biến môi trường (không chứa giá trị thật)
+docs/deploy.md                → Hướng dẫn deploy lên VPS bằng Docker
 ```
 
 ## Code Style
@@ -149,7 +172,9 @@ export async function register(raw: unknown): Promise<RegisterResult> {
 
 - **Unit (Vitest):** chuẩn hoá SĐT/email, băm/kiểm mật khẩu, logic khoá sau 5 lần sai.
 - **Integration (Vitest + Postgres test thật, reset mỗi file):** register → login → getCurrentUser →
-  logout; đổi mật khẩu huỷ phiên khác; tài khoản bị khoá không đăng nhập được; token trong DB là mã băm.
+  logout; đổi mật khẩu huỷ phiên khác; tài khoản bị khoá không đăng nhập được; token trong DB là mã băm;
+  quên mật khẩu → token hết hạn hoặc đã dùng thì bị từ chối → đặt lại xong thì huỷ phiên cũ.
+- **Docker smoke test:** `docker compose up` trên máy sạch, sau đó `/api/health` trả 200.
 - **E2E (Playwright):** đăng ký → thấy tên trên header → đăng xuất → đăng nhập lại.
 - Mục tiêu: mọi tiêu chí chấp nhận ở trên đều có ít nhất 1 test. Coverage `src/modules/identity` ≥ 90%.
 - Viết test trước (TDD). Sửa lỗi nào cũng thêm test tái hiện lỗi đó trước.
@@ -182,11 +207,15 @@ export async function register(raw: unknown): Promise<RegisterResult> {
 - [ ] Sai mật khẩu lần thứ 6 trong 15 phút bị chặn, kể cả khi lần đó nhập đúng mật khẩu.
 - [ ] Bảng `Session` không chứa token gốc. Bảng `User` không chứa mật khẩu gốc.
 - [ ] `requireAdmin()` trả 404 cho tài khoản thường.
+- [ ] Quên mật khẩu: nhận được mail, link dùng được đúng 1 lần, hết hạn sau 30 phút, đặt lại xong thì mọi thiết
+      bị khác bị đăng xuất. Nhập email chưa đăng ký vẫn thấy cùng một thông báo.
+- [ ] Trên VPS trắng chỉ có Docker: `docker compose up -d --build` xong thì `https://9mua.com` chạy và có HTTPS.
 - [ ] `npm run lint`, `npm test`, `npm run test:e2e` đều xanh.
 
 ## Open Questions
 
-1. VPS đang dùng **Node.js phiên bản nào**? (chạy `node -v`). Next 15 cần ≥ 18.18, khuyến nghị 22.
-2. DNS của `9mua.com` đang quản lý ở đâu (P.A, Mắt Bão, Cloudflare…)? Cần biết để cấp SSL wildcard tự động.
-3. Quên mật khẩu do CEO cấp lại thủ công có ổn cho MVP không, hay cần tự gửi mã qua email (cần dịch vụ
-   gửi mail, ví dụ Resend miễn phí 3.000 mail/tháng)? Gửi OTP qua SMS tốn phí nên để sau.
+1. **Cổng 80/443:** Caddy trong Docker cần dùng cổng 80/443, nên Nginx đang chạy trên VPS phải tắt
+   hoặc chuyển cổng. Nếu VPS đang chạy site khác bằng Nginx thì báo tôi: tôi sẽ để Nginx trên host
+   làm proxy vào container và dùng cách cấp SSL khác.
+2. **Nhà cung cấp email (SMTP):** đề xuất Resend (miễn phí 3.000 mail/tháng, cần xác minh tên miền
+   9mua.com bằng vài bản ghi DNS) hoặc Brevo (miễn phí 300 mail/ngày). Có thể quyết lúc deploy, code không phụ thuộc.

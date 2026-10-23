@@ -1,6 +1,6 @@
 # Capability Map: 9mua.com MVP — Kiot + Chợ + Thu hộ + Creator video
 
-Mục tiêu MVP: người bán trả 25.000đ qua PayOS để kích hoạt Kiot 1 năm và có trang `tenkiot.9mua.com`.
+Mục tiêu MVP: người bán trả 26.000đ qua PayOS để kích hoạt Kiot 1 năm và có trang `tenkiot.9mua.com`.
 Người mua đặt hàng và **trả tiền cho 9mua qua PayOS**, sau đó 9mua trả lại cho người bán. Sản phẩm hiện
 trên Chợ chung. Creator đăng video dọc 9:16 có gắn sản phẩm. CEO quản trị tất cả.
 
@@ -9,7 +9,7 @@ trên Chợ chung. Creator đăng video dọc 9:16 có gắn sản phẩm. CEO q
 | `identity` | Đăng ký / đăng nhập (SĐT hoặc email + mật khẩu), phiên đăng nhập, vai trò `buyer` / `seller` / `creator` / `admin` | — |
 | `kiot` | Tạo Kiot (tên, slug `tenkiot`), thông tin liên hệ, TK ngân hàng nhận tiền của người bán; CRUD sản phẩm + ảnh + tồn kho; trang Kiot công khai `tenkiot.9mua.com` | `identity` |
 | `payments` | Lớp tích hợp PayOS dùng chung: tạo link/QR thanh toán, xác thực chữ ký webhook, ghi sổ giao dịch (idempotent) | — |
-| `billing` | Phí thuê Kiot 25.000đ/năm: thanh toán qua `payments`, kích hoạt / gia hạn / hết hạn Kiot | `identity`, `kiot`, `payments` |
+| `billing` | Phí thuê Kiot 26.000đ/năm: thanh toán qua `payments`, kích hoạt / gia hạn / hết hạn Kiot | `identity`, `kiot`, `payments` |
 | `orders` | Giỏ hàng (mỗi đơn thuộc một Kiot), thanh toán qua `payments`, trạng thái đơn (chờ trả → đã trả → đang giao → hoàn tất / huỷ / hoàn tiền), người bán xác nhận và giao hàng | `identity`, `kiot`, `payments` |
 | `payouts` | Sổ số dư người bán: cộng khi đơn hoàn tất, trừ phí sàn; người bán yêu cầu rút; CEO duyệt và đánh dấu đã chuyển khoản | `orders` |
 | `marketplace` | Chợ chung tại `9mua.com/cho`: liệt kê sản phẩm của Kiot đang hoạt động, tìm kiếm, lọc danh mục, thêm vào giỏ | `kiot`, `billing` |
@@ -26,7 +26,7 @@ Thứ tự xây:
 1. **9mua thu hộ:** tiền đơn hàng vào TK MB 979393916 của 9MUA CO.,LTD qua PayOS. Khi đơn hoàn tất,
    tiền được cộng vào số dư của người bán, sau đó 9mua chuyển khoản trả người bán theo yêu cầu rút
    tiền. **MVP: CEO chuyển khoản tay rồi bấm "đã trả"**, chưa chi tự động.
-2. Kiot chỉ hiện công khai và nhận đơn khi đã đóng phí 25k và còn hạn.
+2. Kiot chỉ hiện công khai và nhận đơn khi đã đóng phí 26k và còn hạn.
 3. Giao hàng: người bán tự giao và tự cập nhật trạng thái. Chưa tích hợp GHN/GHTK.
 4. VPS Ubuntu có sẵn Nginx + Node.js. Sẽ cài thêm **PostgreSQL**. Ảnh và video lưu trên ổ đĩa VPS,
    do Nginx phục vụ. Cần **chứng chỉ wildcard `*.9mua.com`** (Let's Encrypt, DNS challenge).

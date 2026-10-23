@@ -1,17 +1,17 @@
-# Spec: `billing` — Phí thuê Kiot 25.000đ/năm
+# Spec: `billing` — Phí thuê Kiot 26.000đ/năm
 
 > Module 4 trong `CAPABILITY-MAP.md`. Phụ thuộc `identity`, `kiot`, `payments`.
 > Nền móng chung theo `SPEC-identity.md`.
 
 ## Objective
 
-Chủ Kiot trả phí thuê Kiot qua QR PayOS, mặc định 25.000đ cho 1 năm. Trả xong thì Kiot tự mở công khai
+Chủ Kiot trả phí thuê Kiot qua QR PayOS, mặc định 26.000đ cho 1 năm. Trả xong thì Kiot tự mở công khai
 ngay, không cần CEO duyệt. Gia hạn lúc nào cũng được, thời gian được cộng dồn. Hệ thống nhắc trước khi
 hết hạn để không mất khách.
 
 ### Tiêu chí chấp nhận
 
-1. **Kích hoạt / Gia hạn**: ở `/kiot-cua-toi` có nút "Kích hoạt Kiot – 25.000đ/năm" (Kiot `draft`) hoặc
+1. **Kích hoạt / Gia hạn**: ở `/kiot-cua-toi` có nút "Kích hoạt Kiot – 26.000đ/năm" (Kiot `draft`) hoặc
    "Gia hạn thêm 1 năm" (Kiot `active` / `expired`).
    - Bấm nút thì gọi `payments.createPayment({ purpose: 'kiot_fee', refId: kiotId, amount: phí hiện hành,
      description: 'KIOT' + mã ngắn })` và chuyển sang trang `/kiot-cua-toi/thanh-toan/<intentId>`.
@@ -24,7 +24,7 @@ hết hạn để không mất khách.
      Gia hạn sớm vẫn giữ đủ ngày còn lại.
    - Ghi một dòng `KiotSubscription`, rồi gọi `kiot.extendActiveUntil(kiotId, periodEnd)`.
    - Sau khi transaction commit, gửi email biên nhận: số tiền, kỳ hạn, mã giao dịch.
-3. **Giá phí**: lưu trong bảng `Setting` (`kiot_fee_vnd`, mặc định `25000`). CEO đổi trong trang admin.
+3. **Giá phí**: lưu trong bảng `Setting` (`kiot_fee_vnd`, mặc định `26000`, tương đương 1 USD). CEO đổi trong trang admin.
    Giá mới chỉ áp dụng cho thanh toán **tạo sau khi đổi**. QR đang chờ vẫn giữ giá cũ và vẫn được ghi
    nhận đúng.
 4. **Tặng năm miễn phí**: `grantYear(kiotId, adminId, reason)` để CEO tặng hoặc khuyến mãi. Ghi
@@ -89,7 +89,7 @@ revenueSummary(range: { from: Date; to: Date }): Promise<{ count: number; total:
 
 ## Success Criteria
 
-- [ ] Từ lúc quét QR trả 25.000đ đến khi trang Kiot hiện công khai không quá 15 giây, không cần ai duyệt.
+- [ ] Từ lúc quét QR trả 26.000đ đến khi trang Kiot hiện công khai không quá 15 giây, không cần ai duyệt.
 - [ ] Gia hạn khi còn 100 ngày thì hạn mới = hạn cũ + 1 năm.
 - [ ] Đổi giá phí trong admin có hiệu lực với QR tạo sau đó, không ảnh hưởng QR đang chờ.
 - [ ] Chủ Kiot nhận email nhắc ở mốc 14 ngày, 3 ngày và ngày hết hạn, mỗi mốc đúng 1 lần.

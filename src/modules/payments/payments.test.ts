@@ -21,7 +21,7 @@ const input = {
 };
 
 function spyHandler() {
-  const handler = vi.fn(async (_tx: unknown, _intent: PaidIntent) => {});
+  const handler = vi.fn<(tx: unknown, intent: PaidIntent) => Promise<void>>(async () => {});
   registerPaymentHandler('kiot_fee', handler);
   return handler;
 }

@@ -38,9 +38,8 @@ export async function createPayment(input: {
       });
       if (existing) return toView(existing);
 
-      const [{ code }] = await tx.$queryRaw<
-        { code: bigint }[]
-      >`SELECT nextval('payment_order_code_seq') AS code`;
+      const seq = await tx.$queryRaw<{ code: bigint }[]>`SELECT nextval('payment_order_code_seq') AS code`;
+      const code = seq[0]!.code;
       const expiresAt = new Date(current.getTime() + (input.ttlMinutes ?? 15) * 60_000);
       const returnUrl = `${env().APP_URL}${input.returnPath}`;
       const link = await gateway().createLink({

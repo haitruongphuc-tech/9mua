@@ -14,8 +14,10 @@ await build({
   platform: 'node',
   format: 'esm',
   target: 'node22',
-  // Gói có mã native hoặc engine riêng: dùng bản trong node_modules của image.
-  external: ['@prisma/client', '@node-rs/argon2', 'nodemailer', '@payos/node', 'sharp', 'qrcode'],
+  // Chỉ để ngoài các gói có mã native/engine riêng — bản standalone của Next chỉ giữ lại đúng những gói này
+  // trong node_modules của image (gói JS thuần như nodemailer, @payos/node, qrcode đã bị Next gộp vào bản web,
+  // nên script phải tự gộp, nếu không worker/CLI lỗi ERR_MODULE_NOT_FOUND trong Docker — phát hiện ở T36).
+  external: ['@prisma/client', '@node-rs/argon2', 'sharp'],
   banner: {
     js: "import { createRequire } from 'node:module'; const require = createRequire(import.meta.url);",
   },

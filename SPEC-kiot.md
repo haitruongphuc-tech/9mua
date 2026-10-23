@@ -43,7 +43,9 @@ chuyển trạng thái. `locked` là cờ `lockedAt` riêng.
    - Trường: tên (2–120), mô tả (≤ 5.000), giá bán (số nguyên VNĐ, 1.000–100.000.000), giá gốc gạch
      ngang (tuỳ chọn, phải lớn hơn giá bán), tồn kho (số nguyên ≥ 0), danh mục, 1–6 ảnh,
      trạng thái `visible` / `hidden`.
-   - Ảnh: JPG/PNG/WebP/HEIC ≤ 10MB. Server chuyển sang WebP, cạnh dài tối đa 1200px, tạo thêm bản
+   - Ảnh: JPG/PNG/WebP ≤ 10MB. (HEIC: bản `sharp` dựng sẵn không có codec HEVC, nên ô chọn ảnh chỉ khai báo
+     JPG/PNG/WebP để iPhone tự đổi HEIC sang JPEG trước khi tải lên. File HEIC lọt tới server bị từ chối kèm
+     hướng dẫn. Quyết định ở T9, ngày 23/10/2026.) Server chuyển sang WebP, cạnh dài tối đa 1200px, tạo thêm bản
      thu nhỏ 400px, xoá metadata EXIF (có thể chứa vị trí GPS). Tên file ngẫu nhiên. Chủ Kiot kéo thả
      để đổi thứ tự ảnh.
    - Tối đa 500 sản phẩm mỗi Kiot.

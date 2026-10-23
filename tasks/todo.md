@@ -141,13 +141,13 @@
   - Deps: T7
   - Files: `src/modules/kiot/{slug,reserved-slugs,kiot,index}.ts` + test, `src/app/kiot-cua-toi/{page,tao/page}.tsx`
 
-- [ ] **T9: Xử lý và lưu ảnh** (S)
+- [x] **T9: Xử lý và lưu ảnh** (S)
   - Interface `ImageStore` (ổ đĩa local). Pipeline sharp: kiểm magic bytes, đổi sang WebP 1200px + bản
     thu nhỏ 400px, xoá EXIF, tên file ngẫu nhiên.
   - Acceptance:
     - Ảnh 8MB có GPS thành WebP ≤ 300KB, không còn GPS.
     - File giả đuôi `.jpg` bị từ chối.
-    - HEIC đọc được.
+    - HEIC: iPhone tự đổi sang JPEG ở ô chọn ảnh; server từ chối HEIC kèm hướng dẫn (xem SPEC-kiot.md).
   - Verify: vitest với ảnh mẫu trong `tests/fixtures`.
   - Deps: T2
   - Files: `src/lib/media/{image-store,process-image}.ts` + test, `tests/fixtures/*`

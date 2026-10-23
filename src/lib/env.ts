@@ -1,3 +1,4 @@
+import path from 'node:path';
 import { z } from 'zod';
 
 const schema = z
@@ -7,6 +8,15 @@ const schema = z
       .string({ error: 'DATABASE_URL là bắt buộc' })
       .regex(/^postgres(ql)?:\/\//, 'DATABASE_URL phải là chuỗi kết nối PostgreSQL'),
     APP_URL: z.url().optional(),
+    // Ảnh/video công khai (Nginx phục vụ /uploads) và file riêng tư (ảnh CCCD) — tuyệt đối trong Docker.
+    UPLOAD_DIR: z
+      .string()
+      .default('data/uploads')
+      .transform((p) => path.resolve(p)),
+    PRIVATE_DIR: z
+      .string()
+      .default('data/private')
+      .transform((p) => path.resolve(p)),
     // Chỉ đặt khi chạy E2E (Playwright). KHÔNG BAO GIỜ đặt trên VPS.
     TEST_MODE: z.enum(['e2e']).optional(),
     MAIL_DRIVER: z.enum(['smtp', 'console', 'memory', 'file']).optional(),

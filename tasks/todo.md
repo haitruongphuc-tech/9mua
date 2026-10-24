@@ -584,6 +584,9 @@
 
 - [ ] **T37: Deploy VPS + thử tiền thật** (M)
   - Theo `docs/deploy.md`:
+    - CEO chọn (24/10/2026): DNS chuyển về Cloudflare (để DNS only), certbot plugin Cloudflare tự gia hạn
+      wildcard; VPS tự kéo code từ repo Private bằng deploy key chỉ đọc, cập nhật bằng `scripts/deploy.sh`
+      (sao lưu DB trước migration, tự quay về bản cũ khi lỗi, `--rollback`).
     - Cài Docker, `.env`, Nginx, SSL wildcard.
     - Cron (reconcile 5 phút, tick 5 phút, payouts sync 2 phút, billing 8:00, digest 8:00, backup DB 2:00).
     - Đăng ký webhook PayOS, xác thực tên miền Brevo, tạo tài khoản CEO.
@@ -594,7 +597,7 @@
     - Backup DB khôi phục được.
   - Verify: CEO cùng kiểm theo checklist trong `docs/deploy.md`.
   - Deps: T36
-  - Files: `docs/deploy.md`, `deploy/cron/9mua.cron`, `scripts/backup-db.sh`
+  - Files: `docs/deploy.md`, `deploy/cron/9mua.cron`, `scripts/backup-db.sh`, `scripts/deploy.sh`
 
 ### ✅ Checkpoint I — Mở cửa
 - [ ] CEO duyệt GO/NO-GO.

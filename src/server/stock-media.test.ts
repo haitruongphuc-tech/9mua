@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createPexels } from './pexels';
+import { createPexels, createPixabay } from './stock-media';
 
 type Call = { url: string; auth: string | null };
 
@@ -106,6 +106,99 @@ describe('Pexels (ảnh/video thật cho dữ liệu mẫu)', () => {
     for (let i = 0; i < 6; i++) await slow.photo('mango');
     expect(attempts).toBe(3);
     const empty = createPexels('k', fakeFetch({ 'https://api.pexels.com/': { photos: [], videos: [] } }));
+    expect(await empty.photo('khong-co')).toBeNull();
+    expect(await empty.video('khong-co')).toBeNull();
+  });
+});
+
+describe('Pixabay (thay Pexels khi Pexels ngừng cấp khoá mới)', () => {
+  it('ảnh: khoá API gửi qua tham số key, tải bản largeImageURL', async () => {
+    const calls: Call[] = [];
+    const pixabay = createPixabay(
+      'khoa-pb',
+      fakeFetch(
+        {
+          'https://pixabay.com/api/?': {
+            hits: [
+              { largeImageURL: 'https://cdn.pixabay.com/photo/xoai_1280.jpg', webformatURL: 'https://w' },
+            ],
+          },
+          'https://cdn.pixabay.com/photo/xoai_1280.jpg': bytes('anh-xoai'),
+        },
+        calls,
+      ),
+    );
+    expect(Buffer.from((await pixabay.photo('mango fruit', 'landscape'))!).toString()).toBe('anh-xoai');
+    const search = new URL(calls[0]!.url);
+    expect(search.searchParams.get('key')).toBe('khoa-pb');
+    expect(search.searchParams.get('q')).toBe('mango fruit');
+    expect(search.searchParams.get('image_type')).toBe('photo');
+    expect(search.searchParams.get('orientation')).toBe('horizontal');
+    expect(Number(search.searchParams.get('per_page'))).toBeGreaterThanOrEqual(3); // Pixabay nhận 3–200
+    expect(calls[1]!.url).toBe('https://cdn.pixabay.com/photo/xoai_1280.jpg');
+  });
+
+  it('video: ưu tiên video dọc ≤ 30 giây, lấy bản nhỏ nhất có cạnh ngắn từ 540px', async () => {
+    const file = (w: number, h: number, url: string, size = 1_000_000) => ({
+      url,
+      width: w,
+      height: h,
+      size,
+    });
+    const pixabay = createPixabay(
+      'k',
+      fakeFetch({
+        'https://pixabay.com/api/videos/': {
+          hits: [
+            {
+              duration: 12,
+              videos: {
+                large: file(1920, 1080, 'https://v/ngang-1080'),
+                medium: file(1280, 720, 'https://v/ngang-720'),
+                small: file(960, 540, 'https://v/ngang-540'),
+                tiny: file(640, 360, 'https://v/ngang-360'),
+              },
+            },
+            { duration: 90, videos: { medium: file(720, 1280, 'https://v/doc-dai') } },
+            {
+              duration: 15,
+              videos: {
+                large: { url: '', width: 0, height: 0, size: 0 },
+                medium: file(720, 1280, 'https://v/doc-720'),
+                small: file(540, 960, 'https://v/doc-540'),
+                tiny: file(360, 640, 'https://v/doc-360'),
+              },
+            },
+          ],
+        },
+        'https://v/doc-540': bytes('video-doc'),
+        'https://v/ngang-540': bytes('video-ngang'),
+      }),
+    );
+    expect(Buffer.from((await pixabay.video('fruit'))!).toString()).toBe('video-doc');
+
+    // Không có video dọc thì lấy video ngang (feed hiện có viền đen trên dưới).
+    const landscapeOnly = createPixabay(
+      'k',
+      fakeFetch({
+        'https://pixabay.com/api/videos/': {
+          hits: [{ duration: 12, videos: { small: file(960, 540, 'https://v/ngang-540') } }],
+        },
+        'https://v/ngang-540': bytes('video-ngang'),
+      }),
+    );
+    expect(Buffer.from((await landscapeOnly.video('fruit'))!).toString()).toBe('video-ngang');
+  });
+
+  it('lỗi hay không có kết quả thì trả null; lỗi 3 lần liên tiếp thì thôi gọi', async () => {
+    let attempts = 0;
+    const down = createPixabay('k', (async () => {
+      attempts += 1;
+      return new Response('{}', { status: 400 });
+    }) as typeof fetch);
+    for (let i = 0; i < 5; i++) expect(await down.photo('mango')).toBeNull();
+    expect(attempts).toBe(3);
+    const empty = createPixabay('k', fakeFetch({ 'https://pixabay.com/api/': { hits: [] } }));
     expect(await empty.photo('khong-co')).toBeNull();
     expect(await empty.video('khong-co')).toBeNull();
   });

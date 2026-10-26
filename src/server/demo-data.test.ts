@@ -77,7 +77,7 @@ describe('dữ liệu mẫu', () => {
       include: { images: true },
     });
     const stats = await sharp(uploadFile(mango.images[0]!.url)).stats();
-    expect(stats.channels[0]!.mean).toBeGreaterThan(180); // ảnh đỏ từ Pexels
+    expect(stats.channels[0]!.mean).toBeGreaterThan(180); // ảnh đỏ từ kho ảnh
     const durian = await db.product.findFirstOrThrow({
       where: { name: { startsWith: 'Sầu riêng' } },
       include: { images: true },

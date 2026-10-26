@@ -26,7 +26,7 @@ export const DEMO_EMAIL_DOMAIN = 'demo.9mua.com';
 // Nút gọi/Zalo trên trang Kiot mẫu gọi về số CEO, không bịa số có thể trúng người lạ.
 const CONTACT_PHONE = '0979393916';
 
-// query: từ khoá tiếng Anh để tìm ảnh thật trên Pexels (kho ảnh tiếng Anh cho kết quả đúng hơn).
+// query: từ khoá tiếng Anh để tìm ảnh thật trên Pixabay/Pexels (kho ảnh tiếng Anh cho kết quả đúng hơn).
 type DemoProduct = [
   name: string,
   price: number,
@@ -195,11 +195,11 @@ export type SeedResult =
       kiots: number;
       products: number;
       videos: number;
-      realPhotos: number; // số ảnh lấy được từ Pexels (còn lại là ảnh vẽ sẵn)
+      realPhotos: number; // số ảnh lấy được từ kho ảnh (còn lại là ảnh vẽ sẵn)
     }
   | { ok: false; error: 'ALREADY_SEEDED' };
 
-// photo(query): ảnh thật (Pexels) theo từ khoá; không có hoặc lỗi thì dùng ảnh vẽ sẵn.
+// photo(query): ảnh thật (Pixabay/Pexels, src/server/stock-media.ts) theo từ khoá; không có hoặc lỗi thì dùng ảnh vẽ sẵn.
 // makeVideo(i, query): nội dung file video thứ i, hoặc null để bỏ qua video.
 export async function seedDemoData(options: {
   photo?: (query: string, shape: 'square' | 'landscape') => Promise<Buffer | null>;

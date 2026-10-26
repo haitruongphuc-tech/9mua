@@ -3,7 +3,7 @@
 //   docker compose run --rm worker node dist/scripts/seed-demo.mjs            tạo
 //   docker compose run --rm worker node dist/scripts/seed-demo.mjs --lam-lai  xoá dữ liệu mẫu cũ rồi tạo lại
 //   docker compose run --rm worker node dist/scripts/seed-demo.mjs --xoa      xoá sạch trước khi mở cửa
-// Có PEXELS_API_KEY trong .env thì dùng ảnh và video thật từ Pexels; không có thì dùng ảnh vẽ sẵn.
+// Có PIXABAY_API_KEY (hoặc PEXELS_API_KEY) trong .env thì dùng ảnh và video thật; không có thì dùng ảnh vẽ sẵn.
 import { spawn } from 'node:child_process';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -12,7 +12,7 @@ import { parseArgs } from 'node:util';
 import { db } from '@/lib/db';
 import { env } from '@/lib/env';
 import { removeDemoData, seedDemoData } from '@/server/demo-data';
-import { createPexels } from '@/server/pexels';
+import { createPexels, createPixabay } from '@/server/stock-media';
 
 const COLORS = ['0xf59e0b', '0x6366f1', '0xf472b6', '0x0ea5e9', '0xb45309', '0x22c55e'];
 
@@ -55,12 +55,14 @@ async function main() {
     if (!values['lam-lai']) return;
   }
 
-  const apiKey = process.env.PEXELS_API_KEY?.trim();
-  const pexels = apiKey ? createPexels(apiKey) : null;
-  console.log(pexels ? 'Lấy ảnh và video thật từ Pexels…' : 'Không có PEXELS_API_KEY: dùng ảnh vẽ sẵn.');
+  const pixabayKey = process.env.PIXABAY_API_KEY?.trim();
+  const pexelsKey = process.env.PEXELS_API_KEY?.trim();
+  const stock = pixabayKey ? createPixabay(pixabayKey) : pexelsKey ? createPexels(pexelsKey) : null;
+  const source = pixabayKey ? 'Pixabay' : 'Pexels';
+  console.log(stock ? `Lấy ảnh và video thật từ ${source}…` : 'Không có PIXABAY_API_KEY: dùng ảnh vẽ sẵn.');
   const result = await seedDemoData({
-    photo: pexels ? (query, shape) => pexels.photo(query, shape) : undefined,
-    makeVideo: async (index, query) => (await pexels?.video(query)) ?? gradientVideo(index),
+    photo: stock ? (query, shape) => stock.photo(query, shape) : undefined,
+    makeVideo: async (index, query) => (await stock?.video(query)) ?? gradientVideo(index),
     log: (line) => console.log(line),
   });
   if (!result.ok) {
@@ -70,14 +72,14 @@ async function main() {
   const host = new URL(env().APP_URL).host;
   console.log(`
 Xong: ${result.kiots} Kiot, ${result.products} sản phẩm, ${result.videos} video (worker xử lý video trong 1–2 phút).
-Ảnh thật từ Pexels: ${result.realPhotos}/${result.products + result.kiots * 2}.
+Ảnh thật từ ${source}: ${result.realPhotos}/${result.products + result.kiots * 2}.
 Xem thử: https://${host}/cho   https://mau-traicay.${host}   https://${host}/video
 Tài khoản người bán mẫu (đăng nhập thử trang Kiot của tôi):
   Email:    ${result.login.email}
   Mật khẩu: ${result.login.password}
 Trước khi mở cửa nhớ xoá: docker compose run --rm worker node dist/scripts/seed-demo.mjs --xoa`);
-  if (pexels && result.realPhotos === 0)
-    console.log('Không lấy được ảnh nào từ Pexels: kiểm tra PEXELS_API_KEY trong .env và mạng của VPS.');
+  if (stock && result.realPhotos === 0)
+    console.log(`Không lấy được ảnh nào từ ${source}: kiểm tra khoá API trong .env và mạng của VPS.`);
   if (result.videos === 0)
     console.log('Không có ffmpeg nên chưa tạo video: hãy chạy lệnh trong container worker.');
 }

@@ -296,8 +296,9 @@ cd /opt/9mua && docker compose run --rm worker node dist/scripts/seed-demo.mjs
 # đã có dữ liệu mẫu cũ thì: ... seed-demo.mjs --lam-lai   (xoá rồi tạo lại)
 ```
 
-**Ảnh và video thật:** thêm dòng `PEXELS_API_KEY=<khoá>` vào `.env` (khoá miễn phí tại pexels.com/api; giấy phép
-Pexels cho dùng thương mại, không bắt ghi nguồn). Không có khoá, hoặc Pexels lỗi, thì script dùng ảnh vẽ sẵn.
+**Ảnh và video thật:** thêm dòng `PIXABAY_API_KEY=<khoá>` vào `.env` (khoá miễn phí: đăng nhập pixabay.com rồi mở
+pixabay.com/api/docs; giấy phép Pixabay cho dùng thương mại, không bắt ghi nguồn). Pexels tạm ngừng cấp khoá mới;
+ai đã có khoá thì dùng `PEXELS_API_KEY`. Không có khoá, hoặc kho ảnh lỗi, thì script dùng ảnh vẽ sẵn.
 
 **Trước khi mở cửa** xoá sạch (tài khoản, Kiot, sản phẩm, video, file ảnh/video):
 

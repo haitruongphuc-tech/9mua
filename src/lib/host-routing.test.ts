@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { routeRequest } from './host-routing';
+import { kiotSlugFromHost, mainSiteNext, routeRequest } from './host-routing';
 
 const prod = 'https://9mua.com';
 const e2e = 'http://9mua.test:3100';
@@ -66,5 +66,22 @@ describe('routeRequest', () => {
       type: 'redirect',
       url: 'https://9mua.com/k/xyz',
     });
+  });
+});
+
+describe('trang Kiot dẫn về tên miền chính', () => {
+  const app = 'https://9mua.com';
+  it('nhận ra tên miền phụ của Kiot', () => {
+    expect(kiotSlugFromHost('mau-traicay.9mua.com', app)).toBe('mau-traicay');
+    expect(kiotSlugFromHost('9mua.com', app)).toBeNull();
+    expect(kiotSlugFromHost('www.9mua.com', app)).toBeNull();
+    expect(kiotSlugFromHost('evil.com', app)).toBeNull();
+    expect(kiotSlugFromHost('a.b.9mua.com', app)).toBeNull();
+  });
+
+  it('đăng nhập từ trang Kiot quay lại đúng trang đó trên tên miền chính (/k/<slug>/...)', () => {
+    expect(mainSiteNext('/p/abc-xoai', 'mau-traicay')).toBe('/k/mau-traicay/p/abc-xoai');
+    expect(mainSiteNext('/', 'mau-traicay')).toBe('/k/mau-traicay');
+    expect(mainSiteNext('/cho', null)).toBe('/cho');
   });
 });

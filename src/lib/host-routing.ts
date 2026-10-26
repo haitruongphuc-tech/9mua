@@ -29,3 +29,18 @@ export function routeRequest(
   // Đăng nhập, giỏ hàng, Chợ… luôn nằm ở tên miền chính.
   return { type: 'redirect', url: `${app.origin}${req.pathname}${req.search}` };
 }
+
+// slug của Kiot nếu request đến từ tên miền phụ <slug>.9mua.com, ngược lại null.
+export function kiotSlugFromHost(host: string, appUrl: string): string | null {
+  const app = new URL(appUrl).host;
+  const h = host.toLowerCase();
+  if (!h.endsWith(`.${app}`)) return null;
+  const slug = h.slice(0, -(app.length + 1));
+  return slug !== 'www' && LABEL.test(slug) ? slug : null;
+}
+
+// Trang đăng nhập nằm ở tên miền chính và chỉ nhận đường dẫn nội bộ (chống open redirect). Trang Kiot
+// <slug>.9mua.com/<path> cũng có ở 9mua.com/k/<slug>/<path>, nên quay lại đó sau khi đăng nhập.
+export function mainSiteNext(pathname: string, kiotSlug: string | null): string {
+  return kiotSlug ? `/k/${kiotSlug}${pathname === '/' ? '' : pathname}` : pathname;
+}

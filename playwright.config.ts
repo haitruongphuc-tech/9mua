@@ -21,7 +21,11 @@ export default defineConfig({
     trace: 'retain-on-failure',
     launchOptions: { args: ['--host-resolver-rules=MAP 9mua.test 127.0.0.1, MAP *.9mua.test 127.0.0.1'] },
   },
-  projects: [{ name: 'mobile-chromium', use: { browserName: 'chromium' } }],
+  // Chạy mọi kịch bản trên cả điện thoại (iPhone giả lập) và máy tính.
+  projects: [
+    { name: 'mobile-chromium', use: { browserName: 'chromium' } },
+    { name: 'desktop-chromium', use: { ...devices['Desktop Chrome'] } },
+  ],
   webServer: {
     // Chạy đúng server.js của bản standalone như trong Docker production.
     command: 'sh scripts/start-standalone.sh',

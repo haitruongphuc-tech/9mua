@@ -57,9 +57,9 @@ describe('dữ liệu mẫu', () => {
     const queries: string[] = [];
     const videoQueries: string[] = [];
     const result = await seedDemoData({
-      photo: async (q) => {
+      photos: async (q, _shape, count) => {
         queries.push(q);
-        return q === 'durian fruit' ? Buffer.from('khong phai anh') : red;
+        return q === 'durian fruit' ? [Buffer.from('khong phai anh')] : Array(count).fill(red);
       },
       makeVideo: async (_i, q) => {
         videoQueries.push(q);
@@ -67,8 +67,8 @@ describe('dữ liệu mẫu', () => {
       },
     });
     if (!result.ok) throw new Error(result.error);
-    // 40 ảnh sản phẩm + 6 logo + 6 ảnh bìa, trừ 1 ảnh hỏng.
-    expect(result.realPhotos).toBe(result.products + 12 - 1);
+    // 3 ảnh cho mỗi sản phẩm (trừ sầu riêng: ảnh hỏng) + 6 logo + 6 ảnh bìa.
+    expect(result.realPhotos).toBe((result.products - 1) * 3 + 12);
     expect(queries).toContain('mango fruit');
     expect(videoQueries).toHaveLength(6);
 
@@ -76,13 +76,19 @@ describe('dữ liệu mẫu', () => {
       where: { name: { startsWith: 'Xoài cát' } },
       include: { images: true },
     });
+    expect(mango.images).toHaveLength(3);
+    // Mô tả dài, có mục như người bán thật viết.
+    expect(mango.description.length).toBeGreaterThan(500);
+    expect(mango.description).toContain('ĐIỂM NỔI BẬT');
+    expect(mango.description).toContain('không bán thật');
     const stats = await sharp(uploadFile(mango.images[0]!.url)).stats();
     expect(stats.channels[0]!.mean).toBeGreaterThan(180); // ảnh đỏ từ kho ảnh
     const durian = await db.product.findFirstOrThrow({
       where: { name: { startsWith: 'Sầu riêng' } },
       include: { images: true },
     });
-    expect(existsSync(uploadFile(durian.images[0]!.url))).toBe(true); // vẫn có ảnh (vẽ sẵn)
+    expect(durian.images).toHaveLength(1); // ảnh hỏng bị bỏ, thay bằng 1 ảnh vẽ sẵn
+    expect(existsSync(uploadFile(durian.images[0]!.url))).toBe(true);
   });
 
   it('chạy lại khi đã có dữ liệu mẫu thì từ chối', async () => {

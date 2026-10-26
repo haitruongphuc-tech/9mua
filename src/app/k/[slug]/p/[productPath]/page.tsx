@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import Link from 'next/link';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { cache } from 'react';
 import { ContactButtons } from '@/components/kiot/ContactButtons';
 import { PreviewBanner } from '@/components/kiot/PreviewBanner';
+import { ProductGallery } from '@/components/kiot/ProductGallery';
 import { ReportProduct } from '@/components/market/ReportProduct';
 import { AddToCart } from '@/components/orders/AddToCart';
 import { env } from '@/lib/env';
@@ -59,24 +59,7 @@ export default async function ProductPage({ params }: Params) {
     <article className="mx-auto flex max-w-5xl flex-col gap-5 px-4 py-6 md:flex-row">
       <div className="md:w-1/2">
         {preview ? <PreviewBanner /> : null}
-        <ul className="mt-3 flex snap-x snap-mandatory gap-2 overflow-x-auto" aria-label="Ảnh sản phẩm">
-          {product.images.map((img, i) => (
-            <li
-              key={img.id}
-              className="relative aspect-square w-full shrink-0 snap-center overflow-hidden rounded-2xl bg-surface-muted"
-            >
-              <Image
-                src={img.url}
-                alt={`${product.name} — ảnh ${i + 1}`}
-                fill
-                sizes="(max-width: 768px) 100vw, 50vw"
-                className="object-contain"
-                priority={i === 0}
-                unoptimized
-              />
-            </li>
-          ))}
-        </ul>
+        <ProductGallery images={product.images} name={product.name} />
       </div>
       <div className="flex flex-col gap-4 md:w-1/2">
         <Link href={base || '/'} className="text-sm font-bold text-brand-deep">
@@ -99,7 +82,17 @@ export default async function ProductPage({ params }: Params) {
         )}
         <ContactButtons phone={kiot.contactPhone} />
         {product.description ? (
-          <div className="whitespace-pre-line leading-relaxed">{product.description}</div>
+          <section className="border-t border-black/10 pt-4" aria-labelledby="mo-ta">
+            <h2 id="mo-ta" className="mb-2 text-lg font-extrabold">
+              Mô tả sản phẩm
+            </h2>
+            <div
+              className="whitespace-pre-line leading-relaxed text-black/85"
+              data-testid="product-description"
+            >
+              {product.description}
+            </div>
+          </section>
         ) : null}
         {preview ? null : (
           <ReportProduct

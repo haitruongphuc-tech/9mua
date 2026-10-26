@@ -9,17 +9,33 @@ const MAX_DOWNLOAD_BYTES = 50 * 1024 * 1024;
 const MAX_CONSECUTIVE_FAILURES = 3;
 
 export type StockMedia = {
+  // Tối đa `count` ảnh khác nhau cho 1 từ khoá (1 lần gọi API), có thể ít hơn hoặc rỗng.
+  photos(query: string, shape?: 'square' | 'landscape', count?: number): Promise<Buffer[]>;
   photo(query: string, shape?: 'square' | 'landscape'): Promise<Buffer | null>;
   video(query: string): Promise<Buffer | null>;
 };
 
-function httpClient(fetchFn: typeof fetch) {
+async function downloadAll(urls: (string | undefined)[], download: (url?: string) => Promise<Buffer | null>) {
+  const files: Buffer[] = [];
+  for (const url of urls) {
+    const data = await download(url);
+    if (data) files.push(data);
+  }
+  return files;
+}
+
+function httpClient(fetchFn: typeof fetch, minGapMs = 0) {
   // Mạng chặn, sai khoá hay kho ảnh quá tải: lỗi liên tiếp 3 lần thì thôi gọi cho cả lần chạy.
   let failures = 0;
+  let lastCall = 0;
   return {
     // URL có thể chứa khoá API (Pixabay): không bao giờ in ra log.
     async json<T>(url: string, headers?: Record<string, string>): Promise<T | null> {
       if (failures >= MAX_CONSECUTIVE_FAILURES) return null;
+      // Giãn cách lượt gọi API để không vượt hạn mức của kho ảnh (tải file từ CDN thì không tính).
+      const wait = lastCall + minGapMs - Date.now();
+      if (wait > 0) await new Promise((r) => setTimeout(r, wait));
+      lastCall = Date.now();
       try {
         const res = await fetchFn(url, { headers, signal: AbortSignal.timeout(20_000) });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -59,13 +75,18 @@ export function createPexels(apiKey: string, fetchFn: typeof fetch = fetch): Sto
   const api = (path: string, params: Record<string, string>) =>
     http.json(`https://api.pexels.com${path}?${new URLSearchParams(params)}`, { Authorization: apiKey });
 
-  return {
-    async photo(query, shape = 'square') {
-      const found = (await api('/v1/search', { query, orientation: shape, per_page: '1' })) as {
+  const self: StockMedia = {
+    async photos(query, shape = 'square', count = 1) {
+      const found = (await api('/v1/search', { query, orientation: shape, per_page: String(count) })) as {
         photos?: PexelsPhoto[];
       } | null;
-      const src = found?.photos?.[0]?.src;
-      return http.download(shape === 'landscape' ? (src?.landscape ?? src?.large2x) : src?.large2x);
+      const urls = (found?.photos ?? [])
+        .slice(0, count)
+        .map(({ src }) => (shape === 'landscape' ? (src?.landscape ?? src?.large2x) : src?.large2x));
+      return downloadAll(urls, http.download);
+    },
+    async photo(query, shape) {
+      return (await self.photos(query, shape, 1))[0] ?? null;
     },
 
     // Video dọc, ngắn; lấy file mp4 nhỏ nhất mà vẫn cao từ 960px (worker chuyển mã về 720p nên không cần nét hơn).
@@ -86,6 +107,7 @@ export function createPexels(apiKey: string, fetchFn: typeof fetch = fetch): Sto
       return null;
     },
   };
+  return self;
 }
 
 type PixabayFile = { url?: string; width?: number; height?: number; size?: number };
@@ -94,24 +116,28 @@ type PixabayVideo = {
   videos?: Partial<Record<'large' | 'medium' | 'small' | 'tiny', PixabayFile>>;
 };
 
-export function createPixabay(apiKey: string, fetchFn: typeof fetch = fetch): StockMedia {
-  const http = httpClient(fetchFn);
+export function createPixabay(apiKey: string, fetchFn: typeof fetch = fetch, minGapMs = 700): StockMedia {
+  // Hạn mức Pixabay: 100 lượt/phút → mỗi lượt cách nhau 0,7 giây.
+  const http = httpClient(fetchFn, minGapMs);
   // Pixabay nhận khoá qua tham số key; per_page phải trong khoảng 3–200.
   const api = (path: string, params: Record<string, string>) =>
     http.json(
       `https://pixabay.com/api/${path}?${new URLSearchParams({ key: apiKey, safesearch: 'true', ...params })}`,
     );
 
-  return {
-    async photo(query, shape = 'square') {
+  const self: StockMedia = {
+    async photos(query, shape = 'square', count = 1) {
       const found = (await api('', {
         q: query.slice(0, 100),
         image_type: 'photo',
         orientation: shape === 'landscape' ? 'horizontal' : 'all',
-        per_page: '3',
+        per_page: String(Math.max(3, count)),
       })) as { hits?: { largeImageURL?: string; webformatURL?: string }[] } | null;
-      const hit = found?.hits?.[0];
-      return http.download(hit?.largeImageURL || hit?.webformatURL);
+      const urls = (found?.hits ?? []).slice(0, count).map((h) => h.largeImageURL || h.webformatURL);
+      return downloadAll(urls, http.download);
+    },
+    async photo(query, shape) {
+      return (await self.photos(query, shape, 1))[0] ?? null;
     },
 
     // Kho video Pixabay phần lớn quay ngang: ưu tiên video dọc, không có thì lấy video ngang (feed hiện viền đen).
@@ -142,4 +168,5 @@ export function createPixabay(apiKey: string, fetchFn: typeof fetch = fetch): St
       return http.download(pick?.file.url);
     },
   };
+  return self;
 }

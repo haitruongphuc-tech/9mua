@@ -112,6 +112,24 @@ describe('Pexels (ảnh/video thật cho dữ liệu mẫu)', () => {
 });
 
 describe('Pixabay (thay Pexels khi Pexels ngừng cấp khoá mới)', () => {
+  it('nhiều ảnh cho 1 sản phẩm: tải đủ số ảnh yêu cầu từ 1 lần tìm', async () => {
+    const calls: Call[] = [];
+    const pixabay = createPixabay(
+      'k',
+      fakeFetch(
+        {
+          'https://pixabay.com/api/?': {
+            hits: [1, 2, 3, 4].map((n) => ({ largeImageURL: `https://cdn.pixabay.com/photo/${n}.jpg` })),
+          },
+          'https://cdn.pixabay.com/photo/': bytes('anh'),
+        },
+        calls,
+      ),
+    );
+    expect(await pixabay.photos('mango', 'square', 3)).toHaveLength(3);
+    expect(calls.filter((c) => c.url.startsWith('https://pixabay.com/api/'))).toHaveLength(1);
+  });
+
   it('ảnh: khoá API gửi qua tham số key, tải bản largeImageURL', async () => {
     const calls: Call[] = [];
     const pixabay = createPixabay(
@@ -188,6 +206,21 @@ describe('Pixabay (thay Pexels khi Pexels ngừng cấp khoá mới)', () => {
       }),
     );
     expect(Buffer.from((await landscapeOnly.video('fruit'))!).toString()).toBe('video-ngang');
+  });
+
+  it('giãn cách các lượt gọi API (hạn mức Pixabay 100 lượt/phút)', async () => {
+    const times: number[] = [];
+    const pixabay = createPixabay(
+      'k',
+      (async () => {
+        times.push(Date.now());
+        return new Response(JSON.stringify({ hits: [] }), { status: 200 });
+      }) as typeof fetch,
+      100,
+    );
+    for (let i = 0; i < 3; i++) await pixabay.photos('mango');
+    expect(times[1]! - times[0]!).toBeGreaterThanOrEqual(95);
+    expect(times[2]! - times[1]!).toBeGreaterThanOrEqual(95);
   });
 
   it('lỗi hay không có kết quả thì trả null; lỗi 3 lần liên tiếp thì thôi gọi', async () => {

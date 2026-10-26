@@ -21,154 +21,14 @@ import {
   updateKiotAddress,
   uploadProductImage,
 } from '@/modules/kiot';
+import { DEMO_KIOTS, describeProduct } from './demo-catalog';
 
 export const DEMO_EMAIL_DOMAIN = 'demo.9mua.com';
 // Nút gọi/Zalo trên trang Kiot mẫu gọi về số CEO, không bịa số có thể trúng người lạ.
 const CONTACT_PHONE = '0979393916';
 
-// query: từ khoá tiếng Anh để tìm ảnh thật trên Pixabay/Pexels (kho ảnh tiếng Anh cho kết quả đúng hơn).
-type DemoProduct = [
-  name: string,
-  price: number,
-  compareAtPrice: number | null,
-  stock: number,
-  category: string,
-  query: string,
-];
-type DemoKiot = {
-  slug: string;
-  name: string;
-  owner: string;
-  description: string;
-  province: string;
-  district: string;
-  color: [string, string];
-  caption: string;
-  queries: { logo: string; cover: string; video: string };
-  products: DemoProduct[];
-};
-
-const KIOTS: DemoKiot[] = [
-  {
-    slug: 'mau-traicay',
-    name: 'Trái cây Miền Tây (Mẫu)',
-    owner: 'Chị Ngọc (Mẫu)',
-    description: 'Trái cây tươi hái tại vườn Cần Thơ, giao trong ngày. Đây là Kiot mẫu để thử web.',
-    province: 'can-tho',
-    district: 'Ninh Kiều',
-    color: ['#f59e0b', '#16a34a'],
-    caption: 'Xoài cát chín cây, ngọt lịm #traicay #mientay #mau',
-    queries: { logo: 'tropical fruit', cover: 'fruit market stall', video: 'tropical fruit' },
-    products: [
-      ['Xoài cát Hòa Lộc loại 1 (1kg)', 65_000, 80_000, 120, 'nong-san', 'mango fruit'],
-      ['Sầu riêng Ri6 nguyên trái (2–3kg)', 145_000, null, 40, 'nong-san', 'durian fruit'],
-      ['Bưởi da xanh Bến Tre (1 trái)', 55_000, 70_000, 80, 'nong-san', 'pomelo'],
-      ['Chôm chôm nhãn (1kg)', 45_000, null, 60, 'nong-san', 'rambutan'],
-      ['Thanh long ruột đỏ (1kg)', 35_000, 42_000, 150, 'nong-san', 'dragon fruit'],
-      ['Mít Thái sấy giòn (500g)', 89_000, null, 200, 'thuc-pham-dac-san', 'dried fruit snack'],
-      ['Combo trái cây biếu Tết', 450_000, 520_000, 15, 'thuc-pham-dac-san', 'fruit gift basket'],
-    ],
-  },
-  {
-    slug: 'mau-thoitrang',
-    name: 'Thời trang Phố Cổ (Mẫu)',
-    owner: 'Anh Tuấn (Mẫu)',
-    description: 'Áo quần may sẵn, chất liệu cotton thoáng mát. Đây là Kiot mẫu để thử web.',
-    province: 'ha-noi',
-    district: 'Hoàn Kiếm',
-    color: ['#6366f1', '#ec4899'],
-    caption: 'Áo thun mới về, đủ size #thoitrang #aothun #mau',
-    queries: { logo: 'clothing store', cover: 'clothing rack boutique', video: 'fashion clothes' },
-    products: [
-      ['Áo thun cotton trơn unisex', 129_000, 159_000, 300, 'thoi-trang', 'white t-shirt'],
-      ['Áo sơ mi linen tay ngắn', 249_000, null, 80, 'thoi-trang', 'linen shirt'],
-      ['Quần jean ống suông nữ', 299_000, 359_000, 60, 'thoi-trang', 'women jeans'],
-      ['Váy hoa nhí dáng dài', 319_000, null, 45, 'thoi-trang', 'floral dress'],
-      ['Áo khoác gió 2 lớp', 389_000, 450_000, 70, 'thoi-trang', 'windbreaker jacket'],
-      ['Túi tote vải canvas', 99_000, null, 120, 'thoi-trang', 'canvas tote bag'],
-      ['Mũ bucket thêu chữ', 79_000, 99_000, 90, 'thoi-trang', 'bucket hat'],
-    ],
-  },
-  {
-    slug: 'mau-mypham',
-    name: 'Mỹ phẩm Thiên Nhiên (Mẫu)',
-    owner: 'Chị Hoa (Mẫu)',
-    description: 'Mỹ phẩm chiết xuất thiên nhiên, có giấy kiểm định. Đây là Kiot mẫu để thử web.',
-    province: 'tp-ho-chi-minh',
-    district: 'Quận 3',
-    color: ['#f472b6', '#a855f7'],
-    caption: 'Son dưỡng môi từ sáp ong #mypham #sonduong #mau',
-    queries: { logo: 'cosmetics', cover: 'skincare products', video: 'skincare' },
-    products: [
-      ['Son dưỡng môi sáp ong', 85_000, 110_000, 200, 'my-pham', 'lip balm'],
-      ['Sữa rửa mặt nghệ tươi (150ml)', 125_000, null, 150, 'my-pham', 'facial cleanser'],
-      ['Nước hoa hồng không cồn (200ml)', 159_000, 189_000, 90, 'my-pham', 'toner bottle skincare'],
-      ['Kem chống nắng SPF50 (50ml)', 219_000, null, 75, 'my-pham', 'sunscreen'],
-      ['Dầu gội bồ kết (300ml)', 99_000, 120_000, 130, 'my-pham', 'shampoo bottle'],
-      ['Mặt nạ đất sét (100g)', 139_000, null, 60, 'my-pham', 'clay face mask'],
-    ],
-  },
-  {
-    slug: 'mau-giadung',
-    name: 'Gia dụng Tiện Ích (Mẫu)',
-    owner: 'Anh Minh (Mẫu)',
-    description: 'Đồ gia dụng và phụ kiện điện thoại giá tốt. Đây là Kiot mẫu để thử web.',
-    province: 'da-nang',
-    district: 'Hải Châu',
-    color: ['#0ea5e9', '#14b8a6'],
-    caption: 'Nồi chiên không dầu cho gia đình #giadung #bep #mau',
-    queries: { logo: 'kitchen utensils', cover: 'modern kitchen', video: 'kitchen cooking' },
-    products: [
-      ['Nồi chiên không dầu 5 lít', 1_290_000, 1_590_000, 25, 'do-gia-dung', 'air fryer'],
-      ['Bình giữ nhiệt inox 500ml', 189_000, null, 140, 'do-gia-dung', 'thermos bottle'],
-      ['Bộ hộp đựng thực phẩm 5 món', 159_000, 199_000, 85, 'do-gia-dung', 'food storage containers'],
-      ['Tai nghe bluetooth chống ồn', 459_000, 590_000, 50, 'dien-tu', 'wireless headphones'],
-      ['Sạc dự phòng 10.000mAh', 299_000, null, 100, 'dien-tu', 'power bank'],
-      ['Cáp sạc nhanh Type-C 1m', 59_000, 79_000, 400, 'dien-tu', 'usb cable'],
-      ['Đèn ngủ cảm ứng để bàn', 149_000, null, 65, 'do-gia-dung', 'bedside lamp'],
-    ],
-  },
-  {
-    slug: 'mau-dacsan',
-    name: 'Đặc sản Tây Bắc (Mẫu)',
-    owner: 'Chú Sùng (Mẫu)',
-    description:
-      'Đặc sản vùng cao: thịt trâu gác bếp, mật ong rừng, chè Shan tuyết. Đây là Kiot mẫu để thử web.',
-    province: 'dien-bien',
-    district: 'Mường Thanh',
-    color: ['#b45309', '#7c2d12'],
-    caption: 'Thịt trâu gác bếp chuẩn vị Tây Bắc #dacsan #taybac #mau',
-    queries: { logo: 'mountain village', cover: 'rice terraces', video: 'honey' },
-    products: [
-      ['Thịt trâu gác bếp (500g)', 450_000, 520_000, 40, 'thuc-pham-dac-san', 'smoked meat'],
-      ['Mật ong rừng nguyên chất (1 lít)', 380_000, null, 30, 'thuc-pham-dac-san', 'honey jar'],
-      ['Chè Shan tuyết cổ thụ (200g)', 260_000, 300_000, 50, 'thuc-pham-dac-san', 'green tea leaves'],
-      ['Lạp xưởng hun khói (500g)', 220_000, null, 45, 'thuc-pham-dac-san', 'chinese sausage'],
-      ['Gạo nếp nương (2kg)', 120_000, 140_000, 70, 'nong-san', 'sticky rice'],
-      ['Giỏ mây đan tay', 180_000, null, 20, 'thu-cong-my-nghe', 'rattan basket'],
-    ],
-  },
-  {
-    slug: 'mau-mevabe',
-    name: 'Mẹ và Bé Xinh (Mẫu)',
-    owner: 'Chị Mai (Mẫu)',
-    description: 'Đồ dùng cho mẹ, bé và thú cưng trong nhà. Đây là Kiot mẫu để thử web.',
-    province: 'hai-phong',
-    district: 'Lê Chân',
-    color: ['#22c55e', '#facc15'],
-    caption: 'Bộ đồ sơ sinh cotton mềm mịn #mevabe #sosinh #mau',
-    queries: { logo: 'baby', cover: 'nursery room', video: 'baby toys' },
-    products: [
-      ['Bộ đồ sơ sinh cotton (3 bộ)', 189_000, 229_000, 100, 'me-va-be', 'baby clothes'],
-      ['Khăn sữa sợi tre (10 cái)', 99_000, null, 160, 'me-va-be', 'muslin cloth baby'],
-      ['Bình sữa thuỷ tinh 240ml', 249_000, 289_000, 55, 'me-va-be', 'baby bottle'],
-      ['Đồ chơi gỗ xếp hình', 159_000, null, 70, 'me-va-be', 'wooden toys'],
-      ['Thức ăn hạt cho mèo (1,5kg)', 179_000, 199_000, 90, 'thu-cung', 'cat food'],
-      ['Sách tô màu cho bé', 45_000, null, 200, 'sach-van-phong-pham', 'coloring book'],
-      ['Sữa tắm thảo dược cho bé', 135_000, 160_000, 80, 'me-va-be', 'baby bath'],
-    ],
-  },
-];
+const KIOTS = DEMO_KIOTS;
+const PHOTOS_PER_PRODUCT = 3;
 
 // Ảnh minh hoạ vẽ bằng hình khối (không dùng chữ: image không có font). Mỗi sản phẩm một bố cục khác nhau.
 function artwork(colors: [string, string], seed: number, size: number): Promise<Buffer> {
@@ -199,10 +59,10 @@ export type SeedResult =
     }
   | { ok: false; error: 'ALREADY_SEEDED' };
 
-// photo(query): ảnh thật (Pixabay/Pexels, src/server/stock-media.ts) theo từ khoá; không có hoặc lỗi thì dùng ảnh vẽ sẵn.
-// makeVideo(i, query): nội dung file video thứ i, hoặc null để bỏ qua video.
+// photos(query, shape, n): tối đa n ảnh thật (Pixabay/Pexels, src/server/stock-media.ts) theo từ khoá; không có
+// hoặc lỗi thì dùng ảnh vẽ sẵn. makeVideo(i, query): nội dung file video thứ i, hoặc null để bỏ qua video.
 export async function seedDemoData(options: {
-  photo?: (query: string, shape: 'square' | 'landscape') => Promise<Buffer | null>;
+  photos?: (query: string, shape: 'square' | 'landscape', count: number) => Promise<Buffer[]>;
   makeVideo: (index: number, query: string) => Promise<Buffer | null>;
   log?: (line: string) => void;
 }): Promise<SeedResult> {
@@ -217,22 +77,23 @@ export async function seedDemoData(options: {
   let products = 0;
   let videos = 0;
   let realPhotos = 0;
-  // Ảnh thật không dùng được (lỗi mạng, ảnh hỏng, quá lớn) thì thử lại bằng ảnh vẽ sẵn.
-  async function withPhoto<T extends { ok: boolean }>(
+  // Lưu tối đa `count` ảnh thật; ảnh nào không dùng được (lỗi mạng, ảnh hỏng, quá lớn) thì bỏ, không còn ảnh
+  // nào thì dùng 1 ảnh vẽ sẵn.
+  async function withPhotos<T extends { ok: boolean }>(
     query: string,
     shape: 'square' | 'landscape',
+    count: number,
     fallback: () => Promise<Buffer>,
     save: (data: Buffer) => Promise<T>,
-  ): Promise<T> {
-    const real = await options.photo?.(query, shape);
-    if (real) {
-      const saved = await save(real);
-      if (saved.ok) {
-        realPhotos += 1;
-        return saved;
-      }
+  ): Promise<T[]> {
+    const saved: T[] = [];
+    for (const data of (await options.photos?.(query, shape, count)) ?? []) {
+      const result = await save(data);
+      if (result.ok) saved.push(result);
+      if (saved.length === count) break;
     }
-    return save(await fallback());
+    realPhotos += saved.length;
+    return saved.length ? saved : [await save(await fallback())];
   }
 
   for (const [i, k] of KIOTS.entries()) {
@@ -252,15 +113,17 @@ export async function seedDemoData(options: {
     if (!kiot.ok) fail(`Kiot ${k.slug}`, kiot);
     const kiotId = kiot.ok ? kiot.kiotId : '';
     await updateKiotAddress(userId, { province: k.province, district: k.district, addressLine: '' });
-    await withPhoto(
+    await withPhotos(
       k.queries.logo,
       'square',
+      1,
       () => artwork(k.color, i, 400),
       (data) => setKiotImage(userId, 'logo', data),
     );
-    await withPhoto(
+    await withPhotos(
       k.queries.cover,
       'landscape',
+      1,
       () => artwork([k.color[1], k.color[0]], i + 3, 1200),
       (data) => setKiotImage(userId, 'cover', data),
     );
@@ -270,24 +133,26 @@ export async function seedDemoData(options: {
     );
 
     const productIds: string[] = [];
-    for (const [j, [name, price, compareAtPrice, stock, category, query]] of k.products.entries()) {
-      const image = await withPhoto(
-        query,
+    for (const [j, p] of k.products.entries()) {
+      const images = await withPhotos(
+        p.query,
         'square',
+        PHOTOS_PER_PRODUCT,
         () => artwork(k.color, j, 800),
         (data) => uploadProductImage(userId, data),
       );
-      if (!image.ok) fail(`ảnh ${name}`, image);
+      const imageIds = images.flatMap((img) => (img.ok ? [img.image.id] : []));
+      if (!imageIds.length) fail(`ảnh ${p.name}`, images[0]);
       const created = await createProduct(userId, {
-        name,
-        description: `${name}. Sản phẩm mẫu để thử web 9MUA, không bán thật.`,
-        price,
-        compareAtPrice,
-        stock,
-        category,
-        imageIds: image.ok ? [image.image.id] : [],
+        name: p.name,
+        description: describeProduct(p),
+        price: p.price,
+        compareAtPrice: p.compareAtPrice,
+        stock: p.stock,
+        category: p.category,
+        imageIds,
       });
-      if (!created.ok) fail(`sản phẩm ${name}`, created);
+      if (!created.ok) fail(`sản phẩm ${p.name}`, created);
       if (created.ok) productIds.push(created.productId);
     }
     products += productIds.length;

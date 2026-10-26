@@ -62,7 +62,7 @@ async function main() {
   const source = pixabayKey ? 'Pixabay' : 'Pexels';
   console.log(stock ? `Lấy ảnh và video thật từ ${source}…` : 'Không có PIXABAY_API_KEY: dùng ảnh vẽ sẵn.');
   const result = await seedDemoData({
-    photo: stock ? (query, shape) => stock.photo(query, shape) : undefined,
+    photos: stock ? (query, shape, count) => stock.photos(query, shape, count) : undefined,
     makeVideo: async (index, query) => (await stock?.video(query)) ?? gradientVideo(index),
     log: (line) => console.log(line),
   });
@@ -73,7 +73,7 @@ async function main() {
   const host = new URL(env().APP_URL).host;
   console.log(`
 Xong: ${result.kiots} Kiot, ${result.products} sản phẩm, ${result.videos} video (worker xử lý video trong 1–2 phút).
-Ảnh thật từ ${source}: ${result.realPhotos}/${result.products + result.kiots * 2}.
+Ảnh thật từ ${source}: ${result.realPhotos} (mỗi sản phẩm tối đa 3 ảnh, mỗi Kiot 1 logo + 1 ảnh bìa).
 Xem thử: https://${host}/cho   https://mau-traicay.${host}   https://${host}/video
 Tài khoản người bán mẫu (đăng nhập thử trang Kiot của tôi):
   Email:    ${result.login.email}

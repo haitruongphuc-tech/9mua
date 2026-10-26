@@ -285,3 +285,20 @@ vào `ninemua`, chép lại `files/uploads` và `files/private` về `/srv/9mua/
 - [ ] `docker compose run --rm worker ffmpeg -version` chạy được (worker có ffmpeg).
 - [ ] Gửi liên tục 7 lần form đăng nhập sai: lần thứ 7 trở đi nhận lỗi 429 (giới hạn theo IP).
 - [ ] `sh scripts/backup-db.sh` chạy tay 1 lần thành công, rồi khôi phục thử như mục 11.
+
+## 13. Dữ liệu mẫu để thử (xoá trước khi mở cửa)
+
+Tạo 6 Kiot "(Mẫu)", 40 sản phẩm có ảnh, 6 video và 1 tài khoản người bán mẫu (email + mật khẩu in ra màn hình).
+Không tạo đơn hàng hay thanh toán: sổ tiền chỉ thêm, không xoá được. Chạy trong container `worker` vì cần ffmpeg:
+
+```bash
+cd /opt/9mua && docker compose run --rm worker node dist/scripts/seed-demo.mjs
+```
+
+**Trước khi mở cửa** xoá sạch (tài khoản, Kiot, sản phẩm, video, file ảnh/video):
+
+```bash
+cd /opt/9mua && docker compose run --rm worker node dist/scripts/seed-demo.mjs --xoa
+```
+
+Nếu đã lỡ đặt đơn trên Kiot mẫu thì lệnh xoá chỉ khoá và ẩn (đơn và sổ tiền không xoá được).

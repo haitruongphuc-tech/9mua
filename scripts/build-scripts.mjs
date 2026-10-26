@@ -6,6 +6,7 @@ await build({
   entryPoints: [
     { in: 'scripts/create-admin.ts', out: 'create-admin' },
     { in: 'scripts/payos-confirm-webhook.ts', out: 'payos-confirm-webhook' },
+    { in: 'scripts/seed-demo.ts', out: 'seed-demo' },
     { in: 'worker/index.ts', out: 'worker' },
   ],
   outdir: 'dist/scripts',

@@ -63,6 +63,7 @@ Trang chủ và danh mục cache dữ liệu 60 giây. Truy vấn nóng đều c
 - [ ] Webhook PayOS, xác thực tên miền Brevo, tạo tài khoản CEO + cài 2 lớp ngay.
 - [ ] Thử tiền thật: trả 2.000đ kích hoạt Kiot thử; chi hộ 2.000đ tới tài khoản thử.
 - [ ] Sao lưu chạy tay 1 lần + khôi phục thử (đã thử trên máy dev: số dòng khớp, trigger đủ, tìm kiếm chạy).
+- [ ] **Xoá dữ liệu mẫu** (`seed-demo.mjs --xoa`, docs/deploy.md mục 13) và thay khoá PayOS tạm `chua-co` bằng khoá thật.
 
 Đã kiểm trong sandbox: image Docker build được, container web chạy ở chế độ production (CSP, route test tắt,
 tên miền phụ sau HTTPS), container `worker` khởi động/dừng đúng, 2 lệnh CLI chạy. Chưa kiểm được ffmpeg

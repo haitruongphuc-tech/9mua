@@ -145,7 +145,7 @@ export async function seedDemoData(options: {
       if (!imageIds.length) fail(`ảnh ${p.name}`, images[0]);
       const created = await createProduct(userId, {
         name: p.name,
-        description: describeProduct(p),
+        description: describeProduct(p, k),
         price: p.price,
         compareAtPrice: p.compareAtPrice,
         stock: p.stock,

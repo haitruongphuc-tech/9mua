@@ -178,9 +178,15 @@ Bật site:
 ```bash
 sudo cp deploy/nginx/ninemua-proxy.conf /etc/nginx/snippets/ninemua-proxy.conf
 sudo cp deploy/nginx/9mua.conf /etc/nginx/sites-available/9mua.conf
+# VPS không có IPv6 thì bỏ các dòng "listen [::]" (nếu không Nginx báo "Address family not supported")
+[ -f /proc/net/if_inet6 ] || sudo sed -i '/listen \[::\]/d' /etc/nginx/sites-available/9mua.conf
 sudo ln -sf /etc/nginx/sites-available/9mua.conf /etc/nginx/sites-enabled/9mua.conf
 sudo nginx -t && sudo systemctl reload nginx
 ```
+
+Nginx của Ubuntu 24.04 là bản 1.24: `deploy/nginx/9mua.conf` dùng cú pháp `listen 443 ssl http2` cho bản này
+(bản 1.25 trở lên chỉ cảnh báo "deprecated", vẫn chạy). Nếu VPS đã có site cũ cho `9mua.com` trong
+`/etc/nginx/sites-enabled/`, sao lưu rồi gỡ link của site cũ trước khi `nginx -t`, tránh trùng tên miền.
 
 Mở `https://9mua.com` và `https://thu.9mua.com`: phải có ổ khoá hợp lệ.
 

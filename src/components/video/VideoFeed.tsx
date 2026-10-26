@@ -19,6 +19,9 @@ const REPORT_REASONS = [
 
 // Feed video dọc toàn màn hình (SPEC-creator.md mục 3): vuốt lên/xuống, tự phát tắt tiếng, chạm để bật
 // tiếng, tải trước video kế tiếp, lượt xem gửi theo lô.
+// Safari iPhone kéo khung snap về video cũ nếu cấu trúc trang đổi giữa lúc đang vuốt (WebKit bug 173830):
+// không thêm/bớt phần tử trong các video khi đổi video đang xem (chỉ đổi class), và chỉ nối thêm video
+// tải về sau khi ngón tay đã dừng vuốt.
 export function VideoFeed({
   initial,
   nextCursor,
@@ -38,6 +41,9 @@ export function VideoFeed({
   const watched = useRef(new Map<string, number>());
   const queue = useRef<ViewEntry[]>([]);
   const loading = useRef(false);
+  const scrolling = useRef(false);
+  const scrollIdle = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const pendingAppend = useRef<(() => void) | null>(null);
 
   const flush = useCallback(() => {
     if (queue.current.length === 0) return;
@@ -82,12 +88,39 @@ export function VideoFeed({
       fetch(`/api/video/feed?sau=${encodeURIComponent(cursor)}`)
         .then((r) => r.json())
         .then((page: { items: FeedVideo[]; nextCursor: string | null }) => {
-          setItems((list) => [...list, ...page.items.filter((v) => !list.some((x) => x.id === v.id))]);
-          setCursor(page.items.length ? page.nextCursor : null);
+          const append = () => {
+            setItems((list) => [...list, ...page.items.filter((v) => !list.some((x) => x.id === v.id))]);
+            setCursor(page.items.length ? page.nextCursor : null);
+            loading.current = false;
+          };
+          if (scrolling.current) pendingAppend.current = append;
+          else append();
         })
-        .finally(() => (loading.current = false));
+        .catch(() => (loading.current = false));
     }
   }, [active, cursor, items, flush]);
+
+  // Khoá cuộn trang phía sau: trên iPhone, vuốt có thể cuộn trang nền thay vì khung video.
+  useEffect(() => {
+    const root = document.documentElement;
+    const previous = root.style.overflow;
+    root.style.overflow = 'hidden';
+    return () => {
+      root.style.overflow = previous;
+      clearTimeout(scrollIdle.current);
+    };
+  }, []);
+
+  function onScroll() {
+    scrolling.current = true;
+    clearTimeout(scrollIdle.current);
+    scrollIdle.current = setTimeout(() => {
+      scrolling.current = false;
+      const append = pendingAppend.current;
+      pendingAppend.current = null;
+      append?.();
+    }, 250);
+  }
 
   useEffect(() => {
     const onHide = () => {
@@ -178,8 +211,9 @@ export function VideoFeed({
 
   return (
     <div
-      className="fixed inset-0 z-50 snap-y snap-mandatory overflow-y-scroll bg-black text-white"
+      className="fixed inset-0 z-50 snap-y snap-mandatory overflow-y-scroll overscroll-y-contain bg-black text-white"
       data-testid="video-feed"
+      onScroll={onScroll}
     >
       <div className="fixed left-0 right-0 top-0 z-10 flex items-center justify-between p-3">
         <Link
@@ -202,7 +236,7 @@ export function VideoFeed({
           data-feed-item
           data-index={i}
           data-testid="feed-item"
-          className="relative h-[100dvh] w-full snap-start snap-always overflow-hidden"
+          className="relative h-full w-full snap-start snap-always overflow-hidden"
         >
           <video
             ref={(el) => {
@@ -221,15 +255,18 @@ export function VideoFeed({
             }}
             className="h-full w-full object-contain"
           />
-          {muted && i === active ? (
-            <button
-              type="button"
-              onClick={() => setMuted(false)}
-              className="absolute left-1/2 top-16 -translate-x-1/2 rounded-full bg-black/50 px-4 py-1.5 text-sm font-bold"
-            >
-              🔇 Chạm để bật tiếng
-            </button>
-          ) : null}
+          {/* Luôn có trong trang, chỉ ẩn/hiện bằng class (xem ghi chú đầu file về Safari). */}
+          <button
+            type="button"
+            onClick={() => setMuted(false)}
+            tabIndex={muted && i === active ? 0 : -1}
+            aria-hidden={!(muted && i === active)}
+            className={`absolute left-1/2 top-16 -translate-x-1/2 rounded-full bg-black/50 px-4 py-1.5 text-sm font-bold ${
+              muted && i === active ? '' : 'pointer-events-none invisible'
+            }`}
+          >
+            🔇 Chạm để bật tiếng
+          </button>
           <div className="absolute bottom-0 left-0 right-16 flex flex-col gap-2 bg-gradient-to-t from-black/80 to-transparent p-4 pb-6">
             <Link href={`/creator/${v.author.id}`} className="font-extrabold">
               @{v.author.displayName}

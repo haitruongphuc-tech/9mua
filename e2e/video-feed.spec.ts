@@ -16,6 +16,23 @@ test.use({
   hasTouch: iPhone.hasTouch,
 });
 
+// Vuốt bằng ngón tay thật (sự kiện chạm), không cuộn bằng code: bắt được lỗi feed không vuốt được trên điện thoại.
+async function swipe(page: import('@playwright/test').Page, direction: 'up' | 'down') {
+  const cdp = await page.context().newCDPSession(page);
+  // Kéo hơn nửa màn hình, mỗi bước 16ms như ngón tay thật (60 lần/giây).
+  const [from, to] = direction === 'up' ? [560, 120] : [120, 560];
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: 195, y: from }] });
+  for (let i = 1; i <= 12; i++) {
+    await cdp.send('Input.dispatchTouchEvent', {
+      type: 'touchMove',
+      touchPoints: [{ x: 195, y: from + ((to - from) * i) / 12 }],
+    });
+    await page.waitForTimeout(16);
+  }
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  await cdp.detach();
+}
+
 async function processVideos(page: import('@playwright/test').Page) {
   await page.request.get('http://localhost:3100/api/internal/video/process', {
     headers: { 'x-internal-token': E2E_CRON_TOKEN },
@@ -57,11 +74,11 @@ test('đăng video gắn sản phẩm → feed → vuốt → thẻ sản phẩm
   await expect(items.first().getByTestId('feed-products')).toContainText(productName);
   expect(await items.count()).toBeGreaterThan(1);
 
-  // Vuốt lên sang video kế rồi vuốt về.
-  await creator.getByTestId('video-feed').evaluate((el) => el.scrollBy(0, el.clientHeight));
-  await expect(items.nth(1)).toBeInViewport();
-  await creator.getByTestId('video-feed').evaluate((el) => el.scrollTo(0, 0));
-  await expect(items.first()).toBeInViewport();
+  // Vuốt lên sang video kế rồi vuốt về, bằng ngón tay như trên điện thoại.
+  await swipe(creator, 'up');
+  await expect(items.nth(1)).toBeInViewport({ ratio: 0.9 });
+  await swipe(creator, 'down');
+  await expect(items.first()).toBeInViewport({ ratio: 0.9 });
 
   await items.first().getByTestId('feed-like').click();
   await expect(items.first().getByTestId('feed-likes')).toHaveText('1');

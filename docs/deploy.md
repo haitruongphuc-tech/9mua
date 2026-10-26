@@ -198,7 +198,8 @@ cd /opt/9mua
 docker compose run --rm app node dist/scripts/create-admin.mjs --phone 0979393916 --name "Nguyễn Hải"
 ```
 
-**Ngay sau đó** đăng nhập `https://9mua.com/admin` để cài xác thực 2 lớp, trước khi ai khác kịp đăng nhập. Cất 10 mã
+**Ngay sau đó** đăng nhập tại `https://9mua.com/dang-nhap?next=/admin` để cài xác thực 2 lớp (`/admin` trả 404 cho
+mọi người chưa đăng nhập bằng tài khoản CEO, để không lộ trang quản trị), trước khi ai khác kịp đăng nhập. Cất 10 mã
 dự phòng ở nơi an toàn. Mất điện thoại 2 lớp và cả 10 mã dự phòng thì cài lại bằng lệnh:
 `docker compose run --rm app node dist/scripts/create-admin.mjs --phone 0979393916 --reset-2fa`
 

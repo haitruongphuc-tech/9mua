@@ -45,11 +45,12 @@ async function main() {
   const { values } = parseArgs({ options: { xoa: { type: 'boolean' }, 'lam-lai': { type: 'boolean' } } });
   if (values.xoa || values['lam-lai']) {
     const r = await removeDemoData();
-    if (r.users === 0) return console.log('Không có dữ liệu mẫu nào.');
     console.log(
-      r.mode === 'deleted'
-        ? `Đã xoá sạch: ${r.users} tài khoản, ${r.kiots} Kiot, ${r.products} sản phẩm, ${r.videos} video.`
-        : `Dữ liệu mẫu đã có đơn hàng/tiền nên KHÔNG xoá được (sổ tiền chỉ thêm). Đã khoá ${r.users} tài khoản, ` +
+      r.users === 0
+        ? 'Không có dữ liệu mẫu nào.'
+        : r.mode === 'deleted'
+          ? `Đã xoá sạch: ${r.users} tài khoản, ${r.kiots} Kiot, ${r.products} sản phẩm, ${r.videos} video.`
+          : `Dữ liệu mẫu đã có đơn hàng/tiền nên KHÔNG xoá được (sổ tiền chỉ thêm). Đã khoá ${r.users} tài khoản, ` +
             `${r.kiots} Kiot, ẩn ${r.products} sản phẩm và ${r.videos} video.`,
     );
     if (!values['lam-lai']) return;

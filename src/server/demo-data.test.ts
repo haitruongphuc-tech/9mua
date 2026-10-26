@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
+import sharp from 'sharp';
 import { describe, expect, it } from 'vitest';
 import { db } from '@/lib/db';
 import { env } from '@/lib/env';
@@ -45,6 +46,43 @@ describe('dữ liệu mẫu', () => {
     expect(await db.order.count()).toBe(0);
     expect(await db.paymentIntent.count()).toBe(0);
     expect(await db.kiotSubscription.count()).toBe(0);
+  });
+
+  it('dùng ảnh và video thật theo từ khoá; ảnh hỏng thì tự thay bằng ảnh vẽ sẵn', async () => {
+    const red = await sharp({
+      create: { width: 900, height: 600, channels: 3, background: { r: 220, g: 20, b: 20 } },
+    })
+      .jpeg()
+      .toBuffer();
+    const queries: string[] = [];
+    const videoQueries: string[] = [];
+    const result = await seedDemoData({
+      photo: async (q) => {
+        queries.push(q);
+        return q === 'durian fruit' ? Buffer.from('khong phai anh') : red;
+      },
+      makeVideo: async (_i, q) => {
+        videoQueries.push(q);
+        return fixture;
+      },
+    });
+    if (!result.ok) throw new Error(result.error);
+    // 40 ảnh sản phẩm + 6 logo + 6 ảnh bìa, trừ 1 ảnh hỏng.
+    expect(result.realPhotos).toBe(result.products + 12 - 1);
+    expect(queries).toContain('mango fruit');
+    expect(videoQueries).toHaveLength(6);
+
+    const mango = await db.product.findFirstOrThrow({
+      where: { name: { startsWith: 'Xoài cát' } },
+      include: { images: true },
+    });
+    const stats = await sharp(uploadFile(mango.images[0]!.url)).stats();
+    expect(stats.channels[0]!.mean).toBeGreaterThan(180); // ảnh đỏ từ Pexels
+    const durian = await db.product.findFirstOrThrow({
+      where: { name: { startsWith: 'Sầu riêng' } },
+      include: { images: true },
+    });
+    expect(existsSync(uploadFile(durian.images[0]!.url))).toBe(true); // vẫn có ảnh (vẽ sẵn)
   });
 
   it('chạy lại khi đã có dữ liệu mẫu thì từ chối', async () => {

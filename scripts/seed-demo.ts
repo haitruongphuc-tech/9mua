@@ -1,7 +1,9 @@
 // Tạo / xoá dữ liệu mẫu để thử web trước khi mở cửa (src/server/demo-data.ts). Chạy trên VPS trong container
 // worker (có ffmpeg để tạo video mẫu):
-//   docker compose run --rm worker node dist/scripts/seed-demo.mjs          tạo
-//   docker compose run --rm worker node dist/scripts/seed-demo.mjs --xoa    xoá sạch trước khi mở cửa
+//   docker compose run --rm worker node dist/scripts/seed-demo.mjs            tạo
+//   docker compose run --rm worker node dist/scripts/seed-demo.mjs --lam-lai  xoá dữ liệu mẫu cũ rồi tạo lại
+//   docker compose run --rm worker node dist/scripts/seed-demo.mjs --xoa      xoá sạch trước khi mở cửa
+// Có PEXELS_API_KEY trong .env thì dùng ảnh và video thật từ Pexels; không có thì dùng ảnh vẽ sẵn.
 import { spawn } from 'node:child_process';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -10,11 +12,12 @@ import { parseArgs } from 'node:util';
 import { db } from '@/lib/db';
 import { env } from '@/lib/env';
 import { removeDemoData, seedDemoData } from '@/server/demo-data';
+import { createPexels } from '@/server/pexels';
 
 const COLORS = ['0xf59e0b', '0x6366f1', '0xf472b6', '0x0ea5e9', '0xb45309', '0x22c55e'];
 
 // Video dọc 8 giây: dải màu chuyển động + tiếng im lặng. Không có ffmpeg thì trả null (bỏ qua video).
-async function makeVideo(index: number): Promise<Buffer | null> {
+async function gradientVideo(index: number): Promise<Buffer | null> {
   const dir = await mkdtemp(path.join(tmpdir(), '9mua-demo-'));
   const out = path.join(dir, 'demo.mp4');
   const c0 = COLORS[index % COLORS.length]!;
@@ -39,8 +42,8 @@ async function makeVideo(index: number): Promise<Buffer | null> {
 }
 
 async function main() {
-  const { values } = parseArgs({ options: { xoa: { type: 'boolean' } } });
-  if (values.xoa) {
+  const { values } = parseArgs({ options: { xoa: { type: 'boolean' }, 'lam-lai': { type: 'boolean' } } });
+  if (values.xoa || values['lam-lai']) {
     const r = await removeDemoData();
     if (r.users === 0) return console.log('Không có dữ liệu mẫu nào.');
     console.log(
@@ -49,22 +52,32 @@ async function main() {
         : `Dữ liệu mẫu đã có đơn hàng/tiền nên KHÔNG xoá được (sổ tiền chỉ thêm). Đã khoá ${r.users} tài khoản, ` +
             `${r.kiots} Kiot, ẩn ${r.products} sản phẩm và ${r.videos} video.`,
     );
-    return;
+    if (!values['lam-lai']) return;
   }
 
-  const result = await seedDemoData({ makeVideo, log: (line) => console.log(line) });
+  const apiKey = process.env.PEXELS_API_KEY?.trim();
+  const pexels = apiKey ? createPexels(apiKey) : null;
+  console.log(pexels ? 'Lấy ảnh và video thật từ Pexels…' : 'Không có PEXELS_API_KEY: dùng ảnh vẽ sẵn.');
+  const result = await seedDemoData({
+    photo: pexels ? (query, shape) => pexels.photo(query, shape) : undefined,
+    makeVideo: async (index, query) => (await pexels?.video(query)) ?? gradientVideo(index),
+    log: (line) => console.log(line),
+  });
   if (!result.ok) {
-    console.error('Đã có dữ liệu mẫu. Muốn tạo lại thì xoá trước bằng: seed-demo.mjs --xoa');
+    console.error('Đã có dữ liệu mẫu. Muốn tạo lại thì chạy: seed-demo.mjs --lam-lai');
     process.exit(1);
   }
   const host = new URL(env().APP_URL).host;
   console.log(`
 Xong: ${result.kiots} Kiot, ${result.products} sản phẩm, ${result.videos} video (worker xử lý video trong 1–2 phút).
+Ảnh thật từ Pexels: ${result.realPhotos}/${result.products + result.kiots * 2}.
 Xem thử: https://${host}/cho   https://mau-traicay.${host}   https://${host}/video
 Tài khoản người bán mẫu (đăng nhập thử trang Kiot của tôi):
   Email:    ${result.login.email}
   Mật khẩu: ${result.login.password}
 Trước khi mở cửa nhớ xoá: docker compose run --rm worker node dist/scripts/seed-demo.mjs --xoa`);
+  if (pexels && result.realPhotos === 0)
+    console.log('Không lấy được ảnh nào từ Pexels: kiểm tra PEXELS_API_KEY trong .env và mạng của VPS.');
   if (result.videos === 0)
     console.log('Không có ffmpeg nên chưa tạo video: hãy chạy lệnh trong container worker.');
 }

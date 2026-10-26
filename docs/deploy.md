@@ -293,7 +293,11 @@ Không tạo đơn hàng hay thanh toán: sổ tiền chỉ thêm, không xoá �
 
 ```bash
 cd /opt/9mua && docker compose run --rm worker node dist/scripts/seed-demo.mjs
+# đã có dữ liệu mẫu cũ thì: ... seed-demo.mjs --lam-lai   (xoá rồi tạo lại)
 ```
+
+**Ảnh và video thật:** thêm dòng `PEXELS_API_KEY=<khoá>` vào `.env` (khoá miễn phí tại pexels.com/api; giấy phép
+Pexels cho dùng thương mại, không bắt ghi nguồn). Không có khoá, hoặc Pexels lỗi, thì script dùng ảnh vẽ sẵn.
 
 **Trước khi mở cửa** xoá sạch (tài khoản, Kiot, sản phẩm, video, file ảnh/video):
 

@@ -26,12 +26,14 @@ export const DEMO_EMAIL_DOMAIN = 'demo.9mua.com';
 // Nút gọi/Zalo trên trang Kiot mẫu gọi về số CEO, không bịa số có thể trúng người lạ.
 const CONTACT_PHONE = '0979393916';
 
+// query: từ khoá tiếng Anh để tìm ảnh thật trên Pexels (kho ảnh tiếng Anh cho kết quả đúng hơn).
 type DemoProduct = [
   name: string,
   price: number,
   compareAtPrice: number | null,
   stock: number,
   category: string,
+  query: string,
 ];
 type DemoKiot = {
   slug: string;
@@ -42,6 +44,7 @@ type DemoKiot = {
   district: string;
   color: [string, string];
   caption: string;
+  queries: { logo: string; cover: string; video: string };
   products: DemoProduct[];
 };
 
@@ -55,14 +58,15 @@ const KIOTS: DemoKiot[] = [
     district: 'Ninh Kiều',
     color: ['#f59e0b', '#16a34a'],
     caption: 'Xoài cát chín cây, ngọt lịm #traicay #mientay #mau',
+    queries: { logo: 'tropical fruit', cover: 'fruit market stall', video: 'tropical fruit' },
     products: [
-      ['Xoài cát Hòa Lộc loại 1 (1kg)', 65_000, 80_000, 120, 'nong-san'],
-      ['Sầu riêng Ri6 nguyên trái (2–3kg)', 145_000, null, 40, 'nong-san'],
-      ['Bưởi da xanh Bến Tre (1 trái)', 55_000, 70_000, 80, 'nong-san'],
-      ['Chôm chôm nhãn (1kg)', 45_000, null, 60, 'nong-san'],
-      ['Thanh long ruột đỏ (1kg)', 35_000, 42_000, 150, 'nong-san'],
-      ['Mít Thái sấy giòn (500g)', 89_000, null, 200, 'thuc-pham-dac-san'],
-      ['Combo trái cây biếu Tết', 450_000, 520_000, 15, 'thuc-pham-dac-san'],
+      ['Xoài cát Hòa Lộc loại 1 (1kg)', 65_000, 80_000, 120, 'nong-san', 'mango fruit'],
+      ['Sầu riêng Ri6 nguyên trái (2–3kg)', 145_000, null, 40, 'nong-san', 'durian fruit'],
+      ['Bưởi da xanh Bến Tre (1 trái)', 55_000, 70_000, 80, 'nong-san', 'pomelo'],
+      ['Chôm chôm nhãn (1kg)', 45_000, null, 60, 'nong-san', 'rambutan'],
+      ['Thanh long ruột đỏ (1kg)', 35_000, 42_000, 150, 'nong-san', 'dragon fruit'],
+      ['Mít Thái sấy giòn (500g)', 89_000, null, 200, 'thuc-pham-dac-san', 'dried fruit snack'],
+      ['Combo trái cây biếu Tết', 450_000, 520_000, 15, 'thuc-pham-dac-san', 'fruit gift basket'],
     ],
   },
   {
@@ -74,14 +78,15 @@ const KIOTS: DemoKiot[] = [
     district: 'Hoàn Kiếm',
     color: ['#6366f1', '#ec4899'],
     caption: 'Áo thun mới về, đủ size #thoitrang #aothun #mau',
+    queries: { logo: 'clothing store', cover: 'clothing rack boutique', video: 'fashion clothes' },
     products: [
-      ['Áo thun cotton trơn unisex', 129_000, 159_000, 300, 'thoi-trang'],
-      ['Áo sơ mi linen tay ngắn', 249_000, null, 80, 'thoi-trang'],
-      ['Quần jean ống suông nữ', 299_000, 359_000, 60, 'thoi-trang'],
-      ['Váy hoa nhí dáng dài', 319_000, null, 45, 'thoi-trang'],
-      ['Áo khoác gió 2 lớp', 389_000, 450_000, 70, 'thoi-trang'],
-      ['Túi tote vải canvas', 99_000, null, 120, 'thoi-trang'],
-      ['Mũ bucket thêu chữ', 79_000, 99_000, 90, 'thoi-trang'],
+      ['Áo thun cotton trơn unisex', 129_000, 159_000, 300, 'thoi-trang', 'white t-shirt'],
+      ['Áo sơ mi linen tay ngắn', 249_000, null, 80, 'thoi-trang', 'linen shirt'],
+      ['Quần jean ống suông nữ', 299_000, 359_000, 60, 'thoi-trang', 'women jeans'],
+      ['Váy hoa nhí dáng dài', 319_000, null, 45, 'thoi-trang', 'floral dress'],
+      ['Áo khoác gió 2 lớp', 389_000, 450_000, 70, 'thoi-trang', 'windbreaker jacket'],
+      ['Túi tote vải canvas', 99_000, null, 120, 'thoi-trang', 'canvas tote bag'],
+      ['Mũ bucket thêu chữ', 79_000, 99_000, 90, 'thoi-trang', 'bucket hat'],
     ],
   },
   {
@@ -93,13 +98,14 @@ const KIOTS: DemoKiot[] = [
     district: 'Quận 3',
     color: ['#f472b6', '#a855f7'],
     caption: 'Son dưỡng môi từ sáp ong #mypham #sonduong #mau',
+    queries: { logo: 'cosmetics', cover: 'skincare products', video: 'skincare' },
     products: [
-      ['Son dưỡng môi sáp ong', 85_000, 110_000, 200, 'my-pham'],
-      ['Sữa rửa mặt nghệ tươi (150ml)', 125_000, null, 150, 'my-pham'],
-      ['Nước hoa hồng không cồn (200ml)', 159_000, 189_000, 90, 'my-pham'],
-      ['Kem chống nắng SPF50 (50ml)', 219_000, null, 75, 'my-pham'],
-      ['Dầu gội bồ kết (300ml)', 99_000, 120_000, 130, 'my-pham'],
-      ['Mặt nạ đất sét (100g)', 139_000, null, 60, 'my-pham'],
+      ['Son dưỡng môi sáp ong', 85_000, 110_000, 200, 'my-pham', 'lip balm'],
+      ['Sữa rửa mặt nghệ tươi (150ml)', 125_000, null, 150, 'my-pham', 'facial cleanser'],
+      ['Nước hoa hồng không cồn (200ml)', 159_000, 189_000, 90, 'my-pham', 'toner bottle skincare'],
+      ['Kem chống nắng SPF50 (50ml)', 219_000, null, 75, 'my-pham', 'sunscreen'],
+      ['Dầu gội bồ kết (300ml)', 99_000, 120_000, 130, 'my-pham', 'shampoo bottle'],
+      ['Mặt nạ đất sét (100g)', 139_000, null, 60, 'my-pham', 'clay face mask'],
     ],
   },
   {
@@ -111,14 +117,15 @@ const KIOTS: DemoKiot[] = [
     district: 'Hải Châu',
     color: ['#0ea5e9', '#14b8a6'],
     caption: 'Nồi chiên không dầu cho gia đình #giadung #bep #mau',
+    queries: { logo: 'kitchen utensils', cover: 'modern kitchen', video: 'kitchen cooking' },
     products: [
-      ['Nồi chiên không dầu 5 lít', 1_290_000, 1_590_000, 25, 'do-gia-dung'],
-      ['Bình giữ nhiệt inox 500ml', 189_000, null, 140, 'do-gia-dung'],
-      ['Bộ hộp đựng thực phẩm 5 món', 159_000, 199_000, 85, 'do-gia-dung'],
-      ['Tai nghe bluetooth chống ồn', 459_000, 590_000, 50, 'dien-tu'],
-      ['Sạc dự phòng 10.000mAh', 299_000, null, 100, 'dien-tu'],
-      ['Cáp sạc nhanh Type-C 1m', 59_000, 79_000, 400, 'dien-tu'],
-      ['Đèn ngủ cảm ứng để bàn', 149_000, null, 65, 'do-gia-dung'],
+      ['Nồi chiên không dầu 5 lít', 1_290_000, 1_590_000, 25, 'do-gia-dung', 'air fryer'],
+      ['Bình giữ nhiệt inox 500ml', 189_000, null, 140, 'do-gia-dung', 'thermos bottle'],
+      ['Bộ hộp đựng thực phẩm 5 món', 159_000, 199_000, 85, 'do-gia-dung', 'food storage containers'],
+      ['Tai nghe bluetooth chống ồn', 459_000, 590_000, 50, 'dien-tu', 'wireless headphones'],
+      ['Sạc dự phòng 10.000mAh', 299_000, null, 100, 'dien-tu', 'power bank'],
+      ['Cáp sạc nhanh Type-C 1m', 59_000, 79_000, 400, 'dien-tu', 'usb cable'],
+      ['Đèn ngủ cảm ứng để bàn', 149_000, null, 65, 'do-gia-dung', 'bedside lamp'],
     ],
   },
   {
@@ -131,13 +138,14 @@ const KIOTS: DemoKiot[] = [
     district: 'Mường Thanh',
     color: ['#b45309', '#7c2d12'],
     caption: 'Thịt trâu gác bếp chuẩn vị Tây Bắc #dacsan #taybac #mau',
+    queries: { logo: 'mountain village', cover: 'rice terraces', video: 'honey' },
     products: [
-      ['Thịt trâu gác bếp (500g)', 450_000, 520_000, 40, 'thuc-pham-dac-san'],
-      ['Mật ong rừng nguyên chất (1 lít)', 380_000, null, 30, 'thuc-pham-dac-san'],
-      ['Chè Shan tuyết cổ thụ (200g)', 260_000, 300_000, 50, 'thuc-pham-dac-san'],
-      ['Lạp xưởng hun khói (500g)', 220_000, null, 45, 'thuc-pham-dac-san'],
-      ['Gạo nếp nương (2kg)', 120_000, 140_000, 70, 'nong-san'],
-      ['Giỏ mây đan tay', 180_000, null, 20, 'thu-cong-my-nghe'],
+      ['Thịt trâu gác bếp (500g)', 450_000, 520_000, 40, 'thuc-pham-dac-san', 'smoked meat'],
+      ['Mật ong rừng nguyên chất (1 lít)', 380_000, null, 30, 'thuc-pham-dac-san', 'honey jar'],
+      ['Chè Shan tuyết cổ thụ (200g)', 260_000, 300_000, 50, 'thuc-pham-dac-san', 'green tea leaves'],
+      ['Lạp xưởng hun khói (500g)', 220_000, null, 45, 'thuc-pham-dac-san', 'chinese sausage'],
+      ['Gạo nếp nương (2kg)', 120_000, 140_000, 70, 'nong-san', 'sticky rice'],
+      ['Giỏ mây đan tay', 180_000, null, 20, 'thu-cong-my-nghe', 'rattan basket'],
     ],
   },
   {
@@ -149,14 +157,15 @@ const KIOTS: DemoKiot[] = [
     district: 'Lê Chân',
     color: ['#22c55e', '#facc15'],
     caption: 'Bộ đồ sơ sinh cotton mềm mịn #mevabe #sosinh #mau',
+    queries: { logo: 'baby', cover: 'nursery room', video: 'baby toys' },
     products: [
-      ['Bộ đồ sơ sinh cotton (3 bộ)', 189_000, 229_000, 100, 'me-va-be'],
-      ['Khăn sữa sợi tre (10 cái)', 99_000, null, 160, 'me-va-be'],
-      ['Bình sữa thuỷ tinh 240ml', 249_000, 289_000, 55, 'me-va-be'],
-      ['Đồ chơi gỗ xếp hình', 159_000, null, 70, 'me-va-be'],
-      ['Thức ăn hạt cho mèo (1,5kg)', 179_000, 199_000, 90, 'thu-cung'],
-      ['Sách tô màu cho bé', 45_000, null, 200, 'sach-van-phong-pham'],
-      ['Sữa tắm thảo dược cho bé', 135_000, 160_000, 80, 'me-va-be'],
+      ['Bộ đồ sơ sinh cotton (3 bộ)', 189_000, 229_000, 100, 'me-va-be', 'baby clothes'],
+      ['Khăn sữa sợi tre (10 cái)', 99_000, null, 160, 'me-va-be', 'muslin cloth baby'],
+      ['Bình sữa thuỷ tinh 240ml', 249_000, 289_000, 55, 'me-va-be', 'baby bottle'],
+      ['Đồ chơi gỗ xếp hình', 159_000, null, 70, 'me-va-be', 'wooden toys'],
+      ['Thức ăn hạt cho mèo (1,5kg)', 179_000, 199_000, 90, 'thu-cung', 'cat food'],
+      ['Sách tô màu cho bé', 45_000, null, 200, 'sach-van-phong-pham', 'coloring book'],
+      ['Sữa tắm thảo dược cho bé', 135_000, 160_000, 80, 'me-va-be', 'baby bath'],
     ],
   },
 ];
@@ -180,12 +189,21 @@ function artwork(colors: [string, string], seed: number, size: number): Promise<
 }
 
 export type SeedResult =
-  | { ok: true; login: { email: string; password: string }; kiots: number; products: number; videos: number }
+  | {
+      ok: true;
+      login: { email: string; password: string };
+      kiots: number;
+      products: number;
+      videos: number;
+      realPhotos: number; // số ảnh lấy được từ Pexels (còn lại là ảnh vẽ sẵn)
+    }
   | { ok: false; error: 'ALREADY_SEEDED' };
 
-// makeVideo(i) trả nội dung file video mẫu thứ i, hoặc null để bỏ qua video (máy không có ffmpeg).
+// photo(query): ảnh thật (Pexels) theo từ khoá; không có hoặc lỗi thì dùng ảnh vẽ sẵn.
+// makeVideo(i, query): nội dung file video thứ i, hoặc null để bỏ qua video.
 export async function seedDemoData(options: {
-  makeVideo: (index: number) => Promise<Buffer | null>;
+  photo?: (query: string, shape: 'square' | 'landscape') => Promise<Buffer | null>;
+  makeVideo: (index: number, query: string) => Promise<Buffer | null>;
   log?: (line: string) => void;
 }): Promise<SeedResult> {
   const log = options.log ?? (() => {});
@@ -198,6 +216,24 @@ export async function seedDemoData(options: {
   let login = { email: '', password: '' };
   let products = 0;
   let videos = 0;
+  let realPhotos = 0;
+  // Ảnh thật không dùng được (lỗi mạng, ảnh hỏng, quá lớn) thì thử lại bằng ảnh vẽ sẵn.
+  async function withPhoto<T extends { ok: boolean }>(
+    query: string,
+    shape: 'square' | 'landscape',
+    fallback: () => Promise<Buffer>,
+    save: (data: Buffer) => Promise<T>,
+  ): Promise<T> {
+    const real = await options.photo?.(query, shape);
+    if (real) {
+      const saved = await save(real);
+      if (saved.ok) {
+        realPhotos += 1;
+        return saved;
+      }
+    }
+    return save(await fallback());
+  }
 
   for (const [i, k] of KIOTS.entries()) {
     const email = `kiot${i + 1}@${DEMO_EMAIL_DOMAIN}`;
@@ -216,16 +252,31 @@ export async function seedDemoData(options: {
     if (!kiot.ok) fail(`Kiot ${k.slug}`, kiot);
     const kiotId = kiot.ok ? kiot.kiotId : '';
     await updateKiotAddress(userId, { province: k.province, district: k.district, addressLine: '' });
-    await setKiotImage(userId, 'logo', await artwork(k.color, i, 400));
-    await setKiotImage(userId, 'cover', await artwork([k.color[1], k.color[0]], i + 3, 1200));
+    await withPhoto(
+      k.queries.logo,
+      'square',
+      () => artwork(k.color, i, 400),
+      (data) => setKiotImage(userId, 'logo', data),
+    );
+    await withPhoto(
+      k.queries.cover,
+      'landscape',
+      () => artwork([k.color[1], k.color[0]], i + 3, 1200),
+      (data) => setKiotImage(userId, 'cover', data),
+    );
     // Kích hoạt 1 năm không qua thanh toán: không tạo KiotSubscription/PaymentIntent (không đụng sổ tiền).
     await db.$transaction((tx) =>
       extendActiveUntil(tx, kiotId, new Date(now().getTime() + 365 * 86_400_000)),
     );
 
     const productIds: string[] = [];
-    for (const [j, [name, price, compareAtPrice, stock, category]] of k.products.entries()) {
-      const image = await uploadProductImage(userId, await artwork(k.color, j, 800));
+    for (const [j, [name, price, compareAtPrice, stock, category, query]] of k.products.entries()) {
+      const image = await withPhoto(
+        query,
+        'square',
+        () => artwork(k.color, j, 800),
+        (data) => uploadProductImage(userId, data),
+      );
       if (!image.ok) fail(`ảnh ${name}`, image);
       const created = await createProduct(userId, {
         name,
@@ -241,7 +292,7 @@ export async function seedDemoData(options: {
     }
     products += productIds.length;
 
-    const video = await options.makeVideo(i);
+    const video = await options.makeVideo(i, k.queries.video);
     if (video) {
       const upload = await saveUpload(userId, Readable.from(video));
       if (!upload.ok) fail('tải video', upload);
@@ -254,7 +305,7 @@ export async function seedDemoData(options: {
     }
     log(`Đã tạo ${k.name}: ${productIds.length} sản phẩm${video ? ', 1 video' : ''}`);
   }
-  return { ok: true, login, kiots: KIOTS.length, products, videos };
+  return { ok: true, login, kiots: KIOTS.length, products, videos, realPhotos };
 }
 
 export type RemoveResult = {

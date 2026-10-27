@@ -2,6 +2,7 @@ import {
   Bell,
   Bookmark,
   ChevronRight,
+  Coins,
   Clapperboard,
   Crown,
   Film,
@@ -31,7 +32,7 @@ export default async function MePage() {
   const user = await requireUser();
   if (user.mustChangePassword) redirect('/tai-khoan/cai-dat?doi-mat-khau=1');
   const [data, t] = await Promise.all([loadMePage(user), getT()]);
-  const { role, follow, free, voucher, kiot, notifications, socialCount, saved } = data;
+  const { role, follow, free, voucher, kiot, notifications, socialCount, saved, xu } = data;
 
   const links = [
     {
@@ -44,6 +45,13 @@ export default async function MePage() {
       badge: notifications,
     },
     { href: '/don-mua', label: t('me.link.orders'), sub: t('me.link.ordersSub'), Icon: Package },
+    {
+      href: '/tai-khoan/xu',
+      label: t('live.xu.title'),
+      sub: t('live.xu.unit', { count: xu.toLocaleString(t.lang) }),
+      Icon: Coins,
+      testId: 'me-xu',
+    },
     { href: '/gio-hang', label: t('me.link.cart'), sub: t('me.link.cartSub'), Icon: ShoppingBag },
     { href: '/kiot-cua-toi', label: t('me.link.kiot'), sub: t('me.link.kiotSub'), Icon: Store },
     ...(role === 'free' ? [] : [{ href: '/ai', label: t('ai.link'), sub: t('ai.linkSub'), Icon: Sparkles }]),

@@ -904,6 +904,18 @@ model LiveViewer {
   @@index([liveId, lastSeenAt])
 }
 
+// Mỗi người xem 1 dòng mỗi buổi: có kết nối được hình hay không (SPEC-live.md: tỉ lệ lỗi > 5% thì đề xuất TURN).
+// Không phải sổ tiền: lần sau kết nối được thì sửa thành ok.
+model LiveConnect {
+  liveId    String
+  viewerKey String
+  ok        Boolean
+  createdAt DateTime
+
+  @@id([liveId, viewerKey])
+  @@index([createdAt])
+}
+
 model LiveChatMessage {
   id        String    @id @default(cuid(2))
   liveId    String

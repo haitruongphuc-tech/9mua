@@ -11,7 +11,14 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   const liveId = (await params).id;
   const first = await liveState(liveId);
   if (!first) return new Response('Not found', { status: 404 });
-  let lastChatId = new URL(request.url).searchParams.get('after');
+  const params0 = new URL(request.url).searchParams;
+  let lastChatId = params0.get('after');
+  // Trình duyệt / mạng không giữ được SSE: hỏi lại mỗi 3 giây, mỗi lần nhận 1 gói JSON.
+  if (params0.get('poll') === '1')
+    return Response.json(
+      { state: first, chat: await recentChat(liveId, lastChatId, 50) },
+      { headers: { 'cache-control': 'no-store' } },
+    );
   const encoder = new TextEncoder();
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {

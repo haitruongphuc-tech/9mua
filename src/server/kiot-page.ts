@@ -1,5 +1,6 @@
 import { getCreatorProfile } from '@/modules/creator';
 import { countPublicProducts, getPublicKiot, kiotOwnerId } from '@/modules/kiot';
+import { liveIdOfHost } from '@/modules/live';
 import { kiotSoldTotal } from '@/modules/marketplace';
 import { followStats, getSocialLinks, kiotHeartStats, toggleFollow, toggleKiotHeart } from '@/modules/social';
 
@@ -8,13 +9,14 @@ export async function loadKiotPage(slug: string, viewerId: string | null) {
   const found = await getPublicKiot(slug, viewerId);
   if (!found) return null;
   const { kiot, preview, owner } = found;
-  const [follow, hearts, products, sold, socialLinks, profile] = await Promise.all([
+  const [follow, hearts, products, sold, socialLinks, profile, liveId] = await Promise.all([
     followStats(owner.id, viewerId ?? undefined),
     kiotHeartStats(kiot.id, owner.id, viewerId ?? undefined),
     countPublicProducts(kiot.id),
     kiotSoldTotal(kiot.id),
     getSocialLinks(owner.id),
     getCreatorProfile(owner.id),
+    liveIdOfHost(owner.id), // chủ Kiot đang live: avatar viền đỏ + nhãn LIVE (SPEC-live.md mục 4)
   ]);
   return {
     kiot,
@@ -28,6 +30,7 @@ export async function loadKiotPage(slug: string, viewerId: string | null) {
     },
     socialLinks,
     videos: profile?.videos ?? [],
+    liveId,
   };
 }
 

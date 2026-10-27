@@ -1,0 +1,40 @@
+# MediaMTX cho Live 9MUA (SPEC-live.md "Kỹ thuật"). Chỉ bật WebRTC (WHIP để phát, WHEP để xem).
+# Địa chỉ hỏi quyền và IP công khai đặt bằng biến môi trường trong docker-compose.yml (MTX_*), không ghi bí mật ở đây.
+logLevel: info
+
+# Tắt mọi giao thức khác.
+rtsp: no
+rtmp: no
+hls: no
+srt: no
+playback: no
+
+# API quản trị CHỈ trong mạng Docker (worker hỏi trạng thái, ngắt kết nối). Không publish cổng 9997 ra host.
+api: yes
+apiAddress: :9997
+
+# WebRTC: HTTP (WHIP/WHEP) ở 8889, Nginx chuyển https://9mua.com/live-media/ vào đây.
+webrtc: yes
+webrtcAddress: :8889
+# Hình và tiếng đi thẳng qua cổng 8189 UDP (TCP dự phòng cho mạng chặn UDP). CEO mở 2 cổng này trên VPS.
+webrtcLocalUDPAddress: :8189
+webrtcLocalTCPAddress: :8189
+webrtcIPsFromInterfaces: no
+# webrtcAdditionalHosts: đặt bằng MTX_WEBRTCADDITIONALHOSTS = IP công khai của VPS.
+webrtcICEServers2: []
+
+# Hỏi app trước mỗi kết nối phát/xem (mã phát dùng 1 lần, mã xem 5 phút). Địa chỉ đặt bằng MTX_AUTHHTTPADDRESS.
+authMethod: http
+authHTTPExclude:
+  - action: api
+  - action: metrics
+  - action: pprof
+
+pathDefaults:
+  # Tối đa 50 người xem mỗi buổi (app cũng chặn người thứ 51).
+  maxReaders: 50
+
+paths:
+  # Mỗi buổi live là một đường ngẫu nhiên do app tạo (l + 24 ký tự hex).
+  '~^l[0-9a-f]{24}$':
+    source: publisher

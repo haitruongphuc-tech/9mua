@@ -21,7 +21,7 @@ const ACCOUNT_PATHS = [
 
 export function BottomNav({ base = '' }: { base?: string }) {
   const pathname = usePathname();
-  const { me, notifications } = useMe();
+  const { me, notifications, liveNow } = useMe();
   const t = useT();
   const onAccount = ACCOUNT_PATHS.some((p) => starts(pathname, p));
   const items = [
@@ -77,8 +77,14 @@ export function BottomNav({ base = '' }: { base?: string }) {
                 <Link
                   href={`${base}${href}`}
                   aria-current={active ? 'page' : undefined}
-                  className="flex flex-col items-center"
+                  className="relative flex flex-col items-center"
                 >
+                  {liveNow ? (
+                    <span
+                      className="absolute -right-0.5 -top-0.5 z-10 h-3 w-3 rounded-full border-2 border-ink bg-red-500"
+                      data-testid="nav-live-dot"
+                    />
+                  ) : null}
                   <span
                     className={`grid h-9 w-14 place-items-center rounded-[12px] text-white ${
                       active

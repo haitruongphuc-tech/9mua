@@ -64,6 +64,21 @@ body {
   }
 }
 
+/* Tim bay lên trên màn hình live (V4). */
+@keyframes heartFly {
+  0% {
+    transform: translateY(0) scale(0.6);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-180px) translateX(-24px) scale(1.2);
+    opacity: 0;
+  }
+}
+
 /* Bảng trượt từ dưới lên (V4). */
 @keyframes sheetUp {
   0% {

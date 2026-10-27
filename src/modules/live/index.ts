@@ -51,5 +51,6 @@ export {
   type PinnedCard,
   type LiveHost,
 } from './view';
+export { reportConnect, connectStats, suggestTurn, type ConnectStats } from './connect';
 export { onLiveEnded, type LiveEndedHook } from './hooks';
 export { fakeMedia } from './media';

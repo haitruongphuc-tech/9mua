@@ -8,6 +8,7 @@ import { fakeMedia } from './media';
 import { banUserFromLive, reportLive, stopLive } from './moderation';
 import { endLive, startLive } from './session';
 import { getLiveForViewer, listLiveNow } from './view';
+import { connectStats, reportConnect, suggestTurn } from './connect';
 import { authorizeMedia, heartbeat, syncWithMediaServer } from './viewers';
 import { verifyViewToken } from './tokens';
 
@@ -223,6 +224,32 @@ describe('người xem, chat, tim (SPEC-live.md mục 4–6)', () => {
     expect(await sendHearts(live.liveId, fan.id, 7)).toEqual({ hearts: 10 });
     advanceClock({ seconds: 1 });
     expect(await sendHearts(live.liveId, fan.id, 50)).toEqual({ hearts: 20 });
+  });
+});
+
+describe('tỉ lệ kết nối hình thất bại (SPEC-live.md "Không cần TURN")', () => {
+  it('mỗi người xem 1 dòng mỗi buổi; kết nối được lần sau thì tính là được; quá 5% thì đề xuất TURN', async () => {
+    setClock(new Date('2026-10-27T03:00:00Z'));
+    const host = await oldUser();
+    const live = await goLive(host.id);
+    const before = await connectStats();
+    expect(await reportConnect(live.liveId, { anonId: 'khach-0001' }, false)).toBe(true);
+    expect(await reportConnect(live.liveId, { anonId: 'khach-0001' }, true)).toBe(true);
+    expect(await reportConnect(live.liveId, { anonId: 'khach-0001' }, false)).toBe(true); // không hạ ngược
+    expect(await reportConnect(live.liveId, { anonId: 'khach-0002' }, false)).toBe(true);
+    for (let i = 0; i < 18; i++)
+      await reportConnect(live.liveId, { anonId: `khach-1${String(i).padStart(3, '0')}` }, true);
+    expect(await reportConnect(live.liveId, {}, false)).toBe(false); // không có mã người xem
+    expect(await reportConnect('khong-co', { anonId: 'khach-0003' }, false)).toBe(false);
+    const after = await connectStats();
+    expect(after.total - before.total).toBe(20);
+    expect(after.failed - before.failed).toBe(1);
+    expect(suggestTurn({ total: 20, failed: 1 })).toBe(false); // đúng 5% chưa vượt
+    expect(suggestTurn({ total: 20, failed: 2 })).toBe(true);
+    expect(suggestTurn({ total: 5, failed: 3 })).toBe(false); // quá ít lượt để kết luận
+    // Buổi đã kết thúc thì không ghi nữa.
+    await endLive(live.liveId, host.id);
+    expect(await reportConnect(live.liveId, { anonId: 'khach-0004' }, false)).toBe(false);
   });
 });
 

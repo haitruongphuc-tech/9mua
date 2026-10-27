@@ -9,6 +9,7 @@ import { ClientMessages } from '@/i18n/ClientMessages';
 import { getT } from '@/i18n/server';
 import { env } from '@/lib/env';
 import { getCreatorProfile } from '@/modules/creator';
+import { liveIdOfHost } from '@/modules/live';
 import { getCurrentUser } from '@/modules/identity';
 import { followStats, getSocialLinks } from '@/modules/social';
 
@@ -30,7 +31,12 @@ export default async function CreatorPage({ params }: { params: Promise<{ userId
   const p = await load(userId);
   if (!p) notFound();
   const viewer = await getCurrentUser();
-  const [follow, links, t] = await Promise.all([followStats(p.id, viewer?.id), getSocialLinks(p.id), getT()]);
+  const [follow, links, t, liveId] = await Promise.all([
+    followStats(p.id, viewer?.id),
+    getSocialLinks(p.id),
+    getT(),
+    liveIdOfHost(p.id),
+  ]);
   const isSelf = viewer?.id === p.id;
   const url = `${env().APP_URL}/creator/${p.id}`;
   return (
@@ -38,9 +44,23 @@ export default async function CreatorPage({ params }: { params: Promise<{ userId
       <div>
         <section className="mx-auto max-w-[900px] px-4 py-6">
           <header className="flex items-center gap-4">
-            <span className="grid h-20 w-20 shrink-0 place-items-center rounded-full border-4 border-ink bg-gradient-to-br from-brand to-[#c2410c] text-[30px] font-black shadow-[0_0_0_2px_rgb(255_107_0/0.5)]">
-              {p.displayName.trim().charAt(0).toUpperCase()}
-            </span>
+            {/* Đang live: viền đỏ + nhãn LIVE, bấm vào là xem (SPEC-live.md mục 4). */}
+            <a
+              href={liveId ? `/live/${liveId}` : undefined}
+              className="relative shrink-0"
+              data-testid={liveId ? 'creator-live-badge' : undefined}
+            >
+              <span
+                className={`grid h-20 w-20 place-items-center rounded-full border-4 bg-gradient-to-br from-brand to-[#c2410c] text-[30px] font-black shadow-[0_0_0_2px_rgb(255_107_0/0.5)] ${liveId ? 'border-red-500' : 'border-ink'}`}
+              >
+                {p.displayName.trim().charAt(0).toUpperCase()}
+              </span>
+              {liveId ? (
+                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded-full bg-red-600 px-2 py-0.5 text-[10px] font-black">
+                  {t('live.badge')}
+                </span>
+              ) : null}
+            </a>
             <div className="min-w-0">
               <h1 className="font-display text-[22px] font-black leading-tight">{p.displayName}</h1>
               <p className="text-[13px] text-white/60">{t('profile.creator')}</p>

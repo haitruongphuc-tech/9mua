@@ -1,5 +1,6 @@
 import { db } from '@/lib/db';
 import { getIntSetting } from '@/lib/settings';
+import { kiotOrigin } from '@/lib/urls';
 import { getProductForCheckout, kiotBasics, productPath } from '@/modules/kiot';
 import { mediaServer } from './media';
 import { getLive } from './session';
@@ -9,6 +10,7 @@ import { activeViewers, viewerKey, viewToken, type Viewer } from './viewers';
 export type LiveHost = {
   id: string;
   displayName: string;
+  href: string; // Kiot của người phát (nếu có), không thì trang creator
   kiot: { slug: string; name: string; logoUrl: string | null } | null;
 };
 export type PinnedCard = {
@@ -16,8 +18,7 @@ export type PinnedCard = {
   name: string;
   price: number;
   imageUrl: string | null;
-  kiotSlug: string;
-  path: string;
+  url: string;
 };
 export type ChatLine = { id: string; userId: string; name: string; text: string; host: boolean; at: string };
 
@@ -40,6 +41,7 @@ async function hostsOf(
     map.set(l.hostUserId, {
       id: l.hostUserId,
       displayName: u?.displayName ?? '',
+      href: k ? kiotOrigin(k.slug) : `/creator/${l.hostUserId}`,
       kiot: k ? { slug: k.slug, name: k.name, logoUrl: k.logoUrl } : null,
     });
   }
@@ -88,8 +90,7 @@ export async function pinnedCard(productId: string | null): Promise<PinnedCard |
     name: p.name,
     price: p.price,
     imageUrl: p.imageUrl,
-    kiotSlug: k.slug,
-    path: productPath(p),
+    url: `${kiotOrigin(k.slug)}${productPath(p)}`,
   };
 }
 

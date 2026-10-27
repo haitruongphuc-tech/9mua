@@ -13,6 +13,8 @@ import { useMe } from './MeProvider';
 // Popup mở tài khoản kiểu V4 (SPEC-identity.md bổ sung 27/10): khách chưa đăng nhập, sau 1,2 giây, bảng trượt từ
 // dưới lên. "Để sau" hoặc ✕ thì 30 ngày không hiện lại (cookie dùng chung cho trang Kiot).
 export const SIGNUP_LATER_COOKIE = 'nm_signup_later';
+// Mở popup ngay (vd. bấm chat/tim trên live khi chưa đăng nhập) mà không rời trang đang xem.
+export const OPEN_SIGNUP_EVENT = 'nm:open-signup';
 const HIDDEN_ON = [
   '/dang-nhap',
   '/dang-ky',
@@ -46,6 +48,12 @@ export function SignupPopup({
     const timer = setTimeout(() => setOpen(true), 1200);
     return () => clearTimeout(timer);
   }, [me, hiddenHere]);
+
+  useEffect(() => {
+    const show = () => setOpen(true);
+    window.addEventListener(OPEN_SIGNUP_EVENT, show);
+    return () => window.removeEventListener(OPEN_SIGNUP_EVENT, show);
+  }, []);
 
   useEffect(() => {
     if (!open) return;

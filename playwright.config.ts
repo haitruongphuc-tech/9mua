@@ -23,7 +23,14 @@ export default defineConfig({
     ...devices['iPhone 13'],
     baseURL: ORIGIN,
     trace: 'retain-on-failure',
-    launchOptions: { args: ['--host-resolver-rules=MAP 9mua.test 127.0.0.1, MAP *.9mua.test 127.0.0.1'] },
+    launchOptions: {
+      args: [
+        '--host-resolver-rules=MAP 9mua.test 127.0.0.1, MAP *.9mua.test 127.0.0.1',
+        // Camera và micro giả cho E2E phát live (SPEC-live.md), tự cho phép không hỏi.
+        '--use-fake-ui-for-media-stream',
+        '--use-fake-device-for-media-stream',
+      ],
+    },
   },
   // Chạy mọi kịch bản trên cả điện thoại (iPhone giả lập) và máy tính.
   projects: [

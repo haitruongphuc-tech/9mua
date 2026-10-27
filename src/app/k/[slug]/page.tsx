@@ -55,7 +55,8 @@ export default async function KiotPage({
   const { slug } = await params;
   const data = await load(slug);
   if (!data) notFound();
-  const { kiot, preview, owner, stats, viewer, socialLinks, videos } = data;
+  const { kiot, preview, owner, stats, viewer, socialLinks, videos, liveId } = data;
+  const liveHref = liveId ? `${env().APP_URL}/live/${liveId}` : null;
   const query = await searchParams;
   const tab: Tab = TABS.includes(query.tab as Tab) ? (query.tab as Tab) : 'san-pham';
   const [products, base, t] = await Promise.all([
@@ -99,23 +100,38 @@ export default async function KiotPage({
           </div>
           <div className="relative -mt-10 px-4">
             <div className="flex items-end gap-4">
-              <span className="relative grid h-24 w-24 shrink-0 place-items-center overflow-hidden rounded-full border-4 border-ink bg-gradient-to-br from-brand to-[#c2410c] text-[36px] font-black">
-                {kiot.logoUrl ? (
-                  <Image
-                    src={kiot.logoUrl}
-                    alt=""
-                    data-testid="kiot-logo"
-                    fill
-                    sizes="96px"
-                    className="object-cover"
-                    unoptimized
-                  />
-                ) : (
-                  <span aria-hidden data-testid="kiot-initial">
-                    {kiot.name.trim().charAt(0).toUpperCase()}
+              {/* Chủ Kiot đang live: viền đỏ + nhãn LIVE, bấm vào là xem (SPEC-live.md mục 4). */}
+              <a
+                href={liveHref ?? undefined}
+                className="relative shrink-0"
+                aria-label={liveHref ? t('live.badge') : undefined}
+                data-testid={liveHref ? 'kiot-live-badge' : undefined}
+              >
+                <span
+                  className={`relative grid h-24 w-24 shrink-0 place-items-center overflow-hidden rounded-full border-4 ${liveHref ? 'border-red-500' : 'border-ink'} bg-gradient-to-br from-brand to-[#c2410c] text-[36px] font-black`}
+                >
+                  {kiot.logoUrl ? (
+                    <Image
+                      src={kiot.logoUrl}
+                      alt=""
+                      data-testid="kiot-logo"
+                      fill
+                      sizes="96px"
+                      className="object-cover"
+                      unoptimized
+                    />
+                  ) : (
+                    <span aria-hidden data-testid="kiot-initial">
+                      {kiot.name.trim().charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                </span>
+                {liveHref ? (
+                  <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded-full bg-red-600 px-2 py-0.5 text-[10px] font-black">
+                    {t('live.badge')}
                   </span>
-                )}
-              </span>
+                ) : null}
+              </a>
               <div className="min-w-0 pb-1">
                 <h1 className="font-display text-[22px] font-black leading-tight">{kiot.name}</h1>
                 <p className="truncate text-[13px] text-white/60" data-testid="kiot-handle">
@@ -198,10 +214,10 @@ export default async function KiotPage({
             {tab === 'live' ? (
               <div className="py-10 text-center" data-testid="kiot-live-tab">
                 <p className="text-[13px] text-white/60">
-                  {t('profile.notLive', { name: owner.displayName })}
+                  {liveHref ? t('live.publish.live') : t('profile.notLive', { name: owner.displayName })}
                 </p>
                 <Link
-                  href={`${env().APP_URL}/live`}
+                  href={liveHref ?? `${env().APP_URL}/live`}
                   className="mt-3 inline-flex h-11 items-center gap-2 rounded-full bg-white/10 px-6 text-[13px] font-black"
                 >
                   <Radio className="h-4 w-4" aria-hidden /> {t('profile.seeLive')}

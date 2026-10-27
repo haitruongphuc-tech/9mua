@@ -9,10 +9,11 @@ import {
   likedVideoCount,
   savedVideos,
 } from '@/modules/social';
+import { getXuBalance } from '@/modules/xu';
 
 // Ghép dữ liệu trang Tôi kiểu V4 (SPEC-social.md mục 4, 7, 8). Mọi số đều đếm thật.
 export async function loadMePage(user: { id: string; role: 'user' | 'admin' }) {
-  const [follow, free, liked, threshold, enabled, voucher, kiot, notifications, links, saved] =
+  const [follow, free, liked, threshold, enabled, voucher, kiot, notifications, links, saved, xu] =
     await Promise.all([
       followStats(user.id),
       freeStatus(user.id),
@@ -24,6 +25,7 @@ export async function loadMePage(user: { id: string; role: 'user' | 'admin' }) {
       unreadCount(user.id),
       getSocialLinks(user.id),
       savedVideos({ userId: user.id }, 12),
+      getXuBalance(user.id),
     ]);
   const status = kiot ? kiotStatus(kiot) : null;
   return {
@@ -34,6 +36,7 @@ export async function loadMePage(user: { id: string; role: 'user' | 'admin' }) {
           ? ('owner' as const)
           : ('free' as const),
     follow: { followers: follow.followers, following: follow.following },
+    xu,
     free: free.isFree ? { used: free.used, limit: free.limit } : null,
     voucher: {
       enabled: enabled === 'true',

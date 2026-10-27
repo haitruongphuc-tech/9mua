@@ -1,6 +1,7 @@
 // Tiến trình nền (service `worker` trong docker-compose): chuyển mã video từng cái một, để web không bị chậm.
 import { db } from '@/lib/db';
-import { cleanupStaleUploads, processNextJob, recomputeScores } from '@/modules/creator';
+import { cleanupStaleUploads, expireStories, recomputeScores } from '@/modules/creator';
+import { processNextJob } from '@/server/creator';
 
 const IDLE_MS = 3_000;
 const CLEANUP_EVERY_MS = 3_600_000;
@@ -28,6 +29,7 @@ async function main() {
       }
       if (Date.now() - lastScores > SCORES_EVERY_MS) {
         await recomputeScores();
+        await expireStories(); // Story quá 24 giờ thì ẩn, file xoá sau 7 ngày
         lastScores = Date.now();
       }
       if (!worked) await sleep(IDLE_MS);

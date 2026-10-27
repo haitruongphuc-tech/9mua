@@ -1,6 +1,6 @@
 import { env } from '@/lib/env';
 import { isInternalRequest, notFoundResponse } from '@/lib/internal-route';
-import { processNextJob } from '@/modules/creator';
+import { processNextJob } from '@/server/creator';
 
 export const dynamic = 'force-dynamic';
 

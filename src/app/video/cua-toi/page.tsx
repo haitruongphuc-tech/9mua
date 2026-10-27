@@ -14,6 +14,7 @@ const STATUS: Record<string, string> = {
   failed: 'Không đăng được',
   hidden: 'Tạm ẩn (chờ 9MUA xem)',
   removed: 'Bị gỡ',
+  expired: 'Story đã hết 24 giờ',
 };
 
 export default async function MyVideosPage({ searchParams }: { searchParams: Promise<{ moi?: string }> }) {
@@ -51,8 +52,19 @@ export default async function MyVideosPage({ searchParams }: { searchParams: Pro
                 ) : null}
               </span>
               <div className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
-                <span className="font-bold" data-testid="my-video-status">
+                <span className="flex flex-wrap items-center gap-1.5 font-bold" data-testid="my-video-status">
+                  {v.kind === 'story' ? (
+                    <span className="rounded-full bg-brand px-2 py-0.5 text-[11px] text-white">Story</span>
+                  ) : null}
+                  {v.duetOfId ? (
+                    <span className="rounded-full bg-brand-ink px-2 py-0.5 text-[11px] text-white">Duet</span>
+                  ) : null}
                   {STATUS[v.status] ?? v.status}
+                  {v.kind === 'story' && v.status === 'ready' && v.expiresAt ? (
+                    <span className="font-normal text-black/60">
+                      · hết hạn {formatDateTimeVN(v.expiresAt)}
+                    </span>
+                  ) : null}
                 </span>
                 {v.failReason ? <span className="text-danger">{v.failReason}</span> : null}
                 {v.moderationNote ? <span className="text-danger">{v.moderationNote}</span> : null}

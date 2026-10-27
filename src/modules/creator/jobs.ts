@@ -7,8 +7,9 @@ import { db } from '@/lib/db';
 import { env } from '@/lib/env';
 import { imageStore } from '@/lib/media/image-store';
 import { notify } from '@/lib/notifications';
+import { runVideoReadyHooks } from './hooks';
 import { initialScore } from './score';
-import { probe, rejectReason, transcode } from './transcode';
+import { composeDuet, MAX_DURATION_SEC, MAX_STORY_SEC, probe, rejectReason, transcode } from './transcode';
 
 export const MAX_ATTEMPTS = 3;
 // Việc "running" mà không xong sau 15 phút (worker chết giữa chừng) được lấy lại.
@@ -56,7 +57,16 @@ export async function processNextJob(): Promise<boolean> {
   const work = path.join(env().PRIVATE_DIR, 'video-work', job.id);
   try {
     const source = await probe(job.sourcePath).catch(() => null);
-    const reason = source ? rejectReason(source) : 'File không phải video MP4, MOV hoặc WebM';
+    const story = video.kind === 'story';
+    let reason = source
+      ? rejectReason(source, story ? MAX_STORY_SEC : MAX_DURATION_SEC)
+      : 'File không phải video MP4, MOV hoặc WebM';
+    // Duet: cần file video gốc còn trên feed (SPEC-creator.md bổ sung 27/10).
+    const original = video.duetOfId
+      ? await db.video.findFirst({ where: { id: video.duetOfId, status: 'ready', kind: 'video' } })
+      : null;
+    const originalPath = original?.fileUrl ? imageStore().localPath(original.fileUrl) : null;
+    if (!reason && video.duetOfId && !originalPath) reason = 'Video gốc để Duet không còn trên 9MUA';
     if (reason) {
       await fail(job, reason);
       return true;
@@ -64,7 +74,14 @@ export async function processNextJob(): Promise<boolean> {
     await mkdir(work, { recursive: true });
     const outMp4 = path.join(work, 'video.mp4');
     const outPoster = path.join(work, 'poster.jpg');
-    await transcode(job.sourcePath, outMp4, outPoster, source!.durationSec);
+    if (originalPath) {
+      const orig = await probe(originalPath);
+      await composeDuet(job.sourcePath, originalPath, outMp4, outPoster, {
+        durationSec: source!.durationSec,
+        newAudio: source!.hasAudio,
+        origAudio: orig.hasAudio,
+      });
+    } else await transcode(job.sourcePath, outMp4, outPoster, source!.durationSec);
     const result = await probe(outMp4);
 
     const t = now();
@@ -84,6 +101,8 @@ export async function processNextJob(): Promise<boolean> {
           height: result.video?.height,
           readyAt: t,
           score: initialScore(),
+          // Story tự ẩn sau 24 giờ kể từ lúc lên.
+          expiresAt: story ? new Date(t.getTime() + 24 * 3_600_000) : null,
         },
       }),
       db.videoJob.update({ where: { id: job.id }, data: { status: 'done', error: null } }),
@@ -95,6 +114,12 @@ export async function processNextJob(): Promise<boolean> {
       video.caption.slice(0, 80) || 'Video của bạn đã lên feed.',
       `/video?v=${video.id}`,
     );
+    await runVideoReadyHooks({
+      id: video.id,
+      authorId: video.authorId,
+      caption: video.caption,
+      kind: video.kind,
+    });
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
     console.error(`[worker] video ${video.id} lỗi (lần ${job.attempts}):`, message);

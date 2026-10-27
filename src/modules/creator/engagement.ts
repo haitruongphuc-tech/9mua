@@ -88,3 +88,23 @@ export async function toggleLike(
     return { ok: true as const, liked: false, likes: v.likes };
   });
 }
+
+// Chỉ thích (không bỏ thích): chạm 2 lần lên video (SPEC-creator.md bổ sung 27/10).
+export async function likeVideo(
+  videoId: string,
+  userId: string,
+): Promise<{ ok: true; liked: true; likes: number } | { ok: false; error: 'NOT_FOUND' }> {
+  return db.$transaction(async (tx) => {
+    const video = await tx.video.findFirst({
+      where: { id: videoId, status: 'ready' },
+      select: { likes: true },
+    });
+    if (!video) return { ok: false as const, error: 'NOT_FOUND' as const };
+    const added = await tx.$executeRaw`
+      INSERT INTO "VideoLike" ("videoId", "userId", "createdAt") VALUES (${videoId}, ${userId}, ${now()})
+      ON CONFLICT DO NOTHING`;
+    if (!added) return { ok: true as const, liked: true as const, likes: video.likes };
+    const v = await tx.video.update({ where: { id: videoId }, data: { likes: { increment: 1 } } });
+    return { ok: true as const, liked: true as const, likes: v.likes };
+  });
+}

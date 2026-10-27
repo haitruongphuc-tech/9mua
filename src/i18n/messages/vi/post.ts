@@ -1,0 +1,35 @@
+// Nhóm "post." — trang đăng video / Story / Duet.
+export const post = {
+  'post.title': 'Đăng video',
+  'post.lead':
+    'Video dọc 9:16 quay bằng điện thoại. Gắn tối đa 3 sản phẩm để người xem bấm mua ngay trên video.',
+  'post.mode.video': 'Video',
+  'post.mode.story': 'Story 24 giờ',
+  'post.storyHint': 'Story dài tối đa 30 giây, tự ẩn sau 24 giờ và hiện ở đầu trang Live.',
+  'post.duetWith': 'Duet với @{name}',
+  'post.duetHint': 'Video của bạn sẽ được ghép cạnh video gốc: bên trái video gốc, bên phải video của bạn.',
+  'post.pick': 'Chọn video (≤ {sec} giây, ≤ 100MB)',
+  'post.caption': 'Chú thích ({count}/{max})',
+  'post.captionPlaceholder': 'Giới thiệu sản phẩm… #thanhlong',
+  'post.products': 'Gắn sản phẩm ({count}/3)',
+  'post.productSearch': 'Tìm sản phẩm trên Chợ…',
+  'post.uploading': 'Đang tải lên {pct}%',
+  'post.saving': 'Đang lưu…',
+  'post.submit': 'Đăng video',
+  'post.submitStory': 'Đăng Story',
+  'post.remaining': 'Hôm nay bạn còn đăng được {count} video.',
+  'post.remainingStory': 'Hôm nay bạn còn đăng được {count} Story.',
+  'post.err.tooBig': 'Video tối đa 100MB.',
+  'post.err.tooLong': 'Video dài hơn {sec} giây, hãy cắt ngắn rồi đăng lại.',
+  'post.err.upload': 'Tải lên thất bại, hãy thử lại.',
+  'post.err.offline': 'Mất kết nối, hãy thử lại.',
+  'post.err.NOT_FOUND': 'Không tìm thấy file vừa tải lên, hãy chọn lại video.',
+  'post.err.TOO_LARGE': 'Video tối đa 100MB.',
+  'post.err.DAILY_LIMIT': 'Mỗi ngày đăng tối đa 10 video và 10 Story.',
+  'post.err.BAD_FORMAT': 'File không phải video MP4, MOV hoặc WebM.',
+  'post.err.PRODUCT_INVALID': 'Có sản phẩm không còn bán. Hãy bỏ chọn rồi thử lại (tối đa 3 sản phẩm).',
+  'post.err.CAPTION_TOO_LONG': 'Chú thích tối đa 300 ký tự.',
+  'post.err.DUET_INVALID': 'Video gốc để Duet không còn trên 9MUA.',
+} as const;
+
+export type PostMessages = Record<keyof typeof post, string>;

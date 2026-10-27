@@ -65,7 +65,7 @@ savedVideos(userId, cursor?): Promise<Page<FeedVideo>>
 hashtagVideos(tag, cursor?): Promise<Page<FeedVideo>>
 trendingHashtags(limit): Promise<{ tag: string; videos: number }[]>
 toggleKiotHeart(userId, kiotId): Promise<{ ok: true; hearted: boolean; hearts: number } | { ok: false; error: 'FREE_LIMIT' }>
-useDailyAction(userId, kind: 'heart' | 'follow'): Promise<{ ok: true } | { ok: false; error: 'FREE_LIMIT' }>  // creator.toggleLike gọi
+consumeDailyAction(userId, kind: 'heart' | 'follow'): Promise<{ ok: true } | { ok: false; error: 'FREE_LIMIT' }>  // creator.toggleLike gọi
 freeStatus(userId): Promise<{ isFree: boolean; used: number; limit: number }>
 checkVoucher(userId): Promise<void>               // gọi sau mỗi lần thích video
 getVoucher(userId): Promise<VoucherView | null>

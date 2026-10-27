@@ -8,6 +8,8 @@ export interface ImageStore {
   // Chuyển một file đã có (vd. video vừa chuyển mã) vào kho công khai; file nguồn bị xoá.
   saveFile(key: string, sourcePath: string): Promise<string>;
   remove(url: string): Promise<void>;
+  // Đường dẫn trên đĩa của một file đã lưu (worker cần để ghép Duet). null nếu không phải file của kho này.
+  localPath(url: string): string | null;
 }
 
 // Trả null nếu đường dẫn thoát ra ngoài thư mục gốc (../).
@@ -38,6 +40,11 @@ export class LocalImageStore implements ImageStore {
       await unlink(sourcePath);
     });
     return `/uploads/${key}`;
+  }
+
+  localPath(url: string): string | null {
+    if (!url.startsWith('/uploads/')) return null;
+    return resolveUploadPath(this.root, url.slice('/uploads/'.length).split('/'));
   }
 
   async remove(url: string): Promise<void> {

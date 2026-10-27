@@ -12,6 +12,17 @@ export async function notify(userId: string, title: string, body = '', url?: str
   }
 }
 
+// Thông báo theo khoá từ điển (SPEC-i18n.md): hiện đúng ngôn ngữ người xem đang chọn. Lưu title = "@khoá",
+// body = biến dạng JSON; trang Thông báo dịch lúc hiển thị. Thông báo cũ (chữ thường) vẫn hiện như cũ.
+export async function notifyKey(
+  userId: string,
+  key: string,
+  vars: Record<string, string | number> = {},
+  url?: string,
+): Promise<void> {
+  await notify(userId, `@${key}`, JSON.stringify(vars), url);
+}
+
 export function unreadCount(userId: string): Promise<number> {
   return db.notification.count({ where: { userId, readAt: null } });
 }

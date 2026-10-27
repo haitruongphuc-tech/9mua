@@ -627,9 +627,9 @@
   (CEO duyệt qua chat, §7 mục 14).
 - [x] **T59: Đăng nhập Google + popup mở tài khoản** (`SPEC-identity.md` bổ sung).
 - [x] **T60: Admin nhớ thiết bị 30 ngày + công cụ CEO** (ghim, slogan, pháp lý, luật Free/voucher).
-- [ ] **T61: Module social** — follow, bình luận, lưu, hashtag, tim Kiot, giới hạn Free, voucher.
-- [ ] **T62: Feed V4** (gộp T41) — tab Đang Follow, thả tim 2 chạm, thanh tiến độ, cột nút, bình luận, chia sẻ có QR.
-- [ ] **T63: Story 24h + Duet**.
+- [x] **T61: Module social** — follow, bình luận, lưu, hashtag, tim Kiot, giới hạn Free, voucher.
+- [x] **T62: Feed V4** (gộp T41) — tab Đang Follow, thả tim 2 chạm, thanh tiến độ, cột nút, bình luận, chia sẻ có QR.
+- [x] **T63: Story 24h + Duet**.
 - [ ] **T64: Trang Kiot V4** (gộp T42) + Social Connect.
 - [ ] **T65: Trang Tôi V4** (gộp T43) — Free/voucher/xu, Bộ sưu tập, lối tắt; cài đặt tài khoản sang `/tai-khoan/cai-dat`.
 - [ ] **T66: Đổi giao diện + dịch các trang còn lại** — Chợ, sản phẩm, danh bạ Kiot, giỏ, đặt hàng, đơn mua, đăng nhập,

@@ -542,6 +542,10 @@ model Video {
   likes          Int            @default(0)
   score          Float          @default(0)
   readyAt        DateTime?
+  // Story 24 giờ và Duet (SPEC-creator.md bổ sung 27/10). Video cũ: kind = video, không hết hạn, không Duet.
+  kind           String         @default("video") // video | story
+  expiresAt      DateTime?
+  duetOfId       String?
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
   products       VideoProduct[]
@@ -549,6 +553,7 @@ model Video {
   @@index([status, score])
   @@index([status, readyAt])
   @@index([authorId, createdAt])
+  @@index([kind, status, expiresAt])
 }
 
 model VideoProduct {
@@ -708,4 +713,87 @@ model PaymentIssueResolution {
   note         String
   resolvedById String
   resolvedAt   DateTime @default(now())
+}
+
+// ===== Social (SPEC-social.md) =====
+model Follow {
+  followerId String
+  followeeId String
+  createdAt  DateTime @default(now())
+
+  @@id([followerId, followeeId])
+  @@index([followeeId])
+}
+
+model Comment {
+  id          String    @id @default(cuid(2))
+  videoId     String
+  userId      String
+  parentId    String?
+  text        String
+  pinnedAt    DateTime?
+  hiddenAt    DateTime?
+  hiddenById  String?
+  reportCount Int       @default(0)
+  createdAt   DateTime  @default(now())
+
+  @@index([videoId, createdAt])
+  @@index([userId, createdAt])
+  @@index([parentId])
+}
+
+model CommentReport {
+  commentId String
+  userId    String
+  reason    String
+  createdAt DateTime @default(now())
+
+  @@id([commentId, userId])
+}
+
+model SavedVideo {
+  userId    String
+  videoId   String
+  createdAt DateTime @default(now())
+
+  @@id([userId, videoId])
+}
+
+model KiotHeart {
+  kiotId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  @@id([kiotId, userId])
+}
+
+// Lượt tim + follow mỗi ngày (giờ Việt Nam) của tài khoản Free.
+model DailyAction {
+  userId String
+  day    String // YYYY-MM-DD theo Asia/Ho_Chi_Minh
+  count  Int    @default(0)
+
+  @@id([userId, day])
+}
+
+// Voucher mở Kiot khi đủ số video đã thả tim (mỗi tài khoản tối đa 1 voucher).
+model KiotVoucher {
+  id           String    @id @default(cuid(2))
+  userId       String    @unique
+  issuedAt     DateTime  @default(now())
+  usedAt       DateTime?
+  kiotId       String?
+  revokedAt    DateTime?
+  revokedById  String?
+  revokeReason String?
+}
+
+// Link mạng xã hội người dùng tự dán (SPEC-kiot.md bổ sung 27/10).
+model SocialLink {
+  userId    String
+  platform  String // tiktok | facebook | instagram | youtube | shopee | zalo
+  url       String
+  createdAt DateTime @default(now())
+
+  @@id([userId, platform])
 }

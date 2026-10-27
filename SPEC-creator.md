@@ -146,7 +146,8 @@ removeVideo(videoId, adminId, reason): Promise<void>     // cho admin
   luận); lưu; chia sẻ; nút ⋯ (Duet, Báo cáo).
 - Bên trái (V4): @tên, chú thích có hashtag bấm được, thẻ sản phẩm nền trắng có nút "+ Giỏ", hàng nút "Mở Kiot"
   (người chưa có Kiot) và "Duet".
-- **Chia sẻ**: bảng trượt có Facebook, Zalo, Messenger, sao chép link, chia sẻ của điện thoại, và **mã QR** của link.
+- **Chia sẻ**: bảng trượt có Facebook, Messenger (điện thoại), sao chép link, chia sẻ của điện thoại (gồm Zalo), và
+  **mã QR** của link.
   Không hiện nút của mạng không cho chia sẻ link (TikTok, Instagram, YouTube, Shopee).
 
 ### Story 24 giờ

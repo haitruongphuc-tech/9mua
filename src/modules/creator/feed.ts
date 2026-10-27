@@ -24,6 +24,7 @@ export type FeedVideo = {
   views: number;
   liked: boolean;
   pinned: boolean; // CEO ghim lên đầu "Dành cho bạn"
+  duetOfId: string | null; // video Duet: link về video gốc
   products: FeedProduct[];
 };
 
@@ -31,8 +32,8 @@ export const FEED_PAGE = 8;
 const FRESH_SHARE = 0.3; // trộn 30% video mới nhất để video mới có cơ hội
 const MAX_SERVED_IN_CURSOR = 300;
 
-// Video được lên feed: đã xử lý xong và tài khoản người đăng không bị khoá.
-const VISIBLE = Prisma.sql`v.status = 'ready' AND u."lockedAt" IS NULL`;
+// Video được lên feed: đã xử lý xong, không phải Story 24 giờ, và tài khoản người đăng không bị khoá.
+const VISIBLE = Prisma.sql`v.status = 'ready' AND v.kind = 'video' AND u."lockedAt" IS NULL`;
 
 type Row = { id: string };
 
@@ -181,6 +182,7 @@ export async function hydrateVideos(ids: string[], viewer: Viewer): Promise<Feed
       views: v.views,
       liked: liked.has(v.id),
       pinned: pinnedSet.has(v.id),
+      duetOfId: v.duetOfId,
       products: await feedProducts(v.products.map((p) => p.productId)),
     });
   }

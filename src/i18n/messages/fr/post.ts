@@ -1,0 +1,36 @@
+import type { PostMessages } from '../vi/post';
+
+export const post: PostMessages = {
+  'post.title': 'Publier une vidéo',
+  'post.lead':
+    'Vidéo verticale 9:16 filmée au téléphone. Liez jusqu’à 3 produits pour que les spectateurs achètent directement depuis la vidéo.',
+  'post.mode.video': 'Vidéo',
+  'post.mode.story': 'Story 24 h',
+  'post.storyHint':
+    'Les Stories durent 30 secondes maximum, disparaissent après 24 heures et s’affichent en haut de la page Live.',
+  'post.duetWith': 'Duo avec @{name}',
+  'post.duetHint': 'Votre vidéo sera placée à côté de l’originale : l’originale à gauche, la vôtre à droite.',
+  'post.pick': 'Choisir une vidéo (≤ {sec} secondes, ≤ 100 Mo)',
+  'post.caption': 'Légende ({count}/{max})',
+  'post.captionPlaceholder': 'Présentez votre produit… #pitaya',
+  'post.products': 'Lier des produits ({count}/3)',
+  'post.productSearch': 'Rechercher des produits sur le Marché…',
+  'post.uploading': 'Envoi {pct} %',
+  'post.saving': 'Enregistrement…',
+  'post.submit': 'Publier la vidéo',
+  'post.submitStory': 'Publier la Story',
+  'post.remaining': 'Vous pouvez encore publier {count} vidéos aujourd’hui.',
+  'post.remainingStory': 'Vous pouvez encore publier {count} Stories aujourd’hui.',
+  'post.err.tooBig': '100 Mo maximum par vidéo.',
+  'post.err.tooLong': 'La vidéo dépasse {sec} secondes, raccourcissez-la puis réessayez.',
+  'post.err.upload': 'Échec de l’envoi, réessayez.',
+  'post.err.offline': 'Connexion perdue, réessayez.',
+  'post.err.NOT_FOUND': 'Fichier envoyé introuvable, choisissez la vidéo à nouveau.',
+  'post.err.TOO_LARGE': '100 Mo maximum par vidéo.',
+  'post.err.DAILY_LIMIT': '10 vidéos et 10 Stories maximum par jour.',
+  'post.err.BAD_FORMAT': 'Le fichier n’est pas une vidéo MP4, MOV ou WebM.',
+  'post.err.PRODUCT_INVALID':
+    'Un produit n’est plus en vente. Désélectionnez-le et réessayez (3 produits maximum).',
+  'post.err.CAPTION_TOO_LONG': '300 caractères maximum pour la légende.',
+  'post.err.DUET_INVALID': 'La vidéo d’origine de ce duo n’est plus sur 9MUA.',
+};

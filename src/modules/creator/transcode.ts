@@ -3,6 +3,7 @@ import { spawn } from 'node:child_process';
 // Chạy ffprobe/ffmpeg bằng spawn với MẢNG tham số cố định (không qua shell, không ghép chuỗi lệnh từ dữ liệu
 // người dùng — SPEC-creator.md "Không bao giờ"). Đường dẫn file do hệ thống tự đặt.
 export const MAX_DURATION_SEC = 60;
+export const MAX_STORY_SEC = 30; // Story 24 giờ (SPEC-creator.md bổ sung 27/10)
 export const TRANSCODE_TIMEOUT_MS = 5 * 60_000;
 const PROBE_TIMEOUT_MS = 30_000;
 
@@ -64,12 +65,12 @@ export async function probe(path: string): Promise<Probe> {
 const ACCEPTED_FORMATS = ['mov', 'mp4', 'matroska', 'webm'];
 
 // Lý do không nhận video (hiển thị cho người đăng), hoặc null nếu dùng được.
-export function rejectReason(p: Probe): string | null {
+export function rejectReason(p: Probe, maxSec: number = MAX_DURATION_SEC): string | null {
   if (!ACCEPTED_FORMATS.some((f) => p.formatName.split(',').includes(f)) || !p.video || p.video.width === 0)
     return 'File không phải video MP4, MOV hoặc WebM';
   if (p.video.width * p.video.height > 4096 * 4096) return 'Độ phân giải video quá lớn';
   if (!(p.durationSec > 0)) return 'Không đọc được thời lượng video';
-  if (p.durationSec > MAX_DURATION_SEC + 0.5) return `Video dài hơn ${MAX_DURATION_SEC} giây`;
+  if (p.durationSec > maxSec + 0.5) return `Video dài hơn ${maxSec} giây`;
   return null;
 }
 
@@ -130,6 +131,11 @@ export async function transcode(src: string, outMp4: string, outPoster: string, 
     ],
     TRANSCODE_TIMEOUT_MS,
   );
+  await makePoster(outMp4, outPoster, durationSec);
+}
+
+// Ảnh bìa: khung hình ở giây thứ 1 (hoặc giữa video nếu ngắn hơn 2 giây).
+async function makePoster(outMp4: string, outPoster: string, durationSec: number) {
   await run(
     'ffmpeg',
     [
@@ -154,4 +160,87 @@ export async function transcode(src: string, outMp4: string, outPoster: string, 
     ],
     PROBE_TIMEOUT_MS,
   );
+}
+
+const ENCODE_ARGS = [
+  '-c:v',
+  'libx264',
+  '-preset',
+  'veryfast',
+  '-crf',
+  '24',
+  '-profile:v',
+  'high',
+  '-level:v',
+  '4.0',
+  '-maxrate',
+  '2500k',
+  '-bufsize',
+  '5000k',
+  '-c:a',
+  'aac',
+  '-b:a',
+  '128k',
+  '-ac',
+  '2',
+  '-map_metadata',
+  '-1',
+  '-map_chapters',
+  '-1',
+  '-movflags',
+  '+faststart',
+];
+
+// Duet (SPEC-creator.md bổ sung 27/10): ghép 2 video cạnh nhau thành 720×1280 — trái video gốc, phải video mới,
+// mỗi bên cắt giữa khung 360×1280. Tiếng: video mới + video gốc nhỏ hơn. Dài bằng video mới (video gốc lặp lại).
+export function duetArgs(
+  newSrc: string,
+  origSrc: string,
+  outMp4: string,
+  opts: { durationSec: number; newAudio: boolean; origAudio: boolean },
+): string[] {
+  const side = 'scale=360:1280:force_original_aspect_ratio=increase,crop=360:1280,setsar=1';
+  const audio =
+    opts.newAudio && opts.origAudio
+      ? ';[1:a]volume=0.35[ga];[0:a][ga]amix=inputs=2:duration=first:dropout_transition=0[a]'
+      : opts.newAudio
+        ? ';[0:a]anull[a]'
+        : opts.origAudio
+          ? ';[1:a]volume=0.35[a]'
+          : '';
+  return [
+    '-nostdin',
+    '-hide_banner',
+    '-loglevel',
+    'error',
+    '-y',
+    '-i',
+    newSrc,
+    '-stream_loop',
+    '-1',
+    '-i',
+    origSrc,
+    '-filter_complex',
+    `[1:v]${side}[l];[0:v]${side}[r];[l][r]hstack=inputs=2,format=yuv420p[v]${audio}`,
+    '-map',
+    '[v]',
+    ...(audio ? ['-map', '[a]'] : []),
+    ...ENCODE_ARGS,
+    '-t',
+    String(Math.min(opts.durationSec, MAX_DURATION_SEC + 1)),
+    '-f',
+    'mp4',
+    outMp4,
+  ];
+}
+
+export async function composeDuet(
+  newSrc: string,
+  origSrc: string,
+  outMp4: string,
+  outPoster: string,
+  opts: { durationSec: number; newAudio: boolean; origAudio: boolean },
+) {
+  await run('ffmpeg', duetArgs(newSrc, origSrc, outMp4, opts), TRANSCODE_TIMEOUT_MS);
+  await makePoster(outMp4, outPoster, opts.durationSec);
 }

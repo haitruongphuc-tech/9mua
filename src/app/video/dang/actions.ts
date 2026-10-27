@@ -1,29 +1,25 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { requireUser } from '@/modules/identity';
+import { getT } from '@/i18n/server';
 import { createVideoUpload } from '@/modules/creator';
+import { requireUser } from '@/modules/identity';
 
-const MESSAGES = {
-  NOT_FOUND: 'Không tìm thấy file vừa tải lên, hãy chọn lại video.',
-  TOO_LARGE: 'Video tối đa 100MB.',
-  DAILY_LIMIT: 'Mỗi ngày đăng tối đa 10 video.',
-  BAD_FORMAT: 'File không phải video MP4, MOV hoặc WebM.',
-  PRODUCT_INVALID: 'Có sản phẩm không còn bán. Hãy bỏ chọn rồi thử lại (tối đa 3 sản phẩm).',
-  CAPTION_TOO_LONG: 'Chú thích tối đa 300 ký tự.',
-} as const;
-
-// Bước 2: tạo video từ file đã tải lên; worker sẽ chuyển mã rồi đưa lên feed.
+// Bước 2: tạo video / Story / Duet từ file đã tải lên; worker sẽ chuyển mã rồi đưa lên feed.
 export async function createVideoAction(input: {
   uploadId: string;
   caption: string;
   productIds: string[];
+  kind?: 'video' | 'story';
+  duetOfId?: string | null;
 }): Promise<{ error: string }> {
   const user = await requireUser();
   const result = await createVideoUpload(user.id, String(input.uploadId), {
     caption: String(input.caption ?? ''),
     productIds: Array.isArray(input.productIds) ? input.productIds.map(String).slice(0, 10) : [],
+    kind: input.kind === 'story' ? 'story' : 'video',
+    duetOfId: typeof input.duetOfId === 'string' ? input.duetOfId : null,
   });
-  if (!result.ok) return { error: MESSAGES[result.error] };
+  if (!result.ok) return { error: (await getT())(`post.err.${result.error}`) };
   redirect(`/video/cua-toi?moi=${result.videoId}`);
 }

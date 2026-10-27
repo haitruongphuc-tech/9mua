@@ -26,11 +26,15 @@ export async function getCreatorProfile(userId: string): Promise<CreatorProfile 
   if (!user || user.lockedAt) return null;
   const [videos, agg] = await Promise.all([
     db.video.findMany({
-      where: { authorId: userId, status: 'ready' },
+      where: { authorId: userId, status: 'ready', kind: 'video' },
       orderBy: { readyAt: 'desc' },
       take: 60,
     }),
-    db.video.aggregate({ where: { authorId: userId, status: 'ready' }, _count: true, _sum: { likes: true } }),
+    db.video.aggregate({
+      where: { authorId: userId, status: 'ready', kind: 'video' },
+      _count: true,
+      _sum: { likes: true },
+    }),
   ]);
   return {
     id: user.id,
@@ -51,7 +55,7 @@ export async function getCreatorProfile(userId: string): Promise<CreatorProfile 
 // Khối "Video hot" trên trang chủ: điểm feed cao nhất, chỉ video đang hiện của tài khoản không bị khoá.
 export async function getHotVideos(limit = 8): Promise<VideoThumb[]> {
   const rows = await db.video.findMany({
-    where: { status: 'ready', fileUrl: { not: null } },
+    where: { status: 'ready', kind: 'video', fileUrl: { not: null } },
     orderBy: [{ score: 'desc' }, { readyAt: 'desc' }],
     take: limit * 3,
   });

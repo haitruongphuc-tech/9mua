@@ -28,7 +28,8 @@ export async function requireUser(): Promise<SessionUser> {
   const path = (await headers()).get('x-pathname') ?? '/';
   if (!user) redirect(`/dang-nhap?next=${encodeURIComponent(path)}`);
   // Đang dùng mật khẩu tạm do CEO cấp → phải đổi trước khi làm việc khác (SPEC-identity.md mục 5).
-  if (user.mustChangePassword && !path.startsWith('/tai-khoan')) redirect('/tai-khoan?doi-mat-khau=1');
+  if (user.mustChangePassword && !path.startsWith('/tai-khoan'))
+    redirect('/tai-khoan/cai-dat?doi-mat-khau=1');
   return user;
 }
 
@@ -37,6 +38,11 @@ export async function requireAdmin(): Promise<SessionUser> {
   const user = await getCurrentUser();
   if (user?.role !== 'admin') notFound();
   return user;
+}
+
+// Chỉ xem có cookie phiên hay không (không hỏi DB): dùng để quyết định gửi phần chữ của popup mở tài khoản.
+export async function hasSessionCookie(): Promise<boolean> {
+  return (await cookies()).has(SESSION_COOKIE);
 }
 
 // Chỉ gọi trong Server Action / Route Handler (nơi được phép ghi cookie).

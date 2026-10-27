@@ -11,20 +11,24 @@ export {
   type CreateVideoResult,
 } from './upload';
 export { processNextJob, claimJob } from './jobs';
+export { onVideoReady, type VideoReadyHook } from './hooks';
+export { listStories, expireStories, type StoryGroup, type StoryItem } from './stories';
 export { extractHashtags } from './hashtags';
 export { feedScore } from './score';
 export { myVideoStats, type MyVideo } from './mine';
 export {
   getFeed,
   getVideo,
+  hydrateVideos,
   recomputeScores,
   isProductTagged,
+  pinVideo,
   FEED_PAGE,
   type FeedVideo,
   type FeedProduct,
   type Viewer,
 } from './feed';
-export { recordViews, toggleLike, MIN_VIEW_SECONDS } from './engagement';
+export { recordViews, toggleLike, likeVideo, MIN_VIEW_SECONDS } from './engagement';
 export {
   reportVideo,
   deleteVideo,

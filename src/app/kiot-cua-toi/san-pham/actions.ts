@@ -2,10 +2,11 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { kiotErrorText, localizeFields } from '@/i18n/module-messages';
+import { getT } from '@/i18n/server';
 import { parseVndInput } from '@/lib/format';
 import { requireUser } from '@/modules/identity';
 import { createProduct, deleteProduct, updateProduct, type ProductInput } from '@/modules/kiot';
-import { KIOT_ERROR_MESSAGES } from '@/modules/kiot/messages';
 
 export type ProductFormEcho = {
   name: string;
@@ -49,17 +50,14 @@ function readForm(form: FormData): ProductInput {
   };
 }
 
-function toState(
+async function toState(
   form: FormData,
   result: { ok: false; error: string; fields?: ProductFormState['fields'] },
-): ProductFormState {
+): Promise<ProductFormState> {
+  const t = await getT();
   const values = echo(form);
-  if (result.error === 'INVALID_INPUT') return { fields: result.fields, values };
-  return {
-    values,
-    message:
-      KIOT_ERROR_MESSAGES[result.error as keyof typeof KIOT_ERROR_MESSAGES] ?? 'Có lỗi, vui lòng thử lại.',
-  };
+  if (result.error === 'INVALID_INPUT') return { fields: localizeFields(t, result.fields), values };
+  return { values, message: kiotErrorText(t, result.error) };
 }
 
 export async function createProductAction(_p: ProductFormState, form: FormData): Promise<ProductFormState> {

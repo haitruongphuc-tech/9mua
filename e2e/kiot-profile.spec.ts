@@ -23,7 +23,7 @@ test('Kiot: logo, ảnh bìa, địa chỉ lấy hàng; trang công khai chỉ h
   await expect(page.locator('#kiot-province')).toHaveValue('lam-dong');
 
   await page.goto(`http://${slug}.9mua.test:3100/`);
-  await expect(page.getByTestId('kiot-location')).toHaveText('📍 Đà Lạt, Lâm Đồng');
+  await expect(page.getByTestId('kiot-location')).toHaveText('Đà Lạt, Lâm Đồng');
   await expect(page.locator('body')).not.toContainText('Hoa Hồng');
   await expect(page.getByTestId('kiot-logo')).toBeVisible();
   await expect(page.getByTestId('kiot-cover')).toBeVisible();

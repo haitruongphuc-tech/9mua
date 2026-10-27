@@ -17,6 +17,8 @@ trên Chợ chung. Creator đăng video dọc 9:16 có gắn sản phẩm. CEO q
 | `admin` | Trang CEO: người dùng, Kiot, đơn hàng, giao dịch, duyệt rút tiền, doanh thu, khoá Kiot, gỡ sản phẩm/video vi phạm | tất cả ở trên |
 | `live` | Mọi tài khoản phát live từ trình duyệt điện thoại (MediaMTX trên VPS), người xem vuốt dọc, chat, thả tim, mua sản phẩm đang ghim (`SPEC-live.md`) | `identity`, `kiot`, `billing`, `orders` |
 | `xu` | Sổ xu thưởng chỉ thêm: 9MUA tự thưởng người phát theo số người xem live hợp lệ; CEO chỉnh luật và thu hồi (`SPEC-live.md`) | `identity`, `kiot`, `live` |
+| `social` | Follow, bình luận, lưu, hashtag, tab Đang Follow, tim Kiot, giới hạn tài khoản Free, voucher mở Kiot (`SPEC-social.md`) | `identity`, `kiot`, `billing`, `creator` |
+| `ai` | AI Studio cho chủ Kiot: viết mô tả, vẽ ảnh, ghép video, đăng bán (`SPEC-ai.md`) | `identity`, `kiot`, `creator` |
 
 Thứ tự xây:
 `identity` → `kiot` → `payments` → `billing` → `orders` → `payouts` → `marketplace`, `creator` (song song) → `admin`

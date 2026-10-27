@@ -135,3 +135,39 @@ removeVideo(videoId, adminId, reason): Promise<void>     // cho admin
 1. Dùng ffmpeg chuyển mã video (service `worker` riêng).
 2. Chưa có bình luận trong MVP.
 3. Creator được gắn sản phẩm của mọi Kiot đang hoạt động.
+
+## Bổ sung 27/10/2026 — Feed V4, Story 24h, Duet (CEO duyệt qua chat, câu 5 và 8 "làm luôn")
+
+### Feed theo V4
+- Tab "Đang Follow" / "Dành cho bạn" ở đầu feed (`SPEC-social.md` mục 2).
+- **Thả tim 2 chạm**: chạm 2 lần lên video thì thích (không bỏ thích), túi cam + tim bay lên tại chỗ chạm.
+- **Thanh tiến độ** 2px màu cam ở mép trên video, chạy theo thời gian phát.
+- Cột nút bên phải (V4): ảnh người đăng có dấu ＋ để follow; tim (số thích); bình luận (số bình luận, mở bảng bình
+  luận); lưu; chia sẻ; nút ⋯ (Duet, Báo cáo).
+- Bên trái (V4): @tên, chú thích có hashtag bấm được, thẻ sản phẩm nền trắng có nút "+ Giỏ", hàng nút "Mở Kiot"
+  (người chưa có Kiot) và "Duet".
+- **Chia sẻ**: bảng trượt có Facebook, Messenger (điện thoại), sao chép link, chia sẻ của điện thoại (gồm Zalo), và
+  **mã QR** của link.
+  Không hiện nút của mạng không cho chia sẻ link (TikTok, Instagram, YouTube, Shopee).
+
+### Story 24 giờ
+- Ai đã đăng nhập cũng đăng được Story: video dọc **≤ 30 giây**, qua cùng bộ xử lý video (ffmpeg). Tối đa 10 Story/ngày.
+- Story **tự ẩn sau 24 giờ** kể từ lúc xử lý xong. Không hiện trong feed chính.
+- Hàng vòng tròn Story ở đầu trang Live (V4): mỗi người một vòng, viền cam khi có Story chưa xem, xám khi đã xem.
+  Bấm vào xem toàn màn hình, có thanh tiến độ, hết Story tự sang người tiếp theo.
+- Người đăng xoá được Story của mình. Báo cáo và gỡ Story giống video.
+- Dữ liệu: thêm cột `kind` (`video | story`, mặc định `video`) và `expiresAt` (trống) vào bảng `Video`. Chỉ thêm cột,
+  dữ liệu cũ không đổi.
+
+### Duet
+- Nút "Duet" trên video `ready` mở trang đăng video ở chế độ Duet: người dùng quay hoặc chọn video của mình (≤ 60 giây).
+- Worker ghép **2 video cạnh nhau** thành một video dọc 720×1280: bên trái video gốc, bên phải video mới, mỗi bên cắt
+  giữa khung. Tiếng: tiếng video mới + tiếng video gốc nhỏ hơn. Dài bằng video mới (video gốc lặp lại nếu ngắn hơn).
+- Video Duet ghi "Duet với @tên" và link về video gốc; gắn sản phẩm như video thường (Collab bán chéo).
+- Video gốc bị gỡ hoặc xoá thì không Duet được nữa; Duet đã đăng vẫn giữ.
+- Dữ liệu: thêm cột `duetOfId` (trống) vào bảng `Video`.
+
+### Kiểm thử bổ sung
+- Story hết 24 giờ không còn trong danh sách; Story không lọt vào feed chính.
+- Duet ra đúng 720×1280, có tiếng, dài bằng video mới; video gốc bị gỡ thì từ chối Duet.
+- Chạm 2 lần thích đúng 1 lần (không bỏ thích); tài khoản Free hết lượt thì báo lỗi, không đổi số.

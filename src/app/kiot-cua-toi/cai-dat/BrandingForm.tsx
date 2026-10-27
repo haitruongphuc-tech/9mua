@@ -2,11 +2,13 @@
 
 import Image from 'next/image';
 import { useState } from 'react';
+import { useT } from '@/i18n/client';
 
 type Kind = 'logo' | 'cover';
 
 // Tải logo và ảnh bìa ngay khi chọn file; ảnh cũ được thay thế.
 export function BrandingForm({ logoUrl, coverUrl }: { logoUrl: string | null; coverUrl: string | null }) {
+  const t = useT();
   const [urls, setUrls] = useState<Record<Kind, string | null>>({ logo: logoUrl, cover: coverUrl });
   const [busy, setBusy] = useState<Kind | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -22,9 +24,9 @@ export function BrandingForm({ logoUrl, coverUrl }: { logoUrl: string | null; co
       const res = await fetch('/api/kiot/branding', { method: 'POST', body });
       const data = (await res.json()) as { ok: boolean; url?: string; message?: string };
       if (data.ok && data.url) setUrls((u) => ({ ...u, [kind]: data.url! }));
-      else setError(data.message ?? 'Tải ảnh thất bại');
+      else setError(data.message ?? t('seller.img.failed'));
     } catch {
-      setError('Mất kết nối, hãy thử lại');
+      setError(t('seller.img.offline'));
     } finally {
       setBusy(null);
     }
@@ -39,17 +41,21 @@ export function BrandingForm({ logoUrl, coverUrl }: { logoUrl: string | null; co
 
   const slot = (kind: Kind, label: string, box: string) => (
     <div className="flex flex-col gap-2">
-      <span className="text-sm font-bold">{label}</span>
+      <span className="text-[12px] font-bold text-white/70">{label}</span>
       <div
-        className={`relative overflow-hidden rounded-2xl border-2 border-dashed border-black/20 bg-surface-muted ${box}`}
+        className={`relative overflow-hidden rounded-[16px] border border-dashed border-white/20 bg-white/5 ${box}`}
       >
         {urls[kind] ? (
           <Image src={urls[kind]!} alt={label} fill sizes="400px" className="object-cover" unoptimized />
         ) : null}
       </div>
-      <div className="flex gap-3 text-sm">
-        <label className="cursor-pointer rounded-full border-2 border-brand-ink px-4 py-1.5 font-bold">
-          {busy === kind ? 'Đang tải…' : urls[kind] ? 'Đổi ảnh' : 'Chọn ảnh'}
+      <div className="flex gap-3 text-[13px]">
+        <label className="cursor-pointer rounded-full border border-white/25 px-4 py-1.5 font-bold">
+          {busy === kind
+            ? t('seller.img.uploading')
+            : urls[kind]
+              ? t('seller.brand.change')
+              : t('seller.img.choose')}
           <input
             type="file"
             accept="image/jpeg,image/png,image/webp"
@@ -66,7 +72,7 @@ export function BrandingForm({ logoUrl, coverUrl }: { logoUrl: string | null; co
             onClick={() => remove(kind)}
             disabled={busy !== null}
           >
-            Gỡ
+            {t('seller.brand.remove')}
           </button>
         ) : null}
       </div>
@@ -79,14 +85,14 @@ export function BrandingForm({ logoUrl, coverUrl }: { logoUrl: string | null; co
         <p
           role="alert"
           data-testid="branding-error"
-          className="rounded-xl bg-danger/10 px-4 py-3 text-sm font-bold text-danger"
+          className="rounded-[14px] bg-danger/20 px-4 py-3 text-[13px] font-bold text-red-300"
         >
           {error}
         </p>
       ) : null}
       <div className="grid grid-cols-[96px_1fr] gap-4">
-        {slot('logo', 'Logo', 'h-24 w-24')}
-        {slot('cover', 'Ảnh bìa', 'h-24 w-full')}
+        {slot('logo', t('seller.brand.logo'), 'h-24 w-24')}
+        {slot('cover', t('seller.brand.cover'), 'h-24 w-full')}
       </div>
     </div>
   );

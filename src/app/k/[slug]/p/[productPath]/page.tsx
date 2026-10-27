@@ -1,17 +1,19 @@
+import { MessageCircle, Phone } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { cache } from 'react';
-import { ContactButtons } from '@/components/kiot/ContactButtons';
 import { PreviewBanner } from '@/components/kiot/PreviewBanner';
 import { ProductDescription } from '@/components/kiot/ProductDescription';
 import { ProductGallery } from '@/components/kiot/ProductGallery';
 import { ReportProduct } from '@/components/market/ReportProduct';
 import { AddToCart } from '@/components/orders/AddToCart';
+import { ClientMessages } from '@/i18n/ClientMessages';
+import { getT } from '@/i18n/server';
 import { env } from '@/lib/env';
 import { formatVnd } from '@/lib/format';
 import { getCurrentUser } from '@/modules/identity';
-import { categoryName, getPublicProduct, productPath } from '@/modules/kiot';
+import { CATEGORIES, getPublicProduct, productPath } from '@/modules/kiot';
 import { kiotBasePath, kiotCanonical } from '../../../kiot-context';
 
 const viewer = cache(getCurrentUser);
@@ -47,60 +49,80 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   };
 }
 
+const contact = 'flex h-11 flex-1 items-center justify-center gap-2 rounded-full text-[14px] font-black';
+
+// Trang sản phẩm kiểu V4: ảnh trên nền trắng, giá cam, nút giỏ cam, liên hệ Zalo/Gọi.
 export default async function ProductPage({ params }: Params) {
   const { slug, productPath: path } = await params;
   const found = await load(slug, path);
   if (!found) notFound();
   const { product, kiot, preview } = found;
-  const base = await kiotBasePath(slug);
+  const [base, t] = await Promise.all([kiotBasePath(slug), getT()]);
   // Tên sản phẩm đổi thì đường dẫn cũ chuyển về đường dẫn đúng.
   if (`/p/${path}` !== productPath(product)) permanentRedirect(`${base}${productPath(product)}`);
+  const category = CATEGORIES.find((c) => c.slug === product.category);
+  const local = '0' + kiot.contactPhone.replace(/^\+84/, '');
 
   return (
-    <article className="mx-auto flex max-w-5xl flex-col gap-5 px-4 py-6 md:flex-row">
-      <div className="md:w-1/2">
-        {preview ? <PreviewBanner /> : null}
-        <ProductGallery images={product.images} name={product.name} />
-      </div>
-      <div className="flex flex-col gap-4 md:w-1/2">
-        <Link href={base || '/'} className="text-sm font-bold text-brand-deep">
-          ← {kiot.name}
-        </Link>
-        <h1 className="text-2xl font-extrabold leading-tight">{product.name}</h1>
-        <p className="flex items-baseline gap-3">
-          <span className="text-3xl font-extrabold text-brand-deep" data-testid="product-price">
-            {formatVnd(product.price)}
-          </span>
-          {product.compareAtPrice ? (
-            <span className="text-black/60 line-through">{formatVnd(product.compareAtPrice)}</span>
+    <ClientMessages prefixes={['market.p.', 'market.report.', 'shop.add.', 'shop.cart.qty']}>
+      <article className="mx-auto flex max-w-5xl flex-col gap-5 px-4 py-6 md:flex-row">
+        <div className="md:w-1/2">
+          {preview ? <PreviewBanner /> : null}
+          <ProductGallery images={product.images} name={product.name} />
+        </div>
+        <div className="flex flex-col gap-4 md:w-1/2">
+          <Link href={base || '/'} className="text-[13px] font-bold text-brand">
+            ← {kiot.name}
+          </Link>
+          <h1 className="font-display text-[24px] font-black leading-tight">{product.name}</h1>
+          <p className="flex items-baseline gap-3">
+            <span className="text-3xl font-black text-brand" data-testid="product-price">
+              {formatVnd(product.price)}
+            </span>
+            {product.compareAtPrice ? (
+              <span className="text-white/50 line-through">{formatVnd(product.compareAtPrice)}</span>
+            ) : null}
+          </p>
+          <p className="text-[13px] text-white/60">
+            {category ? `${category.icon} ${t(`market.cat.${category.slug}`)}` : t('market.cat.khac')} ·{' '}
+            {product.stock > 0 ? t('market.p.left', { stock: product.stock }) : t('market.soldOut')}
+          </p>
+          {preview ? null : (
+            <AddToCart productId={product.id} maxQty={product.stock} cartUrl={`${env().APP_URL}/gio-hang`} />
+          )}
+          <div className="flex gap-2">
+            <a
+              href={`https://zalo.me/${local}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`${contact} bg-[#0068FF]`}
+            >
+              <MessageCircle className="h-4 w-4" aria-hidden /> {t('market.p.zalo')}
+            </a>
+            <a href={`tel:${kiot.contactPhone}`} className={`${contact} bg-white/10`}>
+              <Phone className="h-4 w-4" aria-hidden /> {t('market.p.call')}
+            </a>
+          </div>
+          {product.description ? (
+            <section className="border-t border-white/10 pt-4" aria-labelledby="mo-ta">
+              <h2 id="mo-ta" className="mb-2 font-display text-[16px] font-black">
+                {t('market.p.description')}
+              </h2>
+              <ProductDescription text={product.description} />
+            </section>
           ) : null}
-        </p>
-        <p className="text-sm text-black/70">
-          {categoryName(product.category)} · {product.stock > 0 ? `Còn ${product.stock}` : 'Hết hàng'}
-        </p>
-        {preview ? null : (
-          <AddToCart productId={product.id} maxQty={product.stock} cartUrl={`${env().APP_URL}/gio-hang`} />
-        )}
-        <ContactButtons phone={kiot.contactPhone} />
-        {product.description ? (
-          <section className="border-t border-black/10 pt-4" aria-labelledby="mo-ta">
-            <h2 id="mo-ta" className="mb-2 text-lg font-extrabold">
-              Mô tả sản phẩm
-            </h2>
-            <ProductDescription text={product.description} />
-          </section>
-        ) : null}
-        {preview ? null : (
-          <ReportProduct
-            productId={product.id}
-            loginUrl={
-              (await viewer())
-                ? null
-                : `${env().APP_URL}/dang-nhap?next=${encodeURIComponent(`/k/${slug}${productPath(product)}`)}`
-            }
-          />
-        )}
-      </div>
-    </article>
+          {preview ? null : (
+            <ReportProduct
+              productId={product.id}
+              loginUrl={
+                (await viewer())
+                  ? null
+                  : `${env().APP_URL}/dang-nhap?next=${encodeURIComponent(`/k/${slug}${productPath(product)}`)}`
+              }
+            />
+          )}
+        </div>
+      </article>
+    </ClientMessages>
   );
 }

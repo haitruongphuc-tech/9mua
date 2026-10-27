@@ -1,14 +1,20 @@
 import type { Metadata } from 'next';
+import { ClientMessages } from '@/i18n/ClientMessages';
+import { getT } from '@/i18n/server';
+import { AuthShell } from '../AuthShell';
 import { ForgotForm } from './ForgotForm';
 
-export const metadata: Metadata = { title: 'Quên mật khẩu', robots: { index: false } };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await getT())('auth.forgot.title'), robots: { index: false } };
+}
 
-export default function ForgotPasswordPage() {
+export default async function ForgotPasswordPage() {
+  const t = await getT();
   return (
-    <section className="mx-auto w-full max-w-sm px-4 py-10">
-      <h1 className="mb-1 text-2xl font-extrabold">Quên mật khẩu</h1>
-      <p className="mb-6 text-black/70">Nhập email của tài khoản, chúng tôi sẽ gửi link đặt mật khẩu mới.</p>
-      <ForgotForm />
-    </section>
+    <AuthShell title={t('auth.forgot.title')} lead={t('auth.forgot.lead')}>
+      <ClientMessages prefixes={['auth.']}>
+        <ForgotForm />
+      </ClientMessages>
+    </AuthShell>
   );
 }

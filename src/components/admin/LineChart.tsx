@@ -16,7 +16,7 @@ export function LineChart({ points, label }: { points: { day: string; value: num
     <figure className="flex flex-col gap-2">
       <figcaption className="flex items-baseline justify-between text-sm">
         <span className="font-bold">{label}</span>
-        <span className="text-black/60">Tổng {formatVnd(total)}</span>
+        <span className="text-white/60">Tổng {formatVnd(total)}</span>
       </figcaption>
       <svg
         viewBox={`0 0 ${W} ${H}`}

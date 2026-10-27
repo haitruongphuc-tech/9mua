@@ -34,7 +34,7 @@ export default async function LedgerPage({
             type="date"
             name="tu"
             defaultValue={tu}
-            className="h-11 rounded-xl border-2 border-black/15 px-3"
+            className="h-11 rounded-[14px] border border-white/15 bg-white/10 text-white px-3"
           />
         </label>
         <label className="flex flex-col gap-1">
@@ -43,13 +43,10 @@ export default async function LedgerPage({
             type="date"
             name="den"
             defaultValue={den}
-            className="h-11 rounded-xl border-2 border-black/15 px-3"
+            className="h-11 rounded-[14px] border border-white/15 bg-white/10 text-white px-3"
           />
         </label>
-        <button
-          type="submit"
-          className="h-11 rounded-full border-2 border-brand-ink bg-brand px-5 font-extrabold text-brand-ink"
-        >
+        <button type="submit" className="h-11 rounded-full bg-brand px-5 font-black text-white">
           Xem
         </button>
       </form>
@@ -63,27 +60,27 @@ export default async function LedgerPage({
           ['Đã chi người bán trong kỳ', r.paidOut],
           ['Phí chi hộ trong kỳ', r.payoutFees],
         ].map(([label, value]) => (
-          <div key={label as string} className="rounded-2xl bg-surface-muted p-3">
-            <dt className="text-xs text-black/60">{label}</dt>
+          <div key={label as string} className="rounded-2xl bg-white/5 p-3">
+            <dt className="text-xs text-white/60">{label}</dt>
             <dd className="text-lg font-extrabold">{formatVnd(value as number)}</dd>
           </div>
         ))}
       </dl>
-      <p className="text-sm text-black/70">
+      <p className="text-sm text-white/70">
         Đối chiếu “Tiền đang giữ hộ” với số dư thật của TK MB 979393916 (trừ phí sàn và phí thuê Kiot chưa rút
         về).
       </p>
       <div className="flex flex-wrap gap-2">
         <a
           href={`/api/admin/export?loai=vao&${qs}`}
-          className="rounded-full border-2 border-brand-ink px-4 py-2 font-bold"
+          className="rounded-full border border-white/25 px-4 py-2 font-bold"
           data-testid="export-in"
         >
           Tải CSV tiền vào
         </a>
         <a
           href={`/api/admin/export?loai=ra&${qs}`}
-          className="rounded-full border-2 border-brand-ink px-4 py-2 font-bold"
+          className="rounded-full border border-white/25 px-4 py-2 font-bold"
           data-testid="export-out"
         >
           Tải CSV tiền ra

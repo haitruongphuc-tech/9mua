@@ -15,6 +15,7 @@ export type CartLine = {
   stock: number;
   imageUrl: string | null;
   sourceVideoId: string | null;
+  sourceLiveId: string | null;
   problem: CartProblem | null;
 };
 
@@ -39,12 +40,17 @@ async function loadSellable(productId: string) {
   return p;
 }
 
+// Nguồn của món: video Creator (chuỗi, như cũ) hoặc { videoId } / { liveId } — buổi live (SPEC-live.md mục 7).
+export type CartSource = string | { videoId?: string; liveId?: string };
+
 export async function addToCart(
   userId: string,
   productId: string,
   qty: number,
-  sourceVideoId?: string,
+  source?: CartSource,
 ): Promise<{ ok: true } | AddError> {
+  const sourceVideoId = typeof source === 'string' ? source : source?.videoId;
+  const sourceLiveId = typeof source === 'object' ? source.liveId : undefined;
   if (!Number.isInteger(qty) || qty <= 0 || qty > 1000) return { ok: false, error: 'UNAVAILABLE' };
   const product = await loadSellable(productId);
   if (!product) return { ok: false, error: 'UNAVAILABLE' };
@@ -59,8 +65,18 @@ export async function addToCart(
 
   await db.cartItem.upsert({
     where: { userId_productId: { userId, productId } },
-    create: { userId, productId, qty, sourceVideoId: sourceVideoId ?? null },
-    update: { qty: nextQty, ...(sourceVideoId ? { sourceVideoId } : {}) },
+    create: {
+      userId,
+      productId,
+      qty,
+      sourceVideoId: sourceVideoId ?? null,
+      sourceLiveId: sourceLiveId ?? null,
+    },
+    update: {
+      qty: nextQty,
+      ...(sourceVideoId ? { sourceVideoId } : {}),
+      ...(sourceLiveId ? { sourceLiveId } : {}),
+    },
   });
   return { ok: true };
 }
@@ -132,6 +148,7 @@ export async function getCart(userId: string): Promise<Cart> {
       stock: p.stock,
       imageUrl: p.images[0]?.thumbUrl ?? null,
       sourceVideoId: item.sourceVideoId,
+      sourceLiveId: item.sourceLiveId,
       problem,
     });
   }

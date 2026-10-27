@@ -16,22 +16,22 @@ export default async function KycQueuePage({ searchParams }: { searchParams: Fla
       <h1 className="text-xl font-extrabold">KYC chờ duyệt</h1>
       <Flash ok={params.xong} error={params.loi} />
       {items.length === 0 ? (
-        <p className="rounded-2xl bg-surface-muted p-6 text-center text-black/70">Không có hồ sơ nào.</p>
+        <p className="rounded-2xl bg-white/5 p-6 text-center text-white/70">Không có hồ sơ nào.</p>
       ) : null}
       <ul className="flex flex-col gap-3">
         {items.map((k) => (
           <li
             key={k.id}
-            className="flex flex-col gap-2 rounded-2xl border-2 border-black/10 p-4"
+            className="flex flex-col gap-2 rounded-[18px] border border-white/10 bg-white/5 p-4"
             data-testid="kyc-row"
           >
             <p className="font-extrabold">
               {k.fullName} · {k.idNumber}
             </p>
-            <p className="text-sm text-black/70">
+            <p className="text-sm text-white/70">
               Kiot: {k.kiotName ?? '—'} · nộp {formatDateTimeVN(k.createdAt)}
             </p>
-            <p className={`text-sm font-bold ${k.nameMatchesBank === false ? 'text-danger' : ''}`}>
+            <p className={`text-sm font-bold ${k.nameMatchesBank === false ? 'text-red-400' : ''}`}>
               Tài khoản nhận tiền: {k.bankAccountName ?? 'chưa khai báo'}
               {k.nameMatchesBank === false ? ' ⚠ khác tên trên CCCD' : k.nameMatchesBank ? ' ✓ khớp tên' : ''}
             </p>
@@ -42,7 +42,7 @@ export default async function KycQueuePage({ searchParams }: { searchParams: Fla
                   href={`/api/admin/kyc/${k.id}/${side}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="block overflow-hidden rounded-xl bg-surface-muted"
+                  className="block overflow-hidden rounded-xl bg-white/5"
                 >
                   {/* Ảnh CCCD qua route có kiểm quyền admin + 2 lớp, không có đường công khai. */}
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -65,7 +65,7 @@ export default async function KycQueuePage({ searchParams }: { searchParams: Fla
                   name="reason"
                   required
                   placeholder="Lý do từ chối"
-                  className="h-11 min-w-0 flex-1 rounded-xl border-2 border-black/15 px-3"
+                  className="h-11 min-w-0 flex-1 rounded-[14px] border border-white/15 bg-white/10 text-white px-3"
                 />
                 <ConfirmSubmit confirm="Từ chối hồ sơ này?" tone="danger">
                   Từ chối

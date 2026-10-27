@@ -130,3 +130,26 @@ trong các module đó nhận `adminId` và tự ghi `AdminAuditLog` qua `src/li
 
 1. Bắt buộc xác thực 2 lớp (TOTP) cho admin. Dùng thư viện `otplib`.
 2. MVP chỉ có một cấp admin toàn quyền.
+
+## Bổ sung 27/10/2026 — Nhớ thiết bị, công cụ CEO (CEO duyệt qua chat, câu 2 "làm luôn", câu 6 "a")
+
+### Nhớ thiết bị 30 ngày cho xác thực 2 lớp
+- Nhập mã 2 lớp đúng thì có ô "Nhớ thiết bị này 30 ngày" (đánh dấu sẵn). Thiết bị đã nhớ không phải nhập mã lại trong
+  30 ngày; vẫn phải đăng nhập mật khẩu khi phiên admin hết hạn.
+- Cookie riêng `nm_admin_device` (httpOnly, Secure, SameSite=Strict, chỉ tên miền chính), DB chỉ lưu mã băm.
+- Đổi mật khẩu, "Đăng xuất khỏi mọi thiết bị" hoặc nút "Quên mọi thiết bị đã nhớ" trong `/admin` thì mọi thiết bị
+  phải nhập mã lại. Danh sách thiết bị đã nhớ (trình duyệt, ngày nhớ, lần dùng cuối) xem được trong `/admin`.
+- Đây không phải tắt xác thực 2 lớp: thiết bị chỉ được nhớ sau khi đã nhập đúng mã.
+- Dữ liệu: bảng mới `AdminTrustedDevice`: id, userId, tokenHash, userAgent, createdAt, expiresAt, lastUsedAt, revokedAt.
+
+### Công cụ CEO (giai đoạn C)
+- **Ghim**: ghim tối đa 5 video lên đầu tab "Dành cho bạn" và tối đa 5 Kiot lên đầu danh bạ Kiot / "Kiot nổi bật",
+  có ngày hết ghim (tuỳ chọn). Video/Kiot ghim có nhãn "📌 GHIM".
+- **Slogan**: sửa 6 câu slogan theo từng thứ tiếng (để trống thì dùng câu mặc định của từ điển).
+- **Thông tin pháp lý**: tên công ty, MST, địa chỉ showroom, văn phòng, hotline, email. Hiện ở chân trang và trang
+  Giới thiệu & Pháp lý.
+- **Luật Free và voucher** (`SPEC-social.md`): giới hạn tim/follow mỗi ngày, mốc tim tặng voucher, công tắc voucher,
+  thu hồi voucher chưa dùng.
+- **AI Studio** (`SPEC-ai.md`): công tắc bật/tắt, ngân sách tháng, số lần mỗi người mỗi ngày.
+- **Live và xu** (`SPEC-live.md`): buổi đang live, dừng live, cấm live, luật thưởng xu, thu hồi xu.
+- Mọi thay đổi ghi audit log có trước/sau.

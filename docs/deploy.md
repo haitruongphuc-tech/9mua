@@ -65,9 +65,11 @@ sudo timedatectl set-timezone Asia/Ho_Chi_Minh     # cron chạy theo giờ Vi�
 sudo apt update && sudo apt install -y git curl rsync nginx certbot python3-certbot-dns-cloudflare
 sudo rm -f /etc/nginx/sites-enabled/default
 
-# Tường lửa: chỉ mở SSH, 80, 443. SSH KHÔNG ở cổng 22 thì thay "OpenSSH" bằng "<cổng>/tcp",
+# Tường lửa: chỉ mở SSH, 80, 443 (và 8189 cho Live). SSH KHÔNG ở cổng 22 thì thay "OpenSSH" bằng "<cổng>/tcp",
 # nếu không sẽ tự khoá mình ở ngoài.
 sudo ufw allow OpenSSH && sudo ufw allow 'Nginx Full' && sudo ufw enable
+# Live: hình và tiếng đi qua cổng 8189 (UDP, TCP dự phòng). Xem thêm mục 4 "Live".
+sudo ufw allow 8189/udp && sudo ufw allow 8189/tcp
 
 # Docker Engine + plugin compose
 curl -fsSL https://get.docker.com | sudo sh
@@ -143,6 +145,38 @@ Kênh chi hộ PayOS cần:
   lệnh sẽ nằm ở trạng thái "đang chuyển" và hệ thống báo CEO sau 2 giờ.
 - Thêm IP của VPS vào danh sách IP được phép gọi API chi hộ (nếu PayOS yêu cầu).
 
+Đăng nhập Google (không bắt buộc; để trống thì ẩn nút "Tiếp tục với Google"):
+1. Vào console.cloud.google.com → tạo dự án (vd. `9mua`).
+2. *APIs & Services* → *OAuth consent screen*: chọn **External**, điền tên `9MUA`, email hỗ trợ, logo; mục
+   *Authorized domains* thêm `9mua.com`; link chính sách `https://9mua.com/chinh-sach/bao-mat`. Phạm vi chỉ cần
+   `openid`, `email`, `profile`. Bấm **Publish app** (không thì chỉ tài khoản thử đăng nhập được).
+3. *Credentials* → *Create credentials* → *OAuth client ID* → **Web application**.
+   *Authorized redirect URIs* điền đúng: `https://9mua.com/api/auth/google/callback`.
+4. Chép *Client ID* vào `GOOGLE_CLIENT_ID`, *Client secret* vào `GOOGLE_CLIENT_SECRET`.
+
+AI Studio (không bắt buộc, `SPEC-ai.md`):
+- `ANTHROPIC_API_KEY`: tạo ở console.anthropic.com → *API Keys* (nạp trước ít tiền, vd. 5 USD). Dùng để AI viết
+  mô tả; mỗi lần khoảng 20đ.
+- `GEMINI_API_KEY`: tạo ở aistudio.google.com → *Get API key* (bật thanh toán cho dự án Google Cloud đi kèm).
+  Dùng để AI vẽ ảnh; mỗi ảnh khoảng 1.000đ.
+- Thiếu khoá nào thì phần đó hiện "Chưa bật", phần còn lại vẫn chạy. Video 10 giây do worker ghép bằng ffmpeg,
+  không tốn phí AI.
+- Sau khi điền khoá: vào `/admin/ai` bấm **Thử kết nối** từng phần để chắc khoá đúng. Ngân sách tháng (mặc định
+  500.000đ), lượt mỗi ngày và công tắc bật/tắt chỉnh ở trang đó. Chạm ngân sách thì AI tạm dừng tới đầu tháng
+  sau và CEO nhận email.
+- Không bao giờ dán khoá vào chat hay gửi cho ai; chỉ điền trong `.env` trên VPS.
+
+Live (`SPEC-live.md`):
+- `LIVE_PUBLIC_IP`: IP công khai của VPS (xem bằng `curl -4 ifconfig.me`). Trình duyệt gửi/nhận hình thẳng tới IP
+  này qua cổng **8189 UDP** (TCP dự phòng). Để trống thì người xem ngoài mạng VPS không thấy hình.
+- Nếu nhà cung cấp VPS có tường lửa riêng trên trang quản lý (Security Group, Firewall…), mở thêm **8189 UDP và
+  8189 TCP** ở đó, ngoài `ufw` ở mục 2.
+- **Băng thông:** lúc cao điểm 2 buổi × 50 người × 1,5 Mbps ≈ 150 Mbps tải ra; 1 giờ live đủ 50 người tốn khoảng
+  34 GB. Hỏi nhà cung cấp VPS tốc độ cổng mạng và giới hạn dung lượng tháng trước khi mở Live cho mọi người. Cổng
+  chỉ 100 Mbps thì vào `/admin/cai-dat` hạ "Người xem tối đa mỗi buổi" xuống 30.
+- MediaMTX (máy chủ hình) chạy thành service `mediamtx` trong `docker-compose.yml`, tự lên cùng app. Nó hỏi app
+  trước mỗi lần phát/xem bằng `INTERNAL_CRON_TOKEN`; cổng quản trị 9997 không mở ra ngoài.
+
 Sửa `.env` sau này: `docker compose up -d` để app nhận giá trị mới (không cần build lại).
 
 ## 5. Chạy ứng dụng lần đầu
@@ -151,7 +185,7 @@ Sửa `.env` sau này: `docker compose up -d` để app nhận giá trị mới 
 cd /opt/9mua
 docker compose up -d --build db
 docker compose run --rm --build migrate   # áp migration database
-docker compose up -d --build              # app + worker (build lần đầu mất 5–10 phút)
+docker compose up -d --build              # app + worker + mediamtx (build lần đầu mất 5–10 phút)
 curl -s 127.0.0.1:3009/api/health         # → {"ok":true}
 ```
 
@@ -189,6 +223,10 @@ Nginx của Ubuntu 24.04 là bản 1.24: `deploy/nginx/9mua.conf` dùng cú phá
 `/etc/nginx/sites-enabled/`, sao lưu rồi gỡ link của site cũ trước khi `nginx -t`, tránh trùng tên miền.
 
 Mở `https://9mua.com` và `https://thu.9mua.com`: phải có ổ khoá hợp lệ.
+
+`deploy/nginx/9mua.conf` đã có 2 chỗ cho Live: `/live-media/` chuyển vào MediaMTX (`127.0.0.1:8889`) để gửi/nhận
+hình, và đường `/api/live/<id>/events` tắt gom dữ liệu để chat, tim hiện ngay. Bản cũ chưa có thì chép lại file
+như trên.
 
 ## 7. Tài khoản CEO + webhook PayOS
 
@@ -234,6 +272,7 @@ Script `scripts/deploy.sh` làm lần lượt:
 3. Sao lưu database vào `/srv/9mua/backups/`.
 4. Nâng cấp database (migration).
 5. Chuyển sang bản mới (web gián đoạn vài giây), rồi kiểm tra web và worker chạy được trong 90 giây.
+6. Bật (hoặc tạo lại khi cấu hình đổi) máy chủ hình `mediamtx` cho Live. Lỗi ở bước này chỉ báo, không quay về.
 
 Lỗi ở bất kỳ bước nào thì script **tự quay về code và bản cũ**, in lý do và đường dẫn bản sao lưu. Script cũng nhắc
 khi bản mới đổi file cấu hình cron/Nginx (chép lại theo mục 6 và 8) hoặc thêm biến mới vào `.env.example`.
@@ -285,6 +324,12 @@ vào `ninemua`, chép lại `files/uploads` và `files/private` về `/srv/9mua/
 - [ ] `docker compose run --rm worker ffmpeg -version` chạy được (worker có ffmpeg).
 - [ ] Gửi liên tục 7 lần form đăng nhập sai: lần thứ 7 trở đi nhận lỗi 429 (giới hạn theo IP).
 - [ ] `sh scripts/backup-db.sh` chạy tay 1 lần thành công, rồi khôi phục thử như mục 11.
+- [ ] Live: `docker compose logs --tail 50 mediamtx | sed 's/key=[^" ]*/key=***/g'` (lệnh tự che khoá nội bộ) không có dòng `ERR`; `curl 127.0.0.1:9997` báo "Connection refused"
+  (cổng quản trị không mở ra host). Dùng 2 điện thoại khác mạng (1 máy 4G): máy A vào `/live/phat` bấm phát, máy B
+  vào `/live` thấy hình trong vài giây, chat qua lại được. Không thấy hình thì kiểm lại `LIVE_PUBLIC_IP` và cổng
+  8189 (mục 2, mục 4).
+- [ ] Sau vài ngày có live: `/admin/live` xem dòng "lượt xem không kết nối được hình". Vượt 5% thì cần thêm máy chủ
+  TURN (nhắn Claude làm).
 
 ## 13. Dữ liệu mẫu để thử (xoá trước khi mở cửa)
 

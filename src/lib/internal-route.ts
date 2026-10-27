@@ -11,6 +11,17 @@ export function isInternalRequest(request: Request): boolean {
   return timingSafeEqual(a, b);
 }
 
+// MediaMTX (trong mạng Docker) không gửi được header riêng: khoá nằm ở tham số ?key= của địa chỉ cấu hình sẵn.
+// Nginx vẫn chặn /api/internal/* từ Internet.
+export function hasInternalKey(request: Request): boolean {
+  const expected = process.env.INTERNAL_CRON_TOKEN ?? '';
+  const given = new URL(request.url).searchParams.get('key') ?? '';
+  if (!expected || !given) return false;
+  const a = createHash('sha256').update(given).digest();
+  const b = createHash('sha256').update(expected).digest();
+  return timingSafeEqual(a, b);
+}
+
 export function notFoundResponse(): Response {
   return new Response('Not found', { status: 404 });
 }

@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { env } from '@/lib/env';
+import { POLICY_SLUGS } from '@/content/legal';
 import { CATEGORIES } from '@/modules/kiot';
 import { listSitemapEntries } from '@/modules/marketplace';
 
@@ -14,6 +15,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${app}/`, changeFrequency: 'daily', priority: 1 },
     { url: `${app}/cho`, changeFrequency: 'hourly', priority: 0.9 },
     { url: `${app}/cho/kiot`, changeFrequency: 'daily', priority: 0.6 },
+    { url: `${app}/gioi-thieu`, changeFrequency: 'monthly', priority: 0.4 },
+    ...POLICY_SLUGS.map((s) => ({
+      url: `${app}/chinh-sach/${s}`,
+      changeFrequency: 'monthly' as const,
+      priority: 0.3,
+    })),
     ...CATEGORIES.map((c) => ({
       url: `${app}/cho/${c.slug}`,
       changeFrequency: 'daily' as const,

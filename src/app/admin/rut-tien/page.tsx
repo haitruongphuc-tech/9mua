@@ -10,7 +10,7 @@ import { approvePayoutAction, markPayoutPaidAction, rejectPayoutAction } from '.
 
 export const dynamic = 'force-dynamic';
 const input =
-  'h-11 min-w-0 flex-1 rounded-xl border-2 border-black/15 px-3 outline-none focus:border-brand-ink';
+  'h-11 min-w-0 flex-1 rounded-[14px] border border-white/15 bg-white/10 text-white px-3 outline-none focus:border-brand';
 
 export default async function PayoutQueuePage({ searchParams }: { searchParams: FlashParams }) {
   await requireAdminVerified();
@@ -24,18 +24,18 @@ export default async function PayoutQueuePage({ searchParams }: { searchParams: 
       </h1>
       <Flash ok={params.xong} error={params.loi} />
       <nav className="flex gap-2 text-sm font-bold">
-        <a href="/admin/rut-tien" className="rounded-full border-2 border-black/10 px-3 py-1.5">
+        <a href="/admin/rut-tien" className="rounded-full border border-white/10 px-3 py-1.5">
           Chờ duyệt
         </a>
         <a
           href="/admin/rut-tien?trang-thai=processing"
-          className="rounded-full border-2 border-black/10 px-3 py-1.5"
+          className="rounded-full border border-white/10 px-3 py-1.5"
         >
           Đang chuyển
         </a>
       </nav>
       {items.length === 0 ? (
-        <p className="rounded-2xl bg-surface-muted p-6 text-center text-black/70" data-testid="queue-empty">
+        <p className="rounded-2xl bg-white/5 p-6 text-center text-white/70" data-testid="queue-empty">
           Không có yêu cầu nào.
         </p>
       ) : null}
@@ -43,7 +43,7 @@ export default async function PayoutQueuePage({ searchParams }: { searchParams: 
         {items.map((p) => (
           <li
             key={p.id}
-            className="flex flex-col gap-2 rounded-2xl border-2 border-black/10 p-4"
+            className="flex flex-col gap-2 rounded-[18px] border border-white/10 bg-white/5 p-4"
             data-testid="payout-row"
             data-code={p.code}
           >
@@ -51,20 +51,20 @@ export default async function PayoutQueuePage({ searchParams }: { searchParams: 
               <span className="font-extrabold">
                 {p.code} · {p.kiotName}
               </span>
-              <span className="text-lg font-extrabold text-brand-deep">{formatVnd(p.netAmount)}</span>
+              <span className="text-lg font-extrabold text-brand">{formatVnd(p.netAmount)}</span>
             </div>
-            <p className="text-sm text-black/70">
+            <p className="text-sm text-white/70">
               Rút {formatVnd(p.amount)}
               {p.fee ? ` (phí ${formatVnd(p.fee)})` : ''} · {formatDateTimeVN(p.createdAt)}
             </p>
             <p className="text-sm">
               {findBank(p.bankBin)?.shortName ?? p.bankBin} · <b>{p.accountNumber}</b> · {p.accountName}
               {p.kycName && p.kycName !== p.accountName ? (
-                <span className="ml-1 font-bold text-danger">⚠ CCCD: {p.kycName}</span>
+                <span className="ml-1 font-bold text-red-400">⚠ CCCD: {p.kycName}</span>
               ) : null}
             </p>
             {p.reasons.length ? (
-              <p className="text-sm text-black/70">Không chi tự động vì: {p.reasons.join('; ')}</p>
+              <p className="text-sm text-white/70">Không chi tự động vì: {p.reasons.join('; ')}</p>
             ) : null}
             {status === 'processing' ? (
               <p className="text-sm">
@@ -81,7 +81,7 @@ export default async function PayoutQueuePage({ searchParams }: { searchParams: 
                     Chi qua PayOS
                   </ConfirmSubmit>
                 </form>
-                <details className="rounded-xl bg-surface-muted p-3">
+                <details className="rounded-xl bg-white/5 p-3">
                   <summary className="cursor-pointer text-sm font-bold">Đã chuyển tay (QR VietQR)</summary>
                   <div className="mt-2 flex flex-col items-start gap-2">
                     <VietQrImage
@@ -98,8 +98,8 @@ export default async function PayoutQueuePage({ searchParams }: { searchParams: 
                     </form>
                   </div>
                 </details>
-                <details className="rounded-xl bg-surface-muted p-3">
-                  <summary className="cursor-pointer text-sm font-bold text-danger">Từ chối</summary>
+                <details className="rounded-xl bg-white/5 p-3">
+                  <summary className="cursor-pointer text-sm font-bold text-red-400">Từ chối</summary>
                   <form action={rejectPayoutAction.bind(null, p.id)} className="mt-2 flex gap-2">
                     <input name="reason" required placeholder="Lý do (người bán sẽ thấy)" className={input} />
                     <ConfirmSubmit confirm="Từ chối và hoàn số dư cho người bán?" tone="danger">

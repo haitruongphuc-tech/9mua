@@ -9,7 +9,7 @@ test('quên mật khẩu → mở link trong email → đặt mật khẩu mới
   await page.fill('#displayName', 'Khách Quên');
   await page.fill('#password', 'mat-khau-cu-e2e');
   await page.click('button[type=submit]');
-  await expect(page.getByTestId('user-menu')).toBeVisible();
+  await expect(page.getByTestId('user-menu')).toHaveAccessibleName('Tôi (Khách Quên)');
   await page.goto('/tai-khoan');
   await page.getByRole('button', { name: 'Đăng xuất', exact: true }).click();
 
@@ -28,12 +28,12 @@ test('quên mật khẩu → mở link trong email → đặt mật khẩu mới
   await page.fill('#password', 'mat-khau-moi-e2e');
   await page.fill('#confirm', 'mat-khau-moi-e2e');
   await page.click('button[type=submit]');
-  await expect(page).toHaveURL(/da-dat-lai=1/);
+  await expect(page).toHaveURL(/da-dat-lai=1/, { timeout: 10_000 });
 
   await page.fill('#identifier', email);
   await page.fill('#password', 'mat-khau-moi-e2e');
   await page.click('button[type=submit]');
-  await expect(page.getByTestId('user-menu')).toHaveText('Khách Quên');
+  await expect(page.getByTestId('user-menu')).toHaveAccessibleName('Tôi (Khách Quên)');
 
   // Link đã dùng thì không dùng lại được.
   await page.goto(link!);

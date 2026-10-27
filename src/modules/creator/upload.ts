@@ -24,8 +24,8 @@ function uploadPath(userId: string, uploadId: string): string | null {
   return resolveUploadPath(env().PRIVATE_DIR, ['video-uploads', userId, `${uploadId}.bin`]);
 }
 
-export async function videosToday(userId: string): Promise<number> {
-  return db.video.count({ where: { authorId: userId, createdAt: { gte: startOfVnDay() } } });
+export async function videosToday(userId: string, kind: 'video' | 'story' = 'video'): Promise<number> {
+  return db.video.count({ where: { authorId: userId, kind, createdAt: { gte: startOfVnDay() } } });
 }
 
 export class UploadTooLarge extends Error {}
@@ -35,7 +35,10 @@ export async function saveUpload(
   userId: string,
   body: Readable,
 ): Promise<{ ok: true; uploadId: string; size: number } | { ok: false; error: 'TOO_LARGE' | 'DAILY_LIMIT' }> {
-  if ((await videosToday(userId)) >= MAX_VIDEOS_PER_DAY) return { ok: false, error: 'DAILY_LIMIT' };
+  // Bước tải lên chưa biết là video hay Story: chỉ chặn khi cả hai loại đều đã đủ 10 trong ngày.
+  const [videos, stories] = await Promise.all([videosToday(userId), videosToday(userId, 'story')]);
+  if (videos >= MAX_VIDEOS_PER_DAY && stories >= MAX_VIDEOS_PER_DAY)
+    return { ok: false, error: 'DAILY_LIMIT' };
   const uploadId = randomBytes(16).toString('hex');
   const target = uploadPath(userId, uploadId)!;
   await mkdir(path.dirname(target), { recursive: true, mode: 0o750 });
@@ -76,15 +79,24 @@ export type CreateVideoResult =
   | {
       ok: false;
       error:
-        'NOT_FOUND' | 'TOO_LARGE' | 'DAILY_LIMIT' | 'BAD_FORMAT' | 'PRODUCT_INVALID' | 'CAPTION_TOO_LONG';
+        | 'NOT_FOUND'
+        | 'TOO_LARGE'
+        | 'DAILY_LIMIT'
+        | 'BAD_FORMAT'
+        | 'PRODUCT_INVALID'
+        | 'CAPTION_TOO_LONG'
+        | 'DUET_INVALID';
     };
 
 // Tạo video từ file đã tải lên (SPEC-creator.md mục 1). Video ở trạng thái processing cho tới khi worker xong.
 export async function createVideoUpload(
   userId: string,
   uploadId: string,
-  meta: { caption: string; productIds: string[] },
+  meta: { caption: string; productIds: string[]; kind?: 'video' | 'story'; duetOfId?: string | null },
 ): Promise<CreateVideoResult> {
+  const kind = meta.kind === 'story' ? 'story' : 'video';
+  // Duet chỉ với video thường đang trên feed (không Duet Story, không Duet chính Story).
+  const duetOfId = kind === 'video' && meta.duetOfId ? meta.duetOfId : null;
   const file = uploadPath(userId, uploadId);
   const info = file ? await stat(file).catch(() => null) : null;
   if (!file || !info) return { ok: false, error: 'NOT_FOUND' };
@@ -97,6 +109,9 @@ export async function createVideoUpload(
   const caption = meta.caption.trim();
   if (caption.length > MAX_CAPTION) return { ok: false, error: 'CAPTION_TOO_LONG' };
 
+  if (duetOfId && !(await db.video.count({ where: { id: duetOfId, status: 'ready', kind: 'video' } })))
+    return { ok: false, error: 'DUET_INVALID' };
+
   const productIds = [...new Set(meta.productIds.filter(Boolean))];
   if (productIds.length > MAX_PRODUCTS_PER_VIDEO) return { ok: false, error: 'PRODUCT_INVALID' };
   for (const id of productIds) {
@@ -107,13 +122,18 @@ export async function createVideoUpload(
   return db.$transaction(async (tx): Promise<CreateVideoResult> => {
     // Khoá theo người đăng để 2 lần đăng cùng lúc không vượt 10 video/ngày.
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`video:${userId}`}))`;
-    const today = await tx.video.count({ where: { authorId: userId, createdAt: { gte: startOfVnDay() } } });
+    // Video và Story có giới hạn riêng, mỗi loại 10 mỗi ngày.
+    const today = await tx.video.count({
+      where: { authorId: userId, kind, createdAt: { gte: startOfVnDay() } },
+    });
     if (today >= MAX_VIDEOS_PER_DAY) return discard({ ok: false as const, error: 'DAILY_LIMIT' as const });
     const video = await tx.video.create({
       data: {
         authorId: userId,
         caption,
         hashtags: extractHashtags(caption),
+        kind,
+        duetOfId,
         createdAt: now(),
         products: { create: productIds.map((productId, position) => ({ productId, position })) },
       },

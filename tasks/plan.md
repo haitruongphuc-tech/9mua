@@ -62,3 +62,20 @@ Thứ tự đi theo capability map. Phase 6 và 7 độc lập với nhau, làm 
 1. **Cấu hình VPS** (CPU, RAM, ổ đĩa, phiên bản Ubuntu)? Cần ≥ 2 vCPU / 4GB RAM / 40GB SSD cho Postgres + ffmpeg.
 2. **Liên kết GitHub** (claude.ai/connect-github + cài Claude GitHub App cho repo `9mua`), để lưu code an toàn.
 3. **Truy cập VPS để deploy** ở Phase 9: anh tự chạy theo `docs/deploy.md`, hay cấp SSH cho tôi? Có thể quyết lúc tới Phase 9.
+
+## Live + xu (T49–T57) — chia nhỏ ngày 27/10/2026 (`SPEC-live.md`)
+
+| Task | Việc | Kiểm tra |
+|---|---|---|
+| T49 | Dữ liệu: `LiveSession`, `LiveViewer`, `LiveChatMessage`, `LiveChatBan`, `LiveReport`, `LiveBan`, `XuEntry` (trigger chỉ thêm), cột `sourceLiveId` ở `CartItem`/`OrderItem`; cài đặt `live_*`, `xu_rules_json` | migrate, test chốt chặn DB |
+| T50 | `startLive`/`endLive`, mã phát dùng 1 lần (lưu băm), mã xem HMAC 5 phút, `authorizeMedia` + `/api/live/media-auth`; giới hạn 2 buổi, 50 người, 2 giờ, tài khoản ≥ 3 ngày, cấm live | integration |
+| T51 | MediaMTX: `deploy/mediamtx/mediamtx.yml`, service trong docker-compose, Nginx `/live-media/`, cổng 8189; `syncWithMediaServer` (API MediaMTX) trong worker mỗi 5 giây | unit với API giả |
+| T52 | `/live/phat`: camera/micro, WHIP bằng `fetch` + `RTCPeerConnection`, đổi camera, tắt micro, giữ màn hình sáng, tự nối lại, bảng tổng kết | E2E |
+| T53 | `/live` + `/live/<id>`: WHEP, vuốt dọc, tín hiệu 20 giây, số người xem thật; chấm đỏ thanh dưới; nhãn LIVE ở trang Kiot/creator | E2E |
+| T54 | Chat + tim qua SSE (không có SSE thì hỏi lại 3 giây); lọc link, 1 tin/3 giây, 10 tim/giây; ẩn tin, cấm chat | unit + integration |
+| T55 | Ghim sản phẩm (mọi Kiot đang hoạt động) + "Thêm vào giỏ" ghi `sourceLiveId` | integration + E2E |
+| T56 | Báo cáo (5 người thì ẩn + báo CEO), `/admin/live`: dừng ngay, cấm 1/7/30 ngày/vĩnh viễn, audit | integration |
+| T57 | Xu: sổ chỉ thêm, `rewardLive` khi kết thúc (người xem hợp lệ, mức thưởng, 1 buổi/ngày, ngân sách tháng), `/admin/xu`, ô xu ở trang Tôi | unit + integration |
+
+Ghi chú: máy làm việc của Claude không chạy được MediaMTX thật (bị chặn tải và build phần mềm ngoài), nên E2E dùng
+"máy chủ hình giả" khi `TEST_MODE=e2e` (giả lập MediaMTX báo có hình); phát/xem hình thật kiểm tra trên VPS.

@@ -98,3 +98,29 @@ revenueSummary(range: { from: Date; to: Date }): Promise<{ count: number; total:
 ## Open Questions
 
 Không có. Mọi quyết định đều theo những gì đã chốt. Các mục "Hỏi trước" ở trên đều nằm ngoài MVP.
+
+## Bổ sung 27/10/2026 — Giá 1 USD/năm theo tỷ giá, voucher (CEO duyệt: §7 mục 4 và câu 7 "b")
+
+### Giá Kiot 1 USD/năm quy ra VNĐ
+- CEO đặt giá bằng USD trong `/admin` (mặc định **1,00 USD/năm**, lưu `kiot_fee_usd_cents = 100`).
+- Mỗi sáng 7:00, máy chủ lấy **tỷ giá bán USD của Vietcombank** (trang tỷ giá XML công khai của Vietcombank), nhân giá
+  USD, **làm tròn tới 1.000đ** gần nhất, lưu vào `kiot_fee_vnd`. Web **chỉ hiện VNĐ**.
+- Lấy tỷ giá lỗi thì **giữ giá gần nhất** và thử lại hôm sau. Giá mới lệch **hơn 10%** so với giá đang dùng thì **không áp
+  dụng** và gửi email báo CEO.
+- QR đã tạo giữ giá lúc tạo (như mục 3). Mỗi lần đổi giá ghi lại tỷ giá, giá cũ, giá mới.
+
+### Voucher mở Kiot
+- Người có voucher chưa dùng (`SPEC-social.md` mục 8) thấy nút "Dùng voucher – miễn phí 1 năm" ở bước kích hoạt / gia hạn.
+- Dùng voucher ghi `KiotSubscription` với `source = 'voucher'`, `amount = 0`, kỳ hạn 1 năm cộng dồn như mục 2, và đánh dấu
+  voucher đã dùng **trong cùng một transaction**. Bấm 2 lần cũng chỉ dùng được 1 lần.
+- Voucher đã bị CEO thu hồi thì không dùng được. Doanh thu phí thuê không tính dòng voucher.
+
+### Ghi chú khi làm (T68, 27/10/2026)
+- Sổ đổi giá: bảng mới `KiotFeeRateLog` (chỉ thêm): nguồn (`vietcombank` | `admin`), tỷ giá, giá USD, giá cũ, giá mới,
+  có áp dụng không. Cron `/api/internal/billing/usd-rate` lúc 7:00; CEO có nút "Cập nhật tỷ giá ngay" ở `/admin/cai-dat`.
+- CEO đổi giá USD thì áp dụng ngay theo tỷ giá đang dùng (CEO chủ động nên không chặn 10%). Giá tối thiểu vẫn 2.000đ.
+- Tỷ giá lưu ở `usd_vnd_rate`, dùng chung để quy chi phí AI Studio ra VNĐ.
+- Voucher: `KiotSubscription.source = 'voucher'`. Việc dùng voucher nằm ở `social.redeemVoucher` (social phụ thuộc billing,
+  billing không gọi ngược social) và gọi `billing.grantVoucherYear(tx, kiotId)` trong cùng transaction.
+  CEO xem và thu hồi voucher chưa dùng ở `/admin/voucher`.
+

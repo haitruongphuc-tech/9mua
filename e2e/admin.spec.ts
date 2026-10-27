@@ -100,11 +100,17 @@ test('CEO: mọi trang hàng chờ mở được, không lỗi', async ({ browse
     ['/admin/khieu-nai', 'Khiếu nại'],
     ['/admin/lech-tien', 'Thanh toán lệch tiền'],
     ['/admin/bao-cao', 'Báo cáo vi phạm'],
+    ['/admin/live', 'Live'],
+    ['/admin/xu', 'Xu thưởng live'],
+    ['/admin/ai', 'AI Studio'],
+    ['/admin/voucher', 'Voucher mở Kiot'],
   ] as const) {
     const res = await ceo.goto(path);
     expect(res?.status(), path).toBe(200);
     await expect(ceo.getByRole('heading', { level: 1 }), path).toHaveText(heading);
   }
+  await ceo.goto('/admin/live');
+  await expect(ceo.getByTestId('live-connect-stats')).toContainText('lượt xem không kết nối được hình');
 });
 
 test('CEO: tra cứu và khoá Kiot, cài đặt có kiểm hợp lệ, công tắc chi tự động, tải CSV', async ({

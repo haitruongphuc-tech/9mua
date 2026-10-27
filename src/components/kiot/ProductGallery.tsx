@@ -2,11 +2,13 @@
 
 import Image from 'next/image';
 import { useRef, useState } from 'react';
+import { useT } from '@/i18n/client';
 
 type GalleryImage = { id: string; url: string; thumbUrl: string };
 
 // Ảnh sản phẩm: vuốt ngang trên điện thoại; bấm ảnh nhỏ bên dưới để chuyển ảnh (tiện trên máy tính).
 export function ProductGallery({ images, name }: { images: GalleryImage[]; name: string }) {
+  const t = useT();
   const list = useRef<HTMLUListElement>(null);
   const [active, setActive] = useState(0);
   const offsets = () => [...(list.current?.children ?? [])].map((c) => (c as HTMLElement).offsetLeft);
@@ -31,17 +33,17 @@ export function ProductGallery({ images, name }: { images: GalleryImage[]; name:
       <ul
         ref={list}
         onScroll={onScroll}
-        className="flex snap-x snap-mandatory gap-2 overflow-x-auto"
-        aria-label="Ảnh sản phẩm"
+        className="no-scrollbar flex snap-x snap-mandatory gap-2 overflow-x-auto"
+        aria-label={t('market.p.photos')}
       >
         {images.map((img, i) => (
           <li
             key={img.id}
-            className="relative aspect-square w-full shrink-0 snap-center overflow-hidden rounded-2xl bg-surface-muted"
+            className="relative aspect-square w-full shrink-0 snap-center overflow-hidden rounded-[18px] bg-white"
           >
             <Image
               src={img.url}
-              alt={`${name} — ảnh ${i + 1}`}
+              alt={t('market.p.photoAlt', { name, n: i + 1 })}
               fill
               sizes="(max-width: 768px) 100vw, 50vw"
               className="object-contain"
@@ -58,10 +60,10 @@ export function ProductGallery({ images, name }: { images: GalleryImage[]; name:
               key={img.id}
               type="button"
               onClick={() => show(i)}
-              aria-label={`Xem ảnh ${i + 1}`}
+              aria-label={t('market.p.viewPhoto', { n: i + 1 })}
               aria-current={i === active}
-              className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 ${
-                i === active ? 'border-brand-ink' : 'border-transparent opacity-70'
+              className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-[10px] border-2 ${
+                i === active ? 'border-brand' : 'border-transparent opacity-70'
               }`}
             >
               <Image src={img.thumbUrl} alt="" fill sizes="64px" className="object-cover" unoptimized />

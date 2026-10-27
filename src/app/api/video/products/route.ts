@@ -1,3 +1,4 @@
+import { getT } from '@/i18n/server';
 import { getCurrentUser } from '@/modules/identity';
 import { listProductsForOwner } from '@/modules/kiot';
 import { searchProducts } from '@/modules/marketplace';
@@ -15,6 +16,7 @@ export type PickableProduct = {
 
 // Tìm sản phẩm để gắn vào video: mọi Kiot đang hoạt động, sản phẩm Kiot của mình lên trước.
 export async function GET(request: Request) {
+  const t = await getT();
   const user = await getCurrentUser();
   if (!user) return Response.json({ items: [] }, { status: 401 });
   const q = new URL(request.url).searchParams.get('q')?.trim().slice(0, 100) ?? '';
@@ -32,7 +34,7 @@ export async function GET(request: Request) {
           name: p.name,
           price: p.price,
           thumbUrl: p.images[0]?.thumbUrl ?? null,
-          kiotName: 'Kiot của tôi',
+          kiotName: t('me.link.kiot'),
           mine: true,
         }))),
     ...found.filter((p) => !ownIds.has(p.id)).map((p) => ({ ...p, mine: false })),

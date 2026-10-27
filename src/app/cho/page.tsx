@@ -1,8 +1,11 @@
 import type { Metadata } from 'next';
+import { HashtagRow } from '@/components/market/HashtagRow';
 import { MarketFeed } from '@/components/market/MarketFeed';
 import { MarketFilters } from '@/components/market/MarketFilters';
 import { MarketShowcase } from '@/components/market/MarketShowcase';
-import { categoryName } from '@/modules/kiot';
+import { ClientMessages } from '@/i18n/ClientMessages';
+import { getT } from '@/i18n/server';
+import { CATEGORIES, categoryName } from '@/modules/kiot';
 import { parseSearchParams, searchProducts, toSearchString } from '@/modules/marketplace';
 
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> };
@@ -19,33 +22,41 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   };
 }
 
+// Chợ kiểu V4 (trang Khám phá của V4): dải cam có slogan, ô tìm dạng viên, nút danh mục, thẻ sản phẩm trắng.
 export default async function MarketPage({ searchParams }: Props) {
   const params = parseSearchParams(await searchParams);
-  const page = await searchProducts(params);
+  const [page, t] = await Promise.all([searchProducts(params), getT()]);
   const query = toSearchString({ ...params, cursor: undefined });
+  const category = CATEGORIES.find((c) => c.slug === params.category);
   return (
-    <section className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-5">
-      <h1 className="text-2xl font-extrabold">
-        {params.q
-          ? `Kết quả cho "${params.q}"`
-          : params.category
-            ? categoryName(params.category)
-            : 'Chợ 9MUA'}
-      </h1>
-      <MarketFilters params={params} />
-      {/* Chợ chưa lọc gì: hiện Bán chạy, Video hot, Kiot nổi bật (trước T40 nằm ở trang chủ). */}
-      {query === '' && !params.cursor ? (
-        <>
-          <MarketShowcase variant="cho" />
-          <h2 className="text-xl font-extrabold">Tất cả sản phẩm</h2>
-        </>
-      ) : null}
-      <MarketFeed
-        key={query + (params.cursor ?? '')}
-        initial={page.items}
-        nextCursor={page.nextCursor}
-        query={query}
-      />
-    </section>
+    <ClientMessages prefixes={['market.']}>
+      <div className="w-full bg-gradient-to-r from-brand to-orange-400 px-4 py-5 text-center">
+        <p className="font-display text-[18px] font-black md:text-[24px]">{t('common.slogan.explore')}</p>
+      </div>
+      <section className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-5">
+        <h1 className="font-display text-[22px] font-black">
+          {params.q
+            ? t('market.resultsFor', { q: params.q })
+            : category
+              ? t(`market.cat.${category.slug}`)
+              : t('market.title')}
+        </h1>
+        <MarketFilters params={params} />
+        {/* Chợ chưa lọc gì: hiện Hashtag nổi bật, Bán chạy, Video hot, Kiot nổi bật. */}
+        {query === '' && !params.cursor ? (
+          <>
+            <HashtagRow />
+            <MarketShowcase variant="cho" />
+            <h2 className="font-display text-[18px] font-black">{t('market.allProducts')}</h2>
+          </>
+        ) : null}
+        <MarketFeed
+          key={query + (params.cursor ?? '')}
+          initial={page.items}
+          nextCursor={page.nextCursor}
+          query={query}
+        />
+      </section>
+    </ClientMessages>
   );
 }

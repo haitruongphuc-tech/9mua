@@ -4,6 +4,9 @@ export type MyVideo = {
   id: string;
   caption: string;
   status: string;
+  kind: 'video' | 'story';
+  expiresAt: Date | null; // Story: hết hạn sau 24 giờ
+  duetOfId: string | null;
   failReason: string | null;
   moderationNote: string | null;
   posterUrl: string | null;
@@ -33,6 +36,9 @@ export async function myVideoStats(userId: string): Promise<MyVideo[]> {
     id: v.id,
     caption: v.caption,
     status: v.status,
+    kind: v.kind === 'story' ? 'story' : 'video',
+    expiresAt: v.expiresAt,
+    duetOfId: v.duetOfId,
     failReason: v.failReason,
     moderationNote: v.moderationNote,
     posterUrl: v.posterUrl,

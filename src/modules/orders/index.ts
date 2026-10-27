@@ -9,6 +9,7 @@ export {
   type CartGroup,
   type CartLine,
   type CartProblem,
+  type CartSource,
 } from './cart';
 export { shippingFeeFor } from './shipping';
 export {

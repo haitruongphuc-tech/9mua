@@ -1,20 +1,29 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
+import { GoogleButton } from '@/components/GoogleButton';
+import { ClientMessages } from '@/i18n/ClientMessages';
+import { getT } from '@/i18n/server';
 import { safeNextPath } from '@/lib/safe-next-path';
 import { getCurrentUser } from '@/modules/identity';
+import { AuthShell, OrDivider } from '../AuthShell';
 import { RegisterForm } from './RegisterForm';
 
-export const metadata: Metadata = { title: 'Đăng ký', robots: { index: false } };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await getT())('auth.register.submit'), robots: { index: false } };
+}
 
 export default async function RegisterPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
-  const { next } = await searchParams;
+  const next = safeNextPath((await searchParams).next);
   // Đã đăng nhập (vd. bấm "Tạo Kiot" ở trang chủ) thì đi thẳng tới trang cần tới.
-  if (await getCurrentUser()) redirect(safeNextPath(next));
+  if (await getCurrentUser()) redirect(next);
+  const t = await getT();
   return (
-    <section className="mx-auto w-full max-w-sm px-4 py-10">
-      <h1 className="mb-1 text-2xl font-extrabold">Tạo tài khoản 9MUA</h1>
-      <p className="mb-6 text-black/70">Mua hàng, mở Kiot và đăng video chỉ với một tài khoản.</p>
-      <RegisterForm next={safeNextPath(next)} />
-    </section>
+    <AuthShell title={t('auth.register.title')} lead={t('auth.register.lead')}>
+      <GoogleButton next={next} />
+      <OrDivider label={t('auth.or')} />
+      <ClientMessages prefixes={['auth.']}>
+        <RegisterForm next={next} />
+      </ClientMessages>
+    </AuthShell>
   );
 }

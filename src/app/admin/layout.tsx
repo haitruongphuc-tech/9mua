@@ -19,6 +19,12 @@ const NAV = [
   ['/admin/bao-cao', 'Báo cáo'],
   ['/admin/tra-cuu', 'Tra cứu'],
   ['/admin/giao-dich', 'Giao dịch'],
+  ['/admin/ghim', 'Ghim'],
+  ['/admin/noi-dung', 'Slogan & pháp lý'],
+  ['/admin/live', 'Live'],
+  ['/admin/xu', 'Xu'],
+  ['/admin/ai', 'AI Studio'],
+  ['/admin/voucher', 'Voucher'],
   ['/admin/cai-dat', 'Cài đặt'],
 ] as const;
 
@@ -32,14 +38,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       {verified ? (
         <nav
           aria-label="Trang CEO"
-          className="sticky top-14 z-30 overflow-x-auto border-b border-black/10 bg-white px-4"
+          className="sticky top-14 z-30 overflow-x-auto border-b border-white/10 bg-ink px-4"
         >
           <ul className="flex gap-1 py-2 text-sm font-bold">
             {NAV.map(([href, label]) => (
               <li key={href}>
                 <Link
                   href={href}
-                  className="block whitespace-nowrap rounded-full px-3 py-1.5 hover:bg-surface-muted"
+                  className="block whitespace-nowrap rounded-full px-3 py-1.5 hover:bg-white/5"
                 >
                   {label}
                 </Link>

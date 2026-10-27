@@ -1,9 +1,10 @@
 'use client';
 
 import { useActionState, useEffect } from 'react';
-import { ME_CHANGED_EVENT } from '@/components/UserMenu';
+import { ME_CHANGED_EVENT } from '@/components/MeProvider';
 import { SubmitButton } from '@/components/ui/SubmitButton';
 import { TextField } from '@/components/ui/TextField';
+import { useT } from '@/i18n/client';
 import { changeEmailAction, changePasswordAction, updateProfileAction, type FormState } from './actions';
 
 function Feedback({ state, id }: { state: FormState; id: string }) {
@@ -12,7 +13,7 @@ function Feedback({ state, id }: { state: FormState; id: string }) {
       <p
         role="alert"
         data-testid={`${id}-error`}
-        className="rounded-xl bg-danger/10 px-4 py-3 text-sm font-bold text-danger"
+        className="rounded-[14px] bg-danger/15 px-4 py-3 text-[13px] font-bold text-danger"
       >
         {state.error}
       </p>
@@ -22,7 +23,7 @@ function Feedback({ state, id }: { state: FormState; id: string }) {
       <p
         role="status"
         data-testid={`${id}-ok`}
-        className="rounded-xl bg-success/10 px-4 py-3 text-sm font-bold text-success"
+        className="rounded-[14px] bg-success/15 px-4 py-3 text-[13px] font-bold text-success"
       >
         {state.ok}
       </p>
@@ -30,48 +31,55 @@ function Feedback({ state, id }: { state: FormState; id: string }) {
   return null;
 }
 
-function Card({ title, id, children }: { title: string; id: string; children: React.ReactNode }) {
+// Thẻ V4 trên nền đen: viền trắng mờ 1px, bo 18px (docs/BRAND.md).
+export function Card({ title, id, children }: { title: string; id: string; children: React.ReactNode }) {
   return (
-    <section id={id} className="flex flex-col gap-4 rounded-2xl border-2 border-black/10 p-5">
-      <h2 className="text-lg font-extrabold">{title}</h2>
+    <section id={id} className="flex flex-col gap-4 rounded-[18px] border border-white/10 bg-white/5 p-5">
+      <h2 className="font-display text-[16px] font-black">{title}</h2>
       {children}
     </section>
   );
 }
 
 export function ProfileForm({ displayName }: { displayName: string }) {
+  const t = useT();
   const [state, action] = useActionState<FormState, FormData>(updateProfileAction, {});
   useEffect(() => {
     if (state.ok) window.dispatchEvent(new Event(ME_CHANGED_EVENT));
   }, [state]);
   return (
-    <Card title="Thông tin" id="thong-tin">
+    <Card title={t('me.settings.info')} id="thong-tin">
       <form action={action} className="flex flex-col gap-4">
         <Feedback state={state} id="profile" />
         <TextField
-          label="Tên hiển thị"
+          tone="dark"
+          label={t('me.settings.displayName')}
           name="displayName"
           id="profile-name"
           defaultValue={displayName}
           required
         />
-        <SubmitButton pendingText="Đang lưu…">Lưu</SubmitButton>
+        <SubmitButton tone="v4" pendingText={t('me.settings.saving')}>
+          {t('me.settings.save')}
+        </SubmitButton>
       </form>
     </Card>
   );
 }
 
 export function EmailForm({ email }: { email: string | null }) {
+  const t = useT();
   const [state, action] = useActionState<FormState, FormData>(changeEmailAction, {});
   return (
-    <Card title={email ? 'Email' : 'Thêm email'} id="email">
-      <p className="text-sm text-black/70">
-        {email ? `Email hiện tại: ${email}` : 'Thêm email để đăng nhập và tự lấy lại mật khẩu khi quên.'}
+    <Card title={email ? t('me.settings.email') : t('me.settings.addEmail')} id="email">
+      <p className="text-[13px] text-white/60">
+        {email ? t('me.settings.currentEmail', { email }) : t('me.settings.addEmailHint')}
       </p>
       <form action={action} className="flex flex-col gap-4">
         <Feedback state={state} id="email" />
         <TextField
-          label="Email"
+          tone="dark"
+          label={t('me.settings.email')}
           name="email"
           id="email-new"
           type="email"
@@ -81,32 +89,37 @@ export function EmailForm({ email }: { email: string | null }) {
           key={state.email ?? 'email'}
         />
         <TextField
-          label="Mật khẩu hiện tại"
+          tone="dark"
+          label={t('me.settings.currentPassword')}
           name="password"
           id="email-password"
           type="password"
           autoComplete="current-password"
           required
         />
-        <SubmitButton pendingText="Đang lưu…">Lưu email</SubmitButton>
+        <SubmitButton tone="v4" pendingText={t('me.settings.saving')}>
+          {t('me.settings.saveEmail')}
+        </SubmitButton>
       </form>
     </Card>
   );
 }
 
 export function PasswordForm({ forced }: { forced: boolean }) {
+  const t = useT();
   const [state, action] = useActionState<FormState, FormData>(changePasswordAction, {});
   return (
-    <Card title="Đổi mật khẩu" id="doi-mat-khau">
+    <Card title={t('me.settings.password')} id="doi-mat-khau">
       {forced && !state.ok ? (
-        <p role="alert" className="rounded-xl bg-brand/20 px-4 py-3 text-sm font-bold">
-          Bạn đang dùng mật khẩu tạm. Hãy đặt mật khẩu mới để tiếp tục.
+        <p role="alert" className="rounded-[14px] bg-brand/20 px-4 py-3 text-[13px] font-bold">
+          {t('me.settings.forced')}
         </p>
       ) : null}
       <form action={action} className="flex flex-col gap-4">
         <Feedback state={state} id="password" />
         <TextField
-          label="Mật khẩu hiện tại"
+          tone="dark"
+          label={t('me.settings.currentPassword')}
           name="oldPassword"
           id="pw-old"
           type="password"
@@ -114,23 +127,27 @@ export function PasswordForm({ forced }: { forced: boolean }) {
           required
         />
         <TextField
-          label="Mật khẩu mới"
+          tone="dark"
+          label={t('me.settings.newPassword')}
           name="newPassword"
           id="pw-new"
           type="password"
           autoComplete="new-password"
           required
-          hint="Ít nhất 8 ký tự"
+          hint={t('me.settings.newPasswordHint')}
         />
         <TextField
-          label="Nhập lại mật khẩu mới"
+          tone="dark"
+          label={t('me.settings.confirm')}
           name="confirm"
           id="pw-confirm"
           type="password"
           autoComplete="new-password"
           required
         />
-        <SubmitButton pendingText="Đang đổi…">Đổi mật khẩu</SubmitButton>
+        <SubmitButton tone="v4" pendingText={t('me.settings.changing')}>
+          {t('me.settings.password')}
+        </SubmitButton>
       </form>
     </Card>
   );

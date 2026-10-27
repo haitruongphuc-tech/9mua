@@ -13,14 +13,19 @@ async function signUp(page: Page, phone: string, password: string) {
   await page.waitForURL((u) => u.pathname === '/tai-khoan');
 }
 
-test('trang tài khoản: đổi tên, thêm email, đổi mật khẩu', async ({ page }) => {
+test('cài đặt tài khoản: đổi tên, thêm email, đổi mật khẩu', async ({ page }) => {
   const phone = `07${stamp}`;
   await signUp(page, phone, 'mat-khau-1-e2e');
+  // Trang Tôi V4 có lối vào Cài đặt tài khoản (T65).
+  await expect(page.getByTestId('me-badge')).toHaveText('TÀI KHOẢN FREE');
+  await expect(page.getByTestId('me-free')).toContainText('Đang dùng Free • 0/50 tim/follow hôm nay');
+  await page.getByRole('link', { name: /Cài đặt tài khoản/ }).click();
+  await page.waitForURL((u) => u.pathname === '/tai-khoan/cai-dat');
 
   await page.fill('#profile-name', 'Tên Mới E2E');
   await page.locator('#thong-tin button[type=submit]').click();
   await expect(page.getByTestId('profile-ok')).toBeVisible();
-  await expect(page.getByTestId('user-menu')).toHaveText('Tên Mới E2E');
+  await expect(page.getByTestId('user-menu')).toHaveAccessibleName('Tôi (Tên Mới E2E)');
 
   await page.fill('#email-new', `acc-${stamp}@9mua.test`);
   await page.fill('#email-password', 'sai-mat-khau');
@@ -41,7 +46,7 @@ test('trang tài khoản: đổi tên, thêm email, đổi mật khẩu', async 
   await page.fill('#identifier', `acc-${stamp}@9mua.test`);
   await page.fill('#password', 'mat-khau-2-e2e');
   await page.click('button[type=submit]');
-  await expect(page.getByTestId('user-menu')).toHaveText('Tên Mới E2E');
+  await expect(page.getByTestId('user-menu')).toHaveAccessibleName('Tôi (Tên Mới E2E)');
 });
 
 test('/admin: tài khoản thường thấy 404, CEO tạo bằng CLI vào được', async ({ page }) => {

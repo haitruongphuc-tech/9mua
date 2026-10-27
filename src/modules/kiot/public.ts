@@ -41,7 +41,13 @@ export function productPath(p: { id: string; name: string }): string {
 async function loadKiot(slug: string, viewerId: string | null) {
   const kiot = await db.kiot.findUnique({
     where: { slug },
-    select: { ...PUBLIC_KIOT, ownerId: true, activeUntil: true, lockedAt: true },
+    select: {
+      ...PUBLIC_KIOT,
+      ownerId: true,
+      activeUntil: true,
+      lockedAt: true,
+      owner: { select: { displayName: true } },
+    },
   });
   if (!kiot || kiot.lockedAt) return null;
   const isOwner = viewerId !== null && viewerId === kiot.ownerId;
@@ -49,16 +55,40 @@ async function loadKiot(slug: string, viewerId: string | null) {
   const publicKiot = Object.fromEntries(
     Object.keys(PUBLIC_KIOT).map((k) => [k, kiot[k as keyof PublicKiot]]),
   ) as PublicKiot;
-  return { kiot: publicKiot, preview: !isKiotActive(kiot, now()), isOwner };
+  return {
+    kiot: publicKiot,
+    preview: !isKiotActive(kiot, now()),
+    isOwner,
+    owner: { id: kiot.ownerId, displayName: kiot.owner.displayName },
+  };
 }
 
 // Kiot công khai; chủ Kiot được xem trước khi còn nháp hoặc hết hạn (preview = true).
 export async function getPublicKiot(
   slug: string,
   viewerId: string | null,
-): Promise<{ kiot: PublicKiot; preview: boolean } | null> {
+): Promise<{
+  kiot: PublicKiot;
+  preview: boolean;
+  // Chỉ dùng ở máy chủ (trang Kiot V4: tên chủ, video của chủ, follow chủ). Không đưa id xuống trình duyệt.
+  owner: { id: string; displayName: string };
+} | null> {
   const found = await loadKiot(slug, viewerId);
-  return found ? { kiot: found.kiot, preview: found.preview } : null;
+  return found ? { kiot: found.kiot, preview: found.preview, owner: found.owner } : null;
+}
+
+// Số sản phẩm đang hiện trên trang Kiot (ô "Sản phẩm" của trang Kiot V4).
+export function countPublicProducts(kiotId: string): Promise<number> {
+  return db.product.count({ where: { kiotId, ...PUBLIC_PRODUCT_WHERE } });
+}
+
+// Chủ của một Kiot đang mở cửa (nút Follow trên trang Kiot là follow chủ Kiot). Kiot khoá/hết hạn: null.
+export async function kiotOwnerId(kiotId: string): Promise<string | null> {
+  const kiot = await db.kiot.findUnique({
+    where: { id: kiotId },
+    select: { ownerId: true, activeUntil: true, lockedAt: true },
+  });
+  return kiot && !kiot.lockedAt && isKiotActive(kiot, now()) ? kiot.ownerId : null;
 }
 
 // Trang Kiot: còn hàng trước, trong mỗi nhóm mới nhất trước. Mỗi Kiot ≤ 500 sản phẩm nên phân trang
@@ -120,4 +150,15 @@ export async function getPublicProduct(slug: string, productId: string, viewerId
   });
   if (!product) return null;
   return { kiot: found.kiot, product, preview: found.preview || !product.visible };
+}
+
+// Tên, slug, logo của vài Kiot (thẻ người phát live, thẻ sản phẩm ghim). Chỉ trường công khai.
+export function kiotBasics(
+  ids: string[],
+): Promise<{ id: string; slug: string; name: string; logoUrl: string | null }[]> {
+  if (ids.length === 0) return Promise.resolve([]);
+  return db.kiot.findMany({
+    where: { id: { in: ids } },
+    select: { id: true, slug: true, name: true, logoUrl: true },
+  });
 }

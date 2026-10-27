@@ -2,9 +2,11 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { localizeFields } from '@/i18n/module-messages';
+import { getT } from '@/i18n/server';
 import { requireUser } from '@/modules/identity';
 import { createKiot, updateKiot } from '@/modules/kiot';
-import { KIOT_ERROR_MESSAGES } from '@/modules/kiot/messages';
+import { redeemVoucher } from '@/modules/social';
 
 export type KiotFormValues = { name: string; slug: string; description: string; contactPhone: string };
 export type KiotFormState = {
@@ -13,6 +15,15 @@ export type KiotFormState = {
   message?: string;
   ok?: string;
 };
+
+const KIOT_ERRORS = [
+  'SLUG_INVALID',
+  'SLUG_RESERVED',
+  'SLUG_TAKEN',
+  'SLUG_LOCKED',
+  'ALREADY_HAS_KIOT',
+  'NO_KIOT',
+] as const;
 
 function readForm(form: FormData): KiotFormValues {
   return {
@@ -25,12 +36,14 @@ function readForm(form: FormData): KiotFormValues {
   };
 }
 
-function toState(
+async function toState(
   values: KiotFormValues,
   result: { ok: false; error: string; fields?: KiotFormState['fields'] },
-) {
-  if (result.error === 'INVALID_INPUT') return { values, fields: result.fields };
-  const message = KIOT_ERROR_MESSAGES[result.error as keyof typeof KIOT_ERROR_MESSAGES];
+): Promise<KiotFormState> {
+  const t = await getT();
+  if (result.error === 'INVALID_INPUT') return { values, fields: localizeFields(t, result.fields) };
+  const code = KIOT_ERRORS.find((c) => c === result.error);
+  const message = code ? t(`seller.err.${code}`) : t('seller.err.generic');
   return result.error.startsWith('SLUG_') ? { values, fields: { slug: message } } : { values, message };
 }
 
@@ -48,5 +61,13 @@ export async function updateKiotAction(_p: KiotFormState, form: FormData): Promi
   const result = await updateKiot(user.id, values);
   if (!result.ok) return toState(values, result);
   revalidatePath('/kiot-cua-toi', 'layout');
-  return { values, ok: 'Đã lưu thông tin Kiot.' };
+  return { values, ok: (await getT())('seller.form.saved') };
+}
+
+// "Dùng voucher – miễn phí 1 năm" (SPEC-billing.md bổ sung 27/10).
+export async function redeemVoucherAction(): Promise<void> {
+  const user = await requireUser();
+  const r = await redeemVoucher(user.id);
+  revalidatePath('/kiot-cua-toi');
+  redirect(r.ok ? '/kiot-cua-toi?da-dung-voucher=1' : '/kiot-cua-toi?loi-voucher=1');
 }

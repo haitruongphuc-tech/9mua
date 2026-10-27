@@ -50,7 +50,7 @@ describe('đăng video và chuyển mã', () => {
       expect(existsSync(fileOf(v.posterUrl!))).toBe(true);
       expect(existsSync(job.sourcePath)).toBe(false);
       expect(await db.notification.findFirst({ where: { userId: u.id } })).toMatchObject({
-        title: 'Video đã đăng xong',
+        title: '@notify.videoReady',
       });
       expect(await processNextJob()).toBe(false);
     },
@@ -77,7 +77,8 @@ describe('đăng video và chuyển mã', () => {
       fileUrl: null,
     });
     expect(await db.notification.findFirst({ where: { userId: u.id } })).toMatchObject({
-      title: 'Video không đăng được',
+      title: '@notify.videoFailed',
+      body: JSON.stringify({ detail: 'Video dài hơn 60 giây' }),
     });
   });
 
@@ -103,9 +104,25 @@ describe('đăng video và chuyển mã', () => {
 });
 
 describe('điều kiện đăng', () => {
-  it('tối đa 10 video/ngày', async () => {
+  it('tối đa 10 video và 10 Story mỗi ngày (giới hạn riêng, SPEC-creator.md bổ sung 27/10)', async () => {
     const u = await createUser();
     for (let i = 0; i < 10; i++) expect(await upload(u.id, 'long-75s.mp4')).toMatchObject({ ok: true });
+    // Hết lượt video nhưng vẫn tải lên được để đăng Story.
+    const saved = await saveUpload(u.id, createReadStream(path.join(FIX, 'long-75s.mp4')));
+    if (!saved.ok) throw new Error(saved.error);
+    expect(await createVideoUpload(u.id, saved.uploadId, { caption: '', productIds: [] })).toEqual({
+      ok: false,
+      error: 'DAILY_LIMIT',
+    });
+    for (let i = 0; i < 10; i++) {
+      const s = await saveUpload(u.id, createReadStream(path.join(FIX, 'long-75s.mp4')));
+      if (!s.ok) throw new Error(s.error);
+      expect(
+        await createVideoUpload(u.id, s.uploadId, { caption: '', productIds: [], kind: 'story' }),
+      ).toMatchObject({
+        ok: true,
+      });
+    }
     expect(await saveUpload(u.id, createReadStream(path.join(FIX, 'long-75s.mp4')))).toEqual({
       ok: false,
       error: 'DAILY_LIMIT',

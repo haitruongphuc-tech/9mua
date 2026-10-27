@@ -12,7 +12,7 @@ test('đăng ký → thấy tên → dùng chung trên Kiot → đăng xuất �
   await page.click('button[type=submit]');
 
   await page.waitForURL((u) => u.pathname === '/tai-khoan');
-  await expect(page.getByTestId('user-menu')).toHaveText('Khách E2E');
+  await expect(page.getByTestId('user-menu')).toHaveAccessibleName('Tôi (Khách E2E)');
 
   // Cookie domain dùng chung: sang tên miền phụ của một Kiot vẫn đang đăng nhập.
   const port = new URL(page.url()).port;
@@ -22,7 +22,7 @@ test('đăng ký → thấy tên → dùng chung trên Kiot → đăng xuất �
 
   await page.getByRole('button', { name: 'Đăng xuất', exact: true }).click();
   await expect(page).toHaveURL(/\/$/);
-  await expect(page.getByRole('link', { name: 'Đăng nhập' })).toBeVisible();
+  await expect(page.getByTestId('user-menu')).toHaveAccessibleName('Tôi (đăng nhập)');
 
   await page.goto('/tai-khoan');
   await expect(page).toHaveURL(/\/dang-nhap\?next=%2Ftai-khoan/);

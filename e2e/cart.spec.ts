@@ -26,6 +26,8 @@ test('khách chưa đăng nhập bấm Thêm vào giỏ → đăng ký → món 
   // Chưa đăng nhập: chuyển sang tên miền chính để đăng nhập/đăng ký rồi tự thêm món.
   await buyer.waitForURL(/9mua\.test:\d+\/dang-nhap\?next=/);
   await buyer.getByRole('link', { name: 'Tạo tài khoản' }).click();
+  // Chờ sang hẳn trang đăng ký: trang đăng nhập cũng có ô #identifier.
+  await buyer.waitForURL((u) => u.pathname === '/dang-ky');
   await buyer.fill('#identifier', `05${String(Date.now()).slice(-8)}`);
   await buyer.fill('#displayName', 'Người Mua');
   await buyer.fill('#password', 'mat-khau-nguoi-mua');

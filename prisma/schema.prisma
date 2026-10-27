@@ -18,16 +18,17 @@ enum Role {
 }
 
 model User {
-  id                 String    @id @default(cuid(2))
-  phone              String?   @unique // dạng +84xxxxxxxxx
-  email              String?   @unique // chữ thường
+  id                 String               @id @default(cuid(2))
+  phone              String?              @unique // dạng +84xxxxxxxxx
+  email              String?              @unique // chữ thường
+  googleSub          String?              @unique // mã tài khoản Google đã liên kết (SPEC-identity.md bổ sung 27/10)
   displayName        String
   passwordHash       String
-  role               Role      @default(user)
-  mustChangePassword Boolean   @default(false)
+  role               Role                 @default(user)
+  mustChangePassword Boolean              @default(false)
   lockedAt           DateTime?
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
   sessions           Session[]
   resetTokens        PasswordResetToken[]
   kiot               Kiot?
@@ -48,12 +49,12 @@ model PasswordResetToken {
 }
 
 model Session {
-  id         String   @id @default(cuid(2))
-  userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tokenHash  String   @unique // SHA-256 của token, không bao giờ lưu token gốc
-  expiresAt  DateTime
-  createdAt  DateTime @default(now())
+  id        String   @id @default(cuid(2))
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique // SHA-256 của token, không bao giờ lưu token gốc
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 
   @@index([userId])
 }
@@ -70,31 +71,31 @@ model LoginAttempt {
 // ─── kiot (SPEC-kiot.md) ─────────────────────────────────────────────────────
 
 model Kiot {
-  id           String    @id @default(cuid(2))
-  ownerId      String    @unique // MVP: mỗi tài khoản 1 Kiot
-  owner        User      @relation(fields: [ownerId], references: [id])
-  slug         String    @unique // tenkiot.9mua.com — cố định sau lần kích hoạt đầu tiên
-  name         String
-  description  String    @default("")
-  contactPhone String // +84…, dùng cho nút gọi/Zalo
-  logoUrl      String?
-  coverUrl     String?
-  province     String?
-  district     String?
-  addressLine  String?
+  id                    String              @id @default(cuid(2))
+  ownerId               String              @unique // MVP: mỗi tài khoản 1 Kiot
+  owner                 User                @relation(fields: [ownerId], references: [id])
+  slug                  String              @unique // tenkiot.9mua.com — cố định sau lần kích hoạt đầu tiên
+  name                  String
+  description           String              @default("")
+  contactPhone          String // +84…, dùng cho nút gọi/Zalo
+  logoUrl               String?
+  coverUrl              String?
+  province              String?
+  district              String?
+  addressLine           String?
   // Trạng thái active/expired tính từ activeUntil (module billing gia hạn); null = nháp
-  activeUntil  DateTime?
-  lockedAt     DateTime?
-  lockReason   String?
-  shippingFee           Int       @default(0) // phí ship cố định mỗi đơn (0–200.000đ)
+  activeUntil           DateTime?
+  lockedAt              DateTime?
+  lockReason            String?
+  shippingFee           Int                 @default(0) // phí ship cố định mỗi đơn (0–200.000đ)
   freeShippingThreshold Int? // tiền hàng từ mức này trở lên thì miễn phí ship
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  products     Product[]
-  images       ProductImage[]
-  payoutAccounts KiotPayoutAccount[]
-  subscriptions  KiotSubscription[]
-  orders         Order[]
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  products              Product[]
+  images                ProductImage[]
+  payoutAccounts        KiotPayoutAccount[]
+  subscriptions         KiotSubscription[]
+  orders                Order[]
 }
 
 // Lịch sử tài khoản nhận tiền: mỗi lần đổi thêm 1 dòng, bản mới nhất là bản đang dùng.
@@ -232,7 +233,7 @@ model KiotSubscription {
   id          String   @id @default(cuid(2))
   kiotId      String
   kiot        Kiot     @relation(fields: [kiotId], references: [id])
-  source      String // payos | admin_grant
+  source      String // payos | admin_grant | voucher
   intentId    String?  @unique // 1 thanh toán = đúng 1 kỳ, chống cộng trùng
   amount      Int
   periodStart DateTime
@@ -263,6 +264,7 @@ model CartItem {
   product       Product  @relation(fields: [productId], references: [id])
   qty           Int
   sourceVideoId String? // món được thêm từ video Creator nào
+  sourceLiveId  String? // món được thêm từ buổi live nào (SPEC-live.md)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -309,14 +311,14 @@ model Checkout {
 }
 
 model Order {
-  id              String      @id @default(cuid(2))
-  code            String      @unique // DH + số, dễ đọc qua điện thoại
+  id              String       @id @default(cuid(2))
+  code            String       @unique // DH + số, dễ đọc qua điện thoại
   checkoutId      String
-  checkout        Checkout    @relation(fields: [checkoutId], references: [id])
+  checkout        Checkout     @relation(fields: [checkoutId], references: [id])
   kiotId          String
-  kiot            Kiot        @relation(fields: [kiotId], references: [id])
+  kiot            Kiot         @relation(fields: [kiotId], references: [id])
   buyerId         String
-  status          OrderStatus @default(pending_payment)
+  status          OrderStatus  @default(pending_payment)
   subtotal        Int
   shippingFee     Int
   total           Int
@@ -334,8 +336,8 @@ model Order {
   refundAccount   Json?
   refundRef       String?
   refundedAt      DateTime?
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
   items           OrderItem[]
   events          OrderEvent[]
   dispute         Dispute?
@@ -356,9 +358,11 @@ model OrderItem {
   qty           Int
   imageUrl      String?
   sourceVideoId String?
+  sourceLiveId  String?
 
   @@index([productId])
   @@index([sourceVideoId])
+  @@index([sourceLiveId])
 }
 
 // Lịch sử chuyển trạng thái: ai, lúc nào, từ đâu sang đâu, vì sao. Chỉ thêm.
@@ -541,6 +545,10 @@ model Video {
   likes          Int            @default(0)
   score          Float          @default(0)
   readyAt        DateTime?
+  // Story 24 giờ và Duet (SPEC-creator.md bổ sung 27/10). Video cũ: kind = video, không hết hạn, không Duet.
+  kind           String         @default("video") // video | story
+  expiresAt      DateTime?
+  duetOfId       String?
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
   products       VideoProduct[]
@@ -548,6 +556,7 @@ model Video {
   @@index([status, score])
   @@index([status, readyAt])
   @@index([authorId, createdAt])
+  @@index([kind, status, expiresAt])
 }
 
 model VideoProduct {
@@ -642,6 +651,41 @@ model AdminTotpAttempt {
   @@index([userId, createdAt])
 }
 
+// Thiết bị admin đã nhập đúng mã 2 lớp và chọn "nhớ 30 ngày" (SPEC-admin.md bổ sung 27/10). Chỉ lưu mã băm của
+// cookie; pwFingerprint đổi khi đổi mật khẩu nên thiết bị cũ tự hết hiệu lực.
+model AdminTrustedDevice {
+  id            String    @id @default(cuid(2))
+  userId        String
+  tokenHash     String    @unique
+  pwFingerprint String
+  userAgent     String
+  createdAt     DateTime  @default(now())
+  expiresAt     DateTime
+  lastUsedAt    DateTime?
+  revokedAt     DateTime?
+
+  @@index([userId])
+}
+
+// Ghim của CEO (SPEC-admin.md bổ sung 27/10): video lên đầu "Dành cho bạn", Kiot lên đầu danh bạ / Kiot nổi bật.
+model Pin {
+  id          String    @id @default(cuid(2))
+  kind        PinKind
+  targetId    String
+  position    Int
+  until       DateTime?
+  createdById String
+  createdAt   DateTime  @default(now())
+
+  @@unique([kind, targetId])
+  @@index([kind, position])
+}
+
+enum PinKind {
+  video
+  kiot
+}
+
 // Phiên đăng nhập nào đã nhập mã 2 lớp, lúc nào (hết hạn sau 12 giờ).
 model AdminSessionVerification {
   sessionId  String   @id
@@ -672,4 +716,261 @@ model PaymentIssueResolution {
   note         String
   resolvedById String
   resolvedAt   DateTime @default(now())
+}
+
+// ===== Social (SPEC-social.md) =====
+model Follow {
+  followerId String
+  followeeId String
+  createdAt  DateTime @default(now())
+
+  @@id([followerId, followeeId])
+  @@index([followeeId])
+}
+
+model Comment {
+  id          String    @id @default(cuid(2))
+  videoId     String
+  userId      String
+  parentId    String?
+  text        String
+  pinnedAt    DateTime?
+  hiddenAt    DateTime?
+  hiddenById  String?
+  reportCount Int       @default(0)
+  createdAt   DateTime  @default(now())
+
+  @@index([videoId, createdAt])
+  @@index([userId, createdAt])
+  @@index([parentId])
+}
+
+model CommentReport {
+  commentId String
+  userId    String
+  reason    String
+  createdAt DateTime @default(now())
+
+  @@id([commentId, userId])
+}
+
+model SavedVideo {
+  userId    String
+  videoId   String
+  createdAt DateTime @default(now())
+
+  @@id([userId, videoId])
+}
+
+model KiotHeart {
+  kiotId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  @@id([kiotId, userId])
+}
+
+// Lượt tim + follow mỗi ngày (giờ Việt Nam) của tài khoản Free.
+model DailyAction {
+  userId String
+  day    String // YYYY-MM-DD theo Asia/Ho_Chi_Minh
+  count  Int    @default(0)
+
+  @@id([userId, day])
+}
+
+// Voucher mở Kiot khi đủ số video đã thả tim (mỗi tài khoản tối đa 1 voucher).
+model KiotVoucher {
+  id           String    @id @default(cuid(2))
+  userId       String    @unique
+  issuedAt     DateTime  @default(now())
+  usedAt       DateTime?
+  kiotId       String?
+  revokedAt    DateTime?
+  revokedById  String?
+  revokeReason String?
+}
+
+// Link mạng xã hội người dùng tự dán (SPEC-kiot.md bổ sung 27/10).
+model SocialLink {
+  userId    String
+  platform  String // tiktok | facebook | instagram | youtube | shopee | zalo
+  url       String
+  createdAt DateTime @default(now())
+
+  @@id([userId, platform])
+}
+
+// ===== AI Studio (SPEC-ai.md) =====
+// Mỗi lần gọi AI ghi 1 dòng chi phí ước tính (chỉ thêm, không sửa/xoá) — tính lượt trong ngày và ngân sách tháng.
+model AiUsage {
+  id           String   @id @default(cuid(2))
+  userId       String
+  kind         String // text | image
+  model        String
+  inputTokens  Int?
+  outputTokens Int?
+  images       Int?
+  costVnd      Int // VNĐ, làm tròn lên
+  ok           Boolean
+  createdAt    DateTime @default(now())
+
+  @@index([userId, kind, createdAt])
+  @@index([createdAt])
+}
+
+// Ảnh AI vẽ, chưa phải ảnh sản phẩm: khi đăng bán mới chép sang ảnh sản phẩm. Ảnh quá 7 ngày tự xoá.
+model AiImage {
+  id        String   @id @default(cuid(2))
+  userId    String
+  url       String
+  thumbUrl  String
+  style     String
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([createdAt])
+}
+
+// Video 10 giây ghép từ ảnh AI (worker chạy ffmpeg). Xem thử trước, bấm đăng bán mới lên feed.
+model AiSlideshow {
+  id        String    @id @default(cuid(2))
+  userId    String
+  imageIds  String[]
+  status    String    @default("queued") // queued | running | done | failed
+  url       String?
+  error     String?
+  attempts  Int       @default(0)
+  lockedAt  DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
+}
+
+// Giá Kiot 1 USD/năm quy ra VNĐ theo tỷ giá bán USD của Vietcombank (SPEC-billing.md bổ sung 27/10). Mỗi lần lấy tỷ
+// giá hoặc CEO đổi giá USD ghi 1 dòng (chỉ thêm): tỷ giá, giá cũ, giá mới, có áp dụng không.
+model KiotFeeRateLog {
+  id        String   @id @default(cuid(2))
+  source    String // vietcombank | admin
+  rate      Int // VNĐ cho 1 USD (giá bán)
+  usdCents  Int
+  oldFeeVnd Int
+  newFeeVnd Int
+  applied   Boolean
+  note      String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+// ===== Live + xu (SPEC-live.md) =====
+model LiveSession {
+  id               String    @id @default(cuid(2))
+  hostUserId       String
+  kiotId           String? // Kiot của người phát (nếu có)
+  title            String
+  status           String    @default("created") // created | live | ended | stopped
+  mediaPath        String    @unique // tên đường phát ngẫu nhiên trên MediaMTX
+  publishTokenHash String
+  publishExpiresAt DateTime // mã phát dùng một lần, hết hạn 2 phút nếu chưa dùng
+  publishUsedAt    DateTime?
+  pinnedProductId  String?
+  startedAt        DateTime? // lúc MediaMTX báo có hình
+  lastMediaAt      DateTime? // lần cuối thấy có hình
+  endedAt          DateTime?
+  endReason        String?
+  peakViewers      Int       @default(0)
+  hearts           Int       @default(0)
+  hiddenAt         DateTime? // 5 báo cáo → ẩn khỏi danh sách
+  createdAt        DateTime  @default(now())
+
+  @@index([status, createdAt])
+  @@index([hostUserId, createdAt])
+}
+
+model LiveViewer {
+  liveId           String
+  viewerKey        String // u:<userId> hoặc a:<mã khách ẩn danh>
+  userId           String?
+  networkHash      String // băm IP, không lưu IP gốc
+  firstSeenAt      DateTime
+  lastSeenAt       DateTime
+  streakStartAt    DateTime // đầu chuỗi tín hiệu liên tục hiện tại
+  longestStreakSec Int      @default(0)
+
+  @@id([liveId, viewerKey])
+  @@index([liveId, lastSeenAt])
+}
+
+// Mỗi người xem 1 dòng mỗi buổi: có kết nối được hình hay không (SPEC-live.md: tỉ lệ lỗi > 5% thì đề xuất TURN).
+// Không phải sổ tiền: lần sau kết nối được thì sửa thành ok.
+model LiveConnect {
+  liveId    String
+  viewerKey String
+  ok        Boolean
+  createdAt DateTime
+
+  @@id([liveId, viewerKey])
+  @@index([createdAt])
+}
+
+model LiveChatMessage {
+  id        String    @id @default(cuid(2))
+  liveId    String
+  userId    String
+  text      String
+  hiddenAt  DateTime?
+  hiddenBy  String?
+  createdAt DateTime  @default(now())
+
+  @@index([liveId, createdAt])
+  @@index([createdAt])
+}
+
+model LiveChatBan {
+  liveId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  @@id([liveId, userId])
+}
+
+model LiveReport {
+  liveId    String
+  userId    String
+  reason    String // bad_content | scam | copyright | other
+  message   String?
+  createdAt DateTime @default(now())
+
+  @@id([liveId, userId])
+}
+
+model LiveBan {
+  id        String    @id @default(cuid(2))
+  userId    String
+  until     DateTime? // trống = vĩnh viễn
+  reason    String
+  adminId   String
+  createdAt DateTime  @default(now())
+
+  @@index([userId, createdAt])
+}
+
+// Sổ xu (chỉ thêm, trigger chặn sửa/xoá). Dương là cộng, âm là trừ. Xu không phải tiền.
+model XuEntry {
+  id          String   @id @default(cuid(2))
+  userId      String
+  amount      Int
+  kind        String // live_reward | admin_revoke
+  liveId      String?
+  rewardDay   String? // YYYY-MM-DD giờ VN, chỉ dòng thưởng: mỗi người tối đa 1 buổi được thưởng mỗi ngày
+  note        String?
+  createdById String?
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, rewardDay])
+  @@index([userId, createdAt])
+  @@index([createdAt])
 }

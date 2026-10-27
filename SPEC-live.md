@@ -248,3 +248,19 @@ monthlyXuUsage(month): Promise<{ used: number; budget: number }>
 5. 5 báo cáo thì ẩn khỏi danh sách và báo CEO, chứ không tự tắt live.
 6. Thêm cột `sourceLiveId` vào giỏ và đơn hàng.
 7. Chưa ghi hình, chưa dùng xu để trả phí.
+
+## Ghi chú khi làm (T49–T57)
+
+- **E2E dùng máy chủ hình giả** (`MEDIA_DRIVER=fake`, chỉ khi `TEST_MODE=e2e`): máy chạy test không tải được
+  MediaMTX, nên chưa thử MediaMTX thật. CEO kiểm trên VPS theo `docs/deploy.md` mục 12 (2 điện thoại khác mạng).
+  Unit test vẫn kiểm đủ quyền phát/xem, mã 1 lần, mã xem 5 phút, người thứ 51, mất hình 60 giây, quá 2 giờ.
+- Trình duyệt chỉ mở camera trên https; E2E chạy http nên thay camera bằng hình vẽ canvas (chỉ trong file test).
+- `Permissions-Policy` đổi `camera=(self), microphone=(self)` để trang `/live/phat` mở được camera.
+- **Tỉ lệ kết nối thất bại:** bảng `LiveConnect` (mỗi người xem 1 dòng mỗi buổi, đã kết nối được thì tính là được;
+  không phải sổ tiền nên được sửa). Trình duyệt báo lỗi khi kết nối hỏng hoặc 15 giây chưa có hình. `/admin/live`
+  hiện tỉ lệ 7 ngày; từ 20 lượt trở lên mà vượt 5% thì hiện đề xuất thêm TURN.
+- Chat/tim/người xem qua SSE (`/api/live/<id>/events`, kết nối tối đa 5 phút rồi tự nối lại); lỗi liên tục thì
+  hỏi lại mỗi 3 giây (`?poll=1`).
+- Thanh dưới có chấm đỏ ở nút Live khi có người đang live (`/api/auth/me` trả `liveNow`, lưu tạm 10 giây).
+- Hợp đồng thêm: `orders.addToCart` nhận tham số nguồn `{ videoId?, liveId? }` (vẫn nhận chuỗi videoId như cũ);
+  `kiot.kiotBasics`. Module mới `live`, `xu`; app nối "kết thúc live → thưởng xu" ở `src/server/live.ts`.

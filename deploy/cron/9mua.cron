@@ -7,6 +7,9 @@ ENVFILE=/opt/9mua/.env
 # T15 — đối soát thanh toán PayOS mỗi 5 phút
 */5 * * * * root . $ENVFILE; curl -fsS -m 120 -H "X-Internal-Token: $INTERNAL_CRON_TOKEN" $APP/api/internal/payments/reconcile >/dev/null
 
+# T68 — giá Kiot 1 USD/năm theo tỷ giá bán USD Vietcombank lúc 7:00 mỗi sáng
+0 7 * * * root . $ENVFILE; curl -fsS -m 60 -H "X-Internal-Token: $INTERNAL_CRON_TOKEN" $APP/api/internal/billing/usd-rate >/dev/null
+
 # T17 — email nhắc gia hạn Kiot lúc 8:00 mỗi ngày
 0 8 * * * root . $ENVFILE; curl -fsS -m 300 -H "X-Internal-Token: $INTERNAL_CRON_TOKEN" $APP/api/internal/billing/reminders >/dev/null
 

@@ -45,6 +45,21 @@ const schema = z
     ),
     // Token bí mật cho cron gọi /api/internal/* (Docker che IP người gọi nên không dựa vào IP).
     INTERNAL_CRON_TOKEN: z.string().optional(),
+    // Đăng nhập Google (SPEC-identity.md bổ sung 27/10). Để trống thì ẩn nút Google.
+    GOOGLE_CLIENT_ID: z.preprocess((v) => (v === '' ? undefined : v), z.string().optional()),
+    GOOGLE_CLIENT_SECRET: z.preprocess((v) => (v === '' ? undefined : v), z.string().optional()),
+    // Live (SPEC-live.md): API nội bộ của MediaMTX (không mở ra Internet). Driver fake chỉ cho test/E2E.
+    MEDIA_DRIVER: z.enum(['mediamtx', 'fake']).optional(),
+    MEDIAMTX_API_URL: z.string().default('http://mediamtx:9997'),
+    // AI Studio (SPEC-ai.md). Thiếu khoá thì phần tương ứng báo "Chưa bật". Driver fake chỉ cho dev/test/E2E.
+    AI_DRIVER: z.enum(['live', 'fake']).optional(),
+    ANTHROPIC_API_KEY: z.preprocess((v) => (v === '' ? undefined : v), z.string().optional()),
+    GEMINI_API_KEY: z.preprocess((v) => (v === '' ? undefined : v), z.string().optional()),
+    AI_TEXT_MODEL: z.preprocess((v) => (v === '' ? undefined : v), z.string().default('claude-haiku-5-5')),
+    AI_IMAGE_MODEL: z.preprocess(
+      (v) => (v === '' ? undefined : v),
+      z.string().default('gemini-2.5-flash-image'),
+    ),
   })
   .superRefine((v, ctx) => {
     if (v.NODE_ENV === 'production' && !v.APP_URL) {
@@ -108,6 +123,27 @@ const schema = z
         message: 'INTERNAL_CRON_TOKEN cần ít nhất 32 ký tự ở production',
       });
     }
+    if (v.NODE_ENV === 'production' && !v.TEST_MODE && mediaDriver(v) === 'fake') {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['MEDIA_DRIVER'],
+        message: 'MEDIA_DRIVER=fake không được dùng ở production',
+      });
+    }
+    if (v.NODE_ENV === 'production' && !v.TEST_MODE && aiDriver(v) === 'fake') {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['AI_DRIVER'],
+        message: 'AI_DRIVER=fake không được dùng ở production',
+      });
+    }
+    if (Boolean(v.GOOGLE_CLIENT_ID) !== Boolean(v.GOOGLE_CLIENT_SECRET)) {
+      ctx.addIssue({
+        code: 'custom',
+        path: [v.GOOGLE_CLIENT_ID ? 'GOOGLE_CLIENT_SECRET' : 'GOOGLE_CLIENT_ID'],
+        message: 'Đăng nhập Google cần đủ cả GOOGLE_CLIENT_ID và GOOGLE_CLIENT_SECRET',
+      });
+    }
     if (driver === 'smtp') {
       for (const key of ['SMTP_HOST', 'SMTP_USER', 'SMTP_PASS'] as const) {
         if (!v[key])
@@ -121,6 +157,8 @@ const schema = z
       ...v,
       MAIL_DRIVER: mailDriver(v),
       PAYMENTS_DRIVER: paymentsDriver(v),
+      AI_DRIVER: aiDriver(v),
+      MEDIA_DRIVER: mediaDriver(v),
       PAYOS_CHECKSUM_KEY: v.PAYOS_CHECKSUM_KEY ?? (paymentsDriver(v) === 'fake' ? FAKE_CHECKSUM_KEY : ''),
       APP_URL: appUrl,
       // Dev/test/E2E dùng khoá cố định công khai; production bắt buộc khoá riêng (kiểm ở trên).
@@ -134,6 +172,16 @@ const DEV_ENCRYPTION_KEY = '9a'.repeat(32);
 
 function paymentsDriver(v: { NODE_ENV: string; PAYMENTS_DRIVER?: 'payos' | 'fake' }) {
   return v.PAYMENTS_DRIVER ?? (v.NODE_ENV === 'production' ? 'payos' : 'fake');
+}
+
+// Test và E2E dùng máy chủ hình giả (máy chạy test không có MediaMTX).
+function mediaDriver(v: { NODE_ENV: string; TEST_MODE?: string; MEDIA_DRIVER?: 'mediamtx' | 'fake' }) {
+  return v.MEDIA_DRIVER ?? (v.TEST_MODE || v.NODE_ENV === 'test' ? 'fake' : 'mediamtx');
+}
+
+// Test và E2E dùng AI giả (không tốn tiền, kết quả cố định); dev và production gọi thật nếu có khoá.
+function aiDriver(v: { NODE_ENV: string; TEST_MODE?: string; AI_DRIVER?: 'live' | 'fake' }) {
+  return v.AI_DRIVER ?? (v.TEST_MODE || v.NODE_ENV === 'test' ? 'fake' : 'live');
 }
 
 // Production gửi thật qua SMTP (Brevo); dev in ra console; test bỏ vào hộp thư giả.

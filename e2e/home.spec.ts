@@ -24,7 +24,7 @@ test('Chợ → tìm → lọc Nông sản → trang Kiot → giỏ; báo cáo v
   expect(products).toBeGreaterThan(0);
   await expect(buyer.getByRole('heading', { name: 'Tất cả sản phẩm' })).toBeVisible();
 
-  const search = buyer.getByRole('searchbox', { name: 'Tìm trên Chợ 9MUA' });
+  const search = buyer.getByRole('searchbox', { name: 'Tìm sản phẩm' });
   await search.fill(`thanh long ruot do ${stamp}`);
   await search.press('Enter');
   await buyer.waitForURL((u) => u.pathname === '/cho');

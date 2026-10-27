@@ -17,7 +17,7 @@ export default async function AdminTotpSetupPage() {
   return (
     <section className="mx-auto flex w-full max-w-sm flex-col gap-4 px-4 py-8">
       <h1 className="text-2xl font-extrabold">Cài xác thực 2 lớp</h1>
-      <ol className="list-decimal space-y-1 pl-5 text-sm text-black/70">
+      <ol className="list-decimal space-y-1 pl-5 text-sm text-white/70">
         <li>Cài Google Authenticator hoặc Authy trên điện thoại.</li>
         <li>Quét mã QR dưới đây (hoặc nhập khoá thủ công).</li>
         <li>Nhập mã 6 số ứng dụng hiện ra.</li>
@@ -30,7 +30,7 @@ export default async function AdminTotpSetupPage() {
         dangerouslySetInnerHTML={{ __html: setup.qrSvg }}
       />
       <p
-        className="break-all rounded-xl bg-surface-muted p-3 text-center font-mono text-sm"
+        className="break-all rounded-xl bg-white/5 p-3 text-center font-mono text-sm"
         data-testid="totp-secret"
       >
         {setup.secret}

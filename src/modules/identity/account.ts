@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { Prisma } from '@prisma/client';
 import { db } from '@/lib/db';
 import { normalizeIdentifier } from './identifier';
@@ -54,4 +55,11 @@ export async function changePassword(
     db.session.deleteMany({ where: { userId, id: { not: currentSessionId } } }),
   ]);
   return { ok: true };
+}
+
+// Dấu vân tay của mật khẩu hiện tại (không lộ mã băm): đổi mật khẩu thì đổi theo. Admin dùng để thiết bị đã nhớ tự
+// hết hiệu lực khi đổi mật khẩu (SPEC-admin.md bổ sung 27/10).
+export async function passwordFingerprint(userId: string): Promise<string> {
+  const user = await db.user.findUniqueOrThrow({ where: { id: userId }, select: { passwordHash: true } });
+  return createHash('sha256').update(`9mua-pw:${user.passwordHash}`).digest('hex').slice(0, 32);
 }

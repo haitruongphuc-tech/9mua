@@ -3,7 +3,7 @@ import { alertCeo } from '@/lib/alerts';
 import { now } from '@/lib/clock';
 import { db } from '@/lib/db';
 import { imageStore } from '@/lib/media/image-store';
-import { notify } from '@/lib/notifications';
+import { notifyKey } from '@/lib/notifications';
 
 export const VIDEO_REPORT_REASONS = [
   { value: 'noi_dung_xau', label: 'Nội dung xấu, phản cảm' },
@@ -89,7 +89,7 @@ export async function removeVideo(
     }),
     db.videoReport.updateMany({ where: { videoId, status: 'open' }, data: { status: 'actioned' } }),
   ]);
-  await notify(video.authorId, 'Video của bạn bị gỡ', `Lý do: ${note}`, '/video/cua-toi');
+  await notifyKey(video.authorId, 'notify.videoRemoved', { detail: note }, '/video/cua-toi');
   return { ok: true };
 }
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useT } from '@/i18n/client';
 import type { MarketCard } from '@/modules/marketplace';
 import { MarketProductCard } from './MarketProductCard';
 
@@ -15,6 +16,7 @@ export function MarketFeed({
   nextCursor: string | null;
   query: string;
 }) {
+  const t = useT();
   const [items, setItems] = useState(initial);
   const [cursor, setCursor] = useState(nextCursor);
   const [loading, setLoading] = useState(false);
@@ -50,8 +52,11 @@ export function MarketFeed({
 
   if (items.length === 0)
     return (
-      <p className="rounded-2xl bg-surface-muted p-6 text-center text-black/70" data-testid="market-empty">
-        Chưa có sản phẩm phù hợp. Thử từ khoá khác hoặc bỏ bớt bộ lọc.
+      <p
+        className="rounded-[18px] border border-white/10 bg-white/5 p-6 text-center text-[13px] text-white/60"
+        data-testid="market-empty"
+      >
+        {t('market.empty')}
       </p>
     );
 
@@ -70,9 +75,9 @@ export function MarketFeed({
               e.preventDefault();
               void loadMore();
             }}
-            className="rounded-full border-2 border-brand-ink px-6 py-2 font-bold"
+            className="inline-flex h-10 items-center rounded-full border border-white/20 px-6 text-[13px] font-bold"
           >
-            {loading ? 'Đang tải…' : 'Xem thêm'}
+            {loading ? t('market.loading') : t('market.more')}
           </a>
         </div>
       ) : null}

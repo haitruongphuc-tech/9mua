@@ -16,10 +16,21 @@ export default defineConfig({
   retries: 0,
   reporter: 'list',
   use: {
+    // Khách mới sẽ thấy popup mở tài khoản sau 1,2 giây; các test khác coi như đã bấm "Để sau" (e2e/signup.spec.ts
+    // kiểm riêng popup).
+    storageState: 'e2e/storage/skip-signup-popup.json',
+    locale: 'vi-VN', // giống người dùng Việt Nam: trang tự chọn tiếng Việt theo ngôn ngữ trình duyệt
     ...devices['iPhone 13'],
     baseURL: ORIGIN,
     trace: 'retain-on-failure',
-    launchOptions: { args: ['--host-resolver-rules=MAP 9mua.test 127.0.0.1, MAP *.9mua.test 127.0.0.1'] },
+    launchOptions: {
+      args: [
+        '--host-resolver-rules=MAP 9mua.test 127.0.0.1, MAP *.9mua.test 127.0.0.1',
+        // Camera và micro giả cho E2E phát live (SPEC-live.md), tự cho phép không hỏi.
+        '--use-fake-ui-for-media-stream',
+        '--use-fake-device-for-media-stream',
+      ],
+    },
   },
   // Chạy mọi kịch bản trên cả điện thoại (iPhone giả lập) và máy tính.
   projects: [

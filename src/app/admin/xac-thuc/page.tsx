@@ -18,7 +18,7 @@ export default async function AdminVerifyPage({
   return (
     <section className="mx-auto flex w-full max-w-sm flex-col gap-4 px-4 py-10">
       <h1 className="text-2xl font-extrabold">Nhập mã 2 lớp</h1>
-      <p className="text-sm text-black/70">
+      <p className="text-sm text-white/70">
         Mở Google Authenticator hoặc Authy, nhập mã 6 số của 9MUA Admin.
       </p>
       <VerifyForm next={next} />

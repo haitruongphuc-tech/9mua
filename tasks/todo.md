@@ -617,17 +617,34 @@
 - [x] **T40: Trang chủ là feed video** (M) — nền đen; chữ giới thiệu + link Chợ cho Google; chỉ tải trước video
   đầu; chưa có video thì hiện nội dung Chợ. Nội dung trang chủ cũ (Video hot, Kiot nổi bật…) chuyển vào `/cho`.
   Kiểm lại vuốt trên iPhone.
-- [ ] **T47: Giao diện V4 — khung chung** (M) — CEO chốt lấy V4 làm chuẩn (§7 mục 10–11). Sửa `docs/BRAND.md`
+- [x] **T47: Giao diện V4 — khung chung** (M) — CEO chốt lấy V4 làm chuẩn (§7 mục 10–11). Sửa `docs/BRAND.md`
   trước. Màu V4 (nền `#0A0A0A`, cam `#FF6B00`, chữ trắng, viền 1px trắng 10%), font Be Vietnam Pro + Space Grotesk
   (tự host), logo 48px phát sáng nhấp nháy, header 64px (logo, slogan, tìm, giỏ), thanh dưới 64px
   Video · Chợ · Live · Kiot · Tôi, nút "Đăng video" lên góc màn hình Video. Ảnh so sánh với V4.
-- [ ] **T48: Đa ngôn ngữ — nền móng** (M) — viết `SPEC-i18n.md`, CEO duyệt. Từ điển 7 thứ tiếng, nút chọn ngôn ngữ
+- [x] **T48: Đa ngôn ngữ — nền móng** (M) — viết `SPEC-i18n.md`, CEO duyệt. Từ điển 7 thứ tiếng, nút chọn ngôn ngữ
   trên header, dịch khung chung.
-- [ ] **T49–T57: Livestream + xu** (`SPEC-live.md`, CEO duyệt 27/10) — chia nhỏ trong `tasks/plan.md` trước khi làm:
-  MediaMTX + Nginx + xác thực; bảng dữ liệu + bắt đầu/kết thúc; trang phát (WHIP); trang xem (WHEP) + đếm người
-  xem; chat + tim (SSE); ghim sản phẩm + `sourceLiveId`; báo cáo + `/admin/live`; sổ xu + thưởng + `/admin/xu`;
-  E2E với MediaMTX thật.
-- [ ] **Đổi giao diện V4 + dịch từng trang** (gộp với T41–T46): Chợ & sản phẩm; Kiot; giỏ, đặt hàng, đơn mua;
+- [x] **T58: Spec cho phần mới** — `SPEC-social.md`, `SPEC-ai.md`, bổ sung creator/identity/admin/billing/kiot/marketplace
+  (CEO duyệt qua chat, §7 mục 14).
+- [x] **T59: Đăng nhập Google + popup mở tài khoản** (`SPEC-identity.md` bổ sung).
+- [x] **T60: Admin nhớ thiết bị 30 ngày + công cụ CEO** (ghim, slogan, pháp lý, luật Free/voucher).
+- [x] **T61: Module social** — follow, bình luận, lưu, hashtag, tim Kiot, giới hạn Free, voucher.
+- [x] **T62: Feed V4** (gộp T41) — tab Đang Follow, thả tim 2 chạm, thanh tiến độ, cột nút, bình luận, chia sẻ có QR.
+- [x] **T63: Story 24h + Duet**.
+- [x] **T64: Trang Kiot V4** (gộp T42) + Social Connect. Trang creator cũng đổi V4 (Follow, link mạng xã hội).
+- [x] **T65: Trang Tôi V4** (gộp T43) — Free/voucher, Bộ sưu tập, lối tắt; cài đặt tài khoản sang `/tai-khoan/cai-dat`.
+  Ô xu đã thêm (T49–T57).
+- [x] **T66: Đổi giao diện + dịch các trang còn lại** — Chợ, sản phẩm, danh bạ Kiot, giỏ, đặt hàng, đơn mua, đăng nhập,
+  Kiot của tôi, video, admin (chỉ tiếng Việt). Cả web nền tối #0A0A0A; lỗi kiểm tra của module dịch ở
+  `src/i18n/module-messages.ts`; email máy tự gửi vẫn tiếng Việt (ghi chú trong `SPEC-i18n.md`).
+- [x] **T67: AI Studio** (`SPEC-ai.md`) — `/ai`, `/admin/ai`, module `ai` (Claude viết, Gemini vẽ, worker ghép video
+  10 giây), driver giả cho test/E2E.
+- [x] **T68: Giới thiệu & Pháp lý + chính sách** (gộp T44, T45) và **giá 1 USD + voucher** (gộp T46).
+  Còn chờ CEO: đọc duyệt 7 trang chính sách (bản nháp), rồi dịch sang zh/ja/ko/fr/es.
+- [x] **T49–T57: Livestream + xu** (`SPEC-live.md`, CEO duyệt 27/10) — MediaMTX + Nginx + xác thực; bảng dữ liệu +
+  bắt đầu/kết thúc; trang phát `/live/phat` (WHIP); trang xem `/live` (WHEP) + đếm người xem; chat + tim (SSE);
+  ghim sản phẩm + `sourceLiveId`; báo cáo + `/admin/live`; sổ xu + thưởng + `/admin/xu` + `/tai-khoan/xu`.
+  E2E chạy với máy chủ hình giả; **còn chờ CEO thử MediaMTX thật trên VPS** (`docs/deploy.md` mục 12).
+- [x] **Đổi giao diện V4 + dịch từng trang** (gộp với T41–T46): Chợ & sản phẩm; Kiot; giỏ, đặt hàng, đơn mua;
   đăng nhập & tài khoản; Kiot của tôi; video & creator; admin.
 - [ ] **T41: Feed: thả tim 2 chạm + túi cam, thanh tiến độ, chia sẻ có QR** (S)
 - [ ] **T42: Trang Kiot kiểu TikTok** (M) — tab Sản phẩm / Video, số sản phẩm, đã bán, chia sẻ có QR.

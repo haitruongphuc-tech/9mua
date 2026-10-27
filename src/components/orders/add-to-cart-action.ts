@@ -1,11 +1,11 @@
 'use server';
 
 import { redirect } from 'next/navigation';
+import { getT } from '@/i18n/server';
 import { env } from '@/lib/env';
 import { isProductTagged } from '@/modules/creator';
 import { getCurrentUser } from '@/modules/identity';
 import { addToCart } from '@/modules/orders';
-import { CART_ERROR_MESSAGES } from '@/modules/orders/messages';
 
 export type AddToCartState = { ok?: boolean; message?: string };
 
@@ -22,6 +22,7 @@ export async function addToCartAction(
     const next = `/gio-hang/them?sp=${encodeURIComponent(productId)}&sl=${qty}${sourceVideoId ? `&v=${encodeURIComponent(sourceVideoId)}` : ''}`;
     redirect(`${env().APP_URL}/dang-nhap?next=${encodeURIComponent(next)}`);
   }
+  const t = await getT();
   // Chỉ ghi nguồn video khi video đó thật sự gắn sản phẩm này (thống kê creator không bị ghi giả).
   const source =
     sourceVideoId && (await isProductTagged(sourceVideoId, productId)) ? sourceVideoId : undefined;
@@ -30,9 +31,9 @@ export async function addToCartAction(
     return {
       message:
         result.error === 'EXCEEDS_STOCK'
-          ? `Chỉ còn ${result.stock} sản phẩm.`
-          : CART_ERROR_MESSAGES[result.error],
+          ? t('shop.cart.err.onlyLeft', { stock: result.stock })
+          : t(`shop.cart.err.${result.error}`),
     };
   }
-  return { ok: true, message: 'Đã thêm vào giỏ hàng.' };
+  return { ok: true, message: t('shop.cart.added') };
 }

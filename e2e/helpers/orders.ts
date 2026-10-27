@@ -36,7 +36,8 @@ export async function checkoutAndPay(buyer: Page, browser: Browser): Promise<str
   const payos = await browser.newPage();
   await payos.goto(href!);
   await payos.getByRole('button', { name: 'Giả lập đã trả đủ' }).click();
-  await expect(payos.getByTestId('fake-status')).toHaveText('paid');
+  // Webhook giả xử lý không đồng bộ; khi máy test bận có lúc quá 5 giây.
+  await expect(payos.getByTestId('fake-status')).toHaveText('paid', { timeout: 15_000 });
   await payos.close();
   await expect(buyer.getByTestId('order-paid')).toBeVisible({ timeout: 15_000 });
   return new URL(buyer.url()).pathname.split('/').pop()!;

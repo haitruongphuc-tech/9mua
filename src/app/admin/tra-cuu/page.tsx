@@ -10,7 +10,7 @@ import * as act from './actions';
 import { TempPassword } from './TempPassword';
 
 export const dynamic = 'force-dynamic';
-const input = 'h-11 min-w-0 flex-1 rounded-xl border-2 border-black/15 px-3';
+const input = 'h-11 min-w-0 flex-1 rounded-[14px] border border-white/15 bg-white/10 text-white px-3';
 const TYPES = [
   ['nguoi-dung', 'Người dùng'],
   ['kiot', 'Kiot'],
@@ -36,7 +36,7 @@ export default async function LookupPage({ searchParams }: { searchParams: Flash
         <select
           name="loai"
           defaultValue={type}
-          className="h-11 rounded-xl border-2 border-black/15 px-3"
+          className="h-11 rounded-[14px] border border-white/15 bg-white/10 text-white px-3"
           aria-label="Loại"
         >
           {TYPES.map(([v, l]) => (
@@ -52,10 +52,7 @@ export default async function LookupPage({ searchParams }: { searchParams: Flash
           className={input}
           data-testid="lookup-q"
         />
-        <button
-          type="submit"
-          className="h-11 rounded-full border-2 border-brand-ink bg-brand px-5 font-extrabold text-brand-ink"
-        >
+        <button type="submit" className="h-11 rounded-full bg-brand px-5 font-black text-white">
           Tìm
         </button>
       </form>
@@ -63,14 +60,14 @@ export default async function LookupPage({ searchParams }: { searchParams: Flash
       {users.map((u) => (
         <article
           key={u.id}
-          className="flex flex-col gap-2 rounded-2xl border-2 border-black/10 p-4"
+          className="flex flex-col gap-2 rounded-[18px] border border-white/10 bg-white/5 p-4"
           data-testid="user-row"
         >
           <p className="font-extrabold">
             {u.displayName} {u.role === 'admin' ? '· CEO' : ''}{' '}
-            {u.lockedAt ? <span className="text-danger">· đang khoá</span> : null}
+            {u.lockedAt ? <span className="text-red-400">· đang khoá</span> : null}
           </p>
-          <p className="text-sm text-black/70">
+          <p className="text-sm text-white/70">
             {u.phone ? '0' + u.phone.slice(3) : '—'} · {u.email ?? 'không có email'} · tạo{' '}
             {formatDateVN(u.createdAt)}
           </p>
@@ -112,16 +109,16 @@ export default async function LookupPage({ searchParams }: { searchParams: Flash
       {kiots.map((k) => (
         <article
           key={k.id}
-          className="flex flex-col gap-2 rounded-2xl border-2 border-black/10 p-4"
+          className="flex flex-col gap-2 rounded-[18px] border border-white/10 bg-white/5 p-4"
           data-testid="kiot-row"
         >
           <p className="font-extrabold">
             <a href={kiotOrigin(k.slug)} className="underline">
               {k.name}
             </a>{' '}
-            · {k.slug} {k.lockedAt ? <span className="text-danger">· khoá: {k.lockReason}</span> : null}
+            · {k.slug} {k.lockedAt ? <span className="text-red-400">· khoá: {k.lockReason}</span> : null}
           </p>
-          <p className="text-sm text-black/70">
+          <p className="text-sm text-white/70">
             Chủ: {k.owner.displayName} ({k.owner.phone ? '0' + k.owner.phone.slice(3) : '—'}) ·{' '}
             {k._count.products} sản phẩm ·{' '}
             {k.activeUntil ? `hạn ${formatDateVN(k.activeUntil)}` : 'chưa kích hoạt'}
@@ -130,7 +127,7 @@ export default async function LookupPage({ searchParams }: { searchParams: Flash
             Số dư có thể rút <b>{formatVnd(k.balance.available)}</b> · đang chờ {formatVnd(k.balance.pending)}
           </p>
           {k.subscriptions.length ? (
-            <p className="text-xs text-black/60">
+            <p className="text-xs text-white/60">
               Phí thuê:{' '}
               {k.subscriptions
                 .map(
@@ -164,7 +161,7 @@ export default async function LookupPage({ searchParams }: { searchParams: Flash
             <form action={act.adjustBalanceAction.bind(null, k.id, qs)} className="flex flex-wrap gap-2">
               <select
                 name="sign"
-                className="h-11 rounded-xl border-2 border-black/15 px-2"
+                className="h-11 rounded-[14px] border border-white/15 bg-white/10 text-white px-2"
                 aria-label="Cộng hay trừ"
               >
                 <option value="+">Cộng</option>
@@ -175,7 +172,7 @@ export default async function LookupPage({ searchParams }: { searchParams: Flash
                 inputMode="numeric"
                 required
                 placeholder="Số tiền"
-                className="h-11 w-28 rounded-xl border-2 border-black/15 px-3"
+                className="h-11 w-28 rounded-[14px] border border-white/15 bg-white/10 text-white px-3"
               />
               <input name="reason" required placeholder="Lý do điều chỉnh" className={input} />
               <ConfirmSubmit confirm="Điều chỉnh số dư Kiot?" tone="danger">
@@ -189,17 +186,17 @@ export default async function LookupPage({ searchParams }: { searchParams: Flash
       {orders.map((o) => (
         <article
           key={o.id}
-          className="flex flex-col gap-1 rounded-2xl border-2 border-black/10 p-4"
+          className="flex flex-col gap-1 rounded-[18px] border border-white/10 bg-white/5 p-4"
           data-testid="order-row"
         >
           <p className="font-extrabold">
             {o.code} · {STATUS_LABELS[o.status] ?? o.status} · {formatVnd(o.total)}
           </p>
-          <p className="text-sm text-black/70">
+          <p className="text-sm text-white/70">
             {o.kiot.name} · {formatDateTimeVN(o.createdAt)} ·{' '}
             {o.items.map((i) => `${i.name} × ${i.qty}`).join(', ')}
           </p>
-          <ol className="mt-1 text-xs text-black/70">
+          <ol className="mt-1 text-xs text-white/70">
             {o.events.map((e) => (
               <li key={e.id}>
                 {formatDateTimeVN(e.createdAt)} — {e.action} ({e.actorRole}){e.reason ? `: ${e.reason}` : ''}
@@ -209,7 +206,7 @@ export default async function LookupPage({ searchParams }: { searchParams: Flash
         </article>
       ))}
       {q && users.length + kiots.length + orders.length === 0 ? (
-        <p className="text-center text-black/60">Không tìm thấy.</p>
+        <p className="text-center text-white/60">Không tìm thấy.</p>
       ) : null}
     </section>
   );

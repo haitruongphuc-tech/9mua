@@ -76,5 +76,24 @@ services:
       db:
         condition: service_healthy
 
+  # Máy chủ hình cho Live (SPEC-live.md, CEO duyệt dùng MediaMTX). Image ghim đúng phiên bản.
+  mediamtx:
+    image: bluenviron/mediamtx:1.21.3
+    restart: unless-stopped
+    volumes:
+      - ./deploy/mediamtx/mediamtx.yml:/mediamtx.yml:ro
+    environment:
+      # App kiểm mã phát/mã xem; khoá ở ?key= trùng INTERNAL_CRON_TOKEN (Nginx chặn /api/internal từ Internet).
+      MTX_AUTHHTTPADDRESS: http://app:3000/api/internal/live/media-auth?key=${INTERNAL_CRON_TOKEN}
+      # IP công khai của VPS để trình duyệt gửi/nhận hình (đặt LIVE_PUBLIC_IP trong .env).
+      MTX_WEBRTCADDITIONALHOSTS: ${LIVE_PUBLIC_IP:-}
+    ports:
+      # WHIP/WHEP chỉ mở cho Nginx trên host.
+      - '127.0.0.1:8889:8889'
+      # Hình và tiếng: mở ra Internet (CEO mở 8189 UDP + TCP trên tường lửa VPS).
+      - '8189:8189/udp'
+      - '8189:8189/tcp'
+    # Cổng API 9997 KHÔNG publish: chỉ app/worker trong mạng compose gọi được.
+
 volumes:
   db-data:

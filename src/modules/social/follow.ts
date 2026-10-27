@@ -1,0 +1,92 @@
+import { Prisma } from '@prisma/client';
+import { db } from '@/lib/db';
+import { notifyKey } from '@/lib/notifications';
+import { hydrateVideos, type FeedVideo, type Viewer } from '@/modules/creator';
+import { consumeDailyAction } from './limits';
+
+// Follow một tài khoản (creator / chủ Kiot) — SPEC-social.md mục 1.
+export async function toggleFollow(
+  followerId: string,
+  followeeId: string,
+): Promise<
+  | { ok: true; following: boolean; followers: number }
+  | { ok: false; error: 'SELF' | 'FREE_LIMIT' | 'NOT_FOUND' }
+> {
+  if (followerId === followeeId) return { ok: false, error: 'SELF' };
+  const target = await db.user.findUnique({ where: { id: followeeId }, select: { lockedAt: true } });
+  if (!target || target.lockedAt) return { ok: false, error: 'NOT_FOUND' };
+  const removed = await db.follow.deleteMany({ where: { followerId, followeeId } });
+  let following = false;
+  if (removed.count === 0) {
+    const allowed = await consumeDailyAction(followerId);
+    if (!allowed.ok) return allowed;
+    await db.follow.create({ data: { followerId, followeeId } }).catch((e) => {
+      if (!(e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002')) throw e;
+    });
+    following = true;
+  }
+  return { ok: true, following, followers: await db.follow.count({ where: { followeeId } }) };
+}
+
+export async function followStats(userId: string, viewerId?: string) {
+  const [followers, following, me] = await Promise.all([
+    db.follow.count({ where: { followeeId: userId } }),
+    db.follow.count({ where: { followerId: userId } }),
+    viewerId
+      ? db.follow.findUnique({
+          where: { followerId_followeeId: { followerId: viewerId, followeeId: userId } },
+        })
+      : null,
+  ]);
+  return { followers, following, isFollowing: Boolean(me) };
+}
+
+export async function followingIds(viewerId: string, authorIds: string[]): Promise<Set<string>> {
+  if (!authorIds.length) return new Set();
+  const rows = await db.follow.findMany({
+    where: { followerId: viewerId, followeeId: { in: authorIds } },
+    select: { followeeId: true },
+  });
+  return new Set(rows.map((r) => r.followeeId));
+}
+
+const PAGE = 8;
+
+// Tab "Đang Follow": video mới nhất của người mình follow (SPEC-social.md mục 2). Con trỏ = readyAt|id.
+export async function followingFeed(
+  viewer: Viewer & { userId: string },
+  cursor?: string,
+): Promise<{ items: FeedVideo[]; nextCursor: string | null }> {
+  const [at, id] = (cursor ?? '').split('|');
+  const after = at && id ? Prisma.sql`AND (v."readyAt", v.id) < (${new Date(at)}, ${id})` : Prisma.empty;
+  const rows = await db.$queryRaw<{ id: string; readyAt: Date }[]>`
+    SELECT v.id, v."readyAt" FROM "Video" v
+    JOIN "User" u ON u.id = v."authorId"
+    JOIN "Follow" f ON f."followeeId" = v."authorId" AND f."followerId" = ${viewer.userId}
+    WHERE v.status = 'ready' AND v.kind = 'video' AND u."lockedAt" IS NULL ${after}
+    ORDER BY v."readyAt" DESC, v.id DESC LIMIT ${PAGE + 1}`;
+  const page = rows.slice(0, PAGE);
+  const last = page.at(-1);
+  return {
+    items: await hydrateVideos(
+      page.map((r) => r.id),
+      viewer,
+    ),
+    nextCursor: rows.length > PAGE && last ? `${last.readyAt.toISOString()}|${last.id}` : null,
+  };
+}
+
+// Người mình follow đăng video mới → thông báo (đăng ký ở src/server/creator.ts qua creator.onVideoReady).
+export async function notifyFollowersOfVideo(video: { id: string; authorId: string; caption: string }) {
+  const [author, followers] = await Promise.all([
+    db.user.findUnique({ where: { id: video.authorId }, select: { displayName: true } }),
+    db.follow.findMany({ where: { followeeId: video.authorId }, select: { followerId: true } }),
+  ]);
+  for (const f of followers)
+    await notifyKey(
+      f.followerId,
+      'notify.followNewVideo',
+      { name: author?.displayName ?? '9MUA', caption: video.caption.slice(0, 60) },
+      `/video?v=${video.id}`,
+    );
+}

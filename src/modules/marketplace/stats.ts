@@ -34,3 +34,9 @@ export async function refreshSales30d(): Promise<{ updated: number }> {
     ), 0)::int`;
   return { updated };
 }
+
+// Ô "Đã bán" của trang Kiot V4: tổng số món trong các đơn hoàn tất của Kiot (đếm từ sổ ProductSale).
+export async function kiotSoldTotal(kiotId: string): Promise<number> {
+  const agg = await db.productSale.aggregate({ where: { kiotId }, _sum: { qty: true } });
+  return agg._sum.qty ?? 0;
+}

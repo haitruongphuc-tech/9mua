@@ -1,10 +1,16 @@
-// Tiến trình nền (service `worker` trong docker-compose): chuyển mã video từng cái một, để web không bị chậm.
+// Tiến trình nền (service `worker` trong docker-compose): chuyển mã video và ghép video AI Studio từng cái một, để web
+// không bị chậm.
 import { db } from '@/lib/db';
-import { cleanupStaleUploads, processNextJob, recomputeScores } from '@/modules/creator';
+import { cleanupAiFiles, processNextSlideshow } from '@/modules/ai';
+import { cleanupStaleUploads, expireStories, recomputeScores } from '@/modules/creator';
+import { cleanupLiveChat } from '@/modules/live';
+import { processNextJob } from '@/server/creator';
+import { syncWithMediaServer } from '@/server/live';
 
 const IDLE_MS = 3_000;
 const CLEANUP_EVERY_MS = 3_600_000;
 const SCORES_EVERY_MS = 5 * 60_000;
+const LIVE_SYNC_MS = 5_000; // trạng thái buổi live theo MediaMTX (SPEC-live.md)
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 let stopping = false;
@@ -20,14 +26,19 @@ async function main() {
   let lastScores = 0;
   while (!stopping) {
     try {
-      const worked = await processNextJob();
+      // Video AI ghép trước (chủ Kiot đang chờ xem thử), rồi tới video người dùng tải lên.
+      const worked = (await processNextSlideshow()) || (await processNextJob());
       if (Date.now() - lastCleanup > CLEANUP_EVERY_MS) {
         const removed = await cleanupStaleUploads();
         if (removed) console.info(`[worker] dọn ${removed} file tải lên bị bỏ dở`);
+        const aiRemoved = await cleanupAiFiles();
+        if (aiRemoved) console.info(`[worker] dọn ${aiRemoved} ảnh AI quá 7 ngày chưa đăng bán`);
+        await cleanupLiveChat(); // chat live quá 30 ngày
         lastCleanup = Date.now();
       }
       if (Date.now() - lastScores > SCORES_EVERY_MS) {
         await recomputeScores();
+        await expireStories(); // Story quá 24 giờ thì ẩn, file xoá sau 7 ngày
         lastScores = Date.now();
       }
       if (!worked) await sleep(IDLE_MS);
@@ -40,4 +51,15 @@ async function main() {
   console.info('[worker] đã dừng');
 }
 
+// Vòng riêng cho live: chuyển mã một video có thể mất vài phút, không được làm chậm việc bật/tắt buổi live.
+async function liveLoop() {
+  while (!stopping) {
+    await syncWithMediaServer().catch((e) =>
+      console.error('[worker] đồng bộ live lỗi:', e instanceof Error ? e.message : e),
+    );
+    await sleep(LIVE_SYNC_MS);
+  }
+}
+
 void main();
+void liveLoop();

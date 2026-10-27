@@ -1,17 +1,22 @@
 'use client';
 
+import { Repeat2 } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
+import { useT } from '@/i18n/client';
 import { formatVnd } from '@/lib/format';
 import type { PickableProduct } from '@/app/api/video/products/route';
 import { createVideoAction } from './actions';
 
 const MAX_BYTES = 100 * 1024 * 1024;
 const MAX_CAPTION = 300;
+const MAX_SEC = { video: 60, story: 30 } as const;
+type Mode = keyof typeof MAX_SEC;
 
 function putWithProgress(
   file: File,
   onProgress: (pct: number) => void,
+  messages: { failed: string; offline: string },
 ): Promise<{ ok: boolean; uploadId?: string; message?: string }> {
   return new Promise((resolve) => {
     const xhr = new XMLHttpRequest();
@@ -22,15 +27,26 @@ function putWithProgress(
       try {
         resolve(JSON.parse(xhr.responseText));
       } catch {
-        resolve({ ok: false, message: 'Tải lên thất bại, hãy thử lại.' });
+        resolve({ ok: false, message: messages.failed });
       }
     };
-    xhr.onerror = () => resolve({ ok: false, message: 'Mất kết nối, hãy thử lại.' });
+    xhr.onerror = () => resolve({ ok: false, message: messages.offline });
     xhr.send(file);
   });
 }
 
-export function VideoUploadForm({ remaining }: { remaining: number }) {
+export function VideoUploadForm({
+  remaining,
+  initialMode,
+  duet,
+}: {
+  remaining: Record<Mode, number>;
+  initialMode: Mode;
+  duet: { id: string; author: string; posterUrl: string | null } | null;
+}) {
+  const t = useT();
+  // Duet luôn là video thường.
+  const [mode, setMode] = useState<Mode>(duet ? 'video' : initialMode);
   const [file, setFile] = useState<File | null>(null);
   const [caption, setCaption] = useState('');
   const [query, setQuery] = useState('');
@@ -57,14 +73,14 @@ export function VideoUploadForm({ remaining }: { remaining: number }) {
   function choose(f: File | undefined) {
     setError(null);
     if (!f) return;
-    if (f.size > MAX_BYTES) return setError('Video tối đa 100MB.');
+    if (f.size > MAX_BYTES) return setError(t('post.err.tooBig'));
     setFile(f);
     // Kiểm sơ bộ thời lượng trên máy (server kiểm lại bằng ffprobe). Trình duyệt không đọc được thì bỏ qua.
     const url = URL.createObjectURL(f);
     const v = preview.current;
     if (v) {
       v.onloadedmetadata = () => {
-        if (v.duration > 60.5) setError('Video dài hơn 60 giây, hãy cắt ngắn rồi đăng lại.');
+        if (v.duration > MAX_SEC[mode] + 0.5) setError(t('post.err.tooLong', { sec: MAX_SEC[mode] }));
       };
       v.src = url;
     }
@@ -74,15 +90,20 @@ export function VideoUploadForm({ remaining }: { remaining: number }) {
     e.preventDefault();
     if (!file || error) return;
     setProgress(0);
-    const up = await putWithProgress(file, setProgress);
+    const up = await putWithProgress(file, setProgress, {
+      failed: t('post.err.upload'),
+      offline: t('post.err.offline'),
+    });
     if (!up.ok || !up.uploadId) {
       setProgress(null);
-      return setError(up.message ?? 'Tải lên thất bại.');
+      return setError(up.message ?? t('post.err.upload'));
     }
     const result = await createVideoAction({
       uploadId: up.uploadId,
       caption,
       productIds: picked.map((p) => p.id),
+      kind: mode,
+      duetOfId: duet?.id ?? null,
     });
     setProgress(null);
     if (result?.error) setError(result.error);
@@ -97,22 +118,61 @@ export function VideoUploadForm({ remaining }: { remaining: number }) {
           : list,
     );
 
+  const field =
+    'rounded-[14px] border border-white/15 bg-white/10 p-3 text-[14px] text-white outline-none placeholder:text-white/40 focus:border-brand';
   return (
     <form onSubmit={submit} className="flex flex-col gap-4">
+      {duet ? (
+        <div
+          className="flex items-center gap-3 rounded-[16px] border border-brand/40 bg-white/5 p-3"
+          data-testid="duet-banner"
+        >
+          <span className="relative h-16 w-10 shrink-0 overflow-hidden rounded-[8px] bg-black">
+            {duet.posterUrl ? (
+              <Image src={duet.posterUrl} alt="" fill sizes="40px" className="object-cover" unoptimized />
+            ) : null}
+          </span>
+          <span className="min-w-0">
+            <span className="flex items-center gap-1 font-black">
+              <Repeat2 className="h-4 w-4 text-brand" aria-hidden />{' '}
+              {t('post.duetWith', { name: duet.author })}
+            </span>
+            <span className="block text-[12px] text-white/60">{t('post.duetHint')}</span>
+          </span>
+        </div>
+      ) : (
+        <div className="flex gap-2" role="radiogroup">
+          {(['video', 'story'] as const).map((m) => (
+            <button
+              key={m}
+              type="button"
+              role="radio"
+              aria-checked={mode === m}
+              onClick={() => setMode(m)}
+              className={`h-9 rounded-full border px-4 text-[12px] font-bold ${
+                mode === m ? 'border-brand bg-brand text-white' : 'border-white/15 bg-white/5 text-white/70'
+              }`}
+            >
+              {t(m === 'video' ? 'post.mode.video' : 'post.mode.story')}
+            </button>
+          ))}
+        </div>
+      )}
+      {mode === 'story' ? <p className="text-[12px] text-white/60">{t('post.storyHint')}</p> : null}
       {error ? (
         <p
           role="alert"
           data-testid="video-error"
-          className="rounded-xl bg-danger/10 px-4 py-3 text-sm font-bold text-danger"
+          className="rounded-[14px] bg-danger/20 px-4 py-3 text-[13px] font-bold text-red-300"
         >
           {error}
         </p>
       ) : null}
-      <label className="flex flex-col items-center gap-2 rounded-2xl border-2 border-dashed border-brand-ink p-6 text-center font-bold">
+      <label className="flex cursor-pointer flex-col items-center gap-2 rounded-[18px] border-2 border-dashed border-brand/60 bg-white/5 p-6 text-center font-bold">
         <span aria-hidden className="text-3xl">
           🎬
         </span>
-        {file ? file.name : 'Chọn video (≤ 60 giây, ≤ 100MB)'}
+        {file ? file.name : t('post.pick', { sec: MAX_SEC[mode] })}
         <input
           type="file"
           accept="video/mp4,video/quicktime,video/webm"
@@ -123,25 +183,27 @@ export function VideoUploadForm({ remaining }: { remaining: number }) {
       </label>
       <video
         ref={preview}
-        className="mx-auto max-h-64 rounded-xl"
+        className="mx-auto max-h-64 rounded-[14px]"
         muted
         playsInline
         controls
         hidden={!file}
       />
-      <label className="flex flex-col gap-1.5 text-sm font-bold">
-        Chú thích ({caption.length}/{MAX_CAPTION})
+      <label className="flex flex-col gap-1.5 text-[12px] font-bold text-white/70">
+        {t('post.caption', { count: caption.length, max: MAX_CAPTION })}
         <textarea
           value={caption}
           onChange={(e) => setCaption(e.target.value.slice(0, MAX_CAPTION))}
           rows={3}
-          placeholder="Giới thiệu sản phẩm… #thanhlong"
-          className="rounded-xl border-2 border-black/15 p-3 font-normal outline-none focus:border-brand-ink"
+          placeholder={t('post.captionPlaceholder')}
+          className={`${field} font-normal`}
           data-testid="video-caption"
         />
       </label>
       <fieldset className="flex flex-col gap-2">
-        <legend className="text-sm font-bold">Gắn sản phẩm ({picked.length}/3)</legend>
+        <legend className="mb-1 text-[12px] font-bold text-white/70">
+          {t('post.products', { count: picked.length })}
+        </legend>
         {picked.length > 0 ? (
           <ul className="flex flex-wrap gap-2">
             {picked.map((p) => (
@@ -149,7 +211,7 @@ export function VideoUploadForm({ remaining }: { remaining: number }) {
                 <button
                   type="button"
                   onClick={() => toggle(p)}
-                  className="rounded-full bg-brand/15 px-3 py-1 text-sm font-bold"
+                  className="h-8 rounded-full bg-brand px-3 text-[12px] font-bold text-white"
                 >
                   {p.name} ✕
                 </button>
@@ -161,11 +223,11 @@ export function VideoUploadForm({ remaining }: { remaining: number }) {
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Tìm sản phẩm trên Chợ…"
-          className="h-11 rounded-xl border-2 border-black/15 bg-white px-3 outline-none focus:border-brand-ink"
+          placeholder={t('post.productSearch')}
+          className={`${field} h-11 rounded-full px-4 py-0`}
           data-testid="video-product-search"
         />
-        <ul className="flex flex-col divide-y divide-black/10" data-testid="video-product-results">
+        <ul className="flex flex-col divide-y divide-white/10" data-testid="video-product-results">
           {results.map((p) => {
             const on = picked.some((x) => x.id === p.id);
             return (
@@ -174,20 +236,20 @@ export function VideoUploadForm({ remaining }: { remaining: number }) {
                   type="button"
                   onClick={() => toggle(p)}
                   aria-pressed={on}
-                  className="flex w-full items-center gap-3 py-2 text-left text-sm"
+                  className="flex w-full items-center gap-3 py-2 text-left text-[13px]"
                 >
-                  <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-surface-muted">
+                  <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-[10px] bg-white/10">
                     {p.thumbUrl ? (
                       <Image src={p.thumbUrl} alt="" fill sizes="40px" className="object-cover" unoptimized />
                     ) : null}
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate font-bold">{p.name}</span>
-                    <span className="text-black/60">
+                    <span className="text-white/50">
                       {formatVnd(p.price)} · {p.kiotName}
                     </span>
                   </span>
-                  <span aria-hidden className="font-bold">
+                  <span aria-hidden className={`font-black ${on ? 'text-brand' : ''}`}>
                     {on ? '✓' : '+'}
                   </span>
                 </button>
@@ -198,22 +260,24 @@ export function VideoUploadForm({ remaining }: { remaining: number }) {
       </fieldset>
       {progress !== null ? (
         <div className="flex flex-col gap-1" aria-live="polite">
-          <div className="h-3 overflow-hidden rounded-full bg-black/10">
+          <div className="h-2 overflow-hidden rounded-full bg-white/10">
             <div className="h-full bg-brand" style={{ width: `${progress}%` }} />
           </div>
-          <span className="text-sm text-black/70" data-testid="video-progress">
-            {progress < 100 ? `Đang tải lên ${progress}%` : 'Đang lưu…'}
+          <span className="text-[12px] text-white/60" data-testid="video-progress">
+            {progress < 100 ? t('post.uploading', { pct: progress }) : t('post.saving')}
           </span>
         </div>
       ) : null}
       <button
         type="submit"
-        disabled={!file || Boolean(error) || progress !== null || remaining <= 0}
-        className="h-12 rounded-full border-2 border-brand-ink bg-brand font-extrabold text-brand-ink disabled:opacity-50"
+        disabled={!file || Boolean(error) || progress !== null || remaining[mode] <= 0}
+        className="h-12 rounded-full bg-brand font-black text-white shadow-[0_0_20px_rgb(255_107_0/0.35)] disabled:opacity-50"
       >
-        Đăng video
+        {t(mode === 'story' ? 'post.submitStory' : 'post.submit')}
       </button>
-      <p className="text-center text-xs text-black/60">Hôm nay bạn còn đăng được {remaining} video.</p>
+      <p className="text-center text-[12px] text-white/50">
+        {t(mode === 'story' ? 'post.remainingStory' : 'post.remaining', { count: remaining[mode] })}
+      </p>
     </form>
   );
 }

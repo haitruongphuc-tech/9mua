@@ -96,6 +96,12 @@ export async function grantYear(kiotId: string, adminId: string, reason: string)
   );
 }
 
+// Voucher mở Kiot (SPEC-billing.md bổ sung 27/10): social gọi trong cùng transaction đánh dấu voucher đã dùng.
+// Ghi 1 kỳ 1 năm, số tiền 0đ (không tính vào doanh thu phí thuê).
+export function grantVoucherYear(tx: Tx, kiotId: string) {
+  return extend(tx, kiotId, { source: 'voucher', intentId: null, amount: 0, grantedById: null, note: null });
+}
+
 export async function getKiotBilling(kiotId: string) {
   const [kiot, history] = await Promise.all([
     db.kiot.findUniqueOrThrow({ where: { id: kiotId }, select: { activeUntil: true } }),

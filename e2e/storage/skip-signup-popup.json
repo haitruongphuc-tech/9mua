@@ -1,0 +1,15 @@
+{
+  "cookies": [
+    {
+      "name": "nm_signup_later",
+      "value": "1",
+      "domain": ".9mua.test",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    }
+  ],
+  "origins": []
+}

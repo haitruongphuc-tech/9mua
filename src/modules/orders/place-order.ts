@@ -111,6 +111,7 @@ export async function placeOrder(
                   qty: l.qty,
                   imageUrl: p.images[0]?.thumbUrl ?? null,
                   sourceVideoId: l.sourceVideoId,
+                  sourceLiveId: l.sourceLiveId,
                 };
               }),
             },

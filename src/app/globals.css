@@ -1,14 +1,21 @@
 @import 'tailwindcss';
 @import '@fontsource/be-vietnam-pro/vietnamese-400.css';
 @import '@fontsource/be-vietnam-pro/vietnamese-700.css';
+@import '@fontsource/be-vietnam-pro/vietnamese-600.css';
 @import '@fontsource/be-vietnam-pro/vietnamese-800.css';
+@import '@fontsource/be-vietnam-pro/vietnamese-900.css';
 @import '@fontsource/be-vietnam-pro/400.css';
+@import '@fontsource/be-vietnam-pro/600.css';
 @import '@fontsource/be-vietnam-pro/700.css';
 @import '@fontsource/be-vietnam-pro/800.css';
+@import '@fontsource/be-vietnam-pro/900.css';
 
-/* Token màu theo docs/BRAND.md — không đặt chữ trắng trên nền brand. */
+/* Token màu theo docs/BRAND.md — chuẩn V4 (CEO chốt 27/10/2026). Từ T66 cả web nền đen chữ trắng. */
 @theme {
-  --color-brand: #fc6f15;
+  --color-ink: #0a0a0a;
+  --color-brand: #ff6b00;
+  --color-slogan: #94a3b8;
+  --color-brand-cream: #fff7ed;
   --color-brand-ink: #1a1410;
   --color-brand-deep: #c2410c;
   --color-surface: #ffffff;
@@ -16,15 +23,86 @@
   --color-success: #15803d;
   --color-danger: #dc2626;
   --font-sans: 'Be Vietnam Pro', ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-space-grotesk), 'Be Vietnam Pro', ui-sans-serif, sans-serif;
   --radius-card: 16px;
 }
 
 html {
-  color: var(--color-brand-ink);
-  background: var(--color-surface);
+  color: #fff;
+  background: var(--color-ink);
+  /* Ô chọn, lịch, thanh cuộn của trình duyệt cũng theo nền đen (chữ trong danh sách chọn không bị trắng trên trắng). */
+  color-scheme: dark;
 }
 
 body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+}
+
+/* Ẩn thanh cuộn của hàng cuộn ngang / feed (V4). */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Túi cam bay lên khi chạm 2 lần thả tim (V4). */
+@keyframes bagPop {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  30% {
+    transform: scale(1.3);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) translateY(-120px);
+    opacity: 0;
+  }
+}
+
+/* Tim bay lên trên màn hình live (V4). */
+@keyframes heartFly {
+  0% {
+    transform: translateY(0) scale(0.6);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-180px) translateX(-24px) scale(1.2);
+    opacity: 0;
+  }
+}
+
+/* Bảng trượt từ dưới lên (V4). */
+@keyframes sheetUp {
+  0% {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Logo V4 phát sáng nhấp nháy (docs/BRAND.md). */
+@keyframes glowPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 4px rgb(255 107 0 / 0.15),
+      0 0 12px #ff6b00;
+  }
+  50% {
+    box-shadow:
+      0 0 0 6px rgb(255 107 0 / 0.22),
+      0 0 22px #ff6b00,
+      0 0 36px rgb(255 107 0 / 0.4);
+  }
 }

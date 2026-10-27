@@ -15,6 +15,8 @@ test('vòng đời: mua → xác nhận → giao → đã nhận → (8 ngày) c
   browser,
   request,
 }) => {
+  // Một mạch dài (2 người, nhiều bước, cron); chạy song song với các test khác có lúc gần 30 giây.
+  test.setTimeout(60_000);
   const { slug } = await signUpWithKiot(page, 'Kiot Vòng Đời');
   await createProductViaUi(page, { name: 'Cà phê Buôn Ma Thuột', price: '90000', stock: '10' });
   await activateKiot(slug);

@@ -18,7 +18,7 @@ export function TempPassword({ userId }: { userId: string }) {
       <ConfirmSubmit confirm="Cấp mật khẩu tạm (mật khẩu cũ mất hiệu lực)?" tone="plain">
         Mật khẩu tạm
       </ConfirmSubmit>
-      {state.error ? <span className="ml-2 text-sm text-danger">{state.error}</span> : null}
+      {state.error ? <span className="ml-2 text-sm text-red-400">{state.error}</span> : null}
     </form>
   );
 }

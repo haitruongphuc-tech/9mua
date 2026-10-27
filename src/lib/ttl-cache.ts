@@ -13,3 +13,8 @@ export function cached<T>(key: string, ttlSeconds: number, load: () => Promise<T
   if (store.size > 500) for (const [k, v] of store) if (v.until <= nowMs) store.delete(k);
   return value;
 }
+
+// Xoá ngay một khoá (vd. CEO vừa sửa slogan, thông tin pháp lý) để lần đọc sau lấy dữ liệu mới.
+export function invalidateCached(key: string): void {
+  store.delete(key);
+}

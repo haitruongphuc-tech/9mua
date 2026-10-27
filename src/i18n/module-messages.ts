@@ -33,6 +33,8 @@ const MAP: Record<string, MessageKey> = {
   'Chọn ngân hàng': 'seller.v.bank',
   'Số tài khoản gồm 6–19 chữ số': 'seller.v.accountNumber',
   'Nhập tên chủ tài khoản đúng như trên ngân hàng': 'seller.v.accountName',
+  'Ghi chú tối đa 300 ký tự': 'ai.v.note300',
+  'Chọn phong cách ảnh': 'ai.v.style',
 };
 
 type Translate = (key: MessageKey, vars?: Vars) => string;

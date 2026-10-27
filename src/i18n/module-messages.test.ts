@@ -23,10 +23,12 @@ describe('dịch lỗi kiểm tra dữ liệu của module', () => {
         '../modules/kiot/product.ts',
         '../modules/kiot/profile.ts',
         '../modules/kiot/payout-account.ts',
+        '../modules/ai/studio.ts',
       ].map(async (p) => (await import('node:fs/promises')).readFile(new URL(p, import.meta.url), 'utf8')),
     );
     const all = sources.join('\n');
-    for (const key of Object.keys(vi).filter((k) => k.startsWith('seller.v.') && k !== 'seller.v.imageMax'))
-      expect(all, key).toContain(vi[key as keyof typeof vi]);
+    const mapped = (k: string) =>
+      (k.startsWith('seller.v.') && k !== 'seller.v.imageMax') || k.startsWith('ai.v.');
+    for (const key of Object.keys(vi).filter(mapped)) expect(all, key).toContain(vi[key as keyof typeof vi]);
   });
 });

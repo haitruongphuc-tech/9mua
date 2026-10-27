@@ -1,4 +1,5 @@
 import type { Messages } from './vi';
+import { ai } from './ja/ai';
 import { auth } from './ja/auth';
 import { common } from './ja/common';
 import { feed } from './ja/feed';
@@ -12,6 +13,7 @@ import { seller } from './ja/seller';
 import { shop } from './ja/shop';
 
 export const ja: Messages = {
+  ...ai,
   ...auth,
   ...common,
   ...feed,

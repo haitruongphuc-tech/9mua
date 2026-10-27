@@ -636,7 +636,8 @@
 - [x] **T66: Đổi giao diện + dịch các trang còn lại** — Chợ, sản phẩm, danh bạ Kiot, giỏ, đặt hàng, đơn mua, đăng nhập,
   Kiot của tôi, video, admin (chỉ tiếng Việt). Cả web nền tối #0A0A0A; lỗi kiểm tra của module dịch ở
   `src/i18n/module-messages.ts`; email máy tự gửi vẫn tiếng Việt (ghi chú trong `SPEC-i18n.md`).
-- [ ] **T67: AI Studio** (`SPEC-ai.md`).
+- [x] **T67: AI Studio** (`SPEC-ai.md`) — `/ai`, `/admin/ai`, module `ai` (Claude viết, Gemini vẽ, worker ghép video
+  10 giây), driver giả cho test/E2E.
 - [ ] **T68: Giới thiệu & Pháp lý + chính sách** (gộp T44, T45) và **giá 1 USD + voucher** (gộp T46).
 - [ ] **T49–T57: Livestream + xu** (`SPEC-live.md`, CEO duyệt 27/10) — chia nhỏ trong `tasks/plan.md` trước khi làm:
   MediaMTX + Nginx + xác thực; bảng dữ liệu + bắt đầu/kết thúc; trang phát (WHIP); trang xem (WHEP) + đếm người

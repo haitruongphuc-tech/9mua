@@ -116,9 +116,12 @@ export default async function SellerDashboard({
           ) : null}
         </form>
       ) : null}
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Link href="/kiot-cua-toi/san-pham" className={card}>
           {t('seller.dash.manageProducts')}
+        </Link>
+        <Link href="/ai" className={`${card} text-brand`} data-testid="dash-ai">
+          ✨ {t('ai.link')}
         </Link>
         <Link href="/video/dang" className={card}>
           {t('seller.dash.postVideo')}

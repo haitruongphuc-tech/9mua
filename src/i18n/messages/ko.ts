@@ -1,4 +1,5 @@
 import type { Messages } from './vi';
+import { ai } from './ko/ai';
 import { auth } from './ko/auth';
 import { common } from './ko/common';
 import { feed } from './ko/feed';
@@ -12,6 +13,7 @@ import { seller } from './ko/seller';
 import { shop } from './ko/shop';
 
 export const ko: Messages = {
+  ...ai,
   ...auth,
   ...common,
   ...feed,

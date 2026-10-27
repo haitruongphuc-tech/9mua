@@ -1,4 +1,5 @@
 import type { Messages } from './vi';
+import { ai } from './fr/ai';
 import { auth } from './fr/auth';
 import { common } from './fr/common';
 import { feed } from './fr/feed';
@@ -12,6 +13,7 @@ import { seller } from './fr/seller';
 import { shop } from './fr/shop';
 
 export const fr: Messages = {
+  ...ai,
   ...auth,
   ...common,
   ...feed,

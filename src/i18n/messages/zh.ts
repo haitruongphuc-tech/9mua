@@ -1,4 +1,5 @@
 import type { Messages } from './vi';
+import { ai } from './zh/ai';
 import { auth } from './zh/auth';
 import { common } from './zh/common';
 import { feed } from './zh/feed';
@@ -12,6 +13,7 @@ import { seller } from './zh/seller';
 import { shop } from './zh/shop';
 
 export const zh: Messages = {
+  ...ai,
   ...auth,
   ...common,
   ...feed,

@@ -41,6 +41,17 @@ describe('parseEnv', () => {
     ).not.toThrow();
   });
 
+  it('AI Studio: production gọi AI thật với model mặc định, cấm driver giả', () => {
+    const env = parseEnv(valid);
+    expect(env.AI_DRIVER).toBe('live');
+    expect(env.AI_TEXT_MODEL).toBe('claude-haiku-5-5');
+    expect(env.AI_IMAGE_MODEL).toBe('gemini-2.5-flash-image');
+    expect(env.ANTHROPIC_API_KEY).toBeUndefined();
+    expect(parseEnv({ ...valid, AI_TEXT_MODEL: '' }).AI_TEXT_MODEL).toBe('claude-haiku-5-5');
+    expect(() => parseEnv({ ...valid, AI_DRIVER: 'fake' })).toThrow(/AI_DRIVER/);
+    expect(parseEnv({ ...valid, NODE_ENV: 'test' }).AI_DRIVER).toBe('fake');
+  });
+
   it('báo rõ tên biến bị thiếu', () => {
     expect(() => parseEnv({ ...valid, DATABASE_URL: undefined })).toThrow(/DATABASE_URL/);
   });

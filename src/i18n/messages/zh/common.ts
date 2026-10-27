@@ -8,6 +8,7 @@ export const common: CommonMessages = {
   'common.slogan.cart': '整个市场装进一个袋子 - 9MUA橙色购物袋',
   'common.slogan.profile': '每个Kiot都是一个品牌 - 背后有CEO',
   'common.slogan.legal': '99% AI运营 - 1% CEO审批 - 真人服务',
+  'common.slogan.ai': '5 种技法 - AI 写文、绘图、做视频 - ArtCraft 描绘未来',
   'common.search.placeholder': '在市场搜索商品',
   'common.search.label': '搜索9MUA市场',
   'common.search.button': '搜索',

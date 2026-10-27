@@ -58,6 +58,23 @@ monthlyUsage(): Promise<{ usedVnd: number; budgetVnd: number }>          // cho 
 - `AiImage`: id, userId, fileUrl, style, createdAt (ảnh chưa đăng bán tự xoá sau 7 ngày).
 - Cài đặt trong `Setting`: `ai.enabled`, `ai.monthlyBudgetVnd`, `ai.textPerDay`, `ai.imagePerDay`.
 
+### Ghi chú khi làm (T67, 27/10/2026)
+
+- Hợp đồng thêm (chỉ thêm, không đổi phần đã duyệt): `aiQuota(userId)` (lượt còn trong ngày), `slideshowStatus(userId,
+  jobId)` (trang hỏi video ghép xong chưa), `processNextSlideshow()` và `cleanupAiFiles()` (worker), `aiSelfTest()`
+  (nút "Thử kết nối" ở `/admin/ai`), `recentUsage()` (bảng chi phí ở `/admin/ai`), `isStudioOwner()`. Lỗi nhập sai
+  trả `INVALID_INPUT` kèm từng ô.
+- Bảng thêm `AiSlideshow` (hàng đợi ghép video): web không có ffmpeg, worker ghép. Chủ Kiot xem thử video thật
+  trước khi bấm đăng; video đăng đi qua đúng luồng video thường (giới hạn 10 video/ngày, chuyển mã, ảnh bìa).
+- Ảnh AI được **chép** sang ảnh sản phẩm khi đăng bán (cùng bước xử lý như ảnh tải lên), nên dọn ảnh AI sau
+  7 ngày không làm mất ảnh sản phẩm.
+- Cài đặt dùng tên có sẵn kiểu `snake_case`: `ai_enabled`, `ai_monthly_budget_vnd`, `ai_text_per_day`,
+  `ai_image_per_day`, thêm `usd_vnd_rate` (quy giá AI tính bằng USD ra VNĐ; T68 dùng chung cho giá 1 USD).
+- Giá không gửi cho AI (mô tả không cần giá); chỉ gửi tên, danh mục, ghi chú. `AiUsage` chỉ thêm (chặn sửa/xoá ở
+  database). Lần gọi lỗi vẫn ghi chi phí (có thể đã tốn tiền) nhưng không trừ lượt.
+- Slogan trang: V4 ghi "9 AI" nhưng bản thật dùng 2 AI (Claude, Gemini) nên đổi thành "5 kỹ thuật - AI viết,
+  vẽ, làm video - ArtCraft vẽ tương lai". CEO sửa được ở `/admin/noi-dung`.
+
 ## Testing Strategy
 
 - **Unit:** ráp prompt (không lọt dữ liệu ngoài đầu vào); đọc kết quả AI sai định dạng thì báo lỗi, không đăng.

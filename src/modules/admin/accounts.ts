@@ -163,6 +163,11 @@ const RULES: Record<SettingKey, { min?: number; max?: number; bool?: true; json?
   social_free_daily_limit: { min: 1, max: 10_000, label: 'Giới hạn tim/follow mỗi ngày (Free)' },
   social_voucher_threshold: { min: 10, max: 100_000, label: 'Số tim để nhận voucher' },
   social_voucher_enabled: { bool: true, label: 'Tặng voucher mở Kiot' },
+  ai_enabled: { bool: true, label: 'AI Studio' },
+  ai_monthly_budget_vnd: { min: 0, max: 100_000_000, label: 'Ngân sách AI mỗi tháng' },
+  ai_text_per_day: { min: 0, max: 1_000, label: 'Lượt viết chữ AI mỗi ngày' },
+  ai_image_per_day: { min: 0, max: 100, label: 'Lượt vẽ ảnh AI mỗi ngày' },
+  usd_vnd_rate: { min: 10_000, max: 100_000, label: 'Tỉ giá USD' },
   slogans_json: { json: true, label: 'Slogan' },
   legal_info_json: { json: true, label: 'Thông tin pháp lý' },
 };

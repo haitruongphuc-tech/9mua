@@ -11,6 +11,7 @@ import {
   Settings,
   Share2,
   ShoppingBag,
+  Sparkles,
   Store,
 } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -45,6 +46,7 @@ export default async function MePage() {
     { href: '/don-mua', label: t('me.link.orders'), sub: t('me.link.ordersSub'), Icon: Package },
     { href: '/gio-hang', label: t('me.link.cart'), sub: t('me.link.cartSub'), Icon: ShoppingBag },
     { href: '/kiot-cua-toi', label: t('me.link.kiot'), sub: t('me.link.kiotSub'), Icon: Store },
+    ...(role === 'free' ? [] : [{ href: '/ai', label: t('ai.link'), sub: t('ai.linkSub'), Icon: Sparkles }]),
     { href: '/video/dang', label: t('me.link.post'), sub: t('me.link.postSub'), Icon: Clapperboard },
     { href: '/video/cua-toi', label: t('me.link.myVideos'), sub: t('me.link.myVideosSub'), Icon: Film },
     {

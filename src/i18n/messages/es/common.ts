@@ -8,6 +8,7 @@ export const common: CommonMessages = {
   'common.slogan.cart': 'Todo el mercado en una bolsa - La bolsa naranja de 9MUA',
   'common.slogan.profile': 'Cada Kiot es una marca - Con un CEO detrás',
   'common.slogan.legal': '99 % gestionado por IA - 1 % aprobado por el CEO - Gente real',
+  'common.slogan.ai': '5 técnicas - La IA escribe, dibuja y crea vídeos - ArtCraft dibuja el futuro',
   'common.search.placeholder': 'Buscar productos en el Mercado',
   'common.search.label': 'Buscar en el Mercado 9MUA',
   'common.search.button': 'Buscar',

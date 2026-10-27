@@ -7,6 +7,7 @@ export const common = {
   'common.slogan.cart': 'Gom cả chợ vào một túi - Túi cam 9MUA',
   'common.slogan.profile': 'Mỗi Kiot là một thương hiệu - CEO đứng sau',
   'common.slogan.legal': '99% AI vận hành - 1% CEO phê duyệt - Người thật',
+  'common.slogan.ai': '5 kỹ thuật - AI viết, vẽ, làm video - ArtCraft vẽ tương lai',
   'common.search.placeholder': 'Tìm sản phẩm trên Chợ',
   'common.search.label': 'Tìm trên Chợ 9MUA',
   'common.search.button': 'Tìm kiếm',

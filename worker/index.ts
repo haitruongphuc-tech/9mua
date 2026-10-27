@@ -1,5 +1,7 @@
-// Tiến trình nền (service `worker` trong docker-compose): chuyển mã video từng cái một, để web không bị chậm.
+// Tiến trình nền (service `worker` trong docker-compose): chuyển mã video và ghép video AI Studio từng cái một, để web
+// không bị chậm.
 import { db } from '@/lib/db';
+import { cleanupAiFiles, processNextSlideshow } from '@/modules/ai';
 import { cleanupStaleUploads, expireStories, recomputeScores } from '@/modules/creator';
 import { processNextJob } from '@/server/creator';
 
@@ -21,10 +23,13 @@ async function main() {
   let lastScores = 0;
   while (!stopping) {
     try {
-      const worked = await processNextJob();
+      // Video AI ghép trước (chủ Kiot đang chờ xem thử), rồi tới video người dùng tải lên.
+      const worked = (await processNextSlideshow()) || (await processNextJob());
       if (Date.now() - lastCleanup > CLEANUP_EVERY_MS) {
         const removed = await cleanupStaleUploads();
         if (removed) console.info(`[worker] dọn ${removed} file tải lên bị bỏ dở`);
+        const aiRemoved = await cleanupAiFiles();
+        if (aiRemoved) console.info(`[worker] dọn ${aiRemoved} ảnh AI quá 7 ngày chưa đăng bán`);
         lastCleanup = Date.now();
       }
       if (Date.now() - lastScores > SCORES_EVERY_MS) {

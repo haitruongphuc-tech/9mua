@@ -16,6 +16,7 @@ describe('chốt chặn trong database', () => {
         'order_item_append_only',
         'ProductSale_append_only',
         'AdminAuditLog_append_only',
+        'AiUsage_append_only',
         'Product_search_name',
       ]),
     );
@@ -28,6 +29,7 @@ describe('chốt chặn trong database', () => {
     expect(rows.map((r) => r.conname)).toEqual(
       expect.arrayContaining([
         'Product_stock_nonnegative',
+        'AiUsage_cost_nonnegative',
         'Product_price_range',
         'Order_amounts_valid',
         'OrderItem_qty_price_valid',

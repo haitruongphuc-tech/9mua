@@ -8,6 +8,7 @@ export const common: CommonMessages = {
   'common.slogan.cart': '시장 전체를 한 가방에 - 9MUA 오렌지 백',
   'common.slogan.profile': '모든 Kiot은 하나의 브랜드 - 그 뒤에 CEO',
   'common.slogan.legal': 'AI 운영 99% - CEO 승인 1% - 진짜 사람',
+  'common.slogan.ai': '5가지 기법 - AI가 쓰고, 그리고, 영상을 만든다 - ArtCraft가 미래를 그린다',
   'common.search.placeholder': '마켓에서 상품 검색',
   'common.search.label': '9MUA 마켓 검색',
   'common.search.button': '검색',

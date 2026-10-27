@@ -143,6 +143,18 @@ Kênh chi hộ PayOS cần:
   lệnh sẽ nằm ở trạng thái "đang chuyển" và hệ thống báo CEO sau 2 giờ.
 - Thêm IP của VPS vào danh sách IP được phép gọi API chi hộ (nếu PayOS yêu cầu).
 
+AI Studio (không bắt buộc, `SPEC-ai.md`):
+- `ANTHROPIC_API_KEY`: tạo ở console.anthropic.com → *API Keys* (nạp trước ít tiền, vd. 5 USD). Dùng để AI viết
+  mô tả; mỗi lần khoảng 20đ.
+- `GEMINI_API_KEY`: tạo ở aistudio.google.com → *Get API key* (bật thanh toán cho dự án Google Cloud đi kèm).
+  Dùng để AI vẽ ảnh; mỗi ảnh khoảng 1.000đ.
+- Thiếu khoá nào thì phần đó hiện "Chưa bật", phần còn lại vẫn chạy. Video 10 giây do worker ghép bằng ffmpeg,
+  không tốn phí AI.
+- Sau khi điền khoá: vào `/admin/ai` bấm **Thử kết nối** từng phần để chắc khoá đúng. Ngân sách tháng (mặc định
+  500.000đ), lượt mỗi ngày và công tắc bật/tắt chỉnh ở trang đó. Chạm ngân sách thì AI tạm dừng tới đầu tháng
+  sau và CEO nhận email.
+- Không bao giờ dán khoá vào chat hay gửi cho ai; chỉ điền trong `.env` trên VPS.
+
 Sửa `.env` sau này: `docker compose up -d` để app nhận giá trị mới (không cần build lại).
 
 ## 5. Chạy ứng dụng lần đầu

@@ -797,3 +797,51 @@ model SocialLink {
 
   @@id([userId, platform])
 }
+
+// ===== AI Studio (SPEC-ai.md) =====
+// Mỗi lần gọi AI ghi 1 dòng chi phí ước tính (chỉ thêm, không sửa/xoá) — tính lượt trong ngày và ngân sách tháng.
+model AiUsage {
+  id           String   @id @default(cuid(2))
+  userId       String
+  kind         String // text | image
+  model        String
+  inputTokens  Int?
+  outputTokens Int?
+  images       Int?
+  costVnd      Int // VNĐ, làm tròn lên
+  ok           Boolean
+  createdAt    DateTime @default(now())
+
+  @@index([userId, kind, createdAt])
+  @@index([createdAt])
+}
+
+// Ảnh AI vẽ, chưa phải ảnh sản phẩm: khi đăng bán mới chép sang ảnh sản phẩm. Ảnh quá 7 ngày tự xoá.
+model AiImage {
+  id        String   @id @default(cuid(2))
+  userId    String
+  url       String
+  thumbUrl  String
+  style     String
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([createdAt])
+}
+
+// Video 10 giây ghép từ ảnh AI (worker chạy ffmpeg). Xem thử trước, bấm đăng bán mới lên feed.
+model AiSlideshow {
+  id        String    @id @default(cuid(2))
+  userId    String
+  imageIds  String[]
+  status    String    @default("queued") // queued | running | done | failed
+  url       String?
+  error     String?
+  attempts  Int       @default(0)
+  lockedAt  DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
+}

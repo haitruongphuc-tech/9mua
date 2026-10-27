@@ -14,6 +14,13 @@ export const SETTING_DEFAULTS = {
   social_free_daily_limit: '50',
   social_voucher_threshold: '100',
   social_voucher_enabled: 'true',
+  // AI Studio (SPEC-ai.md mục 8)
+  ai_enabled: 'true',
+  ai_monthly_budget_vnd: '500000',
+  ai_text_per_day: '10',
+  ai_image_per_day: '3',
+  // Tỉ giá USD dùng để quy chi phí AI (giá AI tính bằng USD) ra VNĐ.
+  usd_vnd_rate: '26500',
   // Nội dung CEO sửa ở /admin/noi-dung (SPEC-admin.md bổ sung 27/10), lưu dạng JSON.
   slogans_json: '{}', // { "home": { "vi": "...", "en": "..." }, ... } — trống thì dùng từ điển
   legal_info_json: '{}', // xem src/lib/legal.ts

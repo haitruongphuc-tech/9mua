@@ -30,3 +30,10 @@ export function startOfVnDay(at: Date = now()): Date {
   const offset = 7 * 3_600_000;
   return new Date(Math.floor((at.getTime() + offset) / 86_400_000) * 86_400_000 - offset);
 }
+
+// 0 giờ ngày 1 của tháng hiện tại theo giờ Việt Nam (ngân sách AI tính theo tháng — SPEC-ai.md mục 8).
+export function startOfVnMonth(at: Date = now()): Date {
+  const offset = 7 * 3_600_000;
+  const local = new Date(at.getTime() + offset);
+  return new Date(Date.UTC(local.getUTCFullYear(), local.getUTCMonth(), 1) - offset);
+}

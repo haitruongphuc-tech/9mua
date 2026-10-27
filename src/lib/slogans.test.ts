@@ -15,6 +15,8 @@ describe('sloganKey: slogan của trang theo đường dẫn (V4)', () => {
     ['/dat-hang/abc', 'cart'],
     ['/don-mua', 'cart'],
     ['/k/mat-ong', 'profile'],
+    ['/ai', 'ai'],
+    ['/aiko', 'home'],
     ['/tai-khoan', 'home'],
   ] as const)('%s → %s', (path, key) => {
     expect(sloganKey(path)).toBe(key);

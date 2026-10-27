@@ -15,8 +15,8 @@ trên Chợ chung. Creator đăng video dọc 9:16 có gắn sản phẩm. CEO q
 | `marketplace` | Chợ chung tại `9mua.com/cho`: liệt kê sản phẩm của Kiot đang hoạt động, tìm kiếm, lọc danh mục, thêm vào giỏ | `kiot`, `billing` |
 | `creator` | Creator đăng video dọc ≤60s, feed 9:16 cuộn dọc, thích / lượt xem, gắn sản phẩm Kiot vào video → bấm mua | `identity`, `kiot` |
 | `admin` | Trang CEO: người dùng, Kiot, đơn hàng, giao dịch, duyệt rút tiền, doanh thu, khoá Kiot, gỡ sản phẩm/video vi phạm | tất cả ở trên |
-| `live` | Mọi tài khoản phát live từ trình duyệt điện thoại (MediaMTX trên VPS), người xem vuốt dọc, chat, thả tim, mua sản phẩm đang ghim (`SPEC-live.md`, chờ duyệt) | `identity`, `kiot`, `billing`, `orders` |
-| `xu` | Sổ xu thưởng chỉ thêm: 9MUA tự thưởng người phát theo số người xem live hợp lệ; CEO chỉnh luật và thu hồi (`SPEC-live.md`, chờ duyệt) | `identity`, `kiot`, `live` |
+| `live` | Mọi tài khoản phát live từ trình duyệt điện thoại (MediaMTX trên VPS), người xem vuốt dọc, chat, thả tim, mua sản phẩm đang ghim (`SPEC-live.md`) | `identity`, `kiot`, `billing`, `orders` |
+| `xu` | Sổ xu thưởng chỉ thêm: 9MUA tự thưởng người phát theo số người xem live hợp lệ; CEO chỉnh luật và thu hồi (`SPEC-live.md`) | `identity`, `kiot`, `live` |
 
 Thứ tự xây:
 `identity` → `kiot` → `payments` → `billing` → `orders` → `payouts` → `marketplace`, `creator` (song song) → `admin`

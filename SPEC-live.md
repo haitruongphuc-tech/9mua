@@ -3,7 +3,7 @@
 > Module 10 và 11 trong `CAPABILITY-MAP.md`. `live` phụ thuộc `identity`, `kiot`, `billing`, `orders`, `creator`.
 > `xu` phụ thuộc `identity`, `kiot`, `live`. Nền móng chung theo `SPEC-identity.md`.
 > Quyết định gốc: `docs/v4-merge-plan.md` §7, mục 8 (tự xây trên VPS), 9 (xu theo KPI) và 12 (làm ngay).
-> **Trạng thái: chờ CEO duyệt.**
+> **Trạng thái: CEO duyệt toàn bộ ngày 27/10/2026**, gồm 7 mặc định ở cuối spec.
 
 ## Objective
 
@@ -238,7 +238,7 @@ monthlyXuUsage(month): Promise<{ used: number; budget: number }>
 - [ ] Xu được cộng đúng luật, không bao giờ cộng 2 lần, và CEO thu hồi được.
 - [ ] Người phát ghim sản phẩm, người xem mua được, và đơn ghi đúng buổi live nguồn.
 
-## Mặc định cần CEO xác nhận
+## Mặc định (CEO đã duyệt 27/10/2026)
 
 1. ~~Chỉ chủ Kiot được phát live~~ → **Mọi tài khoản được phát live** (CEO chốt 27/10). Kèm theo: tài khoản phải tạo
    ít nhất 3 ngày mới được phát, và ghim được sản phẩm của mọi Kiot đang hoạt động.

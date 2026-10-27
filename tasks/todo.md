@@ -617,6 +617,18 @@
 - [x] **T40: Trang chủ là feed video** (M) — nền đen; chữ giới thiệu + link Chợ cho Google; chỉ tải trước video
   đầu; chưa có video thì hiện nội dung Chợ. Nội dung trang chủ cũ (Video hot, Kiot nổi bật…) chuyển vào `/cho`.
   Kiểm lại vuốt trên iPhone.
+- [ ] **T47: Giao diện V4 — khung chung** (M) — CEO chốt lấy V4 làm chuẩn (§7 mục 10–11). Sửa `docs/BRAND.md`
+  trước. Màu V4 (nền `#0A0A0A`, cam `#FF6B00`, chữ trắng, viền 1px trắng 10%), font Be Vietnam Pro + Space Grotesk
+  (tự host), logo 48px phát sáng nhấp nháy, header 64px (logo, slogan, tìm, giỏ), thanh dưới 64px
+  Video · Chợ · Live · Kiot · Tôi, nút "Đăng video" lên góc màn hình Video. Ảnh so sánh với V4.
+- [ ] **T48: Đa ngôn ngữ — nền móng** (M) — viết `SPEC-i18n.md`, CEO duyệt. Từ điển 7 thứ tiếng, nút chọn ngôn ngữ
+  trên header, dịch khung chung.
+- [ ] **T49–T57: Livestream + xu** (`SPEC-live.md`, CEO duyệt 27/10) — chia nhỏ trong `tasks/plan.md` trước khi làm:
+  MediaMTX + Nginx + xác thực; bảng dữ liệu + bắt đầu/kết thúc; trang phát (WHIP); trang xem (WHEP) + đếm người
+  xem; chat + tim (SSE); ghim sản phẩm + `sourceLiveId`; báo cáo + `/admin/live`; sổ xu + thưởng + `/admin/xu`;
+  E2E với MediaMTX thật.
+- [ ] **Đổi giao diện V4 + dịch từng trang** (gộp với T41–T46): Chợ & sản phẩm; Kiot; giỏ, đặt hàng, đơn mua;
+  đăng nhập & tài khoản; Kiot của tôi; video & creator; admin.
 - [ ] **T41: Feed: thả tim 2 chạm + túi cam, thanh tiến độ, chia sẻ có QR** (S)
 - [ ] **T42: Trang Kiot kiểu TikTok** (M) — tab Sản phẩm / Video, số sản phẩm, đã bán, chia sẻ có QR.
 - [ ] **T43: Trang Tôi** (S) — trung tâm tài khoản: đơn mua, giỏ, thông báo, Kiot của tôi, video của tôi.
@@ -626,12 +638,10 @@
 - [ ] **T46: Giá Kiot 1 USD/năm quy ra VNĐ** (M) — sửa `SPEC-billing.md` trước; cron tỷ giá Vietcombank, làm tròn
   1.000đ, giữ giá gần nhất khi lỗi, chặn lệch > 10%, QR cũ giữ giá.
 
-### Giai đoạn B — Mạng xã hội + livestream (chỉ thêm bảng mới; viết spec trước)
+### Giai đoạn B — Mạng xã hội (chỉ thêm bảng mới; viết spec trước). Livestream đã chuyển lên T49–T57
 - [ ] Follow Kiot + tab "Đang follow" + thông báo video mới.
 - [ ] Bình luận video (trả lời 1 cấp, ghim, báo cáo, chống spam).
 - [ ] Lưu video/sản phẩm; trang hashtag; feed ưu tiên Kiot đang follow.
-- [ ] Livestream tự xây (MediaMTX): phát từ trình duyệt, xem, chat, ghim sản phẩm, báo cáo, CEO tắt live.
-- [ ] Xu 9MUA thưởng theo người xem hợp lệ (quy tắc trong `docs/v4-merge-plan.md` mục 7).
 
 ### Giai đoạn C — Công cụ CEO
 - [ ] Ghim Kiot/video lên đầu, sửa slogan, sửa thông tin pháp lý (có nhật ký).

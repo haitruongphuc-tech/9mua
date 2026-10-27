@@ -2,7 +2,8 @@ import { db, type Tx } from './db';
 
 // Cài đặt CEO chỉnh được trong trang admin. Giá trị lưu dạng chuỗi, đọc kèm mặc định.
 export const SETTING_DEFAULTS = {
-  kiot_fee_vnd: '26000',
+  kiot_fee_vnd: '26000', // tự tính từ kiot_fee_usd_cents × tỷ giá Vietcombank mỗi sáng (SPEC-billing.md bổ sung 27/10)
+  kiot_fee_usd_cents: '100', // 1,00 USD/năm
   platform_fee_bp: '500', // 5% = 500 basis point
   payout_min_vnd: '50000',
   payout_fee_vnd: '0',

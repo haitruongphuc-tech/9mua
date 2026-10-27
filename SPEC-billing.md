@@ -114,3 +114,13 @@ Không có. Mọi quyết định đều theo những gì đã chốt. Các mụ
 - Dùng voucher ghi `KiotSubscription` với `source = 'voucher'`, `amount = 0`, kỳ hạn 1 năm cộng dồn như mục 2, và đánh dấu
   voucher đã dùng **trong cùng một transaction**. Bấm 2 lần cũng chỉ dùng được 1 lần.
 - Voucher đã bị CEO thu hồi thì không dùng được. Doanh thu phí thuê không tính dòng voucher.
+
+### Ghi chú khi làm (T68, 27/10/2026)
+- Sổ đổi giá: bảng mới `KiotFeeRateLog` (chỉ thêm): nguồn (`vietcombank` | `admin`), tỷ giá, giá USD, giá cũ, giá mới,
+  có áp dụng không. Cron `/api/internal/billing/usd-rate` lúc 7:00; CEO có nút "Cập nhật tỷ giá ngay" ở `/admin/cai-dat`.
+- CEO đổi giá USD thì áp dụng ngay theo tỷ giá đang dùng (CEO chủ động nên không chặn 10%). Giá tối thiểu vẫn 2.000đ.
+- Tỷ giá lưu ở `usd_vnd_rate`, dùng chung để quy chi phí AI Studio ra VNĐ.
+- Voucher: `KiotSubscription.source = 'voucher'`. Việc dùng voucher nằm ở `social.redeemVoucher` (social phụ thuộc billing,
+  billing không gọi ngược social) và gọi `billing.grantVoucherYear(tx, kiotId)` trong cùng transaction.
+  CEO xem và thu hồi voucher chưa dùng ở `/admin/voucher`.
+

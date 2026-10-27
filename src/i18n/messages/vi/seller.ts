@@ -286,6 +286,10 @@ export const seller = {
   'seller.v.bank': 'Chọn ngân hàng',
   'seller.v.accountNumber': 'Số tài khoản gồm 6–19 chữ số',
   'seller.v.accountName': 'Nhập tên chủ tài khoản đúng như trên ngân hàng',
+  'seller.dash.voucher': '🎁 Dùng voucher – miễn phí 1 năm',
+  'seller.dash.voucherHint': 'Bạn được tặng 1 năm phí Kiot vì đã thả tim đủ video. Mỗi tài khoản dùng 1 lần.',
+  'seller.dash.voucherUsed': 'Đã dùng voucher: Kiot được cộng thêm 1 năm.',
+  'seller.dash.voucherFailed': 'Không dùng được voucher (đã dùng hoặc đã bị thu hồi).',
 } as const;
 
 export type SellerMessages = Record<keyof typeof seller, string>;

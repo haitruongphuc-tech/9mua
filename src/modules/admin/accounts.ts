@@ -1,6 +1,6 @@
 import { audit } from '@/lib/audit';
 import { db } from '@/lib/db';
-import { getKiotFee, grantYear, setKiotFee } from '@/modules/billing';
+import { getKiotFee, grantYear, setKiotFee, setKiotFeeUsd } from '@/modules/billing';
 import { lockUser, requestPasswordReset, resetPassword, unlockUser } from '@/modules/identity';
 import { lockKiot, unlockKiot } from '@/modules/kiot';
 import { adjustBalance, availableBalance } from '@/modules/payouts';
@@ -153,6 +153,7 @@ export async function adjustKiotBalance(
 // Cài đặt (SPEC-admin.md mục 5): kiểm hợp lệ trước khi lưu, mỗi giá trị đổi ghi 1 dòng nhật ký.
 const RULES: Record<SettingKey, { min?: number; max?: number; bool?: true; json?: true; label: string }> = {
   kiot_fee_vnd: { min: 2_000, max: 10_000_000, label: 'Phí thuê Kiot' },
+  kiot_fee_usd_cents: { min: 1, max: 100_000, label: 'Giá Kiot (USD)' },
   platform_fee_bp: { min: 0, max: 3_000, label: 'Phí sàn' }, // basis point: 0–30%
   payout_fee_vnd: { min: 0, max: 100_000, label: 'Phí chi hộ' },
   payout_min_vnd: { min: 10_000, max: 10_000_000, label: 'Rút tối thiểu' },
@@ -215,6 +216,7 @@ export async function updateSettings(
     const value = raw.trim();
     if (current[key] === value) continue;
     if (key === 'kiot_fee_vnd') await setKiotFee(Number(value), adminId);
+    else if (key === 'kiot_fee_usd_cents') await setKiotFeeUsd(Number(value), adminId);
     else await setSetting(key, value, adminId);
     await audit({
       adminId,

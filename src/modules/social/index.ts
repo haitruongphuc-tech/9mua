@@ -18,6 +18,7 @@ export {
   checkVoucher,
   getVoucher,
   consumeVoucher,
+  redeemVoucher,
   revokeVoucher,
   listVouchers,
   likedVideoCount,

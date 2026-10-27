@@ -283,4 +283,8 @@ export const seller: SellerMessages = {
   'seller.v.bank': '은행을 고르세요',
   'seller.v.accountNumber': '계좌 번호는 6–19자리예요',
   'seller.v.accountName': '은행에 등록된 그대로 예금주를 입력하세요',
+  'seller.dash.voucher': '🎁 바우처 사용 – 1년 무료',
+  'seller.dash.voucherHint': '영상에 하트를 충분히 눌러 Kiot 이용료 1년을 선물받았어요. 계정당 1회.',
+  'seller.dash.voucherUsed': '바우처를 사용했어요: Kiot이 1년 연장되었습니다.',
+  'seller.dash.voucherFailed': '바우처를 사용할 수 없습니다(이미 사용했거나 회수됨).',
 };

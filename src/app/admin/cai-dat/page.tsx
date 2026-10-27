@@ -2,8 +2,10 @@ import { ConfirmSubmit } from '@/components/admin/ConfirmSubmit';
 import { Flash } from '@/components/admin/Flash';
 import { formatDateTimeVN } from '@/lib/format';
 import { getAllSettings, listTrustedDevices, requireAdminVerified } from '@/modules/admin';
+import { recentFeeRates } from '@/modules/billing';
+import { formatVnd } from '@/lib/format';
 import type { FlashParams } from '../flash';
-import { forgetDevicesAction, saveSettingsAction, toggleAutoPayoutAction } from './actions';
+import { forgetDevicesAction, saveSettingsAction, toggleAutoPayoutAction, updateRateAction } from './actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,10 +13,11 @@ const field = 'h-11 rounded-[14px] border border-white/15 bg-white/10 text-white
 
 export default async function SettingsPage({ searchParams }: { searchParams: FlashParams }) {
   const admin = await requireAdminVerified();
-  const [s, params, devices] = await Promise.all([
+  const [s, params, devices, rates] = await Promise.all([
     getAllSettings(),
     searchParams,
     listTrustedDevices(admin.id),
+    recentFeeRates(5),
   ]);
   const autoOn = s.payout_auto_enabled === 'true';
   const num = (label: string, name: string, value: string, hint?: string) => (
@@ -60,7 +63,20 @@ export default async function SettingsPage({ searchParams }: { searchParams: Fla
         action={saveSettingsAction}
         className="flex flex-col gap-4 rounded-[18px] border border-white/10 bg-white/5 p-4"
       >
-        {num('Phí thuê Kiot (đ/năm)', 'kiot_fee_vnd', s.kiot_fee_vnd, 'Từ 2.000đ.')}
+        <label className="flex flex-col gap-1 text-sm font-bold">
+          Giá thuê Kiot (USD/năm)
+          <input
+            name="kiot_fee_usd"
+            inputMode="decimal"
+            defaultValue={(Number(s.kiot_fee_usd_cents) / 100).toFixed(2).replace('.', ',')}
+            className={field}
+            data-testid="kiot-fee-usd"
+          />
+          <span className="text-xs font-normal text-white/60">
+            Đang thu {formatVnd(Number(s.kiot_fee_vnd))}/năm (tỷ giá {formatVnd(Number(s.usd_vnd_rate))}/USD).
+            Web chỉ hiện VNĐ; mỗi sáng 7:00 tự cập nhật theo tỷ giá bán của Vietcombank.
+          </span>
+        </label>
         <label className="flex flex-col gap-1 text-sm font-bold">
           Phí sàn (% trên tiền hàng)
           <input
@@ -103,6 +119,36 @@ export default async function SettingsPage({ searchParams }: { searchParams: Fla
         </label>
         <ConfirmSubmit confirm="Lưu các thay đổi cài đặt?">Lưu cài đặt</ConfirmSubmit>
       </form>
+      <section
+        className="flex flex-col gap-3 rounded-[18px] border border-white/10 bg-white/5 p-4"
+        data-testid="fee-rates"
+      >
+        <h2 className="text-lg font-extrabold">Tỷ giá và giá Kiot gần đây</h2>
+        {rates.length === 0 ? (
+          <p className="text-sm text-white/60">Chưa lấy tỷ giá lần nào.</p>
+        ) : (
+          <ul className="flex flex-col gap-2 text-sm">
+            {rates.map((r) => (
+              <li key={r.id} className="rounded-xl bg-white/5 px-3 py-2">
+                <p className="font-bold">
+                  {formatDateTimeVN(r.createdAt)} · {r.source === 'admin' ? 'CEO đổi giá' : 'Vietcombank'} ·{' '}
+                  {formatVnd(r.rate)}/USD
+                </p>
+                <p className={r.applied ? 'text-white/70' : 'text-red-400'}>
+                  {formatVnd(r.oldFeeVnd)} → {formatVnd(r.newFeeVnd)}{' '}
+                  {r.applied ? '(đã áp dụng)' : '(chưa áp dụng)'}
+                  {r.note ? ` — ${r.note}` : ''}
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
+        <form action={updateRateAction}>
+          <ConfirmSubmit confirm="Lấy tỷ giá Vietcombank ngay bây giờ?" tone="plain" testId="update-rate">
+            Cập nhật tỷ giá ngay
+          </ConfirmSubmit>
+        </form>
+      </section>
       <section
         className="flex flex-col gap-3 rounded-[18px] border border-white/10 bg-white/5 p-4"
         data-testid="trusted-devices"

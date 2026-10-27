@@ -6,6 +6,7 @@ import { localizeFields } from '@/i18n/module-messages';
 import { getT } from '@/i18n/server';
 import { requireUser } from '@/modules/identity';
 import { createKiot, updateKiot } from '@/modules/kiot';
+import { redeemVoucher } from '@/modules/social';
 
 export type KiotFormValues = { name: string; slug: string; description: string; contactPhone: string };
 export type KiotFormState = {
@@ -61,4 +62,12 @@ export async function updateKiotAction(_p: KiotFormState, form: FormData): Promi
   if (!result.ok) return toState(values, result);
   revalidatePath('/kiot-cua-toi', 'layout');
   return { values, ok: (await getT())('seller.form.saved') };
+}
+
+// "Dùng voucher – miễn phí 1 năm" (SPEC-billing.md bổ sung 27/10).
+export async function redeemVoucherAction(): Promise<void> {
+  const user = await requireUser();
+  const r = await redeemVoucher(user.id);
+  revalidatePath('/kiot-cua-toi');
+  redirect(r.ok ? '/kiot-cua-toi?da-dung-voucher=1' : '/kiot-cua-toi?loi-voucher=1');
 }

@@ -8,8 +8,10 @@ import { kiotOrigin } from '@/lib/urls';
 import { requireUser } from '@/modules/identity';
 import { getKiotByOwner, kiotStatus } from '@/modules/kiot';
 import { getKiotFee } from '@/modules/billing';
+import { getVoucher } from '@/modules/social';
 import { formatDateVN, formatVnd } from '@/lib/format';
 import { StatusBadge } from './StatusBadge';
+import { redeemVoucherAction } from './actions';
 import { startKiotPaymentAction } from './thanh-toan/actions';
 
 export const metadata: Metadata = { title: 'Kiot của tôi', robots: { index: false } };
@@ -19,7 +21,12 @@ const card = 'rounded-[18px] border border-white/10 bg-white/5 p-4 font-bold hov
 export default async function SellerDashboard({
   searchParams,
 }: {
-  searchParams: Promise<{ 'moi-tao'?: string; 'loi-thanh-toan'?: string }>;
+  searchParams: Promise<{
+    'moi-tao'?: string;
+    'loi-thanh-toan'?: string;
+    'da-dung-voucher'?: string;
+    'loi-voucher'?: string;
+  }>;
 }) {
   const user = await requireUser();
   const [kiot, t] = await Promise.all([getKiotByOwner(user.id), getT()]);
@@ -40,10 +47,11 @@ export default async function SellerDashboard({
 
   const status = kiotStatus(kiot);
   const url = kiotOrigin(kiot.slug);
-  const [qrSvg, params, fee] = await Promise.all([
+  const [qrSvg, params, fee, voucher] = await Promise.all([
     QRCode.toString(url, { type: 'svg', margin: 1, errorCorrectionLevel: 'M' }),
     searchParams,
     getKiotFee(),
+    getVoucher(user.id),
   ]);
   const justCreated = Boolean(params['moi-tao']);
   return (
@@ -89,6 +97,34 @@ export default async function SellerDashboard({
         >
           {t('seller.dash.expiring', { date: formatDateVN(kiot.activeUntil) })}
         </p>
+      ) : null}
+      {params['da-dung-voucher'] ? (
+        <p
+          role="status"
+          className="rounded-[14px] bg-success/20 px-4 py-3 text-[13px] font-bold text-green-300"
+        >
+          {t('seller.dash.voucherUsed')}
+        </p>
+      ) : null}
+      {params['loi-voucher'] ? (
+        <p role="alert" className="rounded-[14px] bg-danger/20 px-4 py-3 text-[13px] font-bold text-red-300">
+          {t('seller.dash.voucherFailed')}
+        </p>
+      ) : null}
+      {voucher?.usable && status !== 'locked' ? (
+        <form
+          action={redeemVoucherAction}
+          className="flex flex-col gap-2 rounded-[18px] border border-green-400/40 bg-green-500/10 p-4"
+        >
+          <p className="text-[13px]">{t('seller.dash.voucherHint')}</p>
+          <button
+            type="submit"
+            data-testid="use-voucher"
+            className="h-12 rounded-full bg-white font-black text-black"
+          >
+            {t('seller.dash.voucher')}
+          </button>
+        </form>
       ) : null}
       {status !== 'locked' ? (
         <form

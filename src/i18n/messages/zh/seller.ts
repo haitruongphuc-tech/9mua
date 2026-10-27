@@ -279,4 +279,8 @@ export const seller: SellerMessages = {
   'seller.v.bank': '请选择银行',
   'seller.v.accountNumber': '账号为6–19位数字',
   'seller.v.accountName': '请输入与银行一致的户名',
+  'seller.dash.voucher': '🎁 使用代金券 – 免费 1 年',
+  'seller.dash.voucherHint': '你点赞了足够多的视频，获赠 1 年店铺费用。每个账号限用 1 次。',
+  'seller.dash.voucherUsed': '已使用代金券：店铺延长 1 年。',
+  'seller.dash.voucherFailed': '无法使用代金券（已使用或已被收回）。',
 };

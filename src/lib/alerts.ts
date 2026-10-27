@@ -19,6 +19,7 @@ export const ALERT_LABELS: Record<string, string> = {
   product_auto_hidden: 'Sản phẩm bị tự ẩn do nhiều báo cáo',
   video_auto_hidden: 'Video bị tự ẩn do nhiều báo cáo',
   ai_budget: 'AI Studio chạm ngân sách tháng',
+  kiot_fee_rate: 'Tỷ giá USD lệch nhiều, giá Kiot chưa đổi',
 };
 
 // Không bao giờ ném lỗi: cảnh báo hỏng không được làm hỏng luồng tiền đang chạy.

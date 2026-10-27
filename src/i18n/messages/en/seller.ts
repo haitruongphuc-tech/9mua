@@ -291,4 +291,9 @@ export const seller: SellerMessages = {
   'seller.v.bank': 'Choose a bank',
   'seller.v.accountNumber': 'The account number has 6–19 digits',
   'seller.v.accountName': 'Enter the account holder name exactly as at the bank',
+  'seller.dash.voucher': '🎁 Use voucher – 1 year free',
+  'seller.dash.voucherHint':
+    'You received 1 free year of Kiot fees for liking enough videos. One per account.',
+  'seller.dash.voucherUsed': 'Voucher used: your Kiot got 1 more year.',
+  'seller.dash.voucherFailed': 'The voucher could not be used (already used or revoked).',
 };

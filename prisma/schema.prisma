@@ -233,7 +233,7 @@ model KiotSubscription {
   id          String   @id @default(cuid(2))
   kiotId      String
   kiot        Kiot     @relation(fields: [kiotId], references: [id])
-  source      String // payos | admin_grant
+  source      String // payos | admin_grant | voucher
   intentId    String?  @unique // 1 thanh toán = đúng 1 kỳ, chống cộng trùng
   amount      Int
   periodStart DateTime
@@ -844,4 +844,20 @@ model AiSlideshow {
 
   @@index([userId, createdAt])
   @@index([status, createdAt])
+}
+
+// Giá Kiot 1 USD/năm quy ra VNĐ theo tỷ giá bán USD của Vietcombank (SPEC-billing.md bổ sung 27/10). Mỗi lần lấy tỷ
+// giá hoặc CEO đổi giá USD ghi 1 dòng (chỉ thêm): tỷ giá, giá cũ, giá mới, có áp dụng không.
+model KiotFeeRateLog {
+  id        String   @id @default(cuid(2))
+  source    String // vietcombank | admin
+  rate      Int // VNĐ cho 1 USD (giá bán)
+  usdCents  Int
+  oldFeeVnd Int
+  newFeeVnd Int
+  applied   Boolean
+  note      String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
 }

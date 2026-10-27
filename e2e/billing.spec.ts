@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { activateKiot } from './helpers/db';
+import { activateKiot, e2eDb } from './helpers/db';
 import { signUpWithKiot } from './helpers/seller';
 
 test('kích hoạt Kiot: bấm nút → trang QR → (PayOS giả) trả tiền → trang tự chuyển "Kiot đã hoạt động" → Kiot công khai', async ({
@@ -59,4 +59,20 @@ test('banner nhắc gia hạn khi Kiot còn dưới 14 ngày', async ({ page }) 
   await page.goto('/kiot-cua-toi');
   await expect(page.getByTestId('expiry-banner')).toContainText('Kiot sắp hết hạn');
   await expect(page.getByTestId('activate-kiot')).toContainText('Gia hạn thêm 1 năm');
+});
+
+test('voucher mở Kiot: bấm "Dùng voucher" → Kiot hoạt động 1 năm không phải trả tiền; dùng xong nút biến mất', async ({
+  page,
+}) => {
+  const { slug } = await signUpWithKiot(page, 'Kiot Voucher');
+  const kiot = await e2eDb.kiot.findUniqueOrThrow({ where: { slug } });
+  await e2eDb.kiotVoucher.create({ data: { userId: kiot.ownerId } });
+  await page.goto('/kiot-cua-toi');
+  await page.getByTestId('use-voucher').click();
+  await page.waitForURL((u) => u.searchParams.has('da-dung-voucher'));
+  await expect(page.getByRole('status')).toContainText('Đã dùng voucher');
+  await expect(page.getByTestId('kiot-status')).toContainText('Đang hoạt động');
+  await expect(page.getByTestId('use-voucher')).toHaveCount(0);
+  const sub = await e2eDb.kiotSubscription.findFirstOrThrow({ where: { kiotId: kiot.id } });
+  expect(sub).toMatchObject({ source: 'voucher', amount: 0 });
 });

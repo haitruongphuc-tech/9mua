@@ -286,4 +286,9 @@ export const seller: SellerMessages = {
   'seller.v.bank': '銀行を選んでください',
   'seller.v.accountNumber': '口座番号は6〜19桁です',
   'seller.v.accountName': '銀行の登録どおりに口座名義を入力してください',
+  'seller.dash.voucher': '🎁 クーポンを使う – 1年無料',
+  'seller.dash.voucherHint':
+    '十分な数の動画にいいねしたので、Kiot 利用料1年分をプレゼント。1アカウント1回限り。',
+  'seller.dash.voucherUsed': 'クーポンを使いました：Kiot が1年延長されました。',
+  'seller.dash.voucherFailed': 'クーポンを使えませんでした（使用済みまたは取り消し済み）。',
 };

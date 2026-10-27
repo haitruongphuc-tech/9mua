@@ -4,6 +4,8 @@ import { now } from '@/lib/clock';
 import { db, type Tx } from '@/lib/db';
 import { notifyKey } from '@/lib/notifications';
 import { getIntSetting, getSetting } from '@/lib/settings';
+import { grantVoucherYear } from '@/modules/billing';
+import { getKiotByOwner } from '@/modules/kiot';
 
 // Voucher mở Kiot khi đủ số video đã thả tim (SPEC-social.md mục 8). Mỗi tài khoản tối đa 1 voucher trong đời.
 const MIN_ACCOUNT_AGE_MS = 3 * 86_400_000;
@@ -67,6 +69,28 @@ export async function consumeVoucher(tx: Tx, userId: string, kiotId: string): Pr
   return count === 1;
 }
 
+class NoVoucher extends Error {}
+
+// Chủ Kiot bấm "Dùng voucher – miễn phí 1 năm": đánh dấu voucher đã dùng và ghi kỳ 1 năm (0đ) trong CÙNG một
+// transaction (SPEC-billing.md bổ sung 27/10). Bấm 2 lần cũng chỉ dùng được 1 lần; voucher bị thu hồi thì không dùng được.
+export async function redeemVoucher(
+  userId: string,
+): Promise<{ ok: true; periodEnd: Date } | { ok: false; error: 'NO_KIOT' | 'KIOT_LOCKED' | 'NO_VOUCHER' }> {
+  const kiot = await getKiotByOwner(userId);
+  if (!kiot) return { ok: false, error: 'NO_KIOT' };
+  if (kiot.lockedAt) return { ok: false, error: 'KIOT_LOCKED' };
+  try {
+    const period = await db.$transaction(async (tx) => {
+      if (!(await consumeVoucher(tx, userId, kiot.id))) throw new NoVoucher();
+      return grantVoucherYear(tx, kiot.id);
+    });
+    return { ok: true, periodEnd: period.end };
+  } catch (e) {
+    if (e instanceof NoVoucher) return { ok: false, error: 'NO_VOUCHER' };
+    throw e;
+  }
+}
+
 export async function revokeVoucher(
   voucherId: string,
   adminId: string,
@@ -81,6 +105,12 @@ export async function revokeVoucher(
   return { ok: count === 1 };
 }
 
+// Cho trang /admin/voucher: kèm tên và SĐT người nhận để CEO nhận ra tài khoản ảo.
 export async function listVouchers(take = 100) {
-  return db.kiotVoucher.findMany({ orderBy: { issuedAt: 'desc' }, take });
+  const rows = await db.kiotVoucher.findMany({ orderBy: { issuedAt: 'desc' }, take });
+  const users = await db.user.findMany({
+    where: { id: { in: rows.map((r) => r.userId) } },
+    select: { id: true, displayName: true, phone: true, email: true },
+  });
+  return rows.map((r) => ({ ...r, user: users.find((u) => u.id === r.userId) ?? null }));
 }

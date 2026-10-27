@@ -291,4 +291,9 @@ export const seller: SellerMessages = {
   'seller.v.bank': 'Elige un banco',
   'seller.v.accountNumber': 'El número de cuenta tiene de 6 a 19 dígitos',
   'seller.v.accountName': 'Escribe el titular igual que en el banco',
+  'seller.dash.voucher': '🎁 Usar el cupón – 1 año gratis',
+  'seller.dash.voucherHint':
+    'Recibiste 1 año gratis de cuota Kiot por dar me gusta a suficientes vídeos. Uno por cuenta.',
+  'seller.dash.voucherUsed': 'Cupón usado: tu Kiot suma 1 año más.',
+  'seller.dash.voucherFailed': 'No se pudo usar el cupón (ya usado o revocado).',
 };

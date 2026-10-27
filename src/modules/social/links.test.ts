@@ -3,10 +3,14 @@ import { hasLink } from './links';
 import { vnDay } from './day';
 
 describe('hasLink', () => {
-  it.each(['xem http://a.b', 'https://shopee.vn/x', 'vào www.abc.net nhé', 'abc.com', 'zalo.me/0909', 'bit.ly/xyz'])(
-    'chặn: %s',
-    (t) => expect(hasLink(t)).toBe(true),
-  );
+  it.each([
+    'xem http://a.b',
+    'https://shopee.vn/x',
+    'vào www.abc.net nhé',
+    'abc.com',
+    'zalo.me/0909',
+    'bit.ly/xyz',
+  ])('chặn: %s', (t) => expect(hasLink(t)).toBe(true));
   it.each(['Đẹp quá shop ơi', 'giá 1.500.000đ', 'size 3.5 ok', 'Mua 2 cái nha'])('cho qua: %s', (t) =>
     expect(hasLink(t)).toBe(false),
   );

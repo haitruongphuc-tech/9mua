@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { V4Page } from '@/components/V4Page';
 import { ClientMessages } from '@/i18n/ClientMessages';
 import { getT } from '@/i18n/server';
 import { getVideo, MAX_VIDEOS_PER_DAY, videosToday } from '@/modules/creator';
@@ -25,7 +24,7 @@ export default async function UploadVideoPage({
     params.duet ? getVideo(params.duet, {}) : Promise.resolve(null),
   ]);
   return (
-    <V4Page className="mx-auto flex w-full max-w-lg flex-col gap-4 px-4 py-6">
+    <div className="mx-auto flex w-full max-w-lg flex-col gap-4 px-4 py-6">
       <h1 className="font-display text-[22px] font-bold">{t('post.title')}</h1>
       <p className="text-[13px] text-white/60">{t('post.lead')}</p>
       <ClientMessages prefixes={['post.']}>
@@ -38,6 +37,6 @@ export default async function UploadVideoPage({
           duet={duet ? { id: duet.id, author: duet.author.displayName, posterUrl: duet.posterUrl } : null}
         />
       </ClientMessages>
-    </V4Page>
+    </div>
   );
 }

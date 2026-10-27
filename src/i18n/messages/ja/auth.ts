@@ -48,4 +48,11 @@ export const auth: AuthMessages = {
   'auth.reset.mismatch': '2つのパスワードが一致しません。',
   'auth.reset.expired': 'リンクの有効期限が切れたか、既に使用されています。新しいリンクを請求してください。',
   'auth.reset.resend': 'リンクを再送する',
+  'auth.mail.subject': '9MUAのパスワード再設定',
+  'auth.mail.title': 'パスワードの再設定',
+  'auth.mail.greeting': '{name}様',
+  'auth.mail.paragraph': '9MUAアカウントのパスワード再設定のリクエストを受け付けました。',
+  'auth.mail.action': '新しいパスワードを設定',
+  'auth.mail.footnote':
+    'リンクの有効期限は30分で、1回だけ使えます。心当たりがない場合はこのメールを無視してください。',
 };

@@ -75,7 +75,8 @@ describe('kiểm duyệt video', () => {
       moderationNote: '9MUA gỡ: Quảng cáo sai sự thật',
     });
     expect(await db.notification.findFirstOrThrow({ where: { userId: author.id } })).toMatchObject({
-      title: 'Video của bạn bị gỡ',
+      title: '@notify.videoRemoved',
+      body: JSON.stringify({ detail: 'Quảng cáo sai sự thật' }),
     });
   });
 

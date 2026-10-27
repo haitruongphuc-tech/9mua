@@ -2,11 +2,11 @@
 
 import { useFormStatus } from 'react-dom';
 
-// tone 'light': nút cũ (chữ đen trên cam); 'v4': nút V4 cam đặc chữ trắng rất đậm (docs/BRAND.md).
+// tone 'v4' (mặc định): nút V4 cam đặc chữ trắng rất đậm (docs/BRAND.md); 'light': nút cũ chữ đen trên cam.
 export function SubmitButton({
   children,
   pendingText,
-  tone = 'light',
+  tone = 'v4',
 }: {
   children: React.ReactNode;
   pendingText: string;

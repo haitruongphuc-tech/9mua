@@ -18,7 +18,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { logoutAction } from '@/app/(auth)/actions';
-import { V4Page } from '@/components/V4Page';
 import { getT } from '@/i18n/server';
 import { requireUser } from '@/modules/identity';
 import { loadMePage } from '@/server/me-page';
@@ -72,7 +71,7 @@ export default async function MePage() {
   ];
 
   return (
-    <V4Page>
+    <div>
       <div className="mx-auto max-w-[760px] px-4 py-6">
         <div className="text-center">
           <span className="mx-auto grid h-24 w-24 place-items-center rounded-full bg-gradient-to-br from-brand to-red-500 text-[36px] font-black">
@@ -232,6 +231,6 @@ export default async function MePage() {
           </button>
         </form>
       </div>
-    </V4Page>
+    </div>
   );
 }

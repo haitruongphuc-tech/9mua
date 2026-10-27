@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { V4Page } from '@/components/V4Page';
 import { VideoGrid } from '@/components/video/VideoGrid';
 import { getT } from '@/i18n/server';
 import { readAnonId } from '@/lib/anon-id';
@@ -21,7 +20,7 @@ export default async function HashtagPage({ params }: Props) {
   const [user, t] = await Promise.all([getCurrentUser(), getT()]);
   const videos = await hashtagVideos(tag, { userId: user?.id, anonId: await readAnonId() });
   return (
-    <V4Page>
+    <div>
       <div className="w-full bg-gradient-to-r from-brand to-orange-400 px-4 py-5 text-center">
         <h1 className="font-display text-[22px] font-bold md:text-[28px]">#{tag}</h1>
         <p className="text-[12px] font-bold text-white/90">
@@ -45,6 +44,6 @@ export default async function HashtagPage({ params }: Props) {
           />
         )}
       </div>
-    </V4Page>
+    </div>
   );
 }

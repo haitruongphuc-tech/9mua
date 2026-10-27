@@ -30,6 +30,22 @@ export const post = {
   'post.err.PRODUCT_INVALID': 'Có sản phẩm không còn bán. Hãy bỏ chọn rồi thử lại (tối đa 3 sản phẩm).',
   'post.err.CAPTION_TOO_LONG': 'Chú thích tối đa 300 ký tự.',
   'post.err.DUET_INVALID': 'Video gốc để Duet không còn trên 9MUA.',
+  'post.mine.title': 'Video của tôi',
+  'post.mine.new': '+ Đăng video',
+  'post.mine.uploaded':
+    'Đã tải lên. Video đang được xử lý, thường xong trong 1 phút — bạn sẽ nhận thông báo.',
+  'post.mine.empty': 'Bạn chưa đăng video nào.',
+  'post.mine.status.processing': 'Đang xử lý…',
+  'post.mine.status.ready': 'Đã đăng',
+  'post.mine.status.failed': 'Không đăng được',
+  'post.mine.status.hidden': 'Tạm ẩn (chờ 9MUA xem)',
+  'post.mine.status.removed': 'Bị gỡ',
+  'post.mine.status.expired': 'Story đã hết 24 giờ',
+  'post.mine.expires': '· hết hạn {date}',
+  'post.mine.noCaption': '(không có chú thích)',
+  'post.mine.stats': '{date} · {views} lượt xem · {likes} thích · {orders} đơn từ video',
+  'post.mine.view': 'Xem video →',
+  'post.mine.delete': 'Xoá',
 } as const;
 
 export type PostMessages = Record<keyof typeof post, string>;

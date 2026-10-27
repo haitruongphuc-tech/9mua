@@ -11,7 +11,7 @@ import { SLOGAN_KEYS, SLOGAN_PAGES } from './keys';
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Slogan & pháp lý' };
 
-const field = 'h-11 w-full rounded-xl border-2 border-black/15 px-3 text-base';
+const field = 'h-11 w-full rounded-[14px] border border-white/15 bg-white/10 text-white px-3 text-base';
 const LEGAL_LABELS = {
   company: 'Tên công ty',
   taxId: 'Mã số thuế',
@@ -36,10 +36,10 @@ export default async function ContentPage({ searchParams }: { searchParams: Flas
       <h1 className="text-xl font-extrabold">Slogan & thông tin pháp lý</h1>
       <Flash ok={params.xong} error={params.loi} />
       <form action={saveContentAction} className="flex flex-col gap-5">
-        <div className="flex flex-col gap-4 rounded-2xl border-2 border-black/10 p-4">
+        <div className="flex flex-col gap-4 rounded-[18px] border border-white/10 bg-white/5 p-4">
           <h2 className="text-lg font-extrabold">Slogan (để trống thì dùng câu mặc định đang hiện mờ)</h2>
           {SLOGAN_KEYS.map((key) => (
-            <details key={key} className="rounded-xl bg-surface-muted p-3" open={key === 'home'}>
+            <details key={key} className="rounded-xl bg-white/5 p-3" open={key === 'home'}>
               <summary className="cursor-pointer font-bold">{SLOGAN_PAGES[key]}</summary>
               <div className="mt-3 grid gap-2">
                 {LANGS.map((l) => (
@@ -61,7 +61,7 @@ export default async function ContentPage({ searchParams }: { searchParams: Flas
             </details>
           ))}
         </div>
-        <div className="flex flex-col gap-3 rounded-2xl border-2 border-black/10 p-4">
+        <div className="flex flex-col gap-3 rounded-[18px] border border-white/10 bg-white/5 p-4">
           <h2 className="text-lg font-extrabold">Thông tin pháp lý (chân trang, trang Giới thiệu)</h2>
           {LEGAL_FIELDS.map((f) => (
             <label key={f} className="flex flex-col gap-1 text-sm font-bold">

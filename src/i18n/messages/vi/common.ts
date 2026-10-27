@@ -31,6 +31,9 @@ export const common = {
   'common.popup.perk2': 'Free: {limit} tim/follow mỗi ngày • Đủ {threshold} tim tặng voucher mở Kiot',
   'common.popup.later': 'Để sau, xem trước đã',
   'common.popup.login': 'Đã có tài khoản? Đăng nhập',
+  'common.nf.title': 'Không tìm thấy trang',
+  'common.nf.text': 'Trang này không tồn tại hoặc đã được chuyển đi.',
+  'common.nf.home': 'Về trang chủ',
 } as const;
 
 export type CommonMessages = Record<keyof typeof common, string>;

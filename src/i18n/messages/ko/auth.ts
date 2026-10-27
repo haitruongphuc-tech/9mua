@@ -48,4 +48,11 @@ export const auth: AuthMessages = {
   'auth.reset.mismatch': '두 비밀번호가 일치하지 않습니다.',
   'auth.reset.expired': '링크가 만료되었거나 이미 사용되었습니다. 새 링크를 요청해 주세요.',
   'auth.reset.resend': '링크 다시 보내기',
+  'auth.mail.subject': '9MUA 비밀번호 재설정',
+  'auth.mail.title': '비밀번호 재설정',
+  'auth.mail.greeting': '{name}님, 안녕하세요.',
+  'auth.mail.paragraph': '9MUA 계정 비밀번호 재설정 요청을 받았어요.',
+  'auth.mail.action': '새 비밀번호 설정',
+  'auth.mail.footnote':
+    '링크는 30분 동안 유효하며 한 번만 쓸 수 있어요. 요청하지 않았다면 이 메일을 무시하세요.',
 };

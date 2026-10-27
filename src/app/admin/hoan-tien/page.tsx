@@ -20,7 +20,7 @@ export default async function RefundQueuePage({ searchParams }: { searchParams: 
       <h1 className="text-xl font-extrabold">Đơn chờ hoàn tiền</h1>
       <Flash ok={params.xong} error={params.loi} />
       {orders.length === 0 ? (
-        <p className="rounded-2xl bg-surface-muted p-6 text-center text-black/70">Không có đơn nào.</p>
+        <p className="rounded-2xl bg-white/5 p-6 text-center text-white/70">Không có đơn nào.</p>
       ) : null}
       <ul className="flex flex-col gap-3">
         {orders.map((o) => {
@@ -28,16 +28,16 @@ export default async function RefundQueuePage({ searchParams }: { searchParams: 
           return (
             <li
               key={o.id}
-              className="flex flex-col gap-2 rounded-2xl border-2 border-black/10 p-4"
+              className="flex flex-col gap-2 rounded-[18px] border border-white/10 bg-white/5 p-4"
               data-testid="refund-row"
             >
               <div className="flex justify-between gap-2">
                 <span className="font-extrabold">
                   {o.code} · {o.kiot.name}
                 </span>
-                <span className="text-lg font-extrabold text-brand-deep">{formatVnd(o.total)}</span>
+                <span className="text-lg font-extrabold text-brand">{formatVnd(o.total)}</span>
               </div>
-              <p className="text-sm text-black/70">Chờ hoàn từ {formatDateTimeVN(o.updatedAt)}</p>
+              <p className="text-sm text-white/70">Chờ hoàn từ {formatDateTimeVN(o.updatedAt)}</p>
               {acc ? (
                 <>
                   <p className="text-sm">
@@ -52,14 +52,16 @@ export default async function RefundQueuePage({ searchParams }: { searchParams: 
                   />
                 </>
               ) : (
-                <p className="text-sm font-bold text-danger">Người mua chưa nhập tài khoản nhận hoàn tiền.</p>
+                <p className="text-sm font-bold text-red-400">
+                  Người mua chưa nhập tài khoản nhận hoàn tiền.
+                </p>
               )}
               <form action={markRefundedAction.bind(null, o.id)} className="flex gap-2">
                 <input
                   name="refundRef"
                   required
                   placeholder="Mã giao dịch ngân hàng"
-                  className="h-11 min-w-0 flex-1 rounded-xl border-2 border-black/15 px-3"
+                  className="h-11 min-w-0 flex-1 rounded-[14px] border border-white/15 bg-white/10 text-white px-3"
                 />
                 <ConfirmSubmit confirm={`Xác nhận đã hoàn ${formatVnd(o.total)} cho đơn ${o.code}?`}>
                   Đã hoàn

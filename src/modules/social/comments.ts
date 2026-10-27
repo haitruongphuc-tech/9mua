@@ -50,7 +50,8 @@ export async function addComment(
     db.comment.findFirst({ where: { userId }, orderBy: { createdAt: 'desc' }, select: { createdAt: true } }),
     db.comment.count({ where: { userId, createdAt: { gte: new Date(t.getTime() - 86_400_000) } } }),
   ]);
-  if (last && t.getTime() - last.createdAt.getTime() < COMMENT_GAP_MS) return { ok: false, error: 'RATE_LIMIT' };
+  if (last && t.getTime() - last.createdAt.getTime() < COMMENT_GAP_MS)
+    return { ok: false, error: 'RATE_LIMIT' };
   if (today >= COMMENTS_PER_DAY) return { ok: false, error: 'DAILY_LIMIT' };
 
   const c = await db.comment.create({ data: { videoId, userId, parentId: rootId, text, createdAt: t } });
@@ -116,7 +117,10 @@ export async function pinComment(commentId: string, ownerId: string): Promise<{ 
   const c = await ownerComment(commentId, ownerId);
   if (!c || c.parentId || c.hiddenAt) return { ok: false };
   await db.$transaction([
-    db.comment.updateMany({ where: { videoId: c.videoId, pinnedAt: { not: null } }, data: { pinnedAt: null } }),
+    db.comment.updateMany({
+      where: { videoId: c.videoId, pinnedAt: { not: null } },
+      data: { pinnedAt: null },
+    }),
     ...(c.pinnedAt ? [] : [db.comment.update({ where: { id: c.id }, data: { pinnedAt: now() } })]),
   ]);
   return { ok: true };
@@ -125,18 +129,28 @@ export async function pinComment(commentId: string, ownerId: string): Promise<{ 
 export async function hideComment(commentId: string, ownerId: string): Promise<{ ok: boolean }> {
   const c = await ownerComment(commentId, ownerId);
   if (!c) return { ok: false };
-  await db.comment.update({ where: { id: c.id }, data: { hiddenAt: now(), hiddenById: ownerId, pinnedAt: null } });
+  await db.comment.update({
+    where: { id: c.id },
+    data: { hiddenAt: now(), hiddenById: ownerId, pinnedAt: null },
+  });
   return { ok: true };
 }
 
-export async function reportComment(userId: string, commentId: string, reason: string): Promise<{ ok: boolean }> {
+export async function reportComment(
+  userId: string,
+  commentId: string,
+  reason: string,
+): Promise<{ ok: boolean }> {
   const c = await db.comment.findUnique({ where: { id: commentId } });
   if (!c || c.userId === userId) return { ok: false };
   const added = await db.$executeRaw`
     INSERT INTO "CommentReport" ("commentId", "userId", reason, "createdAt")
     VALUES (${commentId}, ${userId}, ${reason.slice(0, 50)}, ${now()}) ON CONFLICT DO NOTHING`;
   if (added) {
-    const updated = await db.comment.update({ where: { id: commentId }, data: { reportCount: { increment: 1 } } });
+    const updated = await db.comment.update({
+      where: { id: commentId },
+      data: { reportCount: { increment: 1 } },
+    });
     if (updated.reportCount >= COMMENT_AUTO_HIDE_REPORTERS && !updated.hiddenAt)
       await db.comment.update({ where: { id: commentId }, data: { hiddenAt: now(), pinnedAt: null } });
   }

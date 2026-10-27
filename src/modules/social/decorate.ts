@@ -11,7 +11,9 @@ export async function decorateFeed(items: FeedVideo[], viewerId?: string): Promi
   const [counts, saved, following] = await Promise.all([
     commentCounts(ids),
     viewerId ? savedSet(viewerId, ids) : Promise.resolve(new Set<string>()),
-    viewerId ? followingIds(viewerId, [...new Set(items.map((v) => v.author.id))]) : Promise.resolve(new Set<string>()),
+    viewerId
+      ? followingIds(viewerId, [...new Set(items.map((v) => v.author.id))])
+      : Promise.resolve(new Set<string>()),
   ]);
   return items.map((v) => ({
     ...v,

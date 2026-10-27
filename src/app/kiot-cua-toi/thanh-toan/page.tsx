@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
+import { getT } from '@/i18n/server';
 import { db } from '@/lib/db';
 import { formatDateVN, formatVnd } from '@/lib/format';
 import { getKiotBilling } from '@/modules/billing';
@@ -26,25 +27,31 @@ export default async function KiotPaymentsPage({
     if (latest) redirect(`/kiot-cua-toi/thanh-toan/${latest.id}`);
   }
 
-  const { history } = await getKiotBilling(kiot.id);
+  const [{ history }, t] = await Promise.all([getKiotBilling(kiot.id), getT()]);
   return (
     <section className="flex flex-col gap-4 px-4 py-6">
-      <h1 className="text-xl font-extrabold">Lịch sử thanh toán phí thuê</h1>
+      <h1 className="font-display text-xl font-black">{t('seller.bill.title')}</h1>
       {history.length === 0 ? (
-        <p className="rounded-2xl bg-surface-muted p-6 text-center text-black/70">Chưa có thanh toán nào.</p>
+        <p className="rounded-[18px] border border-white/10 bg-white/5 p-6 text-center text-white/60">
+          {t('seller.bill.empty')}
+        </p>
       ) : (
-        <ul className="flex flex-col divide-y divide-black/10" data-testid="billing-history">
+        <ul className="flex flex-col divide-y divide-white/10" data-testid="billing-history">
           {history.map((h) => (
             <li key={h.id} className="flex items-center justify-between gap-3 py-3">
               <span>
                 <span className="block font-bold">
                   {formatDateVN(h.periodStart)} – {formatDateVN(h.periodEnd)}
                 </span>
-                <span className="text-sm text-black/60">
-                  {h.source === 'payos' ? 'Thanh toán PayOS' : `9MUA tặng${h.note ? `: ${h.note}` : ''}`}
+                <span className="text-[13px] text-white/60">
+                  {h.source === 'payos'
+                    ? t('seller.bill.payos')
+                    : h.note
+                      ? t('seller.bill.giftNote', { note: h.note })
+                      : t('seller.bill.gift')}
                 </span>
               </span>
-              <span className="font-extrabold">{h.amount ? formatVnd(h.amount) : 'Miễn phí'}</span>
+              <span className="font-black">{h.amount ? formatVnd(h.amount) : t('seller.bill.free')}</span>
             </li>
           ))}
         </ul>

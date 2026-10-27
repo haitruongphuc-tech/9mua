@@ -3,6 +3,7 @@
 import { useActionState, useEffect } from 'react';
 import { ME_CHANGED_EVENT } from '@/components/MeProvider';
 import { SubmitButton } from '@/components/ui/SubmitButton';
+import { useT } from '@/i18n/client';
 import { addToCartAction, type AddToCartState } from './add-to-cart-action';
 
 export function AddToCart({
@@ -16,6 +17,7 @@ export function AddToCart({
   maxQty: number;
   cartUrl: string;
 }) {
+  const t = useT();
   const [state, action] = useActionState<AddToCartState, FormData>(
     addToCartAction.bind(null, productId, sourceVideoId ?? null),
     {},
@@ -23,12 +25,13 @@ export function AddToCart({
   useEffect(() => {
     if (state.ok) window.dispatchEvent(new Event(ME_CHANGED_EVENT));
   }, [state]);
-  if (maxQty <= 0) return <p className="rounded-xl bg-black/5 px-4 py-3 font-bold">Hết hàng</p>;
+  if (maxQty <= 0)
+    return <p className="rounded-[14px] bg-white/10 px-4 py-3 font-bold">{t('shop.add.soldOut')}</p>;
   return (
     <form action={action} className="flex flex-col gap-2">
       <div className="flex gap-2">
         <label className="sr-only" htmlFor={`qty-${productId}`}>
-          Số lượng
+          {t('shop.cart.qty')}
         </label>
         <input
           id={`qty-${productId}`}
@@ -38,22 +41,22 @@ export function AddToCart({
           max={maxQty}
           defaultValue={1}
           inputMode="numeric"
-          className="h-12 w-20 rounded-xl border-2 border-black/15 text-center text-base font-bold"
+          className="h-12 w-20 rounded-full border border-white/15 bg-white/10 text-center text-base font-bold text-white outline-none focus:border-brand"
         />
         <div className="flex-1 [&>button]:w-full">
-          <SubmitButton pendingText="Đang thêm…">🛒 Thêm vào giỏ</SubmitButton>
+          <SubmitButton pendingText={t('shop.add.adding')}>{t('shop.add.button')}</SubmitButton>
         </div>
       </div>
       {state.message ? (
         <p
           role="status"
           data-testid="cart-message"
-          className={`text-sm font-bold ${state.ok ? 'text-success' : 'text-danger'}`}
+          className={`text-[13px] font-bold ${state.ok ? 'text-green-400' : 'text-red-400'}`}
         >
           {state.message}{' '}
           {state.ok ? (
             <a href={cartUrl} className="underline">
-              Xem giỏ hàng
+              {t('shop.add.viewCart')}
             </a>
           ) : null}
         </p>

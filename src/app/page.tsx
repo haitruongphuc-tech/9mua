@@ -21,9 +21,11 @@ export default async function HomePage() {
   const feed = await loadFeed({ userId: user?.id, anonId: await readAnonId() });
   if (feed.items.length === 0)
     return (
-      <div className="mx-auto max-w-6xl px-4 py-6">
-        <MarketShowcase variant="home" />
-      </div>
+      <ClientMessages prefixes={['market.']}>
+        <div className="mx-auto max-w-6xl px-4 py-6">
+          <MarketShowcase variant="home" />
+        </div>
+      </ClientMessages>
     );
   return (
     <>

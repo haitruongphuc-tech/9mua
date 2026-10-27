@@ -32,4 +32,7 @@ export const common: CommonMessages = {
   'common.popup.perk2': 'Free: {limit} likes/follows a day • Reach {threshold} likes for a free Kiot voucher',
   'common.popup.later': 'Later, let me look around first',
   'common.popup.login': 'Already have an account? Sign in',
+  'common.nf.title': 'Page not found',
+  'common.nf.text': 'This page does not exist or has moved.',
+  'common.nf.home': 'Back to home',
 };

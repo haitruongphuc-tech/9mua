@@ -57,11 +57,4 @@ export async function processImage(
     return { ok: false, error: 'NOT_AN_IMAGE' };
   }
 }
-
-export const IMAGE_ERROR_MESSAGES: Record<ImageError, string> = {
-  TOO_LARGE: 'Ảnh quá 10MB.',
-  NOT_AN_IMAGE: 'File không phải ảnh JPG, PNG hoặc WebP.',
-  HEIC_UNSUPPORTED:
-    'Ảnh HEIC chưa được hỗ trợ. Hãy chọn ảnh từ thư viện bằng nút "Chọn ảnh" (iPhone tự đổi sang JPG).',
-  TOO_MANY_PIXELS: 'Ảnh có độ phân giải quá lớn.',
-};
+// Câu báo lỗi theo từng ngôn ngữ: khoá "seller.img.<mã lỗi>" (src/i18n/module-messages.ts).

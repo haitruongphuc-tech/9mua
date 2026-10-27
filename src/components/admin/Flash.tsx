@@ -5,7 +5,7 @@ export function Flash({ ok, error }: { ok?: string; error?: string }) {
       <p
         role="status"
         data-testid="flash-ok"
-        className="rounded-xl bg-success/10 px-4 py-3 text-sm font-bold text-success"
+        className="rounded-xl bg-success/20 px-4 py-3 text-sm font-bold text-green-400"
       >
         {ok}
       </p>
@@ -15,7 +15,7 @@ export function Flash({ ok, error }: { ok?: string; error?: string }) {
       <p
         role="alert"
         data-testid="flash-error"
-        className="rounded-xl bg-danger/10 px-4 py-3 text-sm font-bold text-danger"
+        className="rounded-xl bg-danger/20 px-4 py-3 text-sm font-bold text-red-400"
       >
         {error}
       </p>

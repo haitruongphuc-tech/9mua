@@ -8,7 +8,10 @@ import { consumeDailyAction } from './limits';
 export async function toggleFollow(
   followerId: string,
   followeeId: string,
-): Promise<{ ok: true; following: boolean; followers: number } | { ok: false; error: 'SELF' | 'FREE_LIMIT' | 'NOT_FOUND' }> {
+): Promise<
+  | { ok: true; following: boolean; followers: number }
+  | { ok: false; error: 'SELF' | 'FREE_LIMIT' | 'NOT_FOUND' }
+> {
   if (followerId === followeeId) return { ok: false, error: 'SELF' };
   const target = await db.user.findUnique({ where: { id: followeeId }, select: { lockedAt: true } });
   if (!target || target.lockedAt) return { ok: false, error: 'NOT_FOUND' };
@@ -29,7 +32,11 @@ export async function followStats(userId: string, viewerId?: string) {
   const [followers, following, me] = await Promise.all([
     db.follow.count({ where: { followeeId: userId } }),
     db.follow.count({ where: { followerId: userId } }),
-    viewerId ? db.follow.findUnique({ where: { followerId_followeeId: { followerId: viewerId, followeeId: userId } } }) : null,
+    viewerId
+      ? db.follow.findUnique({
+          where: { followerId_followeeId: { followerId: viewerId, followeeId: userId } },
+        })
+      : null,
   ]);
   return { followers, following, isFollowing: Boolean(me) };
 }

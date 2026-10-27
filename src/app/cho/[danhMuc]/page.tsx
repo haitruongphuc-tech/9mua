@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { MarketFeed } from '@/components/market/MarketFeed';
 import { MarketFilters } from '@/components/market/MarketFilters';
+import { ClientMessages } from '@/i18n/ClientMessages';
+import { getT } from '@/i18n/server';
 import { cached } from '@/lib/ttl-cache';
 import { CATEGORIES } from '@/modules/kiot';
 import { searchProducts, toSearchString, type SearchParams } from '@/modules/marketplace';
@@ -28,14 +30,16 @@ export default async function CategoryPage({ params }: Props) {
   const c = find((await params).danhMuc);
   if (!c) notFound();
   const search: SearchParams = { category: c.slug, sort: 'moi-nhat' };
-  const page = await cached(`cho:${c.slug}`, 60, () => searchProducts(search));
+  const [page, t] = await Promise.all([cached(`cho:${c.slug}`, 60, () => searchProducts(search)), getT()]);
   return (
-    <section className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-5">
-      <h1 className="text-2xl font-extrabold">
-        <span aria-hidden>{c.icon}</span> {c.name}
-      </h1>
-      <MarketFilters params={search} />
-      <MarketFeed initial={page.items} nextCursor={page.nextCursor} query={toSearchString(search)} />
-    </section>
+    <ClientMessages prefixes={['market.']}>
+      <section className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-5">
+        <h1 className="font-display text-[22px] font-black">
+          <span aria-hidden>{c.icon}</span> {t(`market.cat.${c.slug}`)}
+        </h1>
+        <MarketFilters params={search} />
+        <MarketFeed initial={page.items} nextCursor={page.nextCursor} query={toSearchString(search)} />
+      </section>
+    </ClientMessages>
   );
 }

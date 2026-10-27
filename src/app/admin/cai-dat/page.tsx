@@ -7,7 +7,7 @@ import { forgetDevicesAction, saveSettingsAction, toggleAutoPayoutAction } from 
 
 export const dynamic = 'force-dynamic';
 
-const field = 'h-11 rounded-xl border-2 border-black/15 px-3 text-base';
+const field = 'h-11 rounded-[14px] border border-white/15 bg-white/10 text-white px-3 text-base';
 
 export default async function SettingsPage({ searchParams }: { searchParams: FlashParams }) {
   const admin = await requireAdminVerified();
@@ -26,7 +26,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Fla
         defaultValue={Number(value).toLocaleString('vi-VN')}
         className={field}
       />
-      {hint ? <span className="text-xs font-normal text-black/60">{hint}</span> : null}
+      {hint ? <span className="text-xs font-normal text-white/60">{hint}</span> : null}
     </label>
   );
   return (
@@ -39,9 +39,11 @@ export default async function SettingsPage({ searchParams }: { searchParams: Fla
       >
         <p className="text-lg font-extrabold">
           Chi tự động:{' '}
-          <span className={autoOn ? 'text-success' : 'text-danger'}>{autoOn ? 'ĐANG BẬT' : 'ĐANG TẮT'}</span>
+          <span className={autoOn ? 'text-green-400' : 'text-red-400'}>
+            {autoOn ? 'ĐANG BẬT' : 'ĐANG TẮT'}
+          </span>
         </p>
-        <p className="text-sm text-black/70">
+        <p className="text-sm text-white/70">
           Tắt khi có sự cố: mọi yêu cầu rút mới sẽ vào hàng chờ duyệt tay.
         </p>
         <form action={toggleAutoPayoutAction.bind(null, !autoOn)}>
@@ -56,7 +58,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Fla
       </div>
       <form
         action={saveSettingsAction}
-        className="flex flex-col gap-4 rounded-2xl border-2 border-black/10 p-4"
+        className="flex flex-col gap-4 rounded-[18px] border border-white/10 bg-white/5 p-4"
       >
         {num('Phí thuê Kiot (đ/năm)', 'kiot_fee_vnd', s.kiot_fee_vnd, 'Từ 2.000đ.')}
         <label className="flex flex-col gap-1 text-sm font-bold">
@@ -68,7 +70,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Fla
             className={field}
             data-testid="platform-fee"
           />
-          <span className="text-xs font-normal text-black/60">
+          <span className="text-xs font-normal text-white/60">
             Từ 0% đến 30%. Đơn đã đặt giữ tỉ lệ lúc đặt.
           </span>
         </label>
@@ -102,18 +104,18 @@ export default async function SettingsPage({ searchParams }: { searchParams: Fla
         <ConfirmSubmit confirm="Lưu các thay đổi cài đặt?">Lưu cài đặt</ConfirmSubmit>
       </form>
       <section
-        className="flex flex-col gap-3 rounded-2xl border-2 border-black/10 p-4"
+        className="flex flex-col gap-3 rounded-[18px] border border-white/10 bg-white/5 p-4"
         data-testid="trusted-devices"
       >
         <h2 className="text-lg font-extrabold">Thiết bị đã nhớ (không phải nhập mã 2 lớp trong 30 ngày)</h2>
         {devices.length === 0 ? (
-          <p className="text-sm text-black/60">Chưa nhớ thiết bị nào.</p>
+          <p className="text-sm text-white/60">Chưa nhớ thiết bị nào.</p>
         ) : (
           <ul className="flex flex-col gap-2 text-sm">
             {devices.map((d) => (
-              <li key={d.id} className="rounded-xl bg-surface-muted px-3 py-2">
+              <li key={d.id} className="rounded-xl bg-white/5 px-3 py-2">
                 <p className="font-bold">{d.userAgent || 'Trình duyệt không rõ'}</p>
-                <p className="text-black/60">
+                <p className="text-white/60">
                   Nhớ lúc {formatDateTimeVN(d.createdAt)} · dùng lần cuối{' '}
                   {d.lastUsedAt ? formatDateTimeVN(d.lastUsedAt) : '—'} · hết hạn{' '}
                   {formatDateTimeVN(d.expiresAt)}

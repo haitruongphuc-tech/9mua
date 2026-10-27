@@ -4,7 +4,6 @@ import { notFound } from 'next/navigation';
 import { cache } from 'react';
 import { ProfileActions } from '@/components/profile/ProfileActions';
 import { SocialLinks } from '@/components/profile/SocialLinks';
-import { V4Page } from '@/components/V4Page';
 import { VideoGrid } from '@/components/video/VideoGrid';
 import { ClientMessages } from '@/i18n/ClientMessages';
 import { getT } from '@/i18n/server';
@@ -36,7 +35,7 @@ export default async function CreatorPage({ params }: { params: Promise<{ userId
   const url = `${env().APP_URL}/creator/${p.id}`;
   return (
     <ClientMessages prefixes={['profile.', 'feed.share.']}>
-      <V4Page>
+      <div>
         <section className="mx-auto max-w-[900px] px-4 py-6">
           <header className="flex items-center gap-4">
             <span className="grid h-20 w-20 shrink-0 place-items-center rounded-full border-4 border-ink bg-gradient-to-br from-brand to-[#c2410c] text-[30px] font-black shadow-[0_0_0_2px_rgb(255_107_0/0.5)]">
@@ -89,7 +88,7 @@ export default async function CreatorPage({ params }: { params: Promise<{ userId
             )}
           </div>
         </section>
-      </V4Page>
+      </div>
     </ClientMessages>
   );
 }

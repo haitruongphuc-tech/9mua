@@ -5,4 +5,10 @@ export const notify: NotifyMessages = {
   'notify.newComment': '{name} commented: {text}',
   'notify.newReply': '{name} replied to you: {text}',
   'notify.voucherIssued': 'You got a voucher for a free 1-year Kiot!',
+  'notify.videoReady': 'Your video is published',
+  'notify.videoFailed': 'Your video could not be published',
+  'notify.videoRemoved': 'Your video was removed',
+  'notify.reason': 'Reason: {reason}',
+  'notify.title': 'Notifications',
+  'notify.empty': 'No notifications yet.',
 };

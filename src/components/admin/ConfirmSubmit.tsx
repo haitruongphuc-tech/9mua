@@ -19,8 +19,8 @@ export function ConfirmSubmit({
     tone === 'danger'
       ? 'border-danger bg-danger text-white'
       : tone === 'plain'
-        ? 'border-brand-ink bg-white text-brand-ink'
-        : 'border-brand-ink bg-brand text-brand-ink';
+        ? 'border-white/25 bg-white/10 text-white'
+        : 'border-white/25 bg-brand text-white';
   return (
     <button
       type="submit"
@@ -29,7 +29,7 @@ export function ConfirmSubmit({
       onClick={(e) => {
         if (!window.confirm(confirm)) e.preventDefault();
       }}
-      className={`h-11 rounded-full border-2 px-4 text-sm font-extrabold disabled:opacity-60 ${color}`}
+      className={`h-11 rounded-full border px-4 text-sm font-extrabold disabled:opacity-60 ${color}`}
     >
       {pending ? 'Đang xử lý…' : children}
     </button>

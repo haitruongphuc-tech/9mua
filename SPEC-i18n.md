@@ -35,6 +35,15 @@ Người nước ngoài và Việt kiều dùng được 9mua.com bằng tiếng
   cho từng ngôn ngữ (việc lớn hơn, hỏi trước).
 - Claude dịch. Tiếng Trung, Nhật, Hàn nên có người bản xứ đọc lại trước khi quảng cáo ra nước ngoài.
 
+### Ghi chú khi làm (T66, 27/10/2026)
+
+- Email do người dùng bấm gửi (quên mật khẩu) đi theo ngôn ngữ đang chọn. Email máy tự gửi về sau (đơn hàng, rút tiền,
+  nhắc gia hạn, biên nhận) vẫn là **tiếng Việt**: theo mục 3, ngôn ngữ chỉ nằm trong cookie, không lưu vào tài khoản,
+  nên lúc gửi máy không biết người nhận dùng tiếng gì. Muốn các email này đúng ngôn ngữ thì phải thêm cột ngôn ngữ vào
+  bảng tài khoản (hỏi CEO trước).
+- Lỗi kiểm tra dữ liệu của module (vd. "Tên Kiot cần ít nhất 2 ký tự") được dịch ở lớp giao diện
+  (`src/i18n/module-messages.ts`), không đổi hợp đồng `index.ts`. Tên tỉnh/thành và tên ngân hàng giữ tiếng Việt.
+
 ## Testing Strategy
 
 - **Unit:** 7 từ điển có đủ khoá như tiếng Việt; chọn ngôn ngữ từ trình duyệt (`ja-JP` → `ja`, `de-DE` → `vi`);

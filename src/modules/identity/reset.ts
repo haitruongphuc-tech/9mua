@@ -13,8 +13,30 @@ const MAX_REQUESTS_PER_HOUR = 3;
 
 const hashToken = (token: string) => createHash('sha256').update(token).digest('hex');
 
+// Chữ của email đặt lại mật khẩu; lớp giao diện truyền bản đã dịch theo ngôn ngữ người yêu cầu (SPEC-i18n.md).
+export type ResetEmailCopy = {
+  subject: string;
+  title: string;
+  greeting: string; // có {name}
+  paragraph: string;
+  action: string;
+  footnote: string;
+};
+
+const VI_COPY: ResetEmailCopy = {
+  subject: 'Đặt lại mật khẩu 9MUA',
+  title: 'Đặt lại mật khẩu',
+  greeting: 'Chào {name},',
+  paragraph: 'Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản 9MUA của bạn.',
+  action: 'Đặt mật khẩu mới',
+  footnote: 'Link có hiệu lực 30 phút và chỉ dùng được 1 lần. Nếu bạn không yêu cầu, hãy bỏ qua email này.',
+};
+
 // Luôn trả cùng một kết quả để không lộ email nào đã đăng ký (SPEC-identity.md mục 5).
-export async function requestPasswordReset(rawEmail: string): Promise<{ ok: true }> {
+export async function requestPasswordReset(
+  rawEmail: string,
+  copy: ResetEmailCopy = VI_COPY,
+): Promise<{ ok: true }> {
   const id = normalizeIdentifier(rawEmail);
   if (id?.kind !== 'email') return { ok: true };
 
@@ -40,14 +62,13 @@ export async function requestPasswordReset(rawEmail: string): Promise<{ ok: true
   const link = `${env().APP_URL}/dat-lai-mat-khau?token=${token}`;
   await sendMail({
     to: id.value,
-    subject: 'Đặt lại mật khẩu 9MUA',
+    subject: copy.subject,
     ...renderEmail({
-      title: 'Đặt lại mật khẩu',
-      greeting: `Chào ${user.displayName},`,
-      paragraphs: ['Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản 9MUA của bạn.'],
-      action: { label: 'Đặt mật khẩu mới', url: link },
-      footnote:
-        'Link có hiệu lực 30 phút và chỉ dùng được 1 lần. Nếu bạn không yêu cầu, hãy bỏ qua email này.',
+      title: copy.title,
+      greeting: copy.greeting.replace('{name}', user.displayName),
+      paragraphs: [copy.paragraph],
+      action: { label: copy.action, url: link },
+      footnote: copy.footnote,
     }),
   });
   return { ok: true };

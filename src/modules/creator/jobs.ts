@@ -6,7 +6,7 @@ import { now } from '@/lib/clock';
 import { db } from '@/lib/db';
 import { env } from '@/lib/env';
 import { imageStore } from '@/lib/media/image-store';
-import { notify } from '@/lib/notifications';
+import { notifyKey } from '@/lib/notifications';
 import { runVideoReadyHooks } from './hooks';
 import { initialScore } from './score';
 import { composeDuet, MAX_DURATION_SEC, MAX_STORY_SEC, probe, rejectReason, transcode } from './transcode';
@@ -39,7 +39,7 @@ async function fail(job: VideoJob, reason: string) {
   ]);
   await unlink(job.sourcePath).catch(() => {});
   const video = await db.video.findUnique({ where: { id: job.videoId } });
-  if (video) await notify(video.authorId, 'Video không đăng được', reason, '/video/cua-toi');
+  if (video) await notifyKey(video.authorId, 'notify.videoFailed', { detail: reason }, '/video/cua-toi');
 }
 
 // Xử lý 1 việc trong hàng đợi. Trả về false nếu không còn việc.
@@ -108,10 +108,10 @@ export async function processNextJob(): Promise<boolean> {
       db.videoJob.update({ where: { id: job.id }, data: { status: 'done', error: null } }),
     ]);
     await unlink(job.sourcePath).catch(() => {});
-    await notify(
+    await notifyKey(
       video.authorId,
-      'Video đã đăng xong',
-      video.caption.slice(0, 80) || 'Video của bạn đã lên feed.',
+      'notify.videoReady',
+      { detail: video.caption.slice(0, 80) },
       `/video?v=${video.id}`,
     );
     await runVideoReadyHooks({

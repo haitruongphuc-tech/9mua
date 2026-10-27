@@ -4,12 +4,27 @@ import { auth } from './vi/auth';
 import { common } from './vi/common';
 import { feed } from './vi/feed';
 import { live } from './vi/live';
+import { market } from './vi/market';
 import { me } from './vi/me';
 import { notify } from './vi/notify';
 import { post } from './vi/post';
 import { profile } from './vi/profile';
+import { seller } from './vi/seller';
+import { shop } from './vi/shop';
 
-export const vi = { ...auth, ...common, ...feed, ...live, ...me, ...notify, ...post, ...profile } as const;
+export const vi = {
+  ...auth,
+  ...common,
+  ...feed,
+  ...live,
+  ...market,
+  ...me,
+  ...notify,
+  ...post,
+  ...profile,
+  ...seller,
+  ...shop,
+} as const;
 
 export type MessageKey = keyof typeof vi;
 export type Messages = Record<MessageKey, string>;

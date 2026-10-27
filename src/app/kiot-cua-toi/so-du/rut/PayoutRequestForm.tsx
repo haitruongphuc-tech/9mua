@@ -2,11 +2,13 @@
 
 import { useActionState, useState } from 'react';
 import { SubmitButton } from '@/components/ui/SubmitButton';
+import { useT } from '@/i18n/client';
 import { formatVnd } from '@/lib/format';
 import { requestPayoutAction, type PayoutRequestState } from '../actions';
 
 // Người bán thấy rõ số tiền sẽ nhận sau phí chi hộ trước khi bấm xác nhận (SPEC-payouts.md mục 4).
 export function PayoutRequestForm({ available, fee, min }: { available: number; fee: number; min: number }) {
+  const t = useT();
   const [state, action] = useActionState<PayoutRequestState, FormData>(requestPayoutAction, {});
   const [raw, setRaw] = useState(state.amount ?? String(available));
   const amount = Number(raw.replace(/\D/g, '')) || 0;
@@ -18,13 +20,13 @@ export function PayoutRequestForm({ available, fee, min }: { available: number; 
         <p
           role="alert"
           data-testid="payout-request-error"
-          className="rounded-xl bg-danger/10 px-4 py-3 text-sm font-bold text-danger"
+          className="rounded-[14px] bg-danger/20 px-4 py-3 text-[13px] font-bold text-red-300"
         >
           {state.error}
         </p>
       ) : null}
-      <label htmlFor="payout-amount" className="text-sm font-bold">
-        Số tiền rút
+      <label htmlFor="payout-amount" className="text-[12px] font-bold text-white/70">
+        {t('seller.wd.amount')}
       </label>
       <input
         id="payout-amount"
@@ -33,23 +35,23 @@ export function PayoutRequestForm({ available, fee, min }: { available: number; 
         autoComplete="off"
         value={raw}
         onChange={(e) => setRaw(e.target.value)}
-        className="h-12 rounded-xl border-2 border-black/15 bg-white px-4 text-lg font-bold outline-none focus:border-brand-ink"
+        className="h-12 rounded-full border border-white/15 bg-white/10 px-5 text-lg font-black text-white outline-none focus:border-brand"
       />
-      <p className="text-sm text-black/70">
-        Tối thiểu {formatVnd(min)} · tối đa {formatVnd(available)}
+      <p className="text-[13px] text-white/60">
+        {t('seller.wd.range', { min: formatVnd(min), max: formatVnd(available) })}
       </p>
       <p
-        className="rounded-xl bg-surface-muted px-4 py-3 font-bold"
+        className="rounded-[14px] bg-white/5 px-4 py-3 font-bold"
         data-testid="payout-quote"
         aria-live="polite"
       >
         {valid
-          ? `Bạn sẽ nhận ${formatVnd(net)} (phí ${formatVnd(fee)})`
+          ? t('seller.wd.receive', { net: formatVnd(net), fee: formatVnd(fee) })
           : amount > available
-            ? 'Số tiền vượt số dư có thể rút.'
-            : `Nhập số tiền từ ${formatVnd(min)}.`}
+            ? t('seller.wd.over')
+            : t('seller.wd.enter', { min: formatVnd(min) })}
       </p>
-      <SubmitButton pendingText="Đang gửi…">Xác nhận rút</SubmitButton>
+      <SubmitButton pendingText={t('seller.wd.sending')}>{t('seller.wd.confirm')}</SubmitButton>
     </form>
   );
 }

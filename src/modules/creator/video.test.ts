@@ -50,7 +50,7 @@ describe('đăng video và chuyển mã', () => {
       expect(existsSync(fileOf(v.posterUrl!))).toBe(true);
       expect(existsSync(job.sourcePath)).toBe(false);
       expect(await db.notification.findFirst({ where: { userId: u.id } })).toMatchObject({
-        title: 'Video đã đăng xong',
+        title: '@notify.videoReady',
       });
       expect(await processNextJob()).toBe(false);
     },
@@ -77,7 +77,8 @@ describe('đăng video và chuyển mã', () => {
       fileUrl: null,
     });
     expect(await db.notification.findFirst({ where: { userId: u.id } })).toMatchObject({
-      title: 'Video không đăng được',
+      title: '@notify.videoFailed',
+      body: JSON.stringify({ detail: 'Video dài hơn 60 giây' }),
     });
   });
 

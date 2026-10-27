@@ -47,4 +47,11 @@ export const auth: AuthMessages = {
   'auth.reset.mismatch': 'The two passwords do not match.',
   'auth.reset.expired': 'This link has expired or was already used. Please request a new one.',
   'auth.reset.resend': 'Send a new link',
+  'auth.mail.subject': 'Reset your 9MUA password',
+  'auth.mail.title': 'Reset password',
+  'auth.mail.greeting': 'Hi {name},',
+  'auth.mail.paragraph': 'We received a request to reset the password of your 9MUA account.',
+  'auth.mail.action': 'Set a new password',
+  'auth.mail.footnote':
+    'The link is valid for 30 minutes and can be used once. If you did not ask for this, ignore this email.',
 };

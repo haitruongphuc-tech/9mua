@@ -1,18 +1,21 @@
 'use client';
 
+import { useT } from '@/i18n/client';
+
 export function DeleteButton({ action }: { action: () => Promise<void> }) {
+  const t = useT();
   return (
     <form
       action={action}
       onSubmit={(e) => {
-        if (!confirm('Xoá sản phẩm này? Đơn hàng cũ vẫn được giữ.')) e.preventDefault();
+        if (!confirm(t('seller.pedit.deleteConfirm'))) e.preventDefault();
       }}
     >
       <button
         type="submit"
-        className="h-12 w-full rounded-full border-2 border-danger font-extrabold text-danger"
+        className="h-12 w-full rounded-full border border-red-500 font-black text-red-400"
       >
-        Xoá sản phẩm
+        {t('seller.pedit.delete')}
       </button>
     </form>
   );

@@ -32,4 +32,7 @@ export const common: CommonMessages = {
   'common.popup.perk2': '무료: 하루 {limit}회 좋아요/팔로우 • 좋아요 {threshold}개 달성 시 Kiot 개설 쿠폰',
   'common.popup.later': '나중에, 먼저 둘러볼게요',
   'common.popup.login': '이미 계정이 있나요? 로그인',
+  'common.nf.title': '페이지를 찾을 수 없어요',
+  'common.nf.text': '이 페이지는 없거나 옮겨졌어요.',
+  'common.nf.home': '홈으로',
 };

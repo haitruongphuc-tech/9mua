@@ -32,4 +32,7 @@ export const common: CommonMessages = {
   'common.popup.perk2': '無料：1日{limit}回までいいね/フォロー • {threshold}いいねでKiot開設クーポン',
   'common.popup.later': 'あとで、まずは見てみる',
   'common.popup.login': 'アカウントをお持ちの方はログイン',
+  'common.nf.title': 'ページが見つかりません',
+  'common.nf.text': 'このページは存在しないか、移動しました。',
+  'common.nf.home': 'ホームに戻る',
 };

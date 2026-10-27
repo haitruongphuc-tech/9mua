@@ -633,15 +633,16 @@
 - [x] **T64: Trang Kiot V4** (gộp T42) + Social Connect. Trang creator cũng đổi V4 (Follow, link mạng xã hội).
 - [x] **T65: Trang Tôi V4** (gộp T43) — Free/voucher, Bộ sưu tập, lối tắt; cài đặt tài khoản sang `/tai-khoan/cai-dat`.
   Ô xu thêm vào khi làm sổ xu (T49–T57).
-- [ ] **T66: Đổi giao diện + dịch các trang còn lại** — Chợ, sản phẩm, danh bạ Kiot, giỏ, đặt hàng, đơn mua, đăng nhập,
-  Kiot của tôi, video, admin (chỉ tiếng Việt).
+- [x] **T66: Đổi giao diện + dịch các trang còn lại** — Chợ, sản phẩm, danh bạ Kiot, giỏ, đặt hàng, đơn mua, đăng nhập,
+  Kiot của tôi, video, admin (chỉ tiếng Việt). Cả web nền tối #0A0A0A; lỗi kiểm tra của module dịch ở
+  `src/i18n/module-messages.ts`; email máy tự gửi vẫn tiếng Việt (ghi chú trong `SPEC-i18n.md`).
 - [ ] **T67: AI Studio** (`SPEC-ai.md`).
 - [ ] **T68: Giới thiệu & Pháp lý + chính sách** (gộp T44, T45) và **giá 1 USD + voucher** (gộp T46).
 - [ ] **T49–T57: Livestream + xu** (`SPEC-live.md`, CEO duyệt 27/10) — chia nhỏ trong `tasks/plan.md` trước khi làm:
   MediaMTX + Nginx + xác thực; bảng dữ liệu + bắt đầu/kết thúc; trang phát (WHIP); trang xem (WHEP) + đếm người
   xem; chat + tim (SSE); ghim sản phẩm + `sourceLiveId`; báo cáo + `/admin/live`; sổ xu + thưởng + `/admin/xu`;
   E2E với MediaMTX thật.
-- [ ] **Đổi giao diện V4 + dịch từng trang** (gộp với T41–T46): Chợ & sản phẩm; Kiot; giỏ, đặt hàng, đơn mua;
+- [x] **Đổi giao diện V4 + dịch từng trang** (gộp với T41–T46): Chợ & sản phẩm; Kiot; giỏ, đặt hàng, đơn mua;
   đăng nhập & tài khoản; Kiot của tôi; video & creator; admin.
 - [ ] **T41: Feed: thả tim 2 chạm + túi cam, thanh tiến độ, chia sẻ có QR** (S)
 - [ ] **T42: Trang Kiot kiểu TikTok** (M) — tab Sản phẩm / Video, số sản phẩm, đã bán, chia sẻ có QR.

@@ -47,6 +47,13 @@ export const auth = {
   'auth.reset.mismatch': 'Hai mật khẩu không khớp.',
   'auth.reset.expired': 'Link đã hết hạn hoặc đã được dùng. Hãy yêu cầu link mới.',
   'auth.reset.resend': 'Gửi lại link',
+  'auth.mail.subject': 'Đặt lại mật khẩu 9MUA',
+  'auth.mail.title': 'Đặt lại mật khẩu',
+  'auth.mail.greeting': 'Chào {name},',
+  'auth.mail.paragraph': 'Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản 9MUA của bạn.',
+  'auth.mail.action': 'Đặt mật khẩu mới',
+  'auth.mail.footnote':
+    'Link có hiệu lực 30 phút và chỉ dùng được 1 lần. Nếu bạn không yêu cầu, hãy bỏ qua email này.',
 } as const;
 
 export type AuthMessages = Record<keyof typeof auth, string>;

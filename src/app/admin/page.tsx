@@ -24,12 +24,12 @@ export default async function AdminHome({ searchParams }: { searchParams: Promis
   ];
   return (
     <section className="flex flex-col gap-5 px-4 py-5">
-      <div className="rounded-2xl border-2 border-brand-ink p-4" data-testid="todo-box">
+      <div className="rounded-2xl border border-white/25 p-4" data-testid="todo-box">
         <h1 className="mb-2 text-lg font-extrabold">Cần xử lý</h1>
         {todo.length === 0 ? (
-          <p className="text-sm text-success">Không có việc nào đang chờ. 👍</p>
+          <p className="text-sm text-green-400">Không có việc nào đang chờ. 👍</p>
         ) : (
-          <ul className="flex flex-col divide-y divide-black/10">
+          <ul className="flex flex-col divide-y divide-white/10">
             {todo.map((t) => (
               <li key={t.key}>
                 <Link
@@ -39,7 +39,7 @@ export default async function AdminHome({ searchParams }: { searchParams: Promis
                 >
                   <span>{t.label}</span>
                   <span
-                    className={`grid h-8 min-w-8 place-items-center rounded-full px-2 text-sm ${t.urgent ? 'bg-danger text-white' : 'bg-brand text-brand-ink'}`}
+                    className={`grid h-8 min-w-8 place-items-center rounded-full px-2 text-sm ${t.urgent ? 'bg-danger text-white' : 'bg-brand text-white'}`}
                   >
                     {t.count}
                   </span>
@@ -55,7 +55,7 @@ export default async function AdminHome({ searchParams }: { searchParams: Promis
             key={r.value}
             href={`/admin?khoang=${r.value}`}
             aria-current={r.value === range ? 'page' : undefined}
-            className={`rounded-full border-2 px-3 py-1.5 ${r.value === range ? 'border-brand-ink bg-brand/15' : 'border-black/10'}`}
+            className={`rounded-full border px-3 py-1.5 ${r.value === range ? 'border-white/25 bg-brand/15' : 'border-white/10'}`}
           >
             {r.label}
           </Link>
@@ -63,13 +63,13 @@ export default async function AdminHome({ searchParams }: { searchParams: Promis
       </nav>
       <dl className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5" data-testid="metrics">
         {cards.map(([label, value]) => (
-          <div key={label} className="rounded-2xl bg-surface-muted p-3">
-            <dt className="text-xs text-black/60">{label}</dt>
+          <div key={label} className="rounded-2xl bg-white/5 p-3">
+            <dt className="text-xs text-white/60">{label}</dt>
             <dd className="text-lg font-extrabold">{value}</dd>
           </div>
         ))}
       </dl>
-      <div className="rounded-2xl border-2 border-black/10 p-4">
+      <div className="rounded-[18px] border border-white/10 bg-white/5 p-4">
         <LineChart
           label="Doanh thu 30 ngày (phí sàn + phí thuê Kiot)"
           points={series.map((s) => ({ day: s.day, value: s.platform + s.kiot }))}

@@ -19,7 +19,10 @@ export async function likedVideoCount(userId: string): Promise<number> {
 // Gọi sau mỗi lần thích video. Đủ điều kiện thì tặng voucher và báo trong app.
 export async function checkVoucher(userId: string): Promise<boolean> {
   if ((await getSetting('social_voucher_enabled')) !== 'true') return false;
-  const user = await db.user.findUnique({ where: { id: userId }, select: { createdAt: true, lockedAt: true, role: true } });
+  const user = await db.user.findUnique({
+    where: { id: userId },
+    select: { createdAt: true, lockedAt: true, role: true },
+  });
   if (!user || user.lockedAt || user.role === 'admin') return false;
   if (now().getTime() - user.createdAt.getTime() < MIN_ACCOUNT_AGE_MS) return false;
   if (await db.kiotVoucher.count({ where: { userId } })) return false;
@@ -34,12 +37,24 @@ export async function checkVoucher(userId: string): Promise<boolean> {
   return true;
 }
 
-export type VoucherView = { id: string; issuedAt: Date; usedAt: Date | null; revokedAt: Date | null; usable: boolean };
+export type VoucherView = {
+  id: string;
+  issuedAt: Date;
+  usedAt: Date | null;
+  revokedAt: Date | null;
+  usable: boolean;
+};
 
 export async function getVoucher(userId: string): Promise<VoucherView | null> {
   const v = await db.kiotVoucher.findUnique({ where: { userId } });
   return v
-    ? { id: v.id, issuedAt: v.issuedAt, usedAt: v.usedAt, revokedAt: v.revokedAt, usable: !v.usedAt && !v.revokedAt }
+    ? {
+        id: v.id,
+        issuedAt: v.issuedAt,
+        usedAt: v.usedAt,
+        revokedAt: v.revokedAt,
+        usable: !v.usedAt && !v.revokedAt,
+      }
     : null;
 }
 
@@ -52,7 +67,11 @@ export async function consumeVoucher(tx: Tx, userId: string, kiotId: string): Pr
   return count === 1;
 }
 
-export async function revokeVoucher(voucherId: string, adminId: string, reason: string): Promise<{ ok: boolean }> {
+export async function revokeVoucher(
+  voucherId: string,
+  adminId: string,
+  reason: string,
+): Promise<{ ok: boolean }> {
   const { count } = await db.kiotVoucher.updateMany({
     where: { id: voucherId, usedAt: null, revokedAt: null },
     data: { revokedAt: now(), revokedById: adminId, revokeReason: reason.slice(0, 300) },

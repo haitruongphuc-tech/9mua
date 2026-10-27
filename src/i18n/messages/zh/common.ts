@@ -32,4 +32,7 @@ export const common: CommonMessages = {
   'common.popup.perk2': '免费账户：每天{limit}次点赞/关注 • 满{threshold}个赞送开Kiot券',
   'common.popup.later': '以后再说，先看看',
   'common.popup.login': '已有账户？登录',
+  'common.nf.title': '找不到页面',
+  'common.nf.text': '此页面不存在或已移动。',
+  'common.nf.home': '返回首页',
 };

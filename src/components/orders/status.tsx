@@ -1,5 +1,7 @@
 import type { OrderStatus } from '@prisma/client';
+import { getT, type T } from '@/i18n/server';
 
+// Nhãn tiếng Việt cho trang admin (SPEC-i18n.md mục 9: admin chỉ cần tiếng Việt).
 export const STATUS_LABELS: Record<OrderStatus, string> = {
   pending_payment: 'Chờ thanh toán',
   paid: 'Đã thanh toán — chờ xác nhận',
@@ -14,46 +16,52 @@ export const STATUS_LABELS: Record<OrderStatus, string> = {
 };
 
 const TONE: Record<OrderStatus, string> = {
-  pending_payment: 'bg-black/10',
+  pending_payment: 'bg-white/10',
   paid: 'bg-brand/30',
   confirmed: 'bg-brand/20',
   shipping: 'bg-brand/20',
-  delivered: 'bg-success/15 text-success',
-  completed: 'bg-success/15 text-success',
-  cancelled: 'bg-black/10',
-  refund_pending: 'bg-danger/10 text-danger',
-  refunded: 'bg-black/10',
-  disputed: 'bg-danger/10 text-danger',
+  delivered: 'bg-success/20 text-green-300',
+  completed: 'bg-success/20 text-green-300',
+  cancelled: 'bg-white/10',
+  refund_pending: 'bg-danger/20 text-red-300',
+  refunded: 'bg-white/10',
+  disputed: 'bg-danger/20 text-red-300',
 };
 
-export function OrderStatusBadge({ status }: { status: OrderStatus }) {
+export async function OrderStatusBadge({ status }: { status: OrderStatus }) {
+  const t = await getT();
   return (
     <span
       data-testid="order-status"
-      className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${TONE[status]}`}
+      className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-bold ${TONE[status]}`}
     >
-      {STATUS_LABELS[status]}
+      {t(`shop.status.${status}`)}
     </span>
   );
 }
 
-export const ACTION_LABELS: Record<string, string> = {
-  place: 'Đặt hàng',
-  pay: 'Thanh toán',
-  cancel: 'Người mua huỷ',
-  expire: 'Tự huỷ (quá hạn thanh toán)',
-  late_pay: 'Thanh toán muộn',
-  late_pay_no_stock: 'Thanh toán muộn — hết hàng',
-  confirm: 'Người bán xác nhận',
-  reject: 'Người bán từ chối',
-  auto_refund: 'Tự huỷ (người bán không xác nhận 48 giờ)',
-  ship: 'Đã giao cho shipper',
-  seller_cancel: 'Người bán huỷ',
-  receive: 'Người mua đã nhận',
-  auto_deliver: 'Tự ghi nhận đã giao (10 ngày)',
-  dispute: 'Người mua khiếu nại',
-  complete: 'Hoàn tất',
-  resolve_refund: '9MUA xử khiếu nại: hoàn tiền',
-  resolve_release: '9MUA xử khiếu nại: trả người bán',
-  mark_refunded: '9MUA đã hoàn tiền',
-};
+const EVENTS = [
+  'place',
+  'pay',
+  'cancel',
+  'expire',
+  'late_pay',
+  'late_pay_no_stock',
+  'confirm',
+  'reject',
+  'auto_refund',
+  'ship',
+  'seller_cancel',
+  'receive',
+  'auto_deliver',
+  'dispute',
+  'complete',
+  'resolve_refund',
+  'resolve_release',
+  'mark_refunded',
+] as const;
+type EventAction = (typeof EVENTS)[number];
+const isEvent = (a: string): a is EventAction => (EVENTS as readonly string[]).includes(a);
+
+// Một dòng trong lịch sử đơn (OrderEvent.action) theo ngôn ngữ đang chọn.
+export const eventLabel = (t: T, action: string) => (isEvent(action) ? t(`shop.event.${action}`) : action);

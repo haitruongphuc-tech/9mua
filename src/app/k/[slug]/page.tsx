@@ -9,7 +9,6 @@ import { HashtagText } from '@/components/profile/HashtagText';
 import { KiotProductGrid } from '@/components/profile/KiotProductGrid';
 import { ProfileActions } from '@/components/profile/ProfileActions';
 import { SocialLinks } from '@/components/profile/SocialLinks';
-import { V4Page } from '@/components/V4Page';
 import { VideoGrid } from '@/components/video/VideoGrid';
 import { ClientMessages } from '@/i18n/ClientMessages';
 import { getT } from '@/i18n/server';
@@ -76,7 +75,7 @@ export default async function KiotPage({
 
   return (
     <ClientMessages prefixes={['profile.', 'feed.share.']}>
-      <V4Page>
+      <div>
         <div className="mx-auto max-w-[900px] pb-8">
           {preview ? (
             <div className="px-4 pt-3">
@@ -230,7 +229,7 @@ export default async function KiotPage({
             ) : null}
           </div>
         </div>
-      </V4Page>
+      </div>
     </ClientMessages>
   );
 }

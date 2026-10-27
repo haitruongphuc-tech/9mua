@@ -1,6 +1,7 @@
 import type { InputHTMLAttributes } from 'react';
 
-// tone: 'light' = trang nền trắng cũ (đang chuyển dần), 'dark' = trang V4 nền đen, 'sheet' = bảng trượt nền trắng V4.
+// tone: 'dark' = trang V4 nền đen (mặc định, cả web nền đen từ T66), 'sheet' = bảng trượt nền trắng V4,
+// 'light' = nền trắng cũ (còn giữ cho trường hợp đặc biệt).
 export type FieldTone = 'light' | 'dark' | 'sheet';
 
 type Props = InputHTMLAttributes<HTMLInputElement> & {
@@ -29,7 +30,7 @@ const NOTE: Record<FieldTone, string> = {
   sheet: 'text-[12px] text-zinc-500',
 };
 
-export function TextField({ label, name, error, hint, id, tone = 'light', ...input }: Props) {
+export function TextField({ label, name, error, hint, id, tone = 'dark', ...input }: Props) {
   const inputId = id ?? name;
   const describedBy = error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined;
   return (

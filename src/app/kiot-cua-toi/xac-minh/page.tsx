@@ -1,20 +1,22 @@
 import type { Metadata } from 'next';
-import { formatDateTimeVN } from '@/lib/format';
+import { getT } from '@/i18n/server';
+import { formatDateTime } from '@/lib/format';
 import { requireUser } from '@/modules/identity';
 import { getKycStatus } from '@/modules/payouts';
 
 export const metadata: Metadata = { title: 'Xác minh danh tính', robots: { index: false } };
 
-const ERRORS: Record<string, string> = {
-  INVALID_INPUT: 'Kiểm tra lại họ tên và số CCCD (12 chữ số).',
-  INVALID_IMAGE: 'Ảnh không hợp lệ. Chọn ảnh JPG/PNG/WebP rõ nét của 2 mặt CCCD.',
-  TOO_LARGE: 'Ảnh quá lớn (mỗi ảnh tối đa 10MB).',
-  ALREADY_PENDING: 'Bạn đã nộp, đang chờ 9MUA duyệt.',
-  ALREADY_APPROVED: 'Bạn đã được xác minh.',
-};
+const ERRORS = [
+  'INVALID_INPUT',
+  'INVALID_IMAGE',
+  'TOO_LARGE',
+  'ALREADY_PENDING',
+  'ALREADY_APPROVED',
+] as const;
 
 const field =
-  'h-12 rounded-xl border-2 border-black/15 bg-white px-4 text-base outline-none focus:border-brand-ink';
+  'h-11 rounded-full border border-white/15 bg-white/10 px-4 text-[14px] text-white outline-none focus:border-brand';
+const label = 'flex flex-col gap-1.5 text-[12px] font-bold text-white/70';
 
 export default async function KycPage({
   searchParams,
@@ -22,32 +24,35 @@ export default async function KycPage({
   searchParams: Promise<{ loi?: string; 'da-gui'?: string }>;
 }) {
   const user = await requireUser();
-  const status = await getKycStatus(user.id);
-  const params = await searchParams;
+  const [status, params, t] = await Promise.all([getKycStatus(user.id), searchParams, getT()]);
+  const code = ERRORS.find((c) => c === params.loi);
   return (
     <section className="flex flex-col gap-4 px-4 py-6">
-      <h1 className="text-xl font-extrabold">Xác minh danh tính (CCCD)</h1>
-      <p className="text-sm text-black/70">
-        Bắt buộc trước lần rút tiền đầu tiên. Ảnh CCCD được lưu riêng tư, chỉ bộ phận duyệt của 9MUA xem được
-        và không bao giờ hiện công khai.
-      </p>
+      <h1 className="font-display text-xl font-black">{t('seller.kyc.title')}</h1>
+      <p className="text-[13px] text-white/60">{t('seller.kyc.intro')}</p>
       {params.loi ? (
-        <p role="alert" className="rounded-xl bg-danger/10 px-4 py-3 text-sm font-bold text-danger">
-          {ERRORS[params.loi] ?? 'Có lỗi, thử lại.'}
+        <p role="alert" className="rounded-[14px] bg-danger/20 px-4 py-3 text-[13px] font-bold text-red-300">
+          {code ? t(`seller.kyc.err.${code}`) : t('seller.kyc.err.other')}
         </p>
       ) : null}
       {params['da-gui'] ? (
-        <p role="status" className="rounded-xl bg-success/10 px-4 py-3 text-sm font-bold text-success">
-          Đã gửi. 9MUA sẽ duyệt sớm.
+        <p
+          role="status"
+          className="rounded-[14px] bg-success/20 px-4 py-3 text-[13px] font-bold text-green-300"
+        >
+          {t('seller.kyc.sent')}
         </p>
       ) : null}
       {status ? (
-        <p className="rounded-xl border-2 border-black/10 p-4 text-sm" data-testid="kyc-status">
+        <p
+          className="rounded-[14px] border border-white/10 bg-white/5 p-4 text-[13px]"
+          data-testid="kyc-status"
+        >
           {status.status === 'approved'
-            ? `✅ Đã xác minh: ${status.fullName}`
+            ? t('seller.kyc.approved', { name: status.fullName })
             : status.status === 'pending'
-              ? `⏳ Đang chờ duyệt (gửi lúc ${formatDateTimeVN(status.createdAt)})`
-              : `❌ Bị từ chối: ${status.reason ?? ''}. Hãy nộp lại.`}
+              ? t('seller.kyc.pending', { date: formatDateTime(status.createdAt, t.lang) })
+              : t('seller.kyc.rejected', { reason: status.reason ?? '' })}
         </p>
       ) : null}
       {!status || status.status === 'rejected' ? (
@@ -57,30 +62,38 @@ export default async function KycPage({
           encType="multipart/form-data"
           className="flex flex-col gap-3"
         >
-          <label className="flex flex-col gap-1.5 text-sm font-bold">
-            Họ tên đúng như trên CCCD
+          <label className={label}>
+            {t('seller.kyc.fullName')}
             <input name="fullName" id="kyc-name" required className={field} />
           </label>
-          <label className="flex flex-col gap-1.5 text-sm font-bold">
-            Số CCCD (12 số)
+          <label className={label}>
+            {t('seller.kyc.idNumber')}
             <input name="idNumber" id="kyc-number" required inputMode="numeric" className={field} />
           </label>
-          <label className="flex flex-col gap-1.5 text-sm font-bold">
-            Ảnh mặt trước
+          <label className={label}>
+            {t('seller.kyc.front')}
             <input
               name="front"
               id="kyc-front"
               type="file"
               required
               accept="image/jpeg,image/png,image/webp"
+              className="text-[13px] text-white"
             />
           </label>
-          <label className="flex flex-col gap-1.5 text-sm font-bold">
-            Ảnh mặt sau
-            <input name="back" id="kyc-back" type="file" required accept="image/jpeg,image/png,image/webp" />
+          <label className={label}>
+            {t('seller.kyc.back')}
+            <input
+              name="back"
+              id="kyc-back"
+              type="file"
+              required
+              accept="image/jpeg,image/png,image/webp"
+              className="text-[13px] text-white"
+            />
           </label>
-          <button className="h-12 rounded-full border-2 border-brand-ink bg-brand font-extrabold text-brand-ink">
-            Gửi xác minh
+          <button className="h-12 rounded-full bg-brand font-black text-white">
+            {t('seller.kyc.submit')}
           </button>
         </form>
       ) : null}

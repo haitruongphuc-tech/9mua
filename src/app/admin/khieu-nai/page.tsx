@@ -7,7 +7,7 @@ import type { FlashParams } from '../flash';
 import { resolveDisputeAction } from './actions';
 
 export const dynamic = 'force-dynamic';
-const input = 'h-11 min-w-0 flex-1 rounded-xl border-2 border-black/15 px-3';
+const input = 'h-11 min-w-0 flex-1 rounded-[14px] border border-white/15 bg-white/10 text-white px-3';
 
 export default async function DisputeQueuePage({ searchParams }: { searchParams: FlashParams }) {
   await requireAdminVerified();
@@ -17,13 +17,13 @@ export default async function DisputeQueuePage({ searchParams }: { searchParams:
       <h1 className="text-xl font-extrabold">Khiếu nại</h1>
       <Flash ok={params.xong} error={params.loi} />
       {orders.length === 0 ? (
-        <p className="rounded-2xl bg-surface-muted p-6 text-center text-black/70">Không có khiếu nại nào.</p>
+        <p className="rounded-2xl bg-white/5 p-6 text-center text-white/70">Không có khiếu nại nào.</p>
       ) : null}
       <ul className="flex flex-col gap-3">
         {orders.map((o) => (
           <li
             key={o.id}
-            className="flex flex-col gap-2 rounded-2xl border-2 border-black/10 p-4"
+            className="flex flex-col gap-2 rounded-[18px] border border-white/10 bg-white/5 p-4"
             data-testid="dispute-row"
           >
             <div className="flex justify-between gap-2">
@@ -33,9 +33,7 @@ export default async function DisputeQueuePage({ searchParams }: { searchParams:
               <span className="font-extrabold">{formatVnd(o.total)}</span>
             </div>
             <p className="text-sm">{o.items.map((i) => `${i.name} × ${i.qty}`).join(', ')}</p>
-            <blockquote className="rounded-xl bg-surface-muted p-3 text-sm">
-              “{o.dispute?.message}”
-            </blockquote>
+            <blockquote className="rounded-xl bg-white/5 p-3 text-sm">“{o.dispute?.message}”</blockquote>
             {Array.isArray(o.dispute?.images) && o.dispute.images.length ? (
               <div className="flex gap-2">
                 {(o.dispute.images as string[]).map((url) => (
@@ -48,7 +46,7 @@ export default async function DisputeQueuePage({ searchParams }: { searchParams:
             ) : null}
             <details>
               <summary className="cursor-pointer text-sm font-bold">Lịch sử đơn</summary>
-              <ol className="mt-1 text-xs text-black/70">
+              <ol className="mt-1 text-xs text-white/70">
                 {o.events.map((e) => (
                   <li key={e.id}>
                     {formatDateTimeVN(e.createdAt)} — {e.action}

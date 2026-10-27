@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { getT } from '@/i18n/server';
 import { requireUser } from '@/modules/identity';
 import { getProductForOwner, MAX_IMAGES_PER_PRODUCT } from '@/modules/kiot';
 import { deleteProductAction, updateProductAction } from '../actions';
@@ -10,19 +11,21 @@ export const metadata: Metadata = { title: 'Sửa sản phẩm', robots: { index
 
 export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requireUser();
-  const product = await getProductForOwner(user.id, (await params).id);
+  const [product, t] = await Promise.all([getProductForOwner(user.id, (await params).id), getT()]);
   if (!product) notFound();
   return (
     <section className="flex flex-col gap-4 px-4 py-6">
-      <h1 className="text-xl font-extrabold">Sửa sản phẩm</h1>
+      <h1 className="font-display text-xl font-black">{t('seller.pedit.title')}</h1>
       {product.hiddenByAdminAt ? (
-        <p role="alert" className="rounded-xl bg-danger/10 px-4 py-3 text-sm font-bold text-danger">
-          Sản phẩm đã bị 9MUA gỡ khỏi Chợ{product.hiddenReason ? `: ${product.hiddenReason}` : ''}.
+        <p role="alert" className="rounded-[14px] bg-danger/20 px-4 py-3 text-[13px] font-bold text-red-300">
+          {product.hiddenReason
+            ? t('seller.pedit.removedReason', { reason: product.hiddenReason })
+            : t('seller.pedit.removed')}
         </p>
       ) : null}
       <ProductForm
         action={updateProductAction.bind(null, product.id)}
-        submitLabel="Lưu thay đổi"
+        submitLabel={t('seller.pedit.save')}
         maxImages={MAX_IMAGES_PER_PRODUCT}
         initial={{
           name: product.name,

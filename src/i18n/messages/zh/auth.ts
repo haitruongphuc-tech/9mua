@@ -45,4 +45,10 @@ export const auth: AuthMessages = {
   'auth.reset.mismatch': '两次输入的密码不一致。',
   'auth.reset.expired': '链接已过期或已被使用，请重新申请。',
   'auth.reset.resend': '重新发送链接',
+  'auth.mail.subject': '重置9MUA密码',
+  'auth.mail.title': '重置密码',
+  'auth.mail.greeting': '{name}，你好：',
+  'auth.mail.paragraph': '我们收到了重置你9MUA账户密码的请求。',
+  'auth.mail.action': '设置新密码',
+  'auth.mail.footnote': '链接30分钟内有效且只能使用一次。如果不是你本人申请，请忽略此邮件。',
 };

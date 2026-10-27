@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { StoriesRow } from '@/components/live/StoriesRow';
-import { V4Page } from '@/components/V4Page';
 import { ClientMessages } from '@/i18n/ClientMessages';
 import { getT } from '@/i18n/server';
 import { listStories } from '@/modules/creator';
@@ -13,7 +12,7 @@ export const metadata: Metadata = { title: 'Live', robots: { index: false } };
 export default async function LivePage() {
   const [t, stories] = await Promise.all([getT(), listStories()]);
   return (
-    <V4Page className="flex flex-col">
+    <div className="flex flex-col">
       <ClientMessages prefixes={['live.']}>
         <StoriesRow groups={stories} />
       </ClientMessages>
@@ -27,6 +26,6 @@ export default async function LivePage() {
           {t('live.empty.cta')}
         </Link>
       </div>
-    </V4Page>
+    </div>
   );
 }

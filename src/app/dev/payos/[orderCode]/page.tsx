@@ -16,34 +16,22 @@ export default async function FakePayosPage({ params }: { params: Promise<{ orde
   const act = simulateAction.bind(null, orderCode);
   return (
     <section className="mx-auto flex max-w-md flex-col gap-4 px-4 py-10">
-      <p className="rounded-xl bg-danger/10 px-4 py-2 text-sm font-bold text-danger">
+      <p className="rounded-xl bg-danger/20 px-4 py-2 text-sm font-bold text-red-400">
         PayOS GIẢ LẬP — chỉ dùng khi thử nghiệm
       </p>
       <h1 className="text-2xl font-extrabold">Thanh toán {formatVnd(intent.amount)}</h1>
-      <p className="text-black/70">
+      <p className="text-white/70">
         Nội dung: <strong>{intent.description}</strong> · Mã: {orderCode} · Trạng thái:{' '}
         <strong data-testid="fake-status">{intent.status}</strong>
       </p>
       <form action={act} className="flex flex-col gap-2">
-        <button
-          name="mode"
-          value="full"
-          className="h-12 rounded-full border-2 border-brand-ink bg-brand font-extrabold text-brand-ink"
-        >
+        <button name="mode" value="full" className="h-12 rounded-full bg-brand font-black text-white">
           Giả lập đã trả đủ
         </button>
-        <button
-          name="mode"
-          value="short"
-          className="h-12 rounded-full border-2 border-brand-ink font-extrabold"
-        >
+        <button name="mode" value="short" className="h-12 rounded-full border border-white/25 font-extrabold">
           Giả lập trả thiếu 1.000đ
         </button>
-        <button
-          name="mode"
-          value="lost"
-          className="h-12 rounded-full border-2 border-brand-ink font-extrabold"
-        >
+        <button name="mode" value="lost" className="h-12 rounded-full border border-white/25 font-extrabold">
           Giả lập trả nhưng mất webhook
         </button>
       </form>

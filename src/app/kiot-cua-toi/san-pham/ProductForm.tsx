@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 import { SubmitButton } from '@/components/ui/SubmitButton';
 import { TextField } from '@/components/ui/TextField';
+import { useT } from '@/i18n/client';
 import { CATEGORIES } from '@/modules/kiot/categories';
 import type { ProductFormState } from './actions';
 import { ImagePicker, type PickedImage } from './ImagePicker';
@@ -25,7 +26,11 @@ type Props = {
   maxImages: number;
 };
 
+const select =
+  'h-11 rounded-full border border-white/15 bg-white/10 px-4 text-[14px] text-white outline-none focus:border-brand';
+
 export function ProductForm({ action, initial, submitLabel, maxImages }: Props) {
+  const t = useT();
   const [state, formAction] = useActionState<ProductFormState, FormData>(action, {});
   const f = state.fields ?? {};
   // Sau khi báo lỗi, giữ nguyên những gì người dùng vừa nhập (React tự đặt lại form về defaultValue).
@@ -44,16 +49,23 @@ export function ProductForm({ action, initial, submitLabel, maxImages }: Props) 
         <p
           role="alert"
           data-testid="form-error"
-          className="rounded-xl bg-danger/10 px-4 py-3 text-sm font-bold text-danger"
+          className="rounded-[14px] bg-danger/20 px-4 py-3 text-[13px] font-bold text-red-300"
         >
           {state.message}
         </p>
       ) : null}
       <ImagePicker initial={initial?.images ?? []} max={maxImages} error={f.images} />
-      <TextField label="Tên sản phẩm" name="name" id="p-name" required defaultValue={v.name} error={f.name} />
+      <TextField
+        label={t('seller.pform.name')}
+        name="name"
+        id="p-name"
+        required
+        defaultValue={v.name}
+        error={f.name}
+      />
       <div className="grid grid-cols-2 gap-3">
         <TextField
-          label="Giá bán (đ)"
+          label={t('seller.pform.price')}
           name="price"
           id="p-price"
           inputMode="numeric"
@@ -62,7 +74,7 @@ export function ProductForm({ action, initial, submitLabel, maxImages }: Props) 
           error={f.price}
         />
         <TextField
-          label="Giá gốc (tuỳ chọn)"
+          label={t('seller.pform.compare')}
           name="compareAtPrice"
           id="p-compare"
           inputMode="numeric"
@@ -72,7 +84,7 @@ export function ProductForm({ action, initial, submitLabel, maxImages }: Props) 
       </div>
       <div className="grid grid-cols-2 gap-3">
         <TextField
-          label="Tồn kho"
+          label={t('seller.pform.stock')}
           name="stock"
           id="p-stock"
           inputMode="numeric"
@@ -81,8 +93,8 @@ export function ProductForm({ action, initial, submitLabel, maxImages }: Props) 
           error={f.stock}
         />
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="p-category" className="text-sm font-bold">
-            Danh mục
+          <label htmlFor="p-category" className="text-[12px] font-bold text-white/70">
+            {t('seller.pform.category')}
           </label>
           <select
             id="p-category"
@@ -91,23 +103,23 @@ export function ProductForm({ action, initial, submitLabel, maxImages }: Props) 
             key={v.category}
             defaultValue={v.category}
             required
-            className="h-12 rounded-xl border-2 border-black/15 bg-white px-3 text-base outline-none focus:border-brand-ink"
+            className={select}
           >
             <option value="" disabled>
-              Chọn…
+              {t('seller.pform.choose')}
             </option>
             {CATEGORIES.map((c) => (
               <option key={c.slug} value={c.slug}>
-                {c.icon} {c.name}
+                {c.icon} {t(`market.cat.${c.slug}`)}
               </option>
             ))}
           </select>
-          {f.category ? <p className="text-sm text-danger">{f.category}</p> : null}
+          {f.category ? <p className="text-[12px] text-red-400">{f.category}</p> : null}
         </div>
       </div>
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="p-description" className="text-sm font-bold">
-          Mô tả
+        <label htmlFor="p-description" className="text-[12px] font-bold text-white/70">
+          {t('seller.pform.description')}
         </label>
         <textarea
           id="p-description"
@@ -115,15 +127,15 @@ export function ProductForm({ action, initial, submitLabel, maxImages }: Props) 
           rows={5}
           maxLength={5000}
           defaultValue={v.description}
-          className="rounded-xl border-2 border-black/15 px-4 py-3 text-base outline-none focus:border-brand-ink"
+          className="rounded-[14px] border border-white/15 bg-white/10 px-4 py-3 text-[14px] text-white outline-none focus:border-brand"
         />
-        {f.description ? <p className="text-sm text-danger">{f.description}</p> : null}
+        {f.description ? <p className="text-[12px] text-red-400">{f.description}</p> : null}
       </div>
-      <label className="flex items-center gap-3 font-bold">
+      <label className="flex items-center gap-3 text-[14px] font-bold">
         <input type="checkbox" name="visible" defaultChecked={v.visible} className="h-5 w-5 accent-brand" />
-        Hiện sản phẩm trên Kiot
+        {t('seller.pform.visible')}
       </label>
-      <SubmitButton pendingText="Đang lưu…">{submitLabel}</SubmitButton>
+      <SubmitButton pendingText={t('seller.form.saving')}>{submitLabel}</SubmitButton>
     </form>
   );
 }

@@ -2,9 +2,11 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useT } from '@/i18n/client';
 
 // Hỏi trạng thái mỗi 3 giây; khi đã trả (hoặc hết hạn) thì tải lại trang để server hiển thị kết quả.
 export function PaymentStatusPoller({ statusUrl, expiresAt }: { statusUrl: string; expiresAt: string }) {
+  const t = useT();
   const router = useRouter();
   const [left, setLeft] = useState(() => Math.max(0, new Date(expiresAt).getTime() - Date.now()));
 
@@ -37,10 +39,10 @@ export function PaymentStatusPoller({ statusUrl, expiresAt }: { statusUrl: strin
   const m = Math.floor(left / 60_000);
   const s = Math.floor((left % 60_000) / 1000);
   return (
-    <p className="text-sm text-black/70" aria-live="polite" data-testid="payment-countdown">
+    <p className="text-[13px] text-white/70" aria-live="polite" data-testid="payment-countdown">
       {left > 0
-        ? `Mã còn hiệu lực ${m}:${String(s).padStart(2, '0')} · đang chờ xác nhận…`
-        : 'Mã đã hết hạn. Tải lại trang để tạo mã mới.'}
+        ? t('shop.qr.countdown', { time: `${m}:${String(s).padStart(2, '0')}` })
+        : t('shop.qr.expiredCode')}
     </p>
   );
 }

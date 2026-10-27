@@ -33,4 +33,7 @@ export const common: CommonMessages = {
     'Gratis: {limit} me gusta/seguimientos al día • Con {threshold} me gusta, un cupón para abrir un Kiot',
   'common.popup.later': 'Más tarde, primero quiero mirar',
   'common.popup.login': '¿Ya tienes cuenta? Inicia sesión',
+  'common.nf.title': 'Página no encontrada',
+  'common.nf.text': 'Esta página no existe o se movió.',
+  'common.nf.home': 'Volver al inicio',
 };

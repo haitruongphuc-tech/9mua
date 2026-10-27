@@ -1,6 +1,8 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { localizeFields } from '@/i18n/module-messages';
+import { getT } from '@/i18n/server';
 import { requireUser } from '@/modules/identity';
 import { setPayoutAccount } from '@/modules/kiot';
 
@@ -13,6 +15,7 @@ export type PayoutFormState = {
 
 export async function setPayoutAccountAction(_p: PayoutFormState, form: FormData): Promise<PayoutFormState> {
   const user = await requireUser();
+  const t = await getT();
   const values = {
     bankBin: String(form.get('bankBin') ?? ''),
     accountNumber: String(form.get('accountNumber') ?? ''),
@@ -20,12 +23,12 @@ export async function setPayoutAccountAction(_p: PayoutFormState, form: FormData
   };
   const result = await setPayoutAccount(user.id, { ...values, password: String(form.get('password') ?? '') });
   if (!result.ok) {
-    if (result.error === 'INVALID_INPUT') return { values, fields: result.fields };
+    if (result.error === 'INVALID_INPUT') return { values, fields: localizeFields(t, result.fields) };
     return {
       values,
-      error: result.error === 'WRONG_PASSWORD' ? 'Mật khẩu không đúng.' : 'Bạn chưa có Kiot.',
+      error: t(result.error === 'WRONG_PASSWORD' ? 'seller.payacc.wrongPassword' : 'seller.err.NO_KIOT'),
     };
   }
   revalidatePath('/kiot-cua-toi/cai-dat');
-  return { ok: 'Đã lưu tài khoản nhận tiền. Rút tiền sẽ tạm giữ 24 giờ sau mỗi lần đổi.' };
+  return { ok: t('seller.payacc.saved') };
 }

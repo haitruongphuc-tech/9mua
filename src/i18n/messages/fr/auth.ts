@@ -49,4 +49,12 @@ export const auth: AuthMessages = {
   'auth.reset.mismatch': 'Les deux mots de passe ne correspondent pas.',
   'auth.reset.expired': 'Ce lien a expiré ou a déjà été utilisé. Demandez-en un nouveau.',
   'auth.reset.resend': 'Renvoyer un lien',
+  'auth.mail.subject': 'Réinitialiser votre mot de passe 9MUA',
+  'auth.mail.title': 'Réinitialiser le mot de passe',
+  'auth.mail.greeting': 'Bonjour {name},',
+  'auth.mail.paragraph':
+    'Nous avons reçu une demande de réinitialisation du mot de passe de votre compte 9MUA.',
+  'auth.mail.action': 'Choisir un nouveau mot de passe',
+  'auth.mail.footnote':
+    'Le lien est valable 30 minutes et ne sert qu’une fois. Si vous n’êtes pas à l’origine de la demande, ignorez cet e-mail.',
 };

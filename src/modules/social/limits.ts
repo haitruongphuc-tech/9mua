@@ -12,7 +12,9 @@ export async function isFreeAccount(userId: string): Promise<boolean> {
 }
 
 // Dùng 1 lượt tim/follow mới. Cộng nguyên tử: chỉ tăng khi còn dưới giới hạn, hai request cùng lúc không vượt.
-export async function consumeDailyAction(userId: string): Promise<{ ok: true } | { ok: false; error: 'FREE_LIMIT' }> {
+export async function consumeDailyAction(
+  userId: string,
+): Promise<{ ok: true } | { ok: false; error: 'FREE_LIMIT' }> {
   if (!(await isFreeAccount(userId))) return { ok: true };
   const limit = await getIntSetting('social_free_daily_limit');
   const rows = await db.$queryRaw<{ count: number }[]>`

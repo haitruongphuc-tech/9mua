@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { logoutAction, logoutOtherDevicesAction } from '@/app/(auth)/actions';
-import { V4Page } from '@/components/V4Page';
 import { ClientMessages } from '@/i18n/ClientMessages';
 import { getT } from '@/i18n/server';
 import { requireUser } from '@/modules/identity';
@@ -19,7 +18,7 @@ export default async function AccountSettingsPage({
   const [params, t] = await Promise.all([searchParams, getT()]);
   return (
     <ClientMessages prefixes={['me.settings.']}>
-      <V4Page>
+      <div>
         <div className="mx-auto flex w-full max-w-md flex-col gap-4 px-4 py-6">
           <Link href="/tai-khoan" className="text-[13px] font-bold text-white/60">
             {t('me.settings.back')}
@@ -54,7 +53,7 @@ export default async function AccountSettingsPage({
             </form>
           </Card>
         </div>
-      </V4Page>
+      </div>
     </ClientMessages>
   );
 }

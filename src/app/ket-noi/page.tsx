@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { V4Page } from '@/components/V4Page';
 import { ClientMessages } from '@/i18n/ClientMessages';
 import { getT } from '@/i18n/server';
 import { requireUser } from '@/modules/identity';
@@ -18,7 +17,7 @@ export default async function ConnectPage() {
   const count = PLATFORM_LIST.filter((p) => links[p]).length;
   return (
     <ClientMessages prefixes={['profile.connect.']}>
-      <V4Page>
+      <div>
         <div className="mx-auto max-w-[760px] px-4 py-5">
           <h1 className="font-display text-[22px] font-black md:text-[28px]">{t('profile.connect.title')}</h1>
           <p className="mt-1 text-[13px] text-white/60">{t('profile.connect.intro')}</p>
@@ -43,7 +42,7 @@ export default async function ConnectPage() {
           <ConnectForm links={links} />
           <p className="mt-4 text-[11px] text-white/40">{t('profile.connect.note')}</p>
         </div>
-      </V4Page>
+      </div>
     </ClientMessages>
   );
 }

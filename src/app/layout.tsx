@@ -50,13 +50,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     : [0, 0];
   return (
     // pb: chừa chỗ cho thanh dưới (64px + viền 1px), hiện trên mọi màn hình như V4.
-    // <main> giữ nền trắng cho các trang chưa đổi sang giao diện V4; trang đã đổi (V4Page) làm <main> thành nền đen.
+    // Cả web nền đen chữ trắng theo V4 (T66).
     <html lang={lang} className={spaceGrotesk.variable}>
       <body className="flex min-h-dvh flex-col bg-ink pb-[calc(4rem+1px+env(safe-area-inset-bottom))] text-white">
         <I18nProvider lang={lang} messages={messages}>
           <MeProvider hasSession={!guest}>
             <SiteHeader />
-            <main className="flex-1 bg-surface text-brand-ink">{children}</main>
+            <main className="flex-1">{children}</main>
             <SiteFooter />
             <ToastHost />
             {guest ? (

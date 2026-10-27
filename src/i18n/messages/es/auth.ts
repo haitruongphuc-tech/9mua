@@ -49,4 +49,11 @@ export const auth: AuthMessages = {
   'auth.reset.mismatch': 'Las dos contraseñas no coinciden.',
   'auth.reset.expired': 'El enlace ha caducado o ya se usó. Solicita uno nuevo.',
   'auth.reset.resend': 'Enviar otro enlace',
+  'auth.mail.subject': 'Restablecer tu contraseña de 9MUA',
+  'auth.mail.title': 'Restablecer contraseña',
+  'auth.mail.greeting': 'Hola, {name}:',
+  'auth.mail.paragraph': 'Recibimos una solicitud para restablecer la contraseña de tu cuenta de 9MUA.',
+  'auth.mail.action': 'Crear nueva contraseña',
+  'auth.mail.footnote':
+    'El enlace es válido 30 minutos y solo se puede usar una vez. Si no lo pediste, ignora este correo.',
 };

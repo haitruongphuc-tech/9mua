@@ -8,7 +8,7 @@ import type { FlashParams } from '../flash';
 import { resolveProductAction, resolveVideoAction } from './actions';
 
 export const dynamic = 'force-dynamic';
-const input = 'h-11 min-w-0 flex-1 rounded-xl border-2 border-black/15 px-3';
+const input = 'h-11 min-w-0 flex-1 rounded-[14px] border border-white/15 bg-white/10 text-white px-3';
 const label = (list: readonly { value: string; label: string }[], counts: Record<string, number>) =>
   Object.entries(counts)
     .map(([k, n]) => `${list.find((r) => r.value === k)?.label ?? k} (${n})`)
@@ -31,7 +31,7 @@ export default async function ReportsQueuePage({ searchParams }: { searchParams:
         {products.map((p) => (
           <li
             key={p.productId}
-            className="flex flex-col gap-2 rounded-2xl border-2 border-black/10 p-4"
+            className="flex flex-col gap-2 rounded-[18px] border border-white/10 bg-white/5 p-4"
             data-testid="product-report-row"
           >
             <p className="font-extrabold">
@@ -39,9 +39,9 @@ export default async function ReportsQueuePage({ searchParams }: { searchParams:
             </p>
             <p className="text-sm">
               {p.reporters} người báo: {label(REPORT_REASONS, p.reasons)}
-              {p.hidden ? <span className="ml-1 font-bold text-danger">· đang ẩn</span> : null}
+              {p.hidden ? <span className="ml-1 font-bold text-red-400">· đang ẩn</span> : null}
             </p>
-            {p.messages.length ? <p className="text-sm text-black/70">“{p.messages.join('” · “')}”</p> : null}
+            {p.messages.length ? <p className="text-sm text-white/70">“{p.messages.join('” · “')}”</p> : null}
             <form action={resolveProductAction.bind(null, p.productId, 'remove')} className="flex gap-2">
               <input name="reason" required placeholder="Lý do gỡ" className={input} />
               <ConfirmSubmit confirm="Gỡ sản phẩm này khỏi 9MUA?" tone="danger">
@@ -61,7 +61,7 @@ export default async function ReportsQueuePage({ searchParams }: { searchParams:
         {videos.map((v) => (
           <li
             key={v.videoId}
-            className="flex flex-col gap-2 rounded-2xl border-2 border-black/10 p-4"
+            className="flex flex-col gap-2 rounded-[18px] border border-white/10 bg-white/5 p-4"
             data-testid="video-report-row"
           >
             <p className="font-extrabold">
@@ -94,7 +94,7 @@ export default async function ReportsQueuePage({ searchParams }: { searchParams:
       </h2>
       <ul className="flex flex-col gap-2 text-sm">
         {failed.map((f) => (
-          <li key={f.videoId} className="rounded-xl bg-surface-muted p-3">
+          <li key={f.videoId} className="rounded-xl bg-white/5 p-3">
             {f.videoId} · {f.attempts} lần · {formatDateTimeVN(f.at)} — {f.error}
           </li>
         ))}

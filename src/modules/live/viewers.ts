@@ -116,16 +116,33 @@ export function viewToken(liveId: string, key: string): string {
 }
 
 // Worker gọi mỗi 5 giây: có hình thì "live"; mất hình quá 60 giây, quá 2 giờ, hoặc mã phát hết hạn mà chưa có hình
-// thì kết thúc (SPEC-live.md "Trạng thái buổi live").
-export async function syncWithMediaServer(): Promise<{ started: number; ended: number }> {
+// thì kết thúc (SPEC-live.md "Trạng thái buổi live"). Máy chủ hình không trả lời thì vẫn huỷ buổi chưa từng có
+// hình và buổi quá 2 giờ (không để chiếm chỗ), giữ nguyên buổi đang live, rồi báo lỗi cho worker ghi log.
+export async function syncWithMediaServer(
+  server = mediaServer(),
+): Promise<{ started: number; ended: number }> {
   const sessions = await db.liveSession.findMany({ where: { status: { in: OPEN } } });
   if (sessions.length === 0) return { started: 0, ended: 0 };
-  const ready = await mediaServer().readyPaths();
+  let ready: Set<string> | null = null;
+  let failure: unknown = null;
+  try {
+    ready = await server.readyPaths();
+  } catch (e) {
+    failure = e;
+  }
   const maxMs = (await getIntSetting('live_max_minutes')) * 60_000;
   const at = now();
   let started = 0;
   let ended = 0;
   for (const s of sessions) {
+    if (!ready) {
+      const reason =
+        s.status === 'live'
+          ? s.startedAt && at.getTime() - s.startedAt.getTime() >= maxMs && 'time_limit'
+          : at.getTime() - s.createdAt.getTime() > PUBLISH_TOKEN_TTL_MS + NO_MEDIA_END_MS && 'never_started';
+      if (reason && (await finishLive(s.id, 'ended', reason))) ended += 1;
+      continue;
+    }
     const hasMedia = ready.has(s.mediaPath);
     if (hasMedia) {
       if (s.status === 'created') started += 1;
@@ -149,5 +166,6 @@ export async function syncWithMediaServer(): Promise<{ started: number; ended: n
     )
       ended += 1;
   }
+  if (failure) throw failure;
   return { started, ended };
 }

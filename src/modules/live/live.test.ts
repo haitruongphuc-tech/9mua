@@ -150,6 +150,24 @@ describe('trạng thái buổi live theo máy chủ hình', () => {
     );
   });
 
+  it('máy chủ hình không trả lời: buổi chưa có hình vẫn tự huỷ, quá 2 giờ vẫn kết thúc, còn lại giữ nguyên', async () => {
+    setClock(new Date('2026-10-27T03:00:00Z'));
+    await setSetting('live_max_sessions', '3', null);
+    const long = await goLive((await oldUser()).id);
+    advanceClock({ minutes: 118 });
+    const live = await goLive((await oldUser()).id, 'Đang live');
+    const idle = await startLive((await oldUser()).id, { title: 'Bỏ dở' });
+    if (!idle.ok) throw new Error(idle.error);
+    const down = { ...fakeMedia, readyPaths: () => Promise.reject(new Error('MediaMTX API 502')) };
+    advanceClock({ minutes: 4 });
+    await expect(syncWithMediaServer(down)).rejects.toThrow('MediaMTX API 502');
+    const status = async (id: string) =>
+      (await db.liveSession.findUniqueOrThrow({ where: { id } })).endReason ?? 'open';
+    expect(await status(long.liveId)).toBe('time_limit');
+    expect(await status(live.liveId)).toBe('open');
+    expect(await status(idle.liveId)).toBe('never_started');
+  });
+
   it('người phát bấm kết thúc; người khác không kết thúc được', async () => {
     const host = await oldUser();
     const other = await oldUser();

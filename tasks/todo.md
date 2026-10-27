@@ -610,7 +610,7 @@
 ## Phase 10 — V4: giao diện, mạng xã hội, livestream (`docs/v4-merge-plan.md`, CEO duyệt 27/10/2026)
 
 ### Giai đoạn A — Giao diện (không đổi schema, không đụng sổ tiền trừ T46)
-- [ ] **T38: Gộp nhánh mô tả sản phẩm chia mục** (S) — review `claude/project-thread-dnygzz`, gộp vào `main`.
+- [x] **T38: Gộp nhánh mô tả sản phẩm chia mục** (S) — review `claude/project-thread-dnygzz`, gộp vào `main`.
 - [ ] **T39: Thanh điều hướng 5 nút + header + logo tròn** (M) — điện thoại: Trang chủ · Chợ · ＋ Đăng video ·
   Giỏ · Tôi; máy tính giữ thanh trên. Logo vòng tròn trắng viền cam, không nhấp nháy. Thêm `lucide-react`.
   Cập nhật `docs/BRAND.md`.

@@ -145,6 +145,15 @@ Kênh chi hộ PayOS cần:
   lệnh sẽ nằm ở trạng thái "đang chuyển" và hệ thống báo CEO sau 2 giờ.
 - Thêm IP của VPS vào danh sách IP được phép gọi API chi hộ (nếu PayOS yêu cầu).
 
+Đăng nhập Google (không bắt buộc; để trống thì ẩn nút "Tiếp tục với Google"):
+1. Vào console.cloud.google.com → tạo dự án (vd. `9mua`).
+2. *APIs & Services* → *OAuth consent screen*: chọn **External**, điền tên `9MUA`, email hỗ trợ, logo; mục
+   *Authorized domains* thêm `9mua.com`; link chính sách `https://9mua.com/chinh-sach/bao-mat`. Phạm vi chỉ cần
+   `openid`, `email`, `profile`. Bấm **Publish app** (không thì chỉ tài khoản thử đăng nhập được).
+3. *Credentials* → *Create credentials* → *OAuth client ID* → **Web application**.
+   *Authorized redirect URIs* điền đúng: `https://9mua.com/api/auth/google/callback`.
+4. Chép *Client ID* vào `GOOGLE_CLIENT_ID`, *Client secret* vào `GOOGLE_CLIENT_SECRET`.
+
 AI Studio (không bắt buộc, `SPEC-ai.md`):
 - `ANTHROPIC_API_KEY`: tạo ở console.anthropic.com → *API Keys* (nạp trước ít tiền, vd. 5 USD). Dùng để AI viết
   mô tả; mỗi lần khoảng 20đ.
@@ -176,7 +185,7 @@ Sửa `.env` sau này: `docker compose up -d` để app nhận giá trị mới 
 cd /opt/9mua
 docker compose up -d --build db
 docker compose run --rm --build migrate   # áp migration database
-docker compose up -d --build              # app + worker (build lần đầu mất 5–10 phút)
+docker compose up -d --build              # app + worker + mediamtx (build lần đầu mất 5–10 phút)
 curl -s 127.0.0.1:3009/api/health         # → {"ok":true}
 ```
 
@@ -263,6 +272,7 @@ Script `scripts/deploy.sh` làm lần lượt:
 3. Sao lưu database vào `/srv/9mua/backups/`.
 4. Nâng cấp database (migration).
 5. Chuyển sang bản mới (web gián đoạn vài giây), rồi kiểm tra web và worker chạy được trong 90 giây.
+6. Bật (hoặc tạo lại khi cấu hình đổi) máy chủ hình `mediamtx` cho Live. Lỗi ở bước này chỉ báo, không quay về.
 
 Lỗi ở bất kỳ bước nào thì script **tự quay về code và bản cũ**, in lý do và đường dẫn bản sao lưu. Script cũng nhắc
 khi bản mới đổi file cấu hình cron/Nginx (chép lại theo mục 6 và 8) hoặc thêm biến mới vào `.env.example`.
@@ -314,7 +324,7 @@ vào `ninemua`, chép lại `files/uploads` và `files/private` về `/srv/9mua/
 - [ ] `docker compose run --rm worker ffmpeg -version` chạy được (worker có ffmpeg).
 - [ ] Gửi liên tục 7 lần form đăng nhập sai: lần thứ 7 trở đi nhận lỗi 429 (giới hạn theo IP).
 - [ ] `sh scripts/backup-db.sh` chạy tay 1 lần thành công, rồi khôi phục thử như mục 11.
-- [ ] Live: `docker compose logs --tail=50 mediamtx` không có dòng `ERR`; `curl 127.0.0.1:9997` báo "Connection refused"
+- [ ] Live: `docker compose logs --tail 50 mediamtx | sed 's/key=[^" ]*/key=***/g'` (lệnh tự che khoá nội bộ) không có dòng `ERR`; `curl 127.0.0.1:9997` báo "Connection refused"
   (cổng quản trị không mở ra host). Dùng 2 điện thoại khác mạng (1 máy 4G): máy A vào `/live/phat` bấm phát, máy B
   vào `/live` thấy hình trong vài giây, chat qua lại được. Không thấy hình thì kiểm lại `LIVE_PUBLIC_IP` và cổng
   8189 (mục 2, mục 4).

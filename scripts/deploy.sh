@@ -120,6 +120,12 @@ SWITCHED=1
 docker compose up -d --no-build app worker || fail 'Không khởi động được bản mới.'
 healthy || fail 'Bản mới không chạy được (kiểm tra 90 giây).'
 
+# Máy chủ hình cho Live (SPEC-live.md). Lỗi ở đây không quay về bản cũ vì web vẫn chạy, chỉ báo để xem.
+# Đổi cấu hình MediaMTX thì tạo lại container để nó đọc file mới.
+if git diff --quiet "$OLD" "$NEW" -- deploy/mediamtx docker-compose.yml; then recreate=; else recreate=--force-recreate; fi
+docker compose up -d $recreate mediamtx >/dev/null 2>&1 ||
+  echo '[CHÚ Ý] MediaMTX (Live) chưa chạy. Xem (đã che khoá): docker compose logs --tail 50 mediamtx | sed "s/key=[^\" ]*/key=***/g"'
+
 echo "$OLD" >"$GITDIR/deploy-previous"
 docker image prune -f >/dev/null
 docker builder prune -f --filter until=168h >/dev/null 2>&1 || true

@@ -15,6 +15,8 @@ trên Chợ chung. Creator đăng video dọc 9:16 có gắn sản phẩm. CEO q
 | `marketplace` | Chợ chung tại `9mua.com/cho`: liệt kê sản phẩm của Kiot đang hoạt động, tìm kiếm, lọc danh mục, thêm vào giỏ | `kiot`, `billing` |
 | `creator` | Creator đăng video dọc ≤60s, feed 9:16 cuộn dọc, thích / lượt xem, gắn sản phẩm Kiot vào video → bấm mua | `identity`, `kiot` |
 | `admin` | Trang CEO: người dùng, Kiot, đơn hàng, giao dịch, duyệt rút tiền, doanh thu, khoá Kiot, gỡ sản phẩm/video vi phạm | tất cả ở trên |
+| `live` | Chủ Kiot phát live từ trình duyệt điện thoại (MediaMTX trên VPS), người xem vuốt dọc, chat, thả tim, mua sản phẩm đang ghim (`SPEC-live.md`, chờ duyệt) | `identity`, `kiot`, `billing`, `orders` |
+| `xu` | Sổ xu thưởng chỉ thêm: 9MUA tự thưởng chủ Kiot theo số người xem live hợp lệ; CEO chỉnh luật và thu hồi (`SPEC-live.md`, chờ duyệt) | `identity`, `kiot`, `live` |
 
 Thứ tự xây:
 `identity` → `kiot` → `payments` → `billing` → `orders` → `payouts` → `marketplace`, `creator` (song song) → `admin`
@@ -30,10 +32,10 @@ Thứ tự xây:
 3. Giao hàng: người bán tự giao và tự cập nhật trạng thái. Chưa tích hợp GHN/GHTK.
 4. VPS Ubuntu có sẵn Nginx + Node.js. Sẽ cài thêm **PostgreSQL**. Ảnh và video lưu trên ổ đĩa VPS,
    do Nginx phục vụ. Cần **chứng chỉ wildcard `*.9mua.com`** (Let's Encrypt, DNS challenge).
-5. Video MVP: tải lên ≤60 giây, ≤100MB, chuyển mã về MP4 H.264 720p bằng ffmpeg (xem `SPEC-creator.md`). Chưa livestream.
+5. Video MVP: tải lên ≤60 giây, ≤100MB, chuyển mã về MP4 H.264 720p bằng ffmpeg (xem `SPEC-creator.md`). Livestream xem `SPEC-live.md` (CEO yêu cầu làm ngay, 27/10/2026).
 6. Giao diện tiếng Việt, ưu tiên điện thoại, màu và logo theo `docs/BRAND.md`.
 7. **Ngoài phạm vi MVP:** quà tặng / tiền thưởng creator, affiliate, đấu trường, AI mua/bán, tự đăng
-   12 nền tảng, Quỹ AI, Visa ảo, blockchain, MISA, đa ngôn ngữ, chi trả tự động.
+   12 nền tảng, Quỹ AI, Visa ảo, blockchain, MISA, chi trả tự động. (Đa ngôn ngữ: CEO yêu cầu làm ngay, 27/10/2026, xem `docs/v4-merge-plan.md` §7.)
 8. **Phí sàn mặc định 5% mỗi đơn**, CEO chỉnh được trong trang admin (áp dụng cho đơn mới).
 9. **Tiền đơn được cộng vào số dư khả dụng sau 7 ngày** kể từ lúc đơn hoàn tất, nếu không có khiếu nại
    hay hoàn tiền. Sau đó người bán mới được rút.

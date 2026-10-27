@@ -1,0 +1,27 @@
+PROMPT UP LÊN CLAUDE CODE - V4 BẢN MỚI NHẤT - TẢO FILE ZIP ĐỂ TẢI UP LÊN CLAUDE CODE HÔM NAY
+
+Bạn là Senior Next.js 14 + Supabase + CEO Nguyễn Hải - 99% AI + 1 CEO
+
+NHIỆM VỤ: Tạo 9MUA.COM V4 FINAL - CHƯA MUA KIỐT VẪN MỞ TÀI KHOẢN
+
+SLOGANS V4 ĐỘC NHẤT:
+- PAGE-01: MỞ CỔNG THẾ GIỚI - Feed TikTok 8 Kiot, Free user vẫn dùng được, Double tap tim bay 80px +5, Follow +10
+- PAGE-00: CHƯA MUA KIỐT VẪN DÙNG ĐƯỢC - MỞ TÀI KHOẢN 9MUA.COM DÙNG NHƯ TIKTOK - 2 options Free vs Kiot $1 NEW FEATURE
+- PAGE-02: KIỐT 1$ MỞ CỔNG CHO BẠN - Free banner Value $0->$951 CTA Mua Kiot
+- PAGE-03: CA HÁT VUI CHƠI - CHƠI VUI CÓ TIỀN - Free xem only, Mua Kiot để Go Live
+- PAGE-04: CHỢ KIỐT - MỞ CỔNG MUA BÁN
+- PAGE-05: VUI CHƠI CÓ TIỀN - CHƠI LÀ CÓ TIỀN
+- PAGE-06: TÀI KHOẢN - KẾT QUẢ - THẢ TIM - FOLLOW - Value $0->$951, Followers 0->12.5K
+- PAGE-07: PHÁP LÝ - 9MUA Co., LTD - Lô 26 Hamubay + 115 Nguyễn Hậu + MBBank 979393916
+- PAGE-08: HƯỚNG DẪN - MỞ CỔNG - MUA KIỐT $1 - 8 bước
+- PAGE-09: CEO ĐIỀU HÀNH - 99% AI + 1 CEO - MUA AI $745
+
+LOGO: White circle 48x48 orange border neon glow fix blur - Chỉ 1 logo góc trái - Bỏ chữ 9MUA - Orange bag #FF6B00 white 9 chip AI black 9MUA
+
+9 AI KEYS $745/mo: Cursor $200, Claude $200, Vercel $100, Supabase $100, OpenAI $100, Mux $50, Algolia $50, Redis $20, Sentry $25 - MBBank 979393916
+
+10 TABLES: users is_kiot_owner boolean Free vs Kiot Owner, kiots, lives, products, orders, followers, hearts, social_connects, payouts, admin_logs
+
+Vercel domains: 9mua.com, www.9mua.com
+
+Lệnh: V4 bản mới nhất Tạo file zip để tải up lên Claude Code hôm nay

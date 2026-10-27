@@ -1,0 +1,21 @@
+CHECKLIST DEPLOY V4 FINAL - CEO NGUYỄN HẢI - 99% AI + 1 CEO
+
+[ ] 1. Tải ZIP: 9MUA-COM-V4-MOI-NHAT-CHUA-MUA-KIOT-MO-TAI-KHOAN-CLAUDE-CODE-99-AI-1-CEO.zip
+[ ] 2. Giải nén - Kiểm tra 22 files
+[ ] 3. Up lên Claude Code: Upload ZIP hoặc kéo thả thư mục
+[ ] 4. Cài đặt: npm install - Next 14.2.5 React 18.3.1 Supabase 2.45 Framer-motion 11
+[ ] 5. Env: Copy .env.example -> .env.local - Điền 9 AI keys $745/mo
+[ ] 6. Supabase: Chạy supabase/schema.sql - 10 tables - is_kiot_owner boolean
+[ ] 7. Logo check: White circle 48x48 orange border neon glow - Chỉ 1 logo góc trái
+[ ] 8. Slogans check: 10 slogans độc nhất V4 - CHƯA MUA KIỐT VẪN DÙNG ĐƯỢC
+[ ] 9. Build: npm run build
+[ ] 10. Vercel: vercel --prod --domains 9mua.com,www.9mua.com
+[ ] 11. Test Free user: Mở tài khoản không mua kiốt vẫn dùng như TikTok
+[ ] 12. Test Kiot Owner: Mua kiốt $1 -> Value $0->$951 Followers 0->12.5K Go Live
+
+CÂU LỆNH LẤY LẠI FILE:
+V4 bản mỗi nhất Tạo file zip dể tải up lên Claude code hôm nay
+V4 bản mới nhất Tạo file zip để tải up lên Claude Code hôm nay - 9MUA.COM V4 FINAL CHỐT
+
+MBBank: 979393916 - Nguyễn Hải
+9 AI: Cursor $200 Claude $200 Vercel $100 Supabase $100 OpenAI $100 Mux $50 Algolia $50 Redis $20 Sentry $25 = $745/mo

@@ -1,0 +1,9 @@
+{
+  "framework": "nextjs",
+  "domains": [
+    "9mua.com",
+    "www.9mua.com"
+  ],
+  "buildCommand": "next build",
+  "outputDirectory": ".next"
+}

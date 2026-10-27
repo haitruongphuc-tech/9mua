@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { MarketFeed } from '@/components/market/MarketFeed';
 import { MarketFilters } from '@/components/market/MarketFilters';
+import { MarketShowcase } from '@/components/market/MarketShowcase';
 import { categoryName } from '@/modules/kiot';
 import { parseSearchParams, searchProducts, toSearchString } from '@/modules/marketplace';
 
@@ -32,6 +33,13 @@ export default async function MarketPage({ searchParams }: Props) {
             : 'Chợ 9MUA'}
       </h1>
       <MarketFilters params={params} />
+      {/* Chợ chưa lọc gì: hiện Bán chạy, Video hot, Kiot nổi bật (trước T40 nằm ở trang chủ). */}
+      {query === '' && !params.cursor ? (
+        <>
+          <MarketShowcase variant="cho" />
+          <h2 className="text-xl font-extrabold">Tất cả sản phẩm</h2>
+        </>
+      ) : null}
       <MarketFeed
         key={query + (params.cursor ?? '')}
         initial={page.items}

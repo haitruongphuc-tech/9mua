@@ -45,10 +45,10 @@ export async function SiteHeader() {
               Chợ
             </Link>
             <Link
-              href={`${base}/video`}
+              href={`${base}/cho/kiot`}
               className="hidden rounded-full px-3 py-2 hover:bg-surface-muted md:inline"
             >
-              Video
+              Kiot
             </Link>
             <Link
               href={`${base}/kiot-cua-toi`}

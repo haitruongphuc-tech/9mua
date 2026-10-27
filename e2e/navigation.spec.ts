@@ -6,14 +6,15 @@ test('điện thoại: thanh dưới 5 nút, nút đang ở sáng lên; ô tìm 
   await page.goto('/cho');
   const nav = page.getByRole('navigation', { name: 'Điều hướng chính' });
   await expect(nav).toBeVisible();
-  await expect(nav.getByRole('link')).toHaveText(['Trang chủ', 'Chợ', 'Đăng video', 'Video', 'Tôi']);
+  await expect(nav.getByRole('link')).toHaveText(['Trang chủ', 'Chợ', 'Đăng video', 'Kiot', 'Tôi']);
   await expect(nav.getByRole('link', { name: 'Chợ' })).toHaveAttribute('aria-current', 'page');
   // Link chữ ở thanh trên chỉ có trên máy tính.
-  await expect(page.getByRole('banner').getByRole('link', { name: 'Video', exact: true })).toBeHidden();
+  await expect(page.getByRole('banner').getByRole('link', { name: 'Kiot', exact: true })).toBeHidden();
 
-  await nav.getByRole('link', { name: 'Trang chủ' }).tap();
-  await page.waitForURL((u) => u.pathname === '/');
-  await expect(nav.getByRole('link', { name: 'Trang chủ' })).toHaveAttribute('aria-current', 'page');
+  await nav.getByRole('link', { name: 'Kiot' }).tap();
+  await page.waitForURL((u) => u.pathname === '/cho/kiot');
+  await expect(nav.getByRole('link', { name: 'Kiot' })).toHaveAttribute('aria-current', 'page');
+  await expect(nav.getByRole('link', { name: 'Chợ' })).not.toHaveAttribute('aria-current', 'page');
 
   const search = page.getByRole('searchbox', { name: 'Tìm trên Chợ 9MUA' });
   await search.fill('mật ong');
@@ -27,7 +28,7 @@ test('điện thoại: thanh dưới 5 nút, nút đang ở sáng lên; ô tìm 
   expect(footer!.y + footer!.height).toBeLessThanOrEqual(bar!.y + 1);
 });
 
-test('máy tính: không có thanh dưới, thanh trên có Chợ/Video/Bán hàng và logo về trang chủ', async ({
+test('máy tính: không có thanh dưới, thanh trên có Chợ/Kiot/Bán hàng và logo về trang chủ', async ({
   page,
   isMobile,
 }) => {
@@ -35,7 +36,7 @@ test('máy tính: không có thanh dưới, thanh trên có Chợ/Video/Bán hà
   await page.goto('/cho');
   await expect(page.getByRole('navigation', { name: 'Điều hướng chính' })).toBeHidden();
   const header = page.getByRole('banner');
-  for (const name of ['Chợ', 'Video', 'Bán hàng'])
+  for (const name of ['Chợ', 'Kiot', 'Bán hàng'])
     await expect(header.getByRole('link', { name, exact: true })).toBeVisible();
   await header.getByRole('link', { name: '9MUA - Trang chủ' }).click();
   await page.waitForURL((u) => u.pathname === '/');

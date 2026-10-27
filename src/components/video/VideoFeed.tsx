@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { addToCartAction } from '@/components/orders/add-to-cart-action';
 import { ME_CHANGED_EVENT } from '@/components/UserMenu';
 import { formatVnd } from '@/lib/format';
@@ -22,15 +23,20 @@ const REPORT_REASONS = [
 // Safari iPhone kéo khung snap về video cũ nếu cấu trúc trang đổi giữa lúc đang vuốt (WebKit bug 173830):
 // không thêm/bớt phần tử trong các video khi đổi video đang xem (chỉ đổi class), và chỉ nối thêm video
 // tải về sau khi ngón tay đã dừng vuốt.
+// variant "page" (/video, /v/<id>): toàn màn hình, có nút ✕. "home" (trang chủ, T40): nằm giữa thanh trên và
+// thanh điều hướng dưới, chỉ tải trước video đang xem để tiết kiệm 4G.
 export function VideoFeed({
   initial,
   nextCursor,
   appUrl,
+  variant = 'page',
 }: {
   initial: FeedVideo[];
   nextCursor: string | null;
   appUrl: string;
+  variant?: 'page' | 'home';
 }) {
+  const home = variant === 'home';
   const [items, setItems] = useState(initial);
   const [cursor, setCursor] = useState(nextCursor);
   const [active, setActive] = useState(0);
@@ -211,18 +217,150 @@ export function VideoFeed({
 
   return (
     <div
-      className="fixed inset-0 z-50 snap-y snap-mandatory overflow-y-scroll overscroll-y-contain bg-black text-white"
-      data-testid="video-feed"
-      onScroll={onScroll}
+      className={`fixed bg-black text-white ${
+        home
+          ? 'inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] top-14 z-30 md:bottom-0'
+          : 'inset-0 z-50'
+      }`}
     >
-      <div className="fixed left-0 right-0 top-0 z-10 flex items-center justify-between p-3">
-        <Link
-          href="/"
-          aria-label="Đóng"
-          className="grid h-10 w-10 place-items-center rounded-full bg-black/40 text-xl"
-        >
-          ✕
-        </Link>
+      <div
+        className="h-full snap-y snap-mandatory overflow-y-scroll overscroll-y-contain"
+        data-testid="video-feed"
+        onScroll={onScroll}
+      >
+        {items.map((v, i) => (
+          <section
+            key={v.id}
+            data-feed-item
+            data-index={i}
+            data-testid="feed-item"
+            className="relative h-full w-full snap-start snap-always overflow-hidden"
+          >
+            <video
+              ref={(el) => {
+                videos.current[i] = el;
+              }}
+              src={v.fileUrl}
+              poster={v.posterUrl ?? undefined}
+              muted={muted}
+              playsInline
+              loop
+              preload={i === active ? 'auto' : i === active + 1 ? (home ? 'metadata' : 'auto') : 'none'}
+              onClick={() => setMuted((m) => !m)}
+              onTimeUpdate={(e) => {
+                const t = e.currentTarget.currentTime;
+                watched.current.set(v.id, Math.max(watched.current.get(v.id) ?? 0, t));
+              }}
+              className="h-full w-full object-contain"
+            />
+            {/* Luôn có trong trang, chỉ ẩn/hiện bằng class (xem ghi chú đầu file về Safari). */}
+            <button
+              type="button"
+              onClick={() => setMuted(false)}
+              tabIndex={muted && i === active ? 0 : -1}
+              aria-hidden={!(muted && i === active)}
+              className={`absolute left-1/2 top-16 -translate-x-1/2 rounded-full bg-black/50 px-4 py-1.5 text-sm font-bold ${
+                muted && i === active ? '' : 'pointer-events-none invisible'
+              }`}
+            >
+              🔇 Chạm để bật tiếng
+            </button>
+            <div className="absolute bottom-0 left-0 right-16 flex flex-col gap-2 bg-gradient-to-t from-black/80 to-transparent p-4 pb-6">
+              <Link href={`/creator/${v.author.id}`} className="font-extrabold">
+                @{v.author.displayName}
+              </Link>
+              {v.caption ? <p className="line-clamp-3 text-sm">{v.caption}</p> : null}
+              {v.products.length > 0 ? (
+                <ul className="flex gap-2 overflow-x-auto" data-testid="feed-products">
+                  {v.products.map((p) => (
+                    <li
+                      key={p.id}
+                      className="flex w-56 shrink-0 items-center gap-2 rounded-xl bg-white p-2 text-brand-ink"
+                    >
+                      <a
+                        href={p.url}
+                        className="flex min-w-0 flex-1 items-center gap-2"
+                        data-testid="feed-product-link"
+                      >
+                        <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-surface-muted">
+                          {p.thumbUrl ? (
+                            <Image
+                              src={p.thumbUrl}
+                              alt=""
+                              fill
+                              sizes="48px"
+                              className="object-cover"
+                              unoptimized
+                            />
+                          ) : null}
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block truncate text-sm font-bold">{p.name}</span>
+                          <span className="text-sm font-extrabold text-brand-deep">{formatVnd(p.price)}</span>
+                        </span>
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => addToCart(p.id, v.id)}
+                        aria-label={`Thêm ${p.name} vào giỏ`}
+                        className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand font-extrabold"
+                        data-testid="feed-add-to-cart"
+                      >
+                        🛒
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
+            <div className="absolute bottom-24 right-2 flex flex-col items-center gap-4">
+              <button
+                type="button"
+                onClick={() => like(i)}
+                aria-pressed={v.liked}
+                aria-label="Thích"
+                className="flex flex-col items-center text-xs font-bold"
+                data-testid="feed-like"
+              >
+                <span className={`text-3xl ${v.liked ? 'text-brand' : ''}`}>{v.liked ? '♥' : '♡'}</span>
+                <span data-testid="feed-likes">{v.likes.toLocaleString('vi-VN')}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => share(v)}
+                aria-label="Chia sẻ"
+                className="flex flex-col items-center text-xs font-bold"
+              >
+                <span className="text-3xl">↗</span>
+                Chia sẻ
+              </button>
+              <button
+                type="button"
+                onClick={() => setReporting(v.id)}
+                aria-label="Báo cáo video"
+                className="text-2xl"
+                data-testid="feed-report"
+              >
+                ⋯
+              </button>
+            </div>
+          </section>
+        ))}
+      </div>
+      <div
+        className={`absolute left-0 right-0 top-0 z-10 items-center justify-between p-3 ${
+          home ? 'hidden md:flex md:justify-end' : 'flex'
+        }`}
+      >
+        {home ? null : (
+          <Link
+            href="/"
+            aria-label="Đóng"
+            className="grid h-10 w-10 place-items-center rounded-full bg-black/40 text-xl"
+          >
+            ✕
+          </Link>
+        )}
         <Link
           href="/video/dang"
           className="rounded-full bg-brand px-4 py-2 text-sm font-extrabold text-brand-ink"
@@ -230,162 +368,56 @@ export function VideoFeed({
           + Đăng video
         </Link>
       </div>
-      {items.map((v, i) => (
-        <section
-          key={v.id}
-          data-feed-item
-          data-index={i}
-          data-testid="feed-item"
-          className="relative h-full w-full snap-start snap-always overflow-hidden"
-        >
-          <video
-            ref={(el) => {
-              videos.current[i] = el;
-            }}
-            src={v.fileUrl}
-            poster={v.posterUrl ?? undefined}
-            muted={muted}
-            playsInline
-            loop
-            preload={i === active || i === active + 1 ? 'auto' : 'none'}
-            onClick={() => setMuted((m) => !m)}
-            onTimeUpdate={(e) => {
-              const t = e.currentTarget.currentTime;
-              watched.current.set(v.id, Math.max(watched.current.get(v.id) ?? 0, t));
-            }}
-            className="h-full w-full object-contain"
-          />
-          {/* Luôn có trong trang, chỉ ẩn/hiện bằng class (xem ghi chú đầu file về Safari). */}
-          <button
-            type="button"
-            onClick={() => setMuted(false)}
-            tabIndex={muted && i === active ? 0 : -1}
-            aria-hidden={!(muted && i === active)}
-            className={`absolute left-1/2 top-16 -translate-x-1/2 rounded-full bg-black/50 px-4 py-1.5 text-sm font-bold ${
-              muted && i === active ? '' : 'pointer-events-none invisible'
-            }`}
-          >
-            🔇 Chạm để bật tiếng
-          </button>
-          <div className="absolute bottom-0 left-0 right-16 flex flex-col gap-2 bg-gradient-to-t from-black/80 to-transparent p-4 pb-6">
-            <Link href={`/creator/${v.author.id}`} className="font-extrabold">
-              @{v.author.displayName}
-            </Link>
-            {v.caption ? <p className="line-clamp-3 text-sm">{v.caption}</p> : null}
-            {v.products.length > 0 ? (
-              <ul className="flex gap-2 overflow-x-auto" data-testid="feed-products">
-                {v.products.map((p) => (
-                  <li
-                    key={p.id}
-                    className="flex w-56 shrink-0 items-center gap-2 rounded-xl bg-white p-2 text-brand-ink"
-                  >
-                    <a
-                      href={p.url}
-                      className="flex min-w-0 flex-1 items-center gap-2"
-                      data-testid="feed-product-link"
-                    >
-                      <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-surface-muted">
-                        {p.thumbUrl ? (
-                          <Image
-                            src={p.thumbUrl}
-                            alt=""
-                            fill
-                            sizes="48px"
-                            className="object-cover"
-                            unoptimized
-                          />
-                        ) : null}
-                      </span>
-                      <span className="min-w-0">
-                        <span className="block truncate text-sm font-bold">{p.name}</span>
-                        <span className="text-sm font-extrabold text-brand-deep">{formatVnd(p.price)}</span>
-                      </span>
-                    </a>
-                    <button
-                      type="button"
-                      onClick={() => addToCart(p.id, v.id)}
-                      aria-label={`Thêm ${p.name} vào giỏ`}
-                      className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand font-extrabold"
-                      data-testid="feed-add-to-cart"
-                    >
-                      🛒
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-          </div>
-          <div className="absolute bottom-24 right-2 flex flex-col items-center gap-4">
-            <button
-              type="button"
-              onClick={() => like(i)}
-              aria-pressed={v.liked}
-              aria-label="Thích"
-              className="flex flex-col items-center text-xs font-bold"
-              data-testid="feed-like"
-            >
-              <span className={`text-3xl ${v.liked ? 'text-brand' : ''}`}>{v.liked ? '♥' : '♡'}</span>
-              <span data-testid="feed-likes">{v.likes.toLocaleString('vi-VN')}</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => share(v)}
-              aria-label="Chia sẻ"
-              className="flex flex-col items-center text-xs font-bold"
-            >
-              <span className="text-3xl">↗</span>
-              Chia sẻ
-            </button>
-            <button
-              type="button"
-              onClick={() => setReporting(v.id)}
-              aria-label="Báo cáo video"
-              className="text-2xl"
-              data-testid="feed-report"
-            >
-              ⋯
-            </button>
-          </div>
-        </section>
-      ))}
-      {reporting ? (
-        <div className="fixed inset-0 z-30 flex items-end bg-black/50" onClick={() => setReporting(null)}>
-          <div
-            className="w-full rounded-t-3xl bg-white p-4 text-brand-ink"
-            onClick={(e) => e.stopPropagation()}
-            role="dialog"
-            aria-label="Báo cáo video"
-          >
-            <p className="mb-2 font-extrabold">Báo cáo video</p>
-            {REPORT_REASONS.map(([value, label]) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => report(reporting, value)}
-                className="block w-full border-b border-black/10 py-3 text-left font-bold"
-              >
-                {label}
-              </button>
-            ))}
-            <button
-              type="button"
+      {/* Bảng báo cáo và thông báo gắn vào <body> để luôn nổi trên thanh điều hướng dưới. */}
+      {reporting && typeof document !== 'undefined'
+        ? createPortal(
+            <div
+              className="fixed inset-0 z-[60] flex items-end bg-black/50"
               onClick={() => setReporting(null)}
-              className="mt-2 w-full py-3 text-center text-black/60"
             >
-              Huỷ
-            </button>
-          </div>
-        </div>
-      ) : null}
-      {toast ? (
-        <p
-          role="status"
-          className="fixed bottom-6 left-1/2 z-20 -translate-x-1/2 rounded-full bg-white px-4 py-2 text-sm font-bold text-brand-ink"
-          data-testid="feed-toast"
-        >
-          {toast}
-        </p>
-      ) : null}
+              <div
+                className="w-full rounded-t-3xl bg-white p-4 text-brand-ink"
+                onClick={(e) => e.stopPropagation()}
+                role="dialog"
+                aria-label="Báo cáo video"
+              >
+                <p className="mb-2 font-extrabold">Báo cáo video</p>
+                {REPORT_REASONS.map(([value, label]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => report(reporting, value)}
+                    className="block w-full border-b border-black/10 py-3 text-left font-bold"
+                  >
+                    {label}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setReporting(null)}
+                  className="mt-2 w-full py-3 text-center text-black/60"
+                >
+                  Huỷ
+                </button>
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
+      {toast && typeof document !== 'undefined'
+        ? createPortal(
+            <p
+              role="status"
+              className={`fixed left-1/2 z-[60] -translate-x-1/2 rounded-full bg-white px-4 py-2 text-sm font-bold text-brand-ink ${
+                home ? 'bottom-24 md:bottom-6' : 'bottom-6'
+              }`}
+              data-testid="feed-toast"
+            >
+              {toast}
+            </p>,
+            document.body,
+          )
+        : null}
     </div>
   );
 }

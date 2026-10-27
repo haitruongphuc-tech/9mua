@@ -4,7 +4,7 @@ import { signUpBuyer } from './helpers/orders';
 import { createProductViaUi } from './helpers/products';
 import { signUpWithKiot } from './helpers/seller';
 
-test('trang chủ → tìm → lọc Nông sản → trang Kiot → giỏ; báo cáo vi phạm', async ({ page, browser }) => {
+test('Chợ → tìm → lọc Nông sản → trang Kiot → giỏ; báo cáo vi phạm', async ({ page, browser }) => {
   const stamp = String(Date.now()).slice(-6);
   const { slug } = await signUpWithKiot(page, 'Kiot Trang Chủ');
   await activateKiot(slug);
@@ -12,7 +12,8 @@ test('trang chủ → tìm → lọc Nông sản → trang Kiot → giỏ; báo 
   await createProductViaUi(page, { name, price: '52000', category: 'nong-san' });
 
   const buyer = await signUpBuyer(browser);
-  await buyer.goto('/');
+  // Từ T40 các khối trang chủ cũ (số liệu, Tạo Kiot, Bán chạy…) nằm ở đầu Chợ.
+  await buyer.goto('/cho');
   const stats = await buyer.getByTestId('home-stats').textContent();
   const [kiots, products] = (stats ?? '').match(/[\d.]+/g)!.map((n) => Number(n.replace(/\./g, '')));
   // Số liệu trang chủ cache 60 giây nên có thể chậm hơn DB một chút; độ chính xác đã test ở home.test.ts.
@@ -21,10 +22,11 @@ test('trang chủ → tìm → lọc Nông sản → trang Kiot → giỏ; báo 
     await e2eDb.kiot.count({ where: { activeUntil: { gt: new Date() }, lockedAt: null } }),
   );
   expect(products).toBeGreaterThan(0);
-  await expect(buyer.getByRole('heading', { name: 'Mới lên Chợ' })).toBeVisible();
+  await expect(buyer.getByRole('heading', { name: 'Tất cả sản phẩm' })).toBeVisible();
 
-  await buyer.getByTestId('home-search').fill(`thanh long ruot do ${stamp}`);
-  await buyer.getByTestId('home-search').press('Enter');
+  const search = buyer.getByRole('searchbox', { name: 'Tìm trên Chợ 9MUA' });
+  await search.fill(`thanh long ruot do ${stamp}`);
+  await search.press('Enter');
   await buyer.waitForURL((u) => u.pathname === '/cho');
   await buyer.getByRole('link', { name: /Nông sản/ }).click();
   await buyer.waitForURL((u) => u.searchParams.get('dm') === 'nong-san');
@@ -42,9 +44,36 @@ test('trang chủ → tìm → lọc Nông sản → trang Kiot → giỏ; báo 
   expect(await e2eDb.productReport.count({ where: { productId: product.id } })).toBe(1);
 
   // Đã đăng nhập bấm "Tạo Kiot" thì vào thẳng trang tạo Kiot.
-  await buyer.goto('/');
+  await buyer.goto('/cho');
   await buyer.getByRole('link', { name: /Tạo Kiot –/ }).click();
   await buyer.waitForURL((u) => u.pathname === '/kiot-cua-toi/tao');
+});
+
+test('trang chủ là feed video nằm giữa thanh trên và thanh điều hướng dưới', async ({ page, isMobile }) => {
+  const author = await e2eDb.user.findFirstOrThrow({ where: { lockedAt: null } });
+  await e2eDb.video.create({
+    data: {
+      authorId: author.id,
+      caption: `Video trang chủ ${Date.now()}`,
+      status: 'ready',
+      fileUrl: '/uploads/khong-co.mp4',
+      readyAt: new Date(),
+      durationSec: 10,
+      score: 1000,
+    },
+  });
+  await page.goto('/');
+  const feed = page.getByTestId('video-feed');
+  await expect(feed).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(/9MUA/); // cho Google, ẩn khỏi mắt
+  await expect(page.getByRole('link', { name: 'Đóng' })).toHaveCount(0);
+  const header = (await page.getByRole('banner').boundingBox())!;
+  const box = (await feed.boundingBox())!;
+  expect(box.y).toBeGreaterThanOrEqual(header.y + header.height - 1);
+  if (isMobile) {
+    const nav = (await page.getByRole('navigation', { name: 'Điều hướng chính' }).boundingBox())!;
+    expect(box.y + box.height).toBeLessThanOrEqual(nav.y + 1);
+  }
 });
 
 test('sitemap và robots', async ({ page }) => {

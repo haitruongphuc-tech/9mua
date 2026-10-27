@@ -11,7 +11,11 @@ Chợ chỉ **đọc** dữ liệu của `kiot`, không sở hữu dữ liệu s
 
 ### Tiêu chí chấp nhận
 
-1. **Trang chủ `/`** (ưu tiên điện thoại):
+1. **Trang chủ `/` là feed video dọc kiểu TikTok** (CEO chọn 27/10/2026, `docs/v4-merge-plan.md`): nằm giữa
+   thanh trên và thanh điều hướng dưới, chỉ tải trước video đang xem, có tiêu đề + đoạn giới thiệu ẩn cho Google.
+   **Chưa có video nào** thì hiện các khối dưới đây. Khi Chợ chưa lọc gì, đầu `/cho` hiện số liệu + nút Tạo Kiot,
+   "Bán chạy", "Video hot", "Kiot nổi bật".
+   Các khối của trang chủ cũ (ưu tiên điện thoại):
    - Khối đầu: khẩu hiệu "Kiếm tiền trên 9mua.com dễ và nhanh nhất", ô tìm kiếm, 2 nút
      "Tạo Kiot – 26.000đ/năm" (dẫn tới `/kiot-cua-toi/tao`, chưa đăng nhập thì qua đăng ký) và "Vào Chợ".
    - Hàng danh mục: 12 danh mục có biểu tượng, bấm vào là lọc Chợ.

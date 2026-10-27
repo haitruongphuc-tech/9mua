@@ -19,7 +19,7 @@ Header web: `9mua-icon.png` 26px đặt trong **vòng tròn trắng 40px, viền
 (CEO chọn 27/10/2026, theo V4 — `docs/v4-merge-plan.md`). Máy tính có chữ "9MUA" bên phải logo; điện thoại chỉ
 logo. Không kéo méo, không đổi màu, không thêm hiệu ứng nhấp nháy cho logo.
 
-Điện thoại có thanh điều hướng 5 nút ở cuối màn hình (Trang chủ · Chợ · ＋ Đăng video · Video · Tôi), icon
+Điện thoại có thanh điều hướng 5 nút ở cuối màn hình (Trang chủ · Chợ · ＋ Đăng video · Kiot · Tôi; ô Kiot thành Live khi có livestream), icon
 `lucide-react`; nút giữa nền `brand` viền `brand-ink`, nút đang mở tô `brand-deep`.
 
 ## Màu

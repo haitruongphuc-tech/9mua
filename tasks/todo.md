@@ -617,7 +617,7 @@
 - [x] **T40: Trang chủ là feed video** (M) — nền đen; chữ giới thiệu + link Chợ cho Google; chỉ tải trước video
   đầu; chưa có video thì hiện nội dung Chợ. Nội dung trang chủ cũ (Video hot, Kiot nổi bật…) chuyển vào `/cho`.
   Kiểm lại vuốt trên iPhone.
-- [ ] **T47: Giao diện V4 — khung chung** (M) — CEO chốt lấy V4 làm chuẩn (§7 mục 10–11). Sửa `docs/BRAND.md`
+- [x] **T47: Giao diện V4 — khung chung** (M) — CEO chốt lấy V4 làm chuẩn (§7 mục 10–11). Sửa `docs/BRAND.md`
   trước. Màu V4 (nền `#0A0A0A`, cam `#FF6B00`, chữ trắng, viền 1px trắng 10%), font Be Vietnam Pro + Space Grotesk
   (tự host), logo 48px phát sáng nhấp nháy, header 64px (logo, slogan, tìm, giỏ), thanh dưới 64px
   Video · Chợ · Live · Kiot · Tôi, nút "Đăng video" lên góc màn hình Video. Ảnh so sánh với V4.

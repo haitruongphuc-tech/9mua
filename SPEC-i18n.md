@@ -1,7 +1,7 @@
 # Spec: Đa ngôn ngữ (i18n)
 
 > Áp dụng cho mọi module. Quyết định gốc: `docs/v4-merge-plan.md` §7 mục 13 (CEO yêu cầu làm ngay, 27/10/2026).
-> **Trạng thái: chờ CEO duyệt.**
+> **Trạng thái: CEO duyệt 27/10/2026** (giữ nguyên địa chỉ trang, không làm `/en/…`).
 
 ## Objective
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState, useEffect } from 'react';
-import { ME_CHANGED_EVENT } from '@/components/UserMenu';
+import { ME_CHANGED_EVENT } from '@/components/MeProvider';
 import { SubmitButton } from '@/components/ui/SubmitButton';
 import { TextField } from '@/components/ui/TextField';
 import { changeEmailAction, changePasswordAction, updateProfileAction, type FormState } from './actions';

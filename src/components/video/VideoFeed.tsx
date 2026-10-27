@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { addToCartAction } from '@/components/orders/add-to-cart-action';
-import { ME_CHANGED_EVENT } from '@/components/UserMenu';
+import { ME_CHANGED_EVENT } from '@/components/MeProvider';
 import { formatVnd } from '@/lib/format';
 import type { FeedVideo } from '@/modules/creator';
 
@@ -218,9 +218,7 @@ export function VideoFeed({
   return (
     <div
       className={`fixed bg-black text-white ${
-        home
-          ? 'inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] top-14 z-30 md:bottom-0'
-          : 'inset-0 z-50'
+        home ? 'inset-x-0 bottom-[calc(4rem+1px+env(safe-area-inset-bottom))] top-16 z-30' : 'inset-0 z-50'
       }`}
     >
       <div
@@ -348,8 +346,8 @@ export function VideoFeed({
         ))}
       </div>
       <div
-        className={`absolute left-0 right-0 top-0 z-10 items-center justify-between p-3 ${
-          home ? 'hidden md:flex md:justify-end' : 'flex'
+        className={`absolute left-0 right-0 top-0 z-10 flex items-center p-3 ${
+          home ? 'justify-end' : 'justify-between'
         }`}
       >
         {home ? null : (
@@ -363,7 +361,7 @@ export function VideoFeed({
         )}
         <Link
           href="/video/dang"
-          className="rounded-full bg-brand px-4 py-2 text-sm font-extrabold text-brand-ink"
+          className="rounded-full bg-brand px-4 py-2 text-[12px] font-black text-white shadow-[0_0_16px_rgb(255_107_0/0.4)]"
         >
           + Đăng video
         </Link>
@@ -409,7 +407,7 @@ export function VideoFeed({
             <p
               role="status"
               className={`fixed left-1/2 z-[60] -translate-x-1/2 rounded-full bg-white px-4 py-2 text-sm font-bold text-brand-ink ${
-                home ? 'bottom-24 md:bottom-6' : 'bottom-6'
+                home ? 'bottom-24' : 'bottom-6'
               }`}
               data-testid="feed-toast"
             >

@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState, useEffect } from 'react';
-import { ME_CHANGED_EVENT } from '@/components/UserMenu';
+import { ME_CHANGED_EVENT } from '@/components/MeProvider';
 import { SubmitButton } from '@/components/ui/SubmitButton';
 import { addToCartAction, type AddToCartState } from './add-to-cart-action';
 

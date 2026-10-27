@@ -1,56 +1,109 @@
 'use client';
 
-import { House, Plus, ShoppingBasket, Store, UserRound } from 'lucide-react';
+import { Clapperboard, Plus, ShoppingBasket, Store, User } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useMe } from './MeProvider';
 
-// Thanh điều hướng 5 nút cuối màn hình điện thoại, kiểu TikTok (docs/v4-merge-plan.md, T39). Trang chủ là feed
-// video (T40) nên ô thứ 4 là danh bạ Kiot; khi có livestream ô này thành "Live". Máy tính dùng thanh trên.
+// Thanh dưới 5 nút theo V4, hiện trên mọi màn hình (docs/BRAND.md; CEO chốt 27/10/2026, §7 mục 11):
+// Video (trang chủ) · Chợ · Live (nút giữa) · Kiot · Tôi.
 // base: '' trên 9mua.com; APP_URL trên trang Kiot (link về tên miền chính, không tô sáng nút nào).
+const starts = (path: string, prefix: string) => path === prefix || path.startsWith(`${prefix}/`);
+const ACCOUNT_PATHS = [
+  '/tai-khoan',
+  '/don-mua',
+  '/kiot-cua-toi',
+  '/thong-bao',
+  '/video/dang',
+  '/video/cua-toi',
+];
+
 export function BottomNav({ base = '' }: { base?: string }) {
   const pathname = usePathname();
+  const { me, notifications } = useMe();
+  const onAccount = ACCOUNT_PATHS.some((p) => starts(pathname, p));
   const items = [
-    { href: '/', label: 'Trang chủ', Icon: House },
-    { href: '/cho', label: 'Chợ', Icon: ShoppingBasket },
-    { href: '/video/dang', label: 'Đăng video', Icon: Plus, center: true },
-    { href: '/cho/kiot', label: 'Kiot', Icon: Store },
-    { href: '/tai-khoan', label: 'Tôi', Icon: UserRound },
+    {
+      href: '/',
+      label: 'Video',
+      Icon: Clapperboard,
+      active: pathname === '/' || (starts(pathname, '/video') && !onAccount),
+    },
+    {
+      href: '/cho',
+      label: 'Chợ',
+      Icon: ShoppingBasket,
+      active: starts(pathname, '/cho') && !starts(pathname, '/cho/kiot'),
+    },
+    { href: '/live', label: 'Live', Icon: Plus, center: true, active: starts(pathname, '/live') },
+    { href: '/cho/kiot', label: 'Kiot', Icon: Store, active: starts(pathname, '/cho/kiot') },
+    {
+      href: me === null ? '/dang-nhap?next=%2Ftai-khoan' : '/tai-khoan',
+      label: 'Tôi',
+      Icon: User,
+      active: onAccount,
+    },
   ];
-  const isActive = (href: string) =>
-    !base &&
-    (href === '/'
-      ? pathname === '/'
-      : href === '/cho'
-        ? (pathname === '/cho' || pathname.startsWith('/cho/')) && !pathname.startsWith('/cho/kiot')
-        : pathname === href || pathname.startsWith(`${href}/`));
 
   return (
     <nav
       aria-label="Điều hướng chính"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-black/10 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-ink/95 pb-[env(safe-area-inset-bottom)] text-white backdrop-blur-xl"
     >
-      {/* 63px + 1px viền trên = 4rem, khớp khoảng chừa ở body và feed video. */}
-      <ul className="mx-auto flex h-[63px] max-w-md items-center justify-around px-2">
-        {items.map(({ href, label, Icon, center }) => {
-          const active = isActive(href);
+      <ul className="mx-auto flex h-16 max-w-[560px] items-center justify-around px-2">
+        {items.map(({ href, label, Icon, center, active: on }) => {
+          const active = !base && on;
           return (
-            <li key={href}>
-              <Link
-                href={`${base}${href}`}
-                aria-current={active ? 'page' : undefined}
-                className={`flex w-16 flex-col items-center gap-0.5 text-[11px] font-bold ${
-                  active ? 'text-brand-deep' : 'text-black/60'
-                }`}
-              >
-                {center ? (
-                  <span className="grid h-8 w-12 place-items-center rounded-xl border-2 border-brand-ink bg-brand text-brand-ink">
-                    <Icon className="h-5 w-5" strokeWidth={2.5} aria-hidden />
+            <li key={label}>
+              {center ? (
+                <Link
+                  href={`${base}${href}`}
+                  aria-current={active ? 'page' : undefined}
+                  className="flex flex-col items-center"
+                >
+                  <span
+                    className={`grid h-9 w-14 place-items-center rounded-[12px] text-white ${
+                      active
+                        ? 'bg-brand shadow-[0_0_16px_#ff6b00]'
+                        : 'bg-gradient-to-r from-cyan-400 via-white to-brand p-[2px]'
+                    }`}
+                  >
+                    <span
+                      className={`grid h-full w-full place-items-center rounded-[10px] ${active ? '' : 'bg-brand'}`}
+                    >
+                      <Icon className="h-5 w-5" aria-hidden />
+                    </span>
                   </span>
-                ) : (
-                  <Icon className="h-6 w-6" strokeWidth={active ? 2.5 : 2} aria-hidden />
-                )}
-                {label}
-              </Link>
+                  <span className={`mt-0.5 text-[10px] font-bold ${active ? 'text-brand' : 'text-white/60'}`}>
+                    {label}
+                  </span>
+                </Link>
+              ) : (
+                <Link
+                  href={`${base}${href}`}
+                  aria-current={active ? 'page' : undefined}
+                  aria-label={
+                    label === 'Tôi' && me !== undefined
+                      ? `Tôi (${me?.displayName ?? 'đăng nhập'})`
+                      : undefined
+                  }
+                  data-testid={label === 'Tôi' ? 'user-menu' : undefined}
+                  className={`relative flex w-14 flex-col items-center gap-0.5 ${
+                    active ? 'text-brand' : 'text-white/60 hover:text-white'
+                  }`}
+                >
+                  <Icon className="h-6 w-6" aria-hidden />
+                  <span className="text-[10px] font-bold">{label}</span>
+                  {label === 'Tôi' && notifications > 0 ? (
+                    <span
+                      className="absolute -top-1 right-2 grid h-4 min-w-4 place-items-center rounded-full bg-danger px-1 text-[9px] font-black text-white"
+                      data-testid="nav-notifications"
+                    >
+                      {notifications}
+                    </span>
+                  ) : null}
+                </Link>
+              )}
             </li>
           );
         })}

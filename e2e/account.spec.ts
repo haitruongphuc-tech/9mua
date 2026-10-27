@@ -20,7 +20,7 @@ test('trang tài khoản: đổi tên, thêm email, đổi mật khẩu', async 
   await page.fill('#profile-name', 'Tên Mới E2E');
   await page.locator('#thong-tin button[type=submit]').click();
   await expect(page.getByTestId('profile-ok')).toBeVisible();
-  await expect(page.getByTestId('user-menu')).toHaveText('Tên Mới E2E');
+  await expect(page.getByTestId('user-menu')).toHaveAccessibleName('Tôi (Tên Mới E2E)');
 
   await page.fill('#email-new', `acc-${stamp}@9mua.test`);
   await page.fill('#email-password', 'sai-mat-khau');
@@ -41,7 +41,7 @@ test('trang tài khoản: đổi tên, thêm email, đổi mật khẩu', async 
   await page.fill('#identifier', `acc-${stamp}@9mua.test`);
   await page.fill('#password', 'mat-khau-2-e2e');
   await page.click('button[type=submit]');
-  await expect(page.getByTestId('user-menu')).toHaveText('Tên Mới E2E');
+  await expect(page.getByTestId('user-menu')).toHaveAccessibleName('Tôi (Tên Mới E2E)');
 });
 
 test('/admin: tài khoản thường thấy 404, CEO tạo bằng CLI vào được', async ({ page }) => {

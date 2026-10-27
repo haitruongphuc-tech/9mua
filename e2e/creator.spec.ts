@@ -15,8 +15,10 @@ test('creator: thông báo khi video xong, trang creator, báo cáo, xoá video'
     headers: { 'x-internal-token': E2E_CRON_TOKEN },
   });
 
-  // Chuông thông báo có 1 thông báo mới.
+  // Thanh dưới hiện số thông báo trên nút Tôi; trang Tôi có lối vào Thông báo.
   await creator.goto('/');
+  await expect(creator.getByTestId('nav-notifications')).toHaveText('1');
+  await creator.goto('/tai-khoan');
   await expect(creator.getByTestId('notifications-link')).toHaveAccessibleName('Thông báo (1 chưa đọc)');
   await creator.getByTestId('notifications-link').click();
   await expect(creator.getByTestId('notifications')).toContainText('Video đã đăng xong');

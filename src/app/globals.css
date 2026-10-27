@@ -1,14 +1,22 @@
 @import 'tailwindcss';
 @import '@fontsource/be-vietnam-pro/vietnamese-400.css';
 @import '@fontsource/be-vietnam-pro/vietnamese-700.css';
+@import '@fontsource/be-vietnam-pro/vietnamese-600.css';
 @import '@fontsource/be-vietnam-pro/vietnamese-800.css';
+@import '@fontsource/be-vietnam-pro/vietnamese-900.css';
 @import '@fontsource/be-vietnam-pro/400.css';
+@import '@fontsource/be-vietnam-pro/600.css';
 @import '@fontsource/be-vietnam-pro/700.css';
 @import '@fontsource/be-vietnam-pro/800.css';
+@import '@fontsource/be-vietnam-pro/900.css';
 
-/* Token màu theo docs/BRAND.md — không đặt chữ trắng trên nền brand. */
+/* Token màu theo docs/BRAND.md — chuẩn V4 (CEO chốt 27/10/2026). Trang chưa đổi sang V4 vẫn dùng nền trắng
+   (khung <main> trong layout) cho tới khi được làm lại. */
 @theme {
-  --color-brand: #fc6f15;
+  --color-ink: #0a0a0a;
+  --color-brand: #ff6b00;
+  --color-slogan: #94a3b8;
+  --color-brand-cream: #fff7ed;
   --color-brand-ink: #1a1410;
   --color-brand-deep: #c2410c;
   --color-surface: #ffffff;
@@ -16,15 +24,39 @@
   --color-success: #15803d;
   --color-danger: #dc2626;
   --font-sans: 'Be Vietnam Pro', ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-space-grotesk), 'Be Vietnam Pro', ui-sans-serif, sans-serif;
   --radius-card: 16px;
 }
 
 html {
-  color: var(--color-brand-ink);
-  background: var(--color-surface);
+  color: #fff;
+  background: var(--color-ink);
 }
 
 body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+}
+
+/* Trang đã đổi sang giao diện V4 (V4Page) phủ nền đen cả khung <main>. Giữ <main> là khối thường để các trang
+   cũ dùng mx-auto vẫn rộng đúng. */
+main:has(> [data-v4]) {
+  background: var(--color-ink);
+  color: #fff;
+}
+
+/* Logo V4 phát sáng nhấp nháy (docs/BRAND.md). */
+@keyframes glowPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 4px rgb(255 107 0 / 0.15),
+      0 0 12px #ff6b00;
+  }
+  50% {
+    box-shadow:
+      0 0 0 6px rgb(255 107 0 / 0.22),
+      0 0 22px #ff6b00,
+      0 0 36px rgb(255 107 0 / 0.4);
+  }
 }

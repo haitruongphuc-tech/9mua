@@ -37,8 +37,8 @@ export async function MarketShowcase({ variant }: { variant: 'home' | 'cho' }) {
   ]);
   const stats = (
     <p className="text-sm text-black/70" data-testid="home-stats">
-      {home.stats.kiots.toLocaleString('vi-VN')} Kiot đang bán ·{' '}
-      {home.stats.products.toLocaleString('vi-VN')} sản phẩm
+      {home.stats.kiots.toLocaleString('vi-VN')} Kiot đang bán · {home.stats.products.toLocaleString('vi-VN')}{' '}
+      sản phẩm
     </p>
   );
   const createKiot = (

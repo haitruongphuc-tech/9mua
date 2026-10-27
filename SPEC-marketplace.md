@@ -108,3 +108,12 @@ Cả hai có sẵn trong image Postgres chính thức.
 ## Open Questions
 
 Không có. Quảng cáo trả tiền để lên top để sau MVP.
+
+## Bổ sung 27/10/2026 — Giới thiệu & Pháp lý, trang chính sách (T44)
+
+- Trang `/gioi-thieu`: giới thiệu 9MUA ("99% AI vận hành - 1% CEO phê duyệt"), thông tin công ty lấy từ cài đặt pháp lý
+  của CEO (`SPEC-admin.md`), không vẽ con dấu, không có STK cá nhân.
+- Trang `/chinh-sach/<loai>`: quy chế hoạt động, điều khoản sử dụng, bảo mật thông tin, đổi trả & hoàn tiền, giải quyết
+  khiếu nại, vận chuyển, thanh toán. Nội dung do Claude viết nháp theo cách 9MUA đang vận hành thật; **CEO đọc duyệt trước
+  khi deploy**.
+- Chân trang có link tới các trang này.

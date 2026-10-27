@@ -623,6 +623,19 @@
   Video · Chợ · Live · Kiot · Tôi, nút "Đăng video" lên góc màn hình Video. Ảnh so sánh với V4.
 - [ ] **T48: Đa ngôn ngữ — nền móng** (M) — viết `SPEC-i18n.md`, CEO duyệt. Từ điển 7 thứ tiếng, nút chọn ngôn ngữ
   trên header, dịch khung chung.
+- [ ] **T58: Spec cho phần mới** — `SPEC-social.md`, `SPEC-ai.md`, bổ sung creator/identity/admin/billing/kiot/marketplace
+  (CEO duyệt qua chat, §7 mục 14).
+- [ ] **T59: Đăng nhập Google + popup mở tài khoản** (`SPEC-identity.md` bổ sung).
+- [ ] **T60: Admin nhớ thiết bị 30 ngày + công cụ CEO** (ghim, slogan, pháp lý, luật Free/voucher).
+- [ ] **T61: Module social** — follow, bình luận, lưu, hashtag, tim Kiot, giới hạn Free, voucher.
+- [ ] **T62: Feed V4** (gộp T41) — tab Đang Follow, thả tim 2 chạm, thanh tiến độ, cột nút, bình luận, chia sẻ có QR.
+- [ ] **T63: Story 24h + Duet**.
+- [ ] **T64: Trang Kiot V4** (gộp T42) + Social Connect.
+- [ ] **T65: Trang Tôi V4** (gộp T43) — Free/voucher/xu, Bộ sưu tập, lối tắt; cài đặt tài khoản sang `/tai-khoan/cai-dat`.
+- [ ] **T66: Đổi giao diện + dịch các trang còn lại** — Chợ, sản phẩm, danh bạ Kiot, giỏ, đặt hàng, đơn mua, đăng nhập,
+  Kiot của tôi, video, admin (chỉ tiếng Việt).
+- [ ] **T67: AI Studio** (`SPEC-ai.md`).
+- [ ] **T68: Giới thiệu & Pháp lý + chính sách** (gộp T44, T45) và **giá 1 USD + voucher** (gộp T46).
 - [ ] **T49–T57: Livestream + xu** (`SPEC-live.md`, CEO duyệt 27/10) — chia nhỏ trong `tasks/plan.md` trước khi làm:
   MediaMTX + Nginx + xác thực; bảng dữ liệu + bắt đầu/kết thúc; trang phát (WHIP); trang xem (WHEP) + đếm người
   xem; chat + tim (SSE); ghim sản phẩm + `sourceLiveId`; báo cáo + `/admin/live`; sổ xu + thưởng + `/admin/xu`;

@@ -218,3 +218,29 @@ export async function register(raw: unknown): Promise<RegisterResult> {
 
 1. Chứng chỉ wildcard `*.9mua.com` cần một API key DNS (hoặc thêm thủ công 1 bản ghi TXT mỗi 90 ngày).
    Xử lý lúc deploy, không chặn việc viết code.
+
+## Bổ sung 27/10/2026 — Đăng nhập Google, popup mở tài khoản (CEO duyệt qua chat, câu 3 "popup", câu 4 "Google")
+
+### Đăng nhập bằng Google
+- Nút "Tiếp tục với Google" trên trang đăng nhập, đăng ký và popup. Chỉ hiện khi đã cấu hình `GOOGLE_CLIENT_ID` và
+  `GOOGLE_CLIENT_SECRET` (CEO tạo trong Google Cloud theo `docs/deploy.md`).
+- Chuẩn OAuth 2.0 / OpenID Connect, luồng authorization code có **PKCE**, `state` và `nonce` chống giả mạo. Địa chỉ quay về
+  luôn là tên miền chính `https://9mua.com/api/auth/google/callback`.
+- Máy chủ đổi mã lấy `id_token`, **tự kiểm chữ ký** bằng khoá công khai của Google (JWKS) và kiểm `iss`, `aud`, `exp`,
+  `nonce`. Chỉ nhận email đã được Google xác minh (`email_verified`). Không thêm thư viện npm.
+- Tài khoản đã liên kết Google (cột `googleSub`) thì đăng nhập luôn.
+- Email Google **trùng tài khoản có sẵn** thì **không tự liên kết**: hiện "Email này đã có tài khoản 9MUA. Đăng nhập bằng
+  mật khẩu một lần để liên kết Google." Đăng nhập mật khẩu đúng trong 10 phút thì liên kết. Chống kẻ xấu tạo trước tài
+  khoản bằng email người khác.
+- Email chưa có tài khoản thì tạo tài khoản mới (tên lấy từ Google, mật khẩu ngẫu nhiên không ai biết; muốn đăng nhập bằng
+  mật khẩu thì dùng "Quên mật khẩu").
+- Tài khoản admin **không** đăng nhập bằng Google.
+- Dữ liệu: thêm cột `googleSub` (trống, duy nhất) vào bảng `User`. Chỉ thêm cột, dữ liệu cũ không đổi.
+
+### Popup mở tài khoản (V4)
+- Khách chưa đăng nhập vào web lần đầu: sau **1,2 giây** hiện bảng trượt từ dưới lên (V4): logo, "Mở tài khoản miễn phí -
+  Dùng như TikTok - Không cần mua Kiot", nút Google, ô tên + SĐT/email + mật khẩu, nút "MỞ TÀI KHOẢN MIỄN PHÍ", và
+  "Để sau, xem trước đã".
+- Bấm "Để sau" hoặc ✕ thì **30 ngày** không hiện lại. Không hiện trên trang đăng nhập/đăng ký, admin, thanh toán.
+- Đăng ký trong popup dùng đúng luồng đăng ký hiện có (cùng kiểm tra, cùng giới hạn).
+- Rủi ro đã báo CEO: Google có thể hạ hạng trang có popup che nội dung trên điện thoại. Popup chỉ hiện 1 lần và đóng được ngay.

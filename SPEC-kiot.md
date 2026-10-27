@@ -157,3 +157,21 @@ Hai người mua cùng lúc món cuối cùng thì chỉ một người thành c
 2. Dùng 12 danh mục như đã liệt kê.
 3. Chưa yêu cầu KYC khi tạo Kiot. Xác minh CCCD khi người bán **rút tiền lần đầu** (module `payouts`).
 4. Thêm hai dependency `sharp` và `qrcode`.
+
+## Bổ sung 27/10/2026 — Trang Kiot kiểu V4, link mạng xã hội (CEO duyệt qua chat)
+
+### Trang Kiot (T42)
+- Bố cục V4: ảnh bìa, avatar tròn viền đen dày, tên Kiot (font tiêu đề), `@slug · tên chủ`, hàng số liệu
+  **Followers · Tim · Sản phẩm · Đã bán** (không hiện điểm đánh giá khi chưa có đánh giá thật), giới thiệu kèm hashtag, tỉnh.
+- Hàng nút: **Follow** (cam, rộng), **Nhắn** (mở Zalo/gọi của Kiot), **Tim**, **Chia sẻ** (có mã QR).
+- 3 tab: **Video** (video của chủ Kiot), **Sản phẩm** (thẻ trắng, nút "+ Giỏ"), **Live** (đang live thì vào xem, chưa thì
+  báo chưa live). Mặc định tab Sản phẩm.
+- Nhãn "LIVE" đỏ trên avatar khi chủ Kiot đang live (`SPEC-live.md`).
+
+### Social Connect (thay bản giả của V4)
+- Trang `/ket-noi`: người dùng dán link trang của mình trên **TikTok, Facebook, Instagram, YouTube, Shopee, Zalo**. Máy chủ
+  kiểm link đúng tên miền của từng mạng.
+- Link hiện thành nút tròn trên trang creator và trang Kiot.
+- **Không** hiện số follower hay "giá trị tài khoản" của các mạng đó: kết nối thật cần từng mạng duyệt ứng dụng (nhiều
+  tuần), làm sau nếu CEO muốn (hỏi trước).
+- Dữ liệu: bảng mới `SocialLink`: (userId, platform) khoá chính, url, createdAt.

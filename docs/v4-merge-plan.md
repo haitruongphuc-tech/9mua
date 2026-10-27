@@ -188,6 +188,7 @@ Mỗi giai đoạn: cập nhật spec → CEO duyệt → code có test (cả đ
 | 11 | Thanh dưới (27/10) | **Video** (trang chủ) · **Chợ** · **Live** (nút giữa, hình như V4) · **Kiot** · **Tôi**. Nút "Đăng video" chuyển lên góc màn hình Video và vào trang Tôi |
 | 12 | Live (27/10, thay #8 phần thời điểm) | **Làm ngay**, không đợi xong giai đoạn A. Spec: `SPEC-live.md` |
 | 13 | Ngôn ngữ (27/10) | **Làm ngay**, 7 thứ tiếng như V4: Việt, Anh, Trung, Nhật, Hàn, Pháp, Tây Ban Nha. Chỉ dịch giao diện, nội dung người bán viết giữ nguyên. Gộp vào lúc đổi giao diện V4 từng trang |
+| 14 | 8 câu hỏi gom một lần (27/10) | 1 Follow/bình luận/lưu/hashtag: **làm luôn** (`SPEC-social.md`) · 2 Công cụ CEO: **làm luôn** · 3 **Popup** mở tài khoản như V4 · 4 **Đăng nhập Google** · 5 Story 24h: **làm luôn** · 6 Admin **nhớ thiết bị 30 ngày** · 7 **Giới hạn Free + voucher 100 tim** như V4 · 8 Social Connect, AI Studio, Duet: **làm luôn** (bản thật, `SPEC-ai.md`). CEO dặn: hỏi một lần rồi làm một mạch tới xong; V4 chỉ là tài liệu tham khảo giao diện và logic |
 
 **Xu 9MUA (mặc định, CEO sửa sau):**
 - 1 xu dùng thay 1.000đ trong 9MUA: gia hạn Kiot, đẩy video/live lên đầu feed. Không đổi ra tiền mặt, không

@@ -621,7 +621,7 @@
   trước. Màu V4 (nền `#0A0A0A`, cam `#FF6B00`, chữ trắng, viền 1px trắng 10%), font Be Vietnam Pro + Space Grotesk
   (tự host), logo 48px phát sáng nhấp nháy, header 64px (logo, slogan, tìm, giỏ), thanh dưới 64px
   Video · Chợ · Live · Kiot · Tôi, nút "Đăng video" lên góc màn hình Video. Ảnh so sánh với V4.
-- [ ] **T48: Đa ngôn ngữ — nền móng** (M) — viết `SPEC-i18n.md`, CEO duyệt. Từ điển 7 thứ tiếng, nút chọn ngôn ngữ
+- [x] **T48: Đa ngôn ngữ — nền móng** (M) — viết `SPEC-i18n.md`, CEO duyệt. Từ điển 7 thứ tiếng, nút chọn ngôn ngữ
   trên header, dịch khung chung.
 - [ ] **T58: Spec cho phần mới** — `SPEC-social.md`, `SPEC-ai.md`, bổ sung creator/identity/admin/billing/kiot/marketplace
   (CEO duyệt qua chat, §7 mục 14).

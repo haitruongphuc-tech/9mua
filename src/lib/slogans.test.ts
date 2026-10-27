@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { SLOGANS, sloganKey } from './slogans';
+import { vi } from '@/i18n/messages/vi';
+import { sloganKey } from './slogans';
 
 describe('sloganKey: slogan của trang theo đường dẫn (V4)', () => {
   it.each([
@@ -24,7 +25,7 @@ describe('sloganKey: slogan của trang theo đường dẫn (V4)', () => {
   });
 
   it('câu slogan đúng bản V4', () => {
-    expect(SLOGANS.home).toBe('Mở cổng thế giới - Một chạm là tới');
-    expect(SLOGANS.explore).toBe('Kiot nào cũng là showroom - 9MUA kết nối');
+    expect(vi['common.slogan.home']).toBe('Mở cổng thế giới - Một chạm là tới');
+    expect(vi['common.slogan.explore']).toBe('Kiot nào cũng là showroom - 9MUA kết nối');
   });
 });

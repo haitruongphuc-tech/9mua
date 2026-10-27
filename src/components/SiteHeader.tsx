@@ -1,10 +1,12 @@
 import { Search } from 'lucide-react';
 import Link from 'next/link';
 import { headers } from 'next/headers';
+import { getT } from '@/i18n/server';
 import { env } from '@/lib/env';
 import { kiotSlugFromHost } from '@/lib/host-routing';
 import { BottomNav } from './BottomNav';
 import { HeaderActions, HeaderSlogan } from './HeaderActions';
+import { LanguageMenu } from './LanguageMenu';
 import { LogoV4 } from './LogoV4';
 import { MeProvider } from './MeProvider';
 
@@ -15,13 +17,14 @@ export async function SiteHeader() {
   const appUrl = env().APP_URL;
   const kiotSlug = kiotSlugFromHost((await headers()).get('host') ?? '', appUrl);
   const base = kiotSlug ? appUrl : '';
+  const t = await getT();
   return (
     <MeProvider>
       <header className="sticky top-0 z-40 border-b border-white/10 bg-ink/90 text-white backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-[1200px] items-center gap-3 px-3 md:px-6">
           <Link
             href={`${base}/`}
-            aria-label="9MUA - Trang chủ"
+            aria-label={t('common.home')}
             className="shrink-0 rounded-full"
             style={{ animation: 'glowPulse 2.8s infinite' }}
           >
@@ -38,11 +41,12 @@ export async function SiteHeader() {
               type="search"
               name="q"
               enterKeyHint="search"
-              placeholder="Tìm sản phẩm trên Chợ"
-              aria-label="Tìm trên Chợ 9MUA"
+              placeholder={t('common.search.placeholder')}
+              aria-label={t('common.search.label')}
               className="min-w-0 flex-1 bg-transparent text-[13px] text-white outline-none placeholder:text-white/40"
             />
           </form>
+          <LanguageMenu onKiotHost={Boolean(kiotSlug)} />
           <HeaderActions base={base} />
         </div>
       </header>

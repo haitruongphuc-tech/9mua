@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from 'next';
 import { Space_Grotesk } from 'next/font/google';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
+import { I18nProvider } from '@/i18n/client';
+import { getLang, messagesFor } from '@/i18n/server';
 import './globals.css';
 
 const siteUrl = process.env.APP_URL ?? 'http://localhost:3000';
@@ -29,15 +31,19 @@ export const dynamic = 'force-dynamic';
 
 export const viewport: Viewport = { themeColor: '#0a0a0a', width: 'device-width', initialScale: 1 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const lang = await getLang();
+  const messages = await messagesFor(['common.']);
   return (
     // pb: chừa chỗ cho thanh dưới (64px + viền 1px), hiện trên mọi màn hình như V4.
     // <main> giữ nền trắng cho các trang chưa đổi sang giao diện V4; trang đã đổi (V4Page) làm <main> thành nền đen.
-    <html lang="vi" className={spaceGrotesk.variable}>
+    <html lang={lang} className={spaceGrotesk.variable}>
       <body className="flex min-h-dvh flex-col bg-ink pb-[calc(4rem+1px+env(safe-area-inset-bottom))] text-white">
-        <SiteHeader />
-        <main className="flex-1 bg-surface text-brand-ink">{children}</main>
-        <SiteFooter />
+        <I18nProvider lang={lang} messages={messages}>
+          <SiteHeader />
+          <main className="flex-1 bg-surface text-brand-ink">{children}</main>
+          <SiteFooter />
+        </I18nProvider>
       </body>
     </html>
   );

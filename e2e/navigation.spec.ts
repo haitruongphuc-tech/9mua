@@ -28,7 +28,8 @@ test('thanh dưới: Video · Chợ · Live · Kiot · Tôi, nút đang ở sán
   await expect(nav.getByTestId('user-menu')).toHaveAttribute('href', '/dang-nhap?next=%2Ftai-khoan');
 
   // Nội dung cuối trang không bị thanh dưới che.
-  await page.goto('/cho');
+  // Dùng /cho/kiot vì /cho tự tải thêm sản phẩm khi cuộn tới cuối.
+  await page.goto('/cho/kiot');
   const footer = page.getByRole('contentinfo');
   await footer.scrollIntoViewIfNeeded();
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));

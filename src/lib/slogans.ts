@@ -1,14 +1,6 @@
-// Slogan của từng trang, lấy nguyên từ V4 (docs/v4-merge-plan.md, T45). CEO sửa được ở /admin trong giai đoạn C.
-export const SLOGANS = {
-  home: 'Mở cổng thế giới - Một chạm là tới',
-  explore: 'Kiot nào cũng là showroom - 9MUA kết nối',
-  live: 'Nhìn thật - Mua thật - Người thật việc thật',
-  cart: 'Gom cả chợ vào một túi - Túi cam 9MUA',
-  profile: 'Mỗi Kiot là một thương hiệu - CEO đứng sau',
-  legal: '99% AI vận hành - 1% CEO phê duyệt - Người thật',
-} as const;
-
-export type SloganKey = keyof typeof SLOGANS;
+// Slogan của từng trang theo V4 (T45). Chữ nằm trong từ điển i18n, khoá `common.slogan.<key>`; CEO sửa được ở
+// /admin trong giai đoạn C.
+export type SloganKey = 'home' | 'explore' | 'live' | 'cart' | 'profile' | 'legal';
 
 const starts = (path: string, prefix: string) => path === prefix || path.startsWith(`${prefix}/`);
 

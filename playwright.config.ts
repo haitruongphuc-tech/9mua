@@ -16,6 +16,7 @@ export default defineConfig({
   retries: 0,
   reporter: 'list',
   use: {
+    locale: 'vi-VN', // giống người dùng Việt Nam: trang tự chọn tiếng Việt theo ngôn ngữ trình duyệt
     ...devices['iPhone 13'],
     baseURL: ORIGIN,
     trace: 'retain-on-failure',

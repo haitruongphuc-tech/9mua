@@ -15,7 +15,8 @@ export async function SiteFooter() {
         </p>
         <nav
           aria-label={t('legal.policies')}
-          className="mt-3 flex flex-wrap gap-x-4 gap-y-1"
+          // Điện thoại: lưới 2 cột cố định để số dòng không đổi khi font tải xong (tránh xô trang, CLS).
+          className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 md:flex md:flex-wrap"
           data-testid="footer-links"
         >
           <Link href="/gioi-thieu" className="hover:text-white">

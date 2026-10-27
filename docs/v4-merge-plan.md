@@ -169,3 +169,26 @@ Mỗi giai đoạn: cập nhật spec → CEO duyệt → code có test (cả đ
 5. Đồng ý **không làm**: STK cá nhân, ví nạp tiền, Value $951, thu nhập mẫu?
 6. Đồng ý thêm thư viện `lucide-react`?
 7. Duyệt bắt đầu giai đoạn A?
+
+## 7. Quyết định của CEO (27/10/2026)
+
+| # | Câu hỏi | Quyết định |
+|---|---|---|
+| 1 | Thương hiệu | Logo trong vòng tròn trắng viền cam, **không nhấp nháy**; giữ cam `#FC6F15` và chữ đen trên nút; máy tính có chữ "9MUA" cạnh logo, điện thoại chỉ logo |
+| 2 | Nền | Đen chỉ cho Video/feed; trang mua bán nền trắng |
+| 3 | Trang chủ | **Trang chủ là feed video** (giữ chữ giới thiệu + link Chợ trong trang cho Google; chỉ tải trước video đầu; chưa có video thì hiện nội dung Chợ). Nội dung trang chủ cũ chuyển vào đầu `/cho` |
+| 4 | Giá Kiot | **1 USD/năm**, máy chủ lấy tỷ giá bán USD Vietcombank mỗi sáng, làm tròn tới 1.000đ; lỗi thì giữ giá gần nhất; lệch > 10% so với lần trước thì không áp dụng và báo CEO; QR đã tạo giữ giá cũ; web chỉ hiện VNĐ. Sửa `SPEC-billing.md` trước khi code |
+| 5 | Không làm | STK cá nhân, ví nạp tiền, Value $951, doanh thu mẫu |
+| 6 | Thư viện | Thêm `lucide-react` |
+| 7 | Giai đoạn A | Duyệt toàn bộ |
+| 8 | Livestream | **Tự xây trên VPS** (MediaMTX, phát từ trình duyệt điện thoại), làm sau giai đoạn A; ban đầu tối đa 2 buổi cùng lúc × 50 người xem |
+| 9 | Quà livestream | **9MUA thưởng xu nội bộ theo KPI số người xem**, tự động (bộ quy tắc dưới đây); khách không tặng nhau |
+| – | Pháp lý | CEO yêu cầu không phân tích pháp lý trong các đề xuất tiếp theo |
+
+**Xu 9MUA (mặc định, CEO sửa sau):**
+- 1 xu dùng thay 1.000đ trong 9MUA: gia hạn Kiot, đẩy video/live lên đầu feed. Không đổi ra tiền mặt, không
+  chuyển cho người khác. Sổ xu riêng, chỉ thêm.
+- Người xem hợp lệ: đã đăng nhập, tài khoản tạo trước buổi live ≥ 3 ngày, xem liên tục ≥ 1 phút, mỗi tài khoản 1 lần
+  mỗi buổi, không tính chủ Kiot, tối đa 3 tài khoản cùng mạng mỗi buổi.
+- Buổi live ≥ 15 phút. Thưởng: 10 người xem → 10 xu; 25 → 30 xu; 50 → 80 xu. Mỗi Kiot tối đa 1 buổi được thưởng/ngày.
+  Ngân sách 20.000 xu/tháng, hết thì dừng và báo CEO. Tự cộng khi buổi live kết thúc; CEO thu hồi bằng dòng trừ.

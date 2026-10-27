@@ -604,3 +604,35 @@
 ### ✅ Checkpoint I — Mở cửa
 - [ ] CEO duyệt GO/NO-GO.
 - [ ] Đã hỏi ý kiến pháp lý về thu hộ (rủi ro trong `tasks/plan.md`).
+
+---
+
+## Phase 10 — V4: giao diện, mạng xã hội, livestream (`docs/v4-merge-plan.md`, CEO duyệt 27/10/2026)
+
+### Giai đoạn A — Giao diện (không đổi schema, không đụng sổ tiền trừ T46)
+- [ ] **T38: Gộp nhánh mô tả sản phẩm chia mục** (S) — review `claude/project-thread-dnygzz`, gộp vào `main`.
+- [ ] **T39: Thanh điều hướng 5 nút + header + logo tròn** (M) — điện thoại: Trang chủ · Chợ · ＋ Đăng video ·
+  Giỏ · Tôi; máy tính giữ thanh trên. Logo vòng tròn trắng viền cam, không nhấp nháy. Thêm `lucide-react`.
+  Cập nhật `docs/BRAND.md`.
+- [ ] **T40: Trang chủ là feed video** (M) — nền đen; chữ giới thiệu + link Chợ cho Google; chỉ tải trước video
+  đầu; chưa có video thì hiện nội dung Chợ. Nội dung trang chủ cũ (Video hot, Kiot nổi bật…) chuyển vào `/cho`.
+  Kiểm lại vuốt trên iPhone.
+- [ ] **T41: Feed: thả tim 2 chạm + túi cam, thanh tiến độ, chia sẻ có QR** (S)
+- [ ] **T42: Trang Kiot kiểu TikTok** (M) — tab Sản phẩm / Video, số sản phẩm, đã bán, chia sẻ có QR.
+- [ ] **T43: Trang Tôi** (S) — trung tâm tài khoản: đơn mua, giỏ, thông báo, Kiot của tôi, video của tôi.
+- [ ] **T44: Giới thiệu & Pháp lý + trang chính sách** (M) — không con dấu vẽ, không STK cá nhân. Nội dung chính
+  sách: Claude viết nháp, CEO duyệt trước khi đăng.
+- [ ] **T45: Slogan cố định + dải nhắc mở tài khoản không che trang** (S)
+- [ ] **T46: Giá Kiot 1 USD/năm quy ra VNĐ** (M) — sửa `SPEC-billing.md` trước; cron tỷ giá Vietcombank, làm tròn
+  1.000đ, giữ giá gần nhất khi lỗi, chặn lệch > 10%, QR cũ giữ giá.
+
+### Giai đoạn B — Mạng xã hội + livestream (chỉ thêm bảng mới; viết spec trước)
+- [ ] Follow Kiot + tab "Đang follow" + thông báo video mới.
+- [ ] Bình luận video (trả lời 1 cấp, ghim, báo cáo, chống spam).
+- [ ] Lưu video/sản phẩm; trang hashtag; feed ưu tiên Kiot đang follow.
+- [ ] Livestream tự xây (MediaMTX): phát từ trình duyệt, xem, chat, ghim sản phẩm, báo cáo, CEO tắt live.
+- [ ] Xu 9MUA thưởng theo người xem hợp lệ (quy tắc trong `docs/v4-merge-plan.md` mục 7).
+
+### Giai đoạn C — Công cụ CEO
+- [ ] Ghim Kiot/video lên đầu, sửa slogan, sửa thông tin pháp lý (có nhật ký).
+

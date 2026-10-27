@@ -20,8 +20,9 @@ export const viewport: Viewport = { themeColor: '#fc6f15', width: 'device-width'
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
+    // pb: chừa chỗ cho thanh điều hướng dưới trên điện thoại (BottomNav).
     <html lang="vi">
-      <body className="flex min-h-dvh flex-col">
+      <body className="flex min-h-dvh flex-col pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">
         <SiteHeader />
         <main className="flex-1">{children}</main>
         <SiteFooter />

@@ -15,8 +15,12 @@ Logo chính thức: túi mua sắm cam hình số 9, có chip mạch điện, k�
 | `public/icon-maskable-512.png` | Biểu tượng PWA Android, có lề an toàn |
 | `public/og-default.png` | Ảnh mặc định khi chia sẻ link lên Facebook/Zalo (1200×630) |
 
-Header web dùng `9mua-icon.png` cao 32px, kèm chữ "9MUA" font đậm tròn. Không kéo méo, không đổi màu,
-không thêm hiệu ứng nhấp nháy cho logo.
+Header web: `9mua-icon.png` 26px đặt trong **vòng tròn trắng 40px, viền cam `brand` 2px**, quầng cam nhạt đứng yên
+(CEO chọn 27/10/2026, theo V4 — `docs/v4-merge-plan.md`). Máy tính có chữ "9MUA" bên phải logo; điện thoại chỉ
+logo. Không kéo méo, không đổi màu, không thêm hiệu ứng nhấp nháy cho logo.
+
+Điện thoại có thanh điều hướng 5 nút ở cuối màn hình (Trang chủ · Chợ · ＋ Đăng video · Video · Tôi), icon
+`lucide-react`; nút giữa nền `brand` viền `brand-ink`, nút đang mở tô `brand-deep`.
 
 ## Màu
 

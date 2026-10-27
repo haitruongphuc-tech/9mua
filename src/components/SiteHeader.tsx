@@ -1,8 +1,10 @@
+import { Search } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { headers } from 'next/headers';
 import { env } from '@/lib/env';
 import { kiotSlugFromHost } from '@/lib/host-routing';
+import { BottomNav } from './BottomNav';
 import { UserMenu } from './UserMenu';
 
 export async function SiteHeader() {
@@ -12,29 +14,53 @@ export async function SiteHeader() {
   const kiotSlug = kiotSlugFromHost((await headers()).get('host') ?? '', appUrl);
   const base = kiotSlug ? appUrl : '';
   return (
-    <header className="sticky top-0 z-40 border-b border-black/10 bg-white/95 backdrop-blur">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-        <Link href={`${base}/`} className="flex items-center gap-2" aria-label="9MUA - Trang chủ">
-          <Image src="/brand/9mua-icon.png" alt="" width={32} height={32} priority />
-          {/* Màn hình rất hẹp (≤ 400px) chỉ hiện biểu tượng để thanh trên không tràn ngang. */}
-          <span className="hidden text-xl font-extrabold tracking-tight min-[400px]:inline">9MUA</span>
-        </Link>
-        <nav className="flex items-center gap-1 text-sm font-bold sm:gap-2">
-          <Link href={`${base}/cho`} className="rounded-full px-2 py-2 hover:bg-surface-muted sm:px-3">
-            Chợ
+    <>
+      <header className="sticky top-0 z-40 border-b border-black/10 bg-white/95 backdrop-blur">
+        <div className="mx-auto flex h-14 max-w-6xl items-center gap-2 px-3 sm:gap-3 sm:px-4">
+          <Link href={`${base}/`} className="flex shrink-0 items-center gap-2" aria-label="9MUA - Trang chủ">
+            {/* Logo trong vòng tròn trắng viền cam, đứng yên (docs/BRAND.md — CEO chọn 27/10/2026). */}
+            <span className="grid h-10 w-10 place-items-center rounded-full border-2 border-brand bg-white shadow-[0_0_0_3px_rgb(252_111_21/0.15)]">
+              <Image src="/brand/9mua-icon.png" alt="" width={26} height={26} priority />
+            </span>
+            <span className="hidden text-xl font-extrabold tracking-tight md:inline">9MUA</span>
           </Link>
-          <Link href={`${base}/video`} className="rounded-full px-2 py-2 hover:bg-surface-muted sm:px-3">
-            Video
-          </Link>
-          <Link
-            href={`${base}/kiot-cua-toi`}
-            className="hidden rounded-full px-3 py-2 hover:bg-surface-muted sm:inline"
-          >
-            Bán hàng
-          </Link>
-          <UserMenu base={base} kiotSlug={kiotSlug} />
-        </nav>
-      </div>
-    </header>
+          <form action={`${base}/cho`} role="search" className="min-w-0 flex-1 md:max-w-sm">
+            <label className="flex h-10 items-center gap-2 rounded-full bg-surface-muted px-3">
+              <Search className="h-4 w-4 shrink-0 text-black/50" aria-hidden />
+              <input
+                type="search"
+                name="q"
+                enterKeyHint="search"
+                placeholder="Tìm trên Chợ…"
+                aria-label="Tìm trên Chợ 9MUA"
+                className="w-full min-w-0 bg-transparent text-sm outline-none placeholder:text-black/50"
+              />
+            </label>
+          </form>
+          <nav className="flex shrink-0 items-center gap-1 text-sm font-bold sm:gap-2">
+            <Link
+              href={`${base}/cho`}
+              className="hidden rounded-full px-3 py-2 hover:bg-surface-muted md:inline"
+            >
+              Chợ
+            </Link>
+            <Link
+              href={`${base}/video`}
+              className="hidden rounded-full px-3 py-2 hover:bg-surface-muted md:inline"
+            >
+              Video
+            </Link>
+            <Link
+              href={`${base}/kiot-cua-toi`}
+              className="hidden rounded-full px-3 py-2 hover:bg-surface-muted md:inline"
+            >
+              Bán hàng
+            </Link>
+            <UserMenu base={base} kiotSlug={kiotSlug} />
+          </nav>
+        </div>
+      </header>
+      <BottomNav base={base} />
+    </>
   );
 }

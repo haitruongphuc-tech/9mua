@@ -611,7 +611,7 @@
 
 ### Giai đoạn A — Giao diện (không đổi schema, không đụng sổ tiền trừ T46)
 - [x] **T38: Gộp nhánh mô tả sản phẩm chia mục** (S) — review `claude/project-thread-dnygzz`, gộp vào `main`.
-- [ ] **T39: Thanh điều hướng 5 nút + header + logo tròn** (M) — điện thoại: Trang chủ · Chợ · ＋ Đăng video ·
+- [x] **T39: Thanh điều hướng 5 nút + header + logo tròn** (M) — điện thoại: Trang chủ · Chợ · ＋ Đăng video ·
   Giỏ · Tôi; máy tính giữ thanh trên. Logo vòng tròn trắng viền cam, không nhấp nháy. Thêm `lucide-react`.
   Cập nhật `docs/BRAND.md`.
 - [ ] **T40: Trang chủ là feed video** (M) — nền đen; chữ giới thiệu + link Chợ cho Google; chỉ tải trước video

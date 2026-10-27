@@ -9,6 +9,7 @@ export function sloganKey(pathname: string, opts: { onKiotHost?: boolean } = {})
   if (starts(pathname, '/cho')) return 'explore';
   if (starts(pathname, '/live')) return 'live';
   if (starts(pathname, '/ai')) return 'ai';
+  if (starts(pathname, '/gioi-thieu') || starts(pathname, '/chinh-sach')) return 'legal';
   if (['/gio-hang', '/dat-hang', '/don-mua'].some((p) => starts(pathname, p))) return 'cart';
   return 'home';
 }

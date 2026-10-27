@@ -117,3 +117,8 @@ Không có. Quảng cáo trả tiền để lên top để sau MVP.
   khiếu nại, vận chuyển, thanh toán. Nội dung do Claude viết nháp theo cách 9MUA đang vận hành thật; **CEO đọc duyệt trước
   khi deploy**.
 - Chân trang có link tới các trang này.
+- Ghi chú khi làm (T68, 27/10/2026): nội dung nằm ở `src/content/legal/` (bản tiếng Việt là bản chính, có bản tiếng
+  Anh). Phí, hotline, địa chỉ… điền tự động từ cài đặt nên đổi ở `/admin` là trang chính sách đổi theo. Tiếng Trung,
+  Nhật, Hàn, Pháp, Tây Ban Nha dịch **sau khi CEO duyệt bản tiếng Việt** (tránh dịch lại); trong lúc chờ, trang hiện
+  bản tiếng Việt kèm dòng báo chưa có bản dịch.
+

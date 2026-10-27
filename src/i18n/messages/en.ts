@@ -3,6 +3,7 @@ import { ai } from './en/ai';
 import { auth } from './en/auth';
 import { common } from './en/common';
 import { feed } from './en/feed';
+import { legal } from './en/legal';
 import { live } from './en/live';
 import { market } from './en/market';
 import { me } from './en/me';
@@ -17,6 +18,7 @@ export const en: Messages = {
   ...auth,
   ...common,
   ...feed,
+  ...legal,
   ...live,
   ...market,
   ...me,

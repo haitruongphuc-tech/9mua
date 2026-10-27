@@ -3,6 +3,7 @@ import { ai } from './ja/ai';
 import { auth } from './ja/auth';
 import { common } from './ja/common';
 import { feed } from './ja/feed';
+import { legal } from './ja/legal';
 import { live } from './ja/live';
 import { market } from './ja/market';
 import { me } from './ja/me';
@@ -17,6 +18,7 @@ export const ja: Messages = {
   ...auth,
   ...common,
   ...feed,
+  ...legal,
   ...live,
   ...market,
   ...me,

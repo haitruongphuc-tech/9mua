@@ -638,7 +638,8 @@
   `src/i18n/module-messages.ts`; email máy tự gửi vẫn tiếng Việt (ghi chú trong `SPEC-i18n.md`).
 - [x] **T67: AI Studio** (`SPEC-ai.md`) — `/ai`, `/admin/ai`, module `ai` (Claude viết, Gemini vẽ, worker ghép video
   10 giây), driver giả cho test/E2E.
-- [ ] **T68: Giới thiệu & Pháp lý + chính sách** (gộp T44, T45) và **giá 1 USD + voucher** (gộp T46).
+- [x] **T68: Giới thiệu & Pháp lý + chính sách** (gộp T44, T45) và **giá 1 USD + voucher** (gộp T46).
+  Còn chờ CEO: đọc duyệt 7 trang chính sách (bản nháp), rồi dịch sang zh/ja/ko/fr/es.
 - [ ] **T49–T57: Livestream + xu** (`SPEC-live.md`, CEO duyệt 27/10) — chia nhỏ trong `tasks/plan.md` trước khi làm:
   MediaMTX + Nginx + xác thực; bảng dữ liệu + bắt đầu/kết thúc; trang phát (WHIP); trang xem (WHEP) + đếm người
   xem; chat + tim (SSE); ghim sản phẩm + `sourceLiveId`; báo cáo + `/admin/live`; sổ xu + thưởng + `/admin/xu`;

@@ -3,6 +3,7 @@ import { ai } from './zh/ai';
 import { auth } from './zh/auth';
 import { common } from './zh/common';
 import { feed } from './zh/feed';
+import { legal } from './zh/legal';
 import { live } from './zh/live';
 import { market } from './zh/market';
 import { me } from './zh/me';
@@ -17,6 +18,7 @@ export const zh: Messages = {
   ...auth,
   ...common,
   ...feed,
+  ...legal,
   ...live,
   ...market,
   ...me,

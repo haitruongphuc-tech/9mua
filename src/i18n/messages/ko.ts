@@ -3,6 +3,7 @@ import { ai } from './ko/ai';
 import { auth } from './ko/auth';
 import { common } from './ko/common';
 import { feed } from './ko/feed';
+import { legal } from './ko/legal';
 import { live } from './ko/live';
 import { market } from './ko/market';
 import { me } from './ko/me';
@@ -17,6 +18,7 @@ export const ko: Messages = {
   ...auth,
   ...common,
   ...feed,
+  ...legal,
   ...live,
   ...market,
   ...me,

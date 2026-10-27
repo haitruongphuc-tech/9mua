@@ -16,6 +16,8 @@ describe('sloganKey: slogan của trang theo đường dẫn (V4)', () => {
     ['/don-mua', 'cart'],
     ['/k/mat-ong', 'profile'],
     ['/ai', 'ai'],
+    ['/gioi-thieu', 'legal'],
+    ['/chinh-sach/bao-mat', 'legal'],
     ['/aiko', 'home'],
     ['/tai-khoan', 'home'],
   ] as const)('%s → %s', (path, key) => {

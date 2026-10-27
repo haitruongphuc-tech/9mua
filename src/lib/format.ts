@@ -16,6 +16,11 @@ export function formatDateTime(date: Date, lang: string): string {
   return date.toLocaleString(lang === 'vi' ? 'vi-VN' : lang, { timeZone: 'Asia/Ho_Chi_Minh', hour12: false });
 }
 
+// Chỉ ngày (không giờ) theo ngôn ngữ đang chọn, theo giờ Việt Nam.
+export function formatDate(date: Date, lang: string): string {
+  return date.toLocaleDateString(lang === 'vi' ? 'vi-VN' : lang, { timeZone: 'Asia/Ho_Chi_Minh' });
+}
+
 // "45.000" / "45,000đ" → 45000; chuỗi rỗng → null.
 export function parseVndInput(value: FormDataEntryValue | null): number | null {
   const digits = String(value ?? '').replace(/\D/g, '');

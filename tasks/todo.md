@@ -623,10 +623,10 @@
   Video · Chợ · Live · Kiot · Tôi, nút "Đăng video" lên góc màn hình Video. Ảnh so sánh với V4.
 - [x] **T48: Đa ngôn ngữ — nền móng** (M) — viết `SPEC-i18n.md`, CEO duyệt. Từ điển 7 thứ tiếng, nút chọn ngôn ngữ
   trên header, dịch khung chung.
-- [ ] **T58: Spec cho phần mới** — `SPEC-social.md`, `SPEC-ai.md`, bổ sung creator/identity/admin/billing/kiot/marketplace
+- [x] **T58: Spec cho phần mới** — `SPEC-social.md`, `SPEC-ai.md`, bổ sung creator/identity/admin/billing/kiot/marketplace
   (CEO duyệt qua chat, §7 mục 14).
-- [ ] **T59: Đăng nhập Google + popup mở tài khoản** (`SPEC-identity.md` bổ sung).
-- [ ] **T60: Admin nhớ thiết bị 30 ngày + công cụ CEO** (ghim, slogan, pháp lý, luật Free/voucher).
+- [x] **T59: Đăng nhập Google + popup mở tài khoản** (`SPEC-identity.md` bổ sung).
+- [x] **T60: Admin nhớ thiết bị 30 ngày + công cụ CEO** (ghim, slogan, pháp lý, luật Free/voucher).
 - [ ] **T61: Module social** — follow, bình luận, lưu, hashtag, tim Kiot, giới hạn Free, voucher.
 - [ ] **T62: Feed V4** (gộp T41) — tab Đang Follow, thả tim 2 chạm, thanh tiến độ, cột nút, bình luận, chia sẻ có QR.
 - [ ] **T63: Story 24h + Duet**.

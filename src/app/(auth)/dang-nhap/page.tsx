@@ -1,29 +1,70 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
+import { GoogleButton } from '@/components/GoogleButton';
+import { ClientMessages } from '@/i18n/ClientMessages';
+import { getT } from '@/i18n/server';
 import { safeNextPath } from '@/lib/safe-next-path';
 import { getCurrentUser } from '@/modules/identity';
+import { AuthShell, OrDivider } from '../AuthShell';
 import { LoginForm } from './LoginForm';
 
-export const metadata: Metadata = { title: 'Đăng nhập', robots: { index: false } };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await getT())('auth.login.submit'), robots: { index: false } };
+}
+
+const GOOGLE_ERRORS = { admin: 'auth.google.admin', khoa: 'auth.err.locked' } as const;
 
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string; 'da-dat-lai'?: string }>;
+  searchParams: Promise<{
+    next?: string;
+    'da-dat-lai'?: string;
+    'lien-ket-google'?: string;
+    'loi-google'?: string;
+  }>;
 }) {
   const params = await searchParams;
   const next = safeNextPath(params.next);
   if (await getCurrentUser()) redirect(next);
+  const t = await getT();
+  const googleError = params['loi-google'];
+  const notice = params['da-dat-lai']
+    ? { tone: 'ok', text: t('auth.login.resetDone') }
+    : params['lien-ket-google']
+      ? { tone: 'info', text: t('auth.login.linkGoogle') }
+      : googleError
+        ? {
+            tone: 'error',
+            text: t(GOOGLE_ERRORS[googleError as keyof typeof GOOGLE_ERRORS] ?? 'auth.google.error'),
+          }
+        : null;
   return (
-    <section className="mx-auto w-full max-w-sm px-4 py-10">
-      <h1 className="mb-1 text-2xl font-extrabold">Đăng nhập 9MUA</h1>
-      <p className="mb-6 text-black/70">Một tài khoản dùng cho 9mua.com và mọi Kiot.</p>
-      {params['da-dat-lai'] ? (
-        <p role="status" className="mb-4 rounded-xl bg-success/10 px-4 py-3 text-sm font-bold text-success">
-          Đã đặt mật khẩu mới. Hãy đăng nhập lại.
+    <AuthShell title={t('auth.login.title')} lead={t('auth.login.lead')}>
+      {notice ? (
+        <p
+          role="status"
+          data-testid="login-notice"
+          className={`mb-4 rounded-[14px] px-4 py-3 text-[13px] font-bold ${
+            notice.tone === 'ok'
+              ? 'bg-success/20 text-emerald-300'
+              : notice.tone === 'info'
+                ? 'border border-brand/40 bg-brand/10 text-white'
+                : 'bg-danger/20 text-red-300'
+          }`}
+        >
+          {notice.text}
         </p>
       ) : null}
-      <LoginForm next={next} />
-    </section>
+      {params['lien-ket-google'] ? null : (
+        <>
+          <GoogleButton next={next} />
+          <OrDivider label={t('auth.or')} />
+        </>
+      )}
+      <ClientMessages prefixes={['auth.']}>
+        <LoginForm next={next} />
+      </ClientMessages>
+    </AuthShell>
   );
 }

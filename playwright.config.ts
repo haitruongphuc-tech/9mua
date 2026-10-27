@@ -16,6 +16,9 @@ export default defineConfig({
   retries: 0,
   reporter: 'list',
   use: {
+    // Khách mới sẽ thấy popup mở tài khoản sau 1,2 giây; các test khác coi như đã bấm "Để sau" (e2e/signup.spec.ts
+    // kiểm riêng popup).
+    storageState: 'e2e/storage/skip-signup-popup.json',
     locale: 'vi-VN', // giống người dùng Việt Nam: trang tự chọn tiếng Việt theo ngôn ngữ trình duyệt
     ...devices['iPhone 13'],
     baseURL: ORIGIN,

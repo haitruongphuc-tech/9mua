@@ -11,8 +11,9 @@ type MeState = { me: Me | undefined; cartCount: number; notifications: number };
 
 const MeContext = createContext<MeState>({ me: undefined, cartCount: 0, notifications: 0 });
 
-// Một lần gọi /api/auth/me cho cả header và thanh dưới (undefined = đang tải).
-export function MeProvider({ children }: { children: React.ReactNode }) {
+// Một lần gọi /api/auth/me cho cả header, thanh dưới và popup (undefined = đang tải). hasSession do layout tính từ
+// cookie: đổi khi đăng nhập/đăng ký/đăng xuất bằng Server Action (đường dẫn có thể không đổi) để tải lại.
+export function MeProvider({ children, hasSession }: { children: React.ReactNode; hasSession: boolean }) {
   const pathname = usePathname();
   const [state, setState] = useState<MeState>({ me: undefined, cartCount: 0, notifications: 0 });
 
@@ -32,7 +33,7 @@ export function MeProvider({ children }: { children: React.ReactNode }) {
       alive = false;
       window.removeEventListener(ME_CHANGED_EVENT, load);
     };
-  }, [pathname]);
+  }, [pathname, hasSession]);
 
   return <MeContext.Provider value={state}>{children}</MeContext.Provider>;
 }

@@ -1,30 +1,6 @@
 import type { Messages } from './vi';
+import { common } from './es/common';
+import { live } from './es/live';
+import { auth } from './es/auth';
 
-export const es: Messages = {
-  'common.home': '9MUA - Inicio',
-  'common.slogan.home': 'Abre la puerta al mundo - A un toque',
-  'common.slogan.explore': 'Cada Kiot es un showroom - 9MUA conecta',
-  'common.slogan.live': 'Ver de verdad - Comprar de verdad - Gente real',
-  'common.slogan.cart': 'Todo el mercado en una bolsa - La bolsa naranja de 9MUA',
-  'common.slogan.profile': 'Cada Kiot es una marca - Con un CEO detrás',
-  'common.slogan.legal': '99 % gestionado por IA - 1 % aprobado por el CEO - Gente real',
-  'common.search.placeholder': 'Buscar productos en el Mercado',
-  'common.search.label': 'Buscar en el Mercado 9MUA',
-  'common.search.button': 'Buscar',
-  'common.cart.label': 'Carrito ({count} artículos)',
-  'common.nav.label': 'Navegación principal',
-  'common.nav.video': 'Video',
-  'common.nav.market': 'Mercado',
-  'common.nav.live': 'Directo',
-  'common.nav.kiot': 'Kiot',
-  'common.nav.me': 'Yo',
-  'common.nav.meUser': 'Yo ({name})',
-  'common.nav.meLogin': 'Yo (iniciar sesión)',
-  'common.lang.label': 'Idioma',
-  'common.lang.read': 'Leer el eslogan',
-  'common.lang.stop': 'Dejar de leer',
-  'common.footer.taxId': 'N.º fiscal',
-  'live.empty.title': 'Nadie está en directo ahora',
-  'live.empty.body': 'El Directo se está terminando. Mientras tanto, mira algunos videos.',
-  'live.empty.cta': 'Ver videos',
-};
+export const es: Messages = { ...common, ...live, ...auth };

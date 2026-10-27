@@ -4,6 +4,8 @@ import { e2eDb } from './helpers/db';
 import { signUpBuyer } from './helpers/orders';
 
 test('creator: thông báo khi video xong, trang creator, báo cáo, xoá video', async ({ browser }) => {
+  // Tải video lên rồi chờ worker ffmpeg: khi máy test đang chuyển mã video của test trước, có lúc gần 30 giây.
+  test.setTimeout(60_000);
   const stamp = String(Date.now()).slice(-6);
   const creator = await signUpBuyer(browser, `Creator ${stamp}`);
   await creator.goto('/video/dang');

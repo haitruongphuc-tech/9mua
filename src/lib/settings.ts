@@ -10,6 +10,13 @@ export const SETTING_DEFAULTS = {
   payout_auto_max_per_request: '5000000',
   payout_auto_max_per_kiot_day: '10000000',
   payout_auto_daily_cap: '50000000',
+  // Tài khoản Free và voucher mở Kiot (SPEC-social.md mục 7–8)
+  social_free_daily_limit: '50',
+  social_voucher_threshold: '100',
+  social_voucher_enabled: 'true',
+  // Nội dung CEO sửa ở /admin/noi-dung (SPEC-admin.md bổ sung 27/10), lưu dạng JSON.
+  slogans_json: '{}', // { "home": { "vi": "...", "en": "..." }, ... } — trống thì dùng từ điển
+  legal_info_json: '{}', // xem src/lib/legal.ts
 } as const;
 
 export type SettingKey = keyof typeof SETTING_DEFAULTS;

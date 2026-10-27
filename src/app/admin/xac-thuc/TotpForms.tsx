@@ -31,6 +31,10 @@ export function VerifyForm({ next }: { next: string }) {
         aria-label="Mã 6 số"
         className={field}
       />
+      <label className="flex items-center gap-2 text-sm font-bold">
+        <input type="checkbox" name="remember" defaultChecked className="h-5 w-5 accent-brand" />
+        Nhớ thiết bị này 30 ngày
+      </label>
       <SubmitButton pendingText="Đang kiểm tra…">Xác nhận</SubmitButton>
       <p className="text-center text-xs text-black/60">
         Mất điện thoại? Nhập một mã dự phòng (dạng ABCDE-12345).

@@ -45,6 +45,9 @@ const schema = z
     ),
     // Token bí mật cho cron gọi /api/internal/* (Docker che IP người gọi nên không dựa vào IP).
     INTERNAL_CRON_TOKEN: z.string().optional(),
+    // Đăng nhập Google (SPEC-identity.md bổ sung 27/10). Để trống thì ẩn nút Google.
+    GOOGLE_CLIENT_ID: z.preprocess((v) => (v === '' ? undefined : v), z.string().optional()),
+    GOOGLE_CLIENT_SECRET: z.preprocess((v) => (v === '' ? undefined : v), z.string().optional()),
   })
   .superRefine((v, ctx) => {
     if (v.NODE_ENV === 'production' && !v.APP_URL) {
@@ -106,6 +109,13 @@ const schema = z
         code: 'custom',
         path: ['INTERNAL_CRON_TOKEN'],
         message: 'INTERNAL_CRON_TOKEN cần ít nhất 32 ký tự ở production',
+      });
+    }
+    if (Boolean(v.GOOGLE_CLIENT_ID) !== Boolean(v.GOOGLE_CLIENT_SECRET)) {
+      ctx.addIssue({
+        code: 'custom',
+        path: [v.GOOGLE_CLIENT_ID ? 'GOOGLE_CLIENT_SECRET' : 'GOOGLE_CLIENT_ID'],
+        message: 'Đăng nhập Google cần đủ cả GOOGLE_CLIENT_ID và GOOGLE_CLIENT_SECRET',
       });
     }
     if (driver === 'smtp') {

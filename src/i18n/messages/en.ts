@@ -1,30 +1,6 @@
 import type { Messages } from './vi';
+import { common } from './en/common';
+import { live } from './en/live';
+import { auth } from './en/auth';
 
-export const en: Messages = {
-  'common.home': '9MUA - Home',
-  'common.slogan.home': 'Open the world gate - One tap away',
-  'common.slogan.explore': 'Every Kiot is a showroom - 9MUA connects',
-  'common.slogan.live': 'See real - Buy real - Real people',
-  'common.slogan.cart': 'The whole market in one bag - The 9MUA orange bag',
-  'common.slogan.profile': 'Every Kiot is a brand - A CEO behind it',
-  'common.slogan.legal': '99% AI operated - 1% CEO approved - Real people',
-  'common.search.placeholder': 'Search products on the Market',
-  'common.search.label': 'Search the 9MUA Market',
-  'common.search.button': 'Search',
-  'common.cart.label': 'Cart ({count} items)',
-  'common.nav.label': 'Main navigation',
-  'common.nav.video': 'Video',
-  'common.nav.market': 'Market',
-  'common.nav.live': 'Live',
-  'common.nav.kiot': 'Kiot',
-  'common.nav.me': 'Me',
-  'common.nav.meUser': 'Me ({name})',
-  'common.nav.meLogin': 'Me (sign in)',
-  'common.lang.label': 'Language',
-  'common.lang.read': 'Read slogan aloud',
-  'common.lang.stop': 'Stop reading',
-  'common.footer.taxId': 'Tax ID',
-  'live.empty.title': 'Nobody is live right now',
-  'live.empty.body': 'Live is being finished. Meanwhile, enjoy some videos.',
-  'live.empty.cta': 'Watch videos',
-};
+export const en: Messages = { ...common, ...live, ...auth };

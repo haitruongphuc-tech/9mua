@@ -1,6 +1,7 @@
 import { Prisma } from '@prisma/client';
 import { now } from '@/lib/clock';
 import { db } from '@/lib/db';
+import { activePinSql, addPin } from '@/lib/pins';
 import { kiotOrigin } from '@/lib/urls';
 import { categoryName, provinceName } from '@/modules/kiot';
 import { hydrate, searchProducts, visibleOnMarket, type MarketCard } from './search';
@@ -14,6 +15,7 @@ export type KiotCard = {
   products: number;
   completedOrders: number;
   url: string;
+  pinned: boolean; // CEO ghim lên đầu
 };
 
 type KiotRow = {
@@ -24,6 +26,7 @@ type KiotRow = {
   main_category: string | null;
   products: number;
   orders: number;
+  pin_pos: number | null;
 };
 
 const toKiotCard = (r: KiotRow): KiotCard => ({
@@ -35,6 +38,7 @@ const toKiotCard = (r: KiotRow): KiotCard => ({
   products: r.products,
   completedOrders: r.orders,
   url: kiotOrigin(r.slug),
+  pinned: r.pin_pos !== null,
 });
 
 // Kiot đang hoạt động có ít nhất 1 sản phẩm hiện. orders = số đơn hoàn tất (từ since, nếu có).
@@ -49,7 +53,7 @@ function kiotQuery(opts: {
   const orderFilter = opts.since ? Prisma.sql`AND ps."completedAt" >= ${opts.since}` : Prisma.empty;
   return Prisma.sql`
     WITH kiots AS (
-      SELECT k.id, k.slug, k.name, k."logoUrl", k.province, k."createdAt",
+      SELECT k.id, k.slug, k.name, k."logoUrl", k.province, k."createdAt", ${activePinSql('kiot', 'k')} AS pin_pos,
         (SELECT COUNT(*)::int FROM "Product" p WHERE p."kiotId" = k.id AND ${visibleOnMarket(at)}) AS products,
         (SELECT mode() WITHIN GROUP (ORDER BY p.category) FROM "Product" p
           WHERE p."kiotId" = k.id AND ${visibleOnMarket(at)}) AS main_category,
@@ -58,9 +62,9 @@ function kiotQuery(opts: {
       WHERE k."activeUntil" > ${at} AND k."lockedAt" IS NULL
         ${opts.province ? Prisma.sql`AND k.province = ${opts.province}` : Prisma.empty}
     )
-    SELECT slug, name, "logoUrl", province, main_category, products, orders FROM kiots
+    SELECT slug, name, "logoUrl", province, main_category, products, orders, pin_pos FROM kiots
     WHERE products > 0 ${opts.category ? Prisma.sql`AND main_category = ${opts.category}` : Prisma.empty}
-    ORDER BY orders DESC, "createdAt" DESC, id
+    ORDER BY pin_pos ASC NULLS LAST, orders DESC, "createdAt" DESC, id
     LIMIT ${opts.limit} OFFSET ${opts.offset ?? 0}`;
 }
 
@@ -106,7 +110,7 @@ export async function getHomeSections(): Promise<HomeSections> {
         (SELECT COUNT(*)::int FROM "Kiot" k WHERE k."activeUntil" > ${at} AND k."lockedAt" IS NULL) AS kiots,
         (SELECT COUNT(*)::int FROM "Product" p JOIN "Kiot" k ON k.id = p."kiotId" WHERE ${visibleOnMarket(at)}) AS products`,
   ]);
-  const withSales = topKiots.filter((k) => k.orders > 0);
+  const withSales = topKiots.filter((k) => k.orders > 0 || k.pin_pos !== null);
   return {
     bestSellers: await hydrate(best.map((r) => r.id)),
     newest: newest.items,
@@ -115,4 +119,18 @@ export async function getHomeSections(): Promise<HomeSections> {
     featuredLabel: withSales.length > 0 ? 'top' : 'new',
     stats: stats[0] ?? { kiots: 0, products: 0 },
   };
+}
+
+// CEO ghim Kiot lên đầu danh bạ / Kiot nổi bật: chỉ Kiot đang hoạt động.
+export async function pinKiot(
+  slug: string,
+  adminId: string,
+  until: Date | null,
+): Promise<{ ok: true } | { ok: false; error: 'NOT_FOUND' | 'FULL' | 'EXISTS' }> {
+  const kiot = await db.kiot.findFirst({
+    where: { slug: slug.trim().toLowerCase(), activeUntil: { gt: now() }, lockedAt: null },
+    select: { id: true },
+  });
+  if (!kiot) return { ok: false, error: 'NOT_FOUND' };
+  return addPin('kiot', kiot.id, adminId, until);
 }

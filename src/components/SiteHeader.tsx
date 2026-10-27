@@ -8,7 +8,6 @@ import { BottomNav } from './BottomNav';
 import { HeaderActions, HeaderSlogan } from './HeaderActions';
 import { LanguageMenu } from './LanguageMenu';
 import { LogoV4 } from './LogoV4';
-import { MeProvider } from './MeProvider';
 
 // Header + thanh dưới theo chuẩn V4 (docs/BRAND.md, CEO chốt 27/10/2026).
 export async function SiteHeader() {
@@ -19,7 +18,7 @@ export async function SiteHeader() {
   const base = kiotSlug ? appUrl : '';
   const t = await getT();
   return (
-    <MeProvider>
+    <>
       <header className="sticky top-0 z-40 border-b border-white/10 bg-ink/90 text-white backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-[1200px] items-center gap-3 px-3 md:px-6">
           <Link
@@ -51,6 +50,6 @@ export async function SiteHeader() {
         </div>
       </header>
       <BottomNav base={base} />
-    </MeProvider>
+    </>
   );
 }

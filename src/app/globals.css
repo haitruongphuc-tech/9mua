@@ -45,6 +45,18 @@ main:has(> [data-v4]) {
   color: #fff;
 }
 
+/* Bảng trượt từ dưới lên (V4). */
+@keyframes sheetUp {
+  0% {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 /* Logo V4 phát sáng nhấp nháy (docs/BRAND.md). */
 @keyframes glowPulse {
   0%,

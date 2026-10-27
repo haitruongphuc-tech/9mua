@@ -1,6 +1,7 @@
 import { Prisma } from '@prisma/client';
 import { now } from '@/lib/clock';
 import { db } from '@/lib/db';
+import { activePinIds, addPin } from '@/lib/pins';
 import { kiotOrigin } from '@/lib/urls';
 import { getProductForCheckout, productPath } from '@/modules/kiot';
 import { feedScore } from './score';
@@ -22,6 +23,7 @@ export type FeedVideo = {
   likes: number;
   views: number;
   liked: boolean;
+  pinned: boolean; // CEO ghim lên đầu "Dành cho bạn"
   products: FeedProduct[];
 };
 
@@ -92,6 +94,19 @@ export async function getFeed(
   }
   for (const id of freshQueue) if (ids.length < limit && !ids.includes(id)) ids.push(id);
 
+  // Trang đầu: video CEO ghim lên đầu (SPEC-admin.md bổ sung 27/10), kể cả video đã xem.
+  if (!served.length && !options.first) {
+    const pinned = await activePinIds('video');
+    if (pinned.length) {
+      const ok = await db.$queryRaw<Row[]>`
+        SELECT v.id FROM "Video" v JOIN "User" u ON u.id = v."authorId" WHERE ${VISIBLE} AND v.id = ANY(${pinned})`;
+      const okSet = new Set(ok.map((r) => r.id));
+      const head = pinned.filter((id) => okSet.has(id));
+      for (let i = ids.length - 1; i >= 0; i--) if (head.includes(ids[i]!)) ids.splice(i, 1);
+      ids.unshift(...head);
+    }
+  }
+
   if (options.first && !served.length) {
     const first = await db.$queryRaw<Row[]>`
       SELECT v.id FROM "Video" v JOIN "User" u ON u.id = v."authorId" WHERE ${VISIBLE} AND v.id = ${options.first}`;
@@ -127,7 +142,7 @@ async function feedProducts(productIds: string[]): Promise<FeedProduct[]> {
 
 export async function hydrateVideos(ids: string[], viewer: Viewer): Promise<FeedVideo[]> {
   if (ids.length === 0) return [];
-  const [videos, likes] = await Promise.all([
+  const [videos, likes, pins] = await Promise.all([
     db.video.findMany({
       where: { id: { in: ids } },
       include: { products: { orderBy: { position: 'asc' } } },
@@ -138,7 +153,9 @@ export async function hydrateVideos(ids: string[], viewer: Viewer): Promise<Feed
           select: { videoId: true },
         })
       : Promise.resolve([]),
+    activePinIds('video'),
   ]);
+  const pinnedSet = new Set(pins);
   const authors = await db.user.findMany({
     where: { id: { in: videos.map((v) => v.authorId) } },
     select: { id: true, displayName: true },
@@ -163,6 +180,7 @@ export async function hydrateVideos(ids: string[], viewer: Viewer): Promise<Feed
       likes: v.likes,
       views: v.views,
       liked: liked.has(v.id),
+      pinned: pinnedSet.has(v.id),
       products: await feedProducts(v.products.map((p) => p.productId)),
     });
   }
@@ -195,4 +213,16 @@ export async function recomputeScores(): Promise<number> {
 // Gắn nguồn video vào giỏ chỉ khi video đó thật sự có gắn sản phẩm này (chống ghi nguồn giả).
 export async function isProductTagged(videoId: string, productId: string): Promise<boolean> {
   return (await db.videoProduct.count({ where: { videoId, productId, video: { status: 'ready' } } })) > 0;
+}
+
+// CEO ghim video lên đầu feed: chỉ video đang hiện trên feed.
+export async function pinVideo(
+  videoId: string,
+  adminId: string,
+  until: Date | null,
+): Promise<{ ok: true } | { ok: false; error: 'NOT_FOUND' | 'FULL' | 'EXISTS' }> {
+  const rows = await db.$queryRaw<Row[]>`
+    SELECT v.id FROM "Video" v JOIN "User" u ON u.id = v."authorId" WHERE ${VISIBLE} AND v.id = ${videoId}`;
+  if (!rows[0]) return { ok: false, error: 'NOT_FOUND' };
+  return addPin('video', videoId, adminId, until);
 }

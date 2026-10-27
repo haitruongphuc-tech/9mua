@@ -19,6 +19,7 @@ export {
   getVideo,
   recomputeScores,
   isProductTagged,
+  pinVideo,
   FEED_PAGE,
   type FeedVideo,
   type FeedProduct,

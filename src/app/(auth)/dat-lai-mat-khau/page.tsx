@@ -1,11 +1,12 @@
 import type { Metadata } from 'next';
+import { ClientMessages } from '@/i18n/ClientMessages';
+import { getT } from '@/i18n/server';
+import { AuthShell } from '../AuthShell';
 import { ResetForm } from './ResetForm';
 
-export const metadata: Metadata = {
-  title: 'Đặt lại mật khẩu',
-  robots: { index: false },
-  referrer: 'no-referrer',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await getT())('auth.reset.title'), robots: { index: false }, referrer: 'no-referrer' };
+}
 
 export default async function ResetPasswordPage({
   searchParams,
@@ -13,11 +14,12 @@ export default async function ResetPasswordPage({
   searchParams: Promise<{ token?: string }>;
 }) {
   const { token = '' } = await searchParams;
+  const t = await getT();
   return (
-    <section className="mx-auto w-full max-w-sm px-4 py-10">
-      <h1 className="mb-1 text-2xl font-extrabold">Đặt mật khẩu mới</h1>
-      <p className="mb-6 text-black/70">Sau khi đổi, mọi thiết bị đang đăng nhập sẽ bị đăng xuất.</p>
-      <ResetForm token={token} />
-    </section>
+    <AuthShell title={t('auth.reset.title')} lead={t('auth.reset.lead')}>
+      <ClientMessages prefixes={['auth.']}>
+        <ResetForm token={token} />
+      </ClientMessages>
+    </AuthShell>
   );
 }

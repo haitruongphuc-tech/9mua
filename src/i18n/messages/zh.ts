@@ -1,30 +1,6 @@
 import type { Messages } from './vi';
+import { common } from './zh/common';
+import { live } from './zh/live';
+import { auth } from './zh/auth';
 
-export const zh: Messages = {
-  'common.home': '9MUA - 首页',
-  'common.slogan.home': '打开世界之门 - 一触即达',
-  'common.slogan.explore': '每个Kiot都是展厅 - 9MUA连接你我',
-  'common.slogan.live': '真实看 - 真实买 - 真人真事',
-  'common.slogan.cart': '整个市场装进一个袋子 - 9MUA橙色购物袋',
-  'common.slogan.profile': '每个Kiot都是一个品牌 - 背后有CEO',
-  'common.slogan.legal': '99% AI运营 - 1% CEO审批 - 真人服务',
-  'common.search.placeholder': '在市场搜索商品',
-  'common.search.label': '搜索9MUA市场',
-  'common.search.button': '搜索',
-  'common.cart.label': '购物车（{count}件）',
-  'common.nav.label': '主导航',
-  'common.nav.video': '视频',
-  'common.nav.market': '市场',
-  'common.nav.live': '直播',
-  'common.nav.kiot': 'Kiot',
-  'common.nav.me': '我',
-  'common.nav.meUser': '我（{name}）',
-  'common.nav.meLogin': '我（登录）',
-  'common.lang.label': '语言',
-  'common.lang.read': '朗读标语',
-  'common.lang.stop': '停止朗读',
-  'common.footer.taxId': '税号',
-  'live.empty.title': '目前没有人在直播',
-  'live.empty.body': '直播功能即将上线。先看看视频吧。',
-  'live.empty.cta': '看视频',
-};
+export const zh: Messages = { ...common, ...live, ...auth };

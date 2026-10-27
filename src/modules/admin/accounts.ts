@@ -151,7 +151,7 @@ export async function adjustKiotBalance(
 }
 
 // Cài đặt (SPEC-admin.md mục 5): kiểm hợp lệ trước khi lưu, mỗi giá trị đổi ghi 1 dòng nhật ký.
-const RULES: Record<SettingKey, { min?: number; max?: number; bool?: true; label: string }> = {
+const RULES: Record<SettingKey, { min?: number; max?: number; bool?: true; json?: true; label: string }> = {
   kiot_fee_vnd: { min: 2_000, max: 10_000_000, label: 'Phí thuê Kiot' },
   platform_fee_bp: { min: 0, max: 3_000, label: 'Phí sàn' }, // basis point: 0–30%
   payout_fee_vnd: { min: 0, max: 100_000, label: 'Phí chi hộ' },
@@ -160,11 +160,26 @@ const RULES: Record<SettingKey, { min?: number; max?: number; bool?: true; label
   payout_auto_max_per_request: { min: 0, max: 1_000_000_000, label: 'Hạn mức mỗi lần' },
   payout_auto_max_per_kiot_day: { min: 0, max: 1_000_000_000, label: 'Hạn mức mỗi Kiot mỗi ngày' },
   payout_auto_daily_cap: { min: 0, max: 10_000_000_000, label: 'Hạn mức toàn sàn mỗi ngày' },
+  social_free_daily_limit: { min: 1, max: 10_000, label: 'Giới hạn tim/follow mỗi ngày (Free)' },
+  social_voucher_threshold: { min: 10, max: 100_000, label: 'Số tim để nhận voucher' },
+  social_voucher_enabled: { bool: true, label: 'Tặng voucher mở Kiot' },
+  slogans_json: { json: true, label: 'Slogan' },
+  legal_info_json: { json: true, label: 'Thông tin pháp lý' },
 };
 
 export function validateSetting(key: SettingKey, value: string): string | null {
   const rule = RULES[key];
   if (rule.bool) return value === 'true' || value === 'false' ? null : `${rule.label}: giá trị không hợp lệ`;
+  if (rule.json) {
+    try {
+      const v = JSON.parse(value) as unknown;
+      return v && typeof v === 'object' && !Array.isArray(v) && value.length <= 20_000
+        ? null
+        : `${rule.label}: dữ liệu không hợp lệ`;
+    } catch {
+      return `${rule.label}: dữ liệu không hợp lệ`;
+    }
+  }
   const n = Number(value);
   if (!Number.isInteger(n)) return `${rule.label} phải là số nguyên`;
   if (n < rule.min! || n > rule.max!)

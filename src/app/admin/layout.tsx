@@ -19,6 +19,8 @@ const NAV = [
   ['/admin/bao-cao', 'Báo cáo'],
   ['/admin/tra-cuu', 'Tra cứu'],
   ['/admin/giao-dich', 'Giao dịch'],
+  ['/admin/ghim', 'Ghim'],
+  ['/admin/noi-dung', 'Slogan & pháp lý'],
   ['/admin/cai-dat', 'Cài đặt'],
 ] as const;
 

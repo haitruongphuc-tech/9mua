@@ -39,6 +39,11 @@ export async function requireAdmin(): Promise<SessionUser> {
   return user;
 }
 
+// Chỉ xem có cookie phiên hay không (không hỏi DB): dùng để quyết định gửi phần chữ của popup mở tài khoản.
+export async function hasSessionCookie(): Promise<boolean> {
+  return (await cookies()).has(SESSION_COOKIE);
+}
+
 // Chỉ gọi trong Server Action / Route Handler (nơi được phép ghi cookie).
 export async function startSession(userId: string): Promise<void> {
   const { token } = await createSession(userId);

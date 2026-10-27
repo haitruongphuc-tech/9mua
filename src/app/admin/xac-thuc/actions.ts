@@ -1,9 +1,18 @@
 'use server';
 
+import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { env } from '@/lib/env';
 import { formatDateTimeVN } from '@/lib/format';
 import { safeNextPath } from '@/lib/safe-next-path';
-import { confirmTotpSetup, markSessionVerified, verifyTotp } from '@/modules/admin';
+import {
+  ADMIN_DEVICE_COOKIE,
+  confirmTotpSetup,
+  markSessionVerified,
+  TRUST_DAYS,
+  trustDevice,
+  verifyTotp,
+} from '@/modules/admin';
 import { getCurrentSessionId, requireAdmin } from '@/modules/identity';
 
 export type TotpState = { error?: string; backupCodes?: string[] };
@@ -23,6 +32,16 @@ export async function verifyTotpAction(next: string, _p: TotpState, form: FormDa
   const result = await verifyTotp(admin.id, String(form.get('code') ?? ''));
   if (!result.ok) return { error: message(result) };
   await markSessionVerified(sessionId, admin.id);
+  if (form.get('remember') === 'on') {
+    const { token } = await trustDevice(admin.id, (await headers()).get('user-agent') ?? '');
+    (await cookies()).set(ADMIN_DEVICE_COOKIE, token, {
+      httpOnly: true,
+      secure: env().APP_URL.startsWith('https://'),
+      sameSite: 'strict',
+      path: '/',
+      maxAge: TRUST_DAYS * 86_400,
+    });
+  }
   const target = safeNextPath(next);
   redirect(target.startsWith('/admin') && !target.startsWith('/admin/xac-thuc') ? target : '/admin');
 }

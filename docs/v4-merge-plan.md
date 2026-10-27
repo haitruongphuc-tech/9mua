@@ -184,6 +184,7 @@ Mỗi giai đoạn: cập nhật spec → CEO duyệt → code có test (cả đ
 | 8 | Livestream | **Tự xây trên VPS** (MediaMTX, phát từ trình duyệt điện thoại), làm sau giai đoạn A; ban đầu tối đa 2 buổi cùng lúc × 50 người xem |
 | 9 | Quà livestream | **9MUA thưởng xu nội bộ theo KPI số người xem**, tự động (bộ quy tắc dưới đây); khách không tặng nhau |
 | – | Pháp lý | CEO yêu cầu không phân tích pháp lý trong các đề xuất tiếp theo |
+| 10 | Giao diện (27/10, thay #1 và #2) | **Lấy V4 làm chuẩn giao diện**, đúng từng màu, độ dày viền, bo góc, cỡ chữ: nền đen `#0A0A0A` toàn site, logo phát sáng nhấp nháy, cam `#FF6B00`, chữ trắng trên nút cam. CEO đã nghe rủi ro chữ trắng trên cam (2,8:1) và chấp nhận |
 
 **Xu 9MUA (mặc định, CEO sửa sau):**
 - 1 xu dùng thay 1.000đ trong 9MUA: gia hạn Kiot, đẩy video/live lên đầu feed. Không đổi ra tiền mặt, không

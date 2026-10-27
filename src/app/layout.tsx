@@ -4,6 +4,7 @@ import { Space_Grotesk } from 'next/font/google';
 import { SiteFooter } from '@/components/SiteFooter';
 import { MeProvider } from '@/components/MeProvider';
 import { SignupPopup } from '@/components/SignupPopup';
+import { ToastHost } from '@/components/ui/Toast';
 import { SiteHeader } from '@/components/SiteHeader';
 import { I18nProvider } from '@/i18n/client';
 import { ClientMessages } from '@/i18n/ClientMessages';
@@ -57,6 +58,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <SiteHeader />
             <main className="flex-1 bg-surface text-brand-ink">{children}</main>
             <SiteFooter />
+            <ToastHost />
             {guest ? (
               <Suspense>
                 <ClientMessages prefixes={['auth.']}>

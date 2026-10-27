@@ -39,7 +39,7 @@ test('trang Kiot công khai: chủ xem trước bản nháp, khách thấy tạm
   await expect(cards.last()).toContainText('Hết hàng');
 
   // Trang sản phẩm trên tên miền phụ + thẻ Open Graph để chia sẻ Zalo/Facebook.
-  await cards.first().getByRole('link').click();
+  await cards.first().getByRole('link').first().click();
   await guest.waitForURL(new RegExp(`^${kiotUrl}/p/[^/]+-thanh-long-ruot-do-1kg$`));
   await expect(guest.getByTestId('product-price')).toHaveText('45.000đ');
   // Mô tả chia mục: tiêu đề IN HOA và gạch đầu dòng hiện thành danh sách.

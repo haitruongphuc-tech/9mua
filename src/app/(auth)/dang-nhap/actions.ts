@@ -28,5 +28,5 @@ export async function loginAction(_prev: LoginFormState, form: FormData): Promis
     await linkGoogleWithTicket(result.userId, ticket);
     jar.set(GOOGLE_LINK_COOKIE, '', { ...googleCookieOptions(), maxAge: 0 });
   }
-  redirect(result.mustChangePassword ? '/tai-khoan?doi-mat-khau=1' : safeNextPath(form.get('next')));
+  redirect(result.mustChangePassword ? '/tai-khoan/cai-dat?doi-mat-khau=1' : safeNextPath(form.get('next')));
 }

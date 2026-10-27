@@ -4,10 +4,12 @@ import { auth } from './vi/auth';
 import { common } from './vi/common';
 import { feed } from './vi/feed';
 import { live } from './vi/live';
+import { me } from './vi/me';
 import { notify } from './vi/notify';
 import { post } from './vi/post';
+import { profile } from './vi/profile';
 
-export const vi = { ...auth, ...common, ...feed, ...live, ...notify, ...post } as const;
+export const vi = { ...auth, ...common, ...feed, ...live, ...me, ...notify, ...post, ...profile } as const;
 
 export type MessageKey = keyof typeof vi;
 export type Messages = Record<MessageKey, string>;

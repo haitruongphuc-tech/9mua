@@ -1,10 +1,9 @@
 'use server';
 
-import { redirect } from 'next/navigation';
 import { getT } from '@/i18n/server';
 import { completePasswordReset } from '@/modules/identity';
 
-export type ResetFormState = { error?: string };
+export type ResetFormState = { error?: string; done?: boolean };
 
 export async function resetPasswordAction(_prev: ResetFormState, form: FormData): Promise<ResetFormState> {
   const t = await getT();
@@ -15,5 +14,7 @@ export async function resetPasswordAction(_prev: ResetFormState, form: FormData)
   if (!result.ok) {
     return { error: t(result.error === 'INVALID_PASSWORD' ? 'auth.err.password' : 'auth.reset.expired') };
   }
-  redirect('/dang-nhap?da-dat-lai=1');
+  // Trình duyệt tự chuyển trang (ResetForm): redirect() của Server Action đôi khi làm router Next.js đứng yên ở nút
+  // "Đang lưu…" dù máy chủ đã xong (E2E 27/10).
+  return { done: true };
 }

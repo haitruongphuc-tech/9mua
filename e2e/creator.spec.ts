@@ -27,7 +27,8 @@ test('creator: thông báo khi video xong, trang creator, báo cáo, xoá video'
 
   const video = await e2eDb.video.findFirstOrThrow({ where: { caption: `Clip trang creator ${stamp}` } });
   await creator.goto(`/creator/${video.authorId}`);
-  await expect(creator.getByTestId('creator-stats')).toHaveText('1 video · 0 lượt thích');
+  await expect(creator.getByTestId('stat-videos')).toHaveText('1');
+  await expect(creator.getByTestId('stat-likes')).toHaveText('0');
 
   // Người khác báo cáo video.
   const viewer = await signUpBuyer(browser, 'Người xem');

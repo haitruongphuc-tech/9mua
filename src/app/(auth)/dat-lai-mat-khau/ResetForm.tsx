@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useActionState } from 'react';
+import { useActionState, useEffect } from 'react';
 import { SubmitButton } from '@/components/ui/SubmitButton';
 import { TextField } from '@/components/ui/TextField';
 import { useT } from '@/i18n/client';
@@ -10,6 +10,10 @@ import { resetPasswordAction, type ResetFormState } from './actions';
 export function ResetForm({ token }: { token: string }) {
   const t = useT();
   const [state, action] = useActionState<ResetFormState, FormData>(resetPasswordAction, {});
+  useEffect(() => {
+    // Mật khẩu đã đổi, mọi phiên đã bị xoá: tải hẳn trang đăng nhập.
+    if (state.done) window.location.assign('/dang-nhap?da-dat-lai=1');
+  }, [state.done]);
   return (
     <form action={action} className="flex flex-col gap-4">
       <input type="hidden" name="token" value={token} />

@@ -28,7 +28,8 @@ export async function requireUser(): Promise<SessionUser> {
   const path = (await headers()).get('x-pathname') ?? '/';
   if (!user) redirect(`/dang-nhap?next=${encodeURIComponent(path)}`);
   // Đang dùng mật khẩu tạm do CEO cấp → phải đổi trước khi làm việc khác (SPEC-identity.md mục 5).
-  if (user.mustChangePassword && !path.startsWith('/tai-khoan')) redirect('/tai-khoan?doi-mat-khau=1');
+  if (user.mustChangePassword && !path.startsWith('/tai-khoan'))
+    redirect('/tai-khoan/cai-dat?doi-mat-khau=1');
   return user;
 }
 

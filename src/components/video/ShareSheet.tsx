@@ -11,11 +11,15 @@ import { Sheet } from './Sheet';
 export function ShareSheet({
   url,
   title,
+  heading,
+  qrHint,
   onClose,
   onCopied,
 }: {
   url: string | null;
   title: string;
+  heading?: string; // mặc định "Chia sẻ video"; trang Kiot/creator truyền chữ riêng
+  qrHint?: string;
   onClose: () => void;
   onCopied: () => void;
 }) {
@@ -47,7 +51,7 @@ export function ShareSheet({
     onCopied();
   };
   return (
-    <Sheet open onClose={onClose} title={t('feed.share.title')} testId="share-sheet">
+    <Sheet open onClose={onClose} title={heading ?? t('feed.share.title')} testId="share-sheet">
       <div className="grid grid-cols-4 gap-3">
         {targets.map((x) => (
           <a
@@ -92,7 +96,7 @@ export function ShareSheet({
           className="rounded-[12px] bg-white"
         />
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] text-zinc-500">{t('feed.share.qr')}</p>
+          <p className="text-[11px] text-zinc-500">{qrHint ?? t('feed.share.qr')}</p>
           <p className="truncate text-[12px] font-bold" data-testid="share-url">
             {url}
           </p>

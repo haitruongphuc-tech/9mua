@@ -630,8 +630,9 @@
 - [x] **T61: Module social** — follow, bình luận, lưu, hashtag, tim Kiot, giới hạn Free, voucher.
 - [x] **T62: Feed V4** (gộp T41) — tab Đang Follow, thả tim 2 chạm, thanh tiến độ, cột nút, bình luận, chia sẻ có QR.
 - [x] **T63: Story 24h + Duet**.
-- [ ] **T64: Trang Kiot V4** (gộp T42) + Social Connect.
-- [ ] **T65: Trang Tôi V4** (gộp T43) — Free/voucher/xu, Bộ sưu tập, lối tắt; cài đặt tài khoản sang `/tai-khoan/cai-dat`.
+- [x] **T64: Trang Kiot V4** (gộp T42) + Social Connect. Trang creator cũng đổi V4 (Follow, link mạng xã hội).
+- [x] **T65: Trang Tôi V4** (gộp T43) — Free/voucher, Bộ sưu tập, lối tắt; cài đặt tài khoản sang `/tai-khoan/cai-dat`.
+  Ô xu thêm vào khi làm sổ xu (T49–T57).
 - [ ] **T66: Đổi giao diện + dịch các trang còn lại** — Chợ, sản phẩm, danh bạ Kiot, giỏ, đặt hàng, đơn mua, đăng nhập,
   Kiot của tôi, video, admin (chỉ tiếng Việt).
 - [ ] **T67: AI Studio** (`SPEC-ai.md`).

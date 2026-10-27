@@ -1,8 +1,17 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { cache } from 'react';
+import { ProfileActions } from '@/components/profile/ProfileActions';
+import { SocialLinks } from '@/components/profile/SocialLinks';
+import { V4Page } from '@/components/V4Page';
 import { VideoGrid } from '@/components/video/VideoGrid';
+import { ClientMessages } from '@/i18n/ClientMessages';
+import { getT } from '@/i18n/server';
+import { env } from '@/lib/env';
 import { getCreatorProfile } from '@/modules/creator';
+import { getCurrentUser } from '@/modules/identity';
+import { followStats, getSocialLinks } from '@/modules/social';
 
 const load = cache(getCreatorProfile);
 
@@ -16,27 +25,71 @@ export async function generateMetadata({
   return { title: `${p.displayName} – Creator`, description: `${p.videoCount} video trên 9MUA.` };
 }
 
+// Trang creator kiểu V4 (SPEC-creator.md mục 7, SPEC-social.md mục 1): số liệu thật, Follow, link mạng xã hội.
 export default async function CreatorPage({ params }: { params: Promise<{ userId: string }> }) {
-  const p = await load((await params).userId);
+  const { userId } = await params;
+  const p = await load(userId);
   if (!p) notFound();
+  const viewer = await getCurrentUser();
+  const [follow, links, t] = await Promise.all([followStats(p.id, viewer?.id), getSocialLinks(p.id), getT()]);
+  const isSelf = viewer?.id === p.id;
+  const url = `${env().APP_URL}/creator/${p.id}`;
   return (
-    <section className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-6">
-      <header className="flex items-center gap-4">
-        <span className="grid h-16 w-16 place-items-center rounded-full border-2 border-brand-ink bg-brand text-2xl font-extrabold text-brand-ink">
-          {p.displayName.trim().charAt(0).toUpperCase()}
-        </span>
-        <div>
-          <h1 className="text-2xl font-extrabold">{p.displayName}</h1>
-          <p className="text-sm text-black/70" data-testid="creator-stats">
-            {p.videoCount} video · {p.totalLikes.toLocaleString('vi-VN')} lượt thích
-          </p>
-        </div>
-      </header>
-      {p.videos.length === 0 ? (
-        <p className="rounded-2xl bg-surface-muted p-6 text-center text-black/70">Chưa có video.</p>
-      ) : (
-        <VideoGrid videos={p.videos} />
-      )}
-    </section>
+    <ClientMessages prefixes={['profile.', 'feed.share.']}>
+      <V4Page>
+        <section className="mx-auto max-w-[900px] px-4 py-6">
+          <header className="flex items-center gap-4">
+            <span className="grid h-20 w-20 shrink-0 place-items-center rounded-full border-4 border-ink bg-gradient-to-br from-brand to-[#c2410c] text-[30px] font-black shadow-[0_0_0_2px_rgb(255_107_0/0.5)]">
+              {p.displayName.trim().charAt(0).toUpperCase()}
+            </span>
+            <div className="min-w-0">
+              <h1 className="font-display text-[22px] font-black leading-tight">{p.displayName}</h1>
+              <p className="text-[13px] text-white/60">{t('profile.creator')}</p>
+            </div>
+          </header>
+          <ProfileActions
+            target={{ userId: p.id }}
+            stats={[
+              { id: 'followers', value: follow.followers },
+              { id: 'following', value: follow.following },
+              { id: 'videos', value: p.videoCount },
+              { id: 'likes', value: p.totalLikes },
+            ]}
+            initial={{ following: follow.isFollowing }}
+            isSelf={isSelf}
+            selfLink={{ href: '/video/cua-toi', label: t('profile.myVideos') }}
+            share={{
+              url,
+              title: p.displayName,
+              heading: t('profile.shareProfile'),
+              qrHint: t('profile.qrProfile'),
+            }}
+            loginHref={`/dang-nhap?next=${encodeURIComponent(`/creator/${p.id}`)}`}
+          >
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <SocialLinks links={links} />
+              {isSelf ? (
+                <Link
+                  href="/ket-noi"
+                  className="rounded-full border border-dashed border-white/30 px-3 py-1.5 text-[12px] font-bold text-white/70"
+                >
+                  {t('profile.addSocial')}
+                </Link>
+              ) : null}
+            </div>
+          </ProfileActions>
+          <h2 className="mt-6 border-b border-white/10 pb-2 text-[13px] font-bold">
+            {t('profile.tab.video')}
+          </h2>
+          <div className="mt-2">
+            {p.videos.length === 0 ? (
+              <p className="py-10 text-center text-[13px] text-white/60">{t('profile.noCreatorVideos')}</p>
+            ) : (
+              <VideoGrid videos={p.videos} />
+            )}
+          </div>
+        </section>
+      </V4Page>
+    </ClientMessages>
   );
 }

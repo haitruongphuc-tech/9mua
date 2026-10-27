@@ -67,6 +67,12 @@ test('feed V4: follow, bình luận, lưu, chạm 2 lần thả tim, tab Đang F
   await expect(fan.getByRole('heading', { level: 1 })).toHaveText(`#xahoi${stamp}`);
   await expect(fan.getByTestId('video-grid').locator('li')).toHaveCount(1);
 
+  // Trang Tôi: Bộ sưu tập có video đã lưu; số Following và lượt Free đã dùng (1 follow + 1 tim).
+  await fan.goto('/tai-khoan');
+  await expect(fan.getByTestId('saved-videos').getByRole('link')).toHaveCount(1);
+  await expect(fan.getByTestId('me-following')).toHaveText('1');
+  await expect(fan.getByTestId('me-free')).toContainText('2/50');
+
   expect(await e2eDb.savedVideo.count({ where: { videoId: video.id } })).toBe(1);
   expect(await e2eDb.follow.count({ where: { followeeId: authorRow.id } })).toBe(1);
 });

@@ -28,7 +28,7 @@ test('quên mật khẩu → mở link trong email → đặt mật khẩu mới
   await page.fill('#password', 'mat-khau-moi-e2e');
   await page.fill('#confirm', 'mat-khau-moi-e2e');
   await page.click('button[type=submit]');
-  await expect(page).toHaveURL(/da-dat-lai=1/);
+  await expect(page).toHaveURL(/da-dat-lai=1/, { timeout: 10_000 });
 
   await page.fill('#identifier', email);
   await page.fill('#password', 'mat-khau-moi-e2e');

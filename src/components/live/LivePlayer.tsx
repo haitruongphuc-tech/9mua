@@ -91,6 +91,8 @@ export function LivePlayer({
       try {
         await session?.close();
         const current = await play(data.whepUrl, data.viewToken, videoRef.current!);
+        // Đã vuốt sang buổi khác trong lúc đang kết nối: đóng ngay.
+        if (stopped) return void current.close();
         session = current;
         current.pc.addEventListener('connectionstatechange', () => {
           const state = current.pc.connectionState;

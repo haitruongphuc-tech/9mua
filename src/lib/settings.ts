@@ -20,6 +20,11 @@ export const SETTING_DEFAULTS = {
   ai_monthly_budget_vnd: '500000',
   ai_text_per_day: '10',
   ai_image_per_day: '3',
+  // Live (SPEC-live.md mục 2) và luật thưởng xu (phần 2)
+  live_max_sessions: '2',
+  live_max_viewers: '50',
+  live_max_minutes: '120',
+  xu_rules_json: '{"tiers":[[10,10],[25,30],[50,80]],"monthlyBudget":20000,"minMinutes":15}',
   // Tỉ giá USD dùng để quy chi phí AI (giá AI tính bằng USD) ra VNĐ.
   usd_vnd_rate: '26500',
   // Nội dung CEO sửa ở /admin/noi-dung (SPEC-admin.md bổ sung 27/10), lưu dạng JSON.

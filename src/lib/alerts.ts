@@ -20,6 +20,8 @@ export const ALERT_LABELS: Record<string, string> = {
   video_auto_hidden: 'Video bị tự ẩn do nhiều báo cáo',
   ai_budget: 'AI Studio chạm ngân sách tháng',
   kiot_fee_rate: 'Tỷ giá USD lệch nhiều, giá Kiot chưa đổi',
+  live_reported: 'Buổi live bị nhiều người báo cáo',
+  xu_budget: 'Hết ngân sách thưởng xu tháng này',
 };
 
 // Không bao giờ ném lỗi: cảnh báo hỏng không được làm hỏng luồng tiền đang chạy.

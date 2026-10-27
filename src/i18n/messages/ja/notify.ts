@@ -11,4 +11,10 @@ export const notify: NotifyMessages = {
   'notify.reason': '理由：{reason}',
   'notify.title': 'お知らせ',
   'notify.empty': 'お知らせはまだありません。',
+  'notify.xuReward': 'ライブの有効視聴者 {viewers} 人で {xu} xu を獲得しました。',
+  'notify.xuSkipped.TOO_SHORT': 'ライブが最低配信時間に届かなかったため、xu はありません。',
+  'notify.xuSkipped.NOT_ENOUGH_VIEWERS': '有効視聴者が {viewers} 人で、xu の付与基準に届きませんでした。',
+  'notify.xuSkipped.DAILY_LIMIT': '本日はすでに xu を獲得しているため、このライブでは付与されません。',
+  'notify.xuSkipped.BUDGET': '今月の xu 予算が上限に達したため、このライブでは付与されません。',
+  'notify.xuSkipped.STOPPED': 'ライブが 9MUA により停止されたため、xu はありません。',
 };

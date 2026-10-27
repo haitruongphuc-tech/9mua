@@ -151,3 +151,14 @@ export async function getPublicProduct(slug: string, productId: string, viewerId
   if (!product) return null;
   return { kiot: found.kiot, product, preview: found.preview || !product.visible };
 }
+
+// Tên, slug, logo của vài Kiot (thẻ người phát live, thẻ sản phẩm ghim). Chỉ trường công khai.
+export function kiotBasics(
+  ids: string[],
+): Promise<{ id: string; slug: string; name: string; logoUrl: string | null }[]> {
+  if (ids.length === 0) return Promise.resolve([]);
+  return db.kiot.findMany({
+    where: { id: { in: ids } },
+    select: { id: true, slug: true, name: true, logoUrl: true },
+  });
+}

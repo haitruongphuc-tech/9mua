@@ -206,3 +206,16 @@ describe('khi tiền vào', () => {
     expect((await getPayment(r.intentId))?.status).toBe('cancelled');
   });
 });
+
+describe('nguồn buổi live (SPEC-live.md mục 7)', () => {
+  it('thêm vào giỏ từ live thì món trong đơn có sourceLiveId', async () => {
+    const seller = await createSeller({ active: true });
+    const p = await createProduct(seller.kiotId, { price: 50_000, stock: 5 });
+    const buyer = await createUser();
+    expect(await addToCart(buyer.id, p.id, 1, { liveId: 'live_1' })).toEqual({ ok: true });
+    const r = await placeOrder(buyer.id, { address: sampleAddress, notes: {}, saveAddress: false });
+    expect(r.ok).toBe(true);
+    const item = await db.orderItem.findFirstOrThrow({ where: { productId: p.id } });
+    expect(item).toMatchObject({ sourceLiveId: 'live_1', sourceVideoId: null });
+  });
+});

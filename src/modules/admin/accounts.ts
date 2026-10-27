@@ -169,6 +169,10 @@ const RULES: Record<SettingKey, { min?: number; max?: number; bool?: true; json?
   ai_text_per_day: { min: 0, max: 1_000, label: 'Lượt viết chữ AI mỗi ngày' },
   ai_image_per_day: { min: 0, max: 100, label: 'Lượt vẽ ảnh AI mỗi ngày' },
   usd_vnd_rate: { min: 10_000, max: 100_000, label: 'Tỉ giá USD' },
+  live_max_sessions: { min: 0, max: 20, label: 'Số buổi live cùng lúc' },
+  live_max_viewers: { min: 1, max: 500, label: 'Người xem tối đa mỗi buổi' },
+  live_max_minutes: { min: 5, max: 480, label: 'Thời lượng tối đa mỗi buổi (phút)' },
+  xu_rules_json: { json: true, label: 'Luật thưởng xu' },
   slogans_json: { json: true, label: 'Slogan' },
   legal_info_json: { json: true, label: 'Thông tin pháp lý' },
 };

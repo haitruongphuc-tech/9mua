@@ -11,4 +11,11 @@ export const notify: NotifyMessages = {
   'notify.reason': 'Reason: {reason}',
   'notify.title': 'Notifications',
   'notify.empty': 'No notifications yet.',
+  'notify.xuReward': 'You earned {xu} xu thanks to {viewers} qualified viewers in your live.',
+  'notify.xuSkipped.TOO_SHORT': 'Your live was shorter than the minimum, so no xu this time.',
+  'notify.xuSkipped.NOT_ENOUGH_VIEWERS':
+    'Your live had {viewers} qualified viewers, not enough for a xu reward.',
+  'notify.xuSkipped.DAILY_LIMIT': 'You already got a xu reward today; this live adds no more.',
+  'notify.xuSkipped.BUDGET': 'This month’s xu reward budget is used up; your live got no xu.',
+  'notify.xuSkipped.STOPPED': 'Your live was stopped by 9MUA, so it earns no xu.',
 };

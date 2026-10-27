@@ -11,4 +11,11 @@ export const notify: NotifyMessages = {
   'notify.reason': 'Motivo: {reason}',
   'notify.title': 'Notificaciones',
   'notify.empty': 'Aún no hay notificaciones.',
+  'notify.xuReward': 'Ganaste {xu} xu gracias a {viewers} espectadores válidos en tu directo.',
+  'notify.xuSkipped.TOO_SHORT': 'Tu directo fue más corto del mínimo, así que esta vez no hay xu.',
+  'notify.xuSkipped.NOT_ENOUGH_VIEWERS':
+    'Tu directo tuvo {viewers} espectadores válidos, no alcanza para recompensa en xu.',
+  'notify.xuSkipped.DAILY_LIMIT': 'Hoy ya recibiste xu; este directo no suma más.',
+  'notify.xuSkipped.BUDGET': 'Se agotó el presupuesto de xu del mes; tu directo no recibe xu.',
+  'notify.xuSkipped.STOPPED': '9MUA detuvo tu directo, así que no recibe xu.',
 };

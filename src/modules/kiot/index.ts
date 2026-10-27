@@ -32,6 +32,7 @@ export {
   getPublicProduct,
   countPublicProducts,
   kiotOwnerId,
+  kiotBasics,
   listPublicProducts,
   productPath,
   PUBLIC_PRODUCT_WHERE,

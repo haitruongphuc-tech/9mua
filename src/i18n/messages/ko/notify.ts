@@ -11,4 +11,10 @@ export const notify: NotifyMessages = {
   'notify.reason': '사유: {reason}',
   'notify.title': '알림',
   'notify.empty': '아직 알림이 없어요.',
+  'notify.xuReward': '라이브 유효 시청자 {viewers}명으로 {xu} xu를 받았어요.',
+  'notify.xuSkipped.TOO_SHORT': '라이브가 최소 시간보다 짧아 이번에는 xu가 없어요.',
+  'notify.xuSkipped.NOT_ENOUGH_VIEWERS': '유효 시청자 {viewers}명으로 xu 보상 기준에 못 미쳤어요.',
+  'notify.xuSkipped.DAILY_LIMIT': '오늘 이미 xu 보상을 받아 이번 라이브는 추가되지 않아요.',
+  'notify.xuSkipped.BUDGET': '이번 달 xu 보상 예산이 소진되어 이번 라이브는 xu가 없어요.',
+  'notify.xuSkipped.STOPPED': '9MUA가 라이브를 중지해 xu가 없어요.',
 };

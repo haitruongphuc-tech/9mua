@@ -23,6 +23,7 @@ export type DemoKiot = {
   district: string;
   color: [string, string];
   caption: string;
+  promises: string[]; // cam kết riêng của shop, in trong mọi mô tả sản phẩm của Kiot
   queries: { logo: string; cover: string; video: string };
   products: DemoProduct[];
 };
@@ -79,13 +80,14 @@ const SHIPPING = [
 ];
 
 // Mô tả đầy đủ như người bán thật viết: giới thiệu, điểm nổi bật, quy cách, hướng dẫn, giao hàng.
-export function describeProduct(p: DemoProduct): string {
+export function describeProduct(p: DemoProduct, k: Pick<DemoKiot, 'promises'>): string {
   const list = (items: string[]) => items.map((i) => `• ${i}`).join('\n');
   return [
     p.intro,
     `ĐIỂM NỔI BẬT\n${list(p.highlights)}`,
     `THÔNG TIN SẢN PHẨM\n${list(p.spec)}`,
     `HƯỚNG DẪN SỬ DỤNG & BẢO QUẢN\n${list(p.care ?? CARE[p.category] ?? CARE['do-gia-dung']!)}`,
+    `CAM KẾT CỦA SHOP\n${list(k.promises)}`,
     `GIAO HÀNG & ĐỔI TRẢ\n${list(SHIPPING)}`,
     '(Đây là sản phẩm mẫu để thử web 9MUA, không bán thật.)',
   ].join('\n\n');
@@ -102,6 +104,11 @@ export const DEMO_KIOTS: DemoKiot[] = [
     district: 'Ninh Kiều',
     color: ['#f59e0b', '#16a34a'],
     caption: 'Xoài cát chín cây, ngọt lịm #traicay #mientay #mau',
+    promises: [
+      'Trái cây nhà vườn trồng, không qua thương lái, không thuốc giữ tươi.',
+      'Trái dập, hư khi nhận: chụp ảnh gửi shop, shop gửi bù trong lần giao sau hoặc hoàn tiền.',
+      'Shop báo trước nếu hết mùa hoặc trái chưa đạt, không giao hàng kém chất lượng.',
+    ],
     queries: { logo: 'tropical fruit', cover: 'fruit market stall', video: 'tropical fruit' },
     products: [
       {
@@ -117,11 +124,15 @@ export const DEMO_KIOTS: DemoKiot[] = [
           'Chín cây, không ủ hoá chất, để 1–2 ngày là ăn được',
           'Thịt dày, mịn, ít xơ, độ ngọt cao',
           'Hái theo đơn mỗi sáng, giao trong ngày ở Cần Thơ',
+          'Mỗi trái bọc lưới xốp, đóng thùng carton chống dập',
         ],
         spec: [
           'Khối lượng: 1kg (2–3 trái)',
           'Xuất xứ: Cái Bè, Tiền Giang',
           'Mùa vụ: quanh năm, ngon nhất tháng 4–6',
+          'Độ ngọt: 18–22 độ Brix',
+          'Đóng gói: thùng carton có lưới xốp',
+          'Chứng nhận: VietGAP',
         ],
       },
       {
@@ -132,16 +143,20 @@ export const DEMO_KIOTS: DemoKiot[] = [
         category: 'nong-san',
         query: 'durian fruit',
         intro:
-          'Sầu riêng Ri6 cơm vàng, hạt lép, béo ngọt vừa phải. Nhà vườn chọn trái già, cắt cuống chuẩn, chín tự nhiên 1–2 ngày sau khi nhận.',
+          'Sầu riêng Ri6 cơm vàng, hạt lép, béo ngọt vừa phải. Nhà vườn chọn trái già, cắt cuống chuẩn, chín tự nhiên 1–2 ngày sau khi nhận. Mỗi trái được gõ thử và soi cuống trước khi giao, nhà vườn quay video cân trái gửi khách trước khi đóng thùng.',
         highlights: [
           'Cơm vàng đậm, ráo, không sượng',
           'Bao ăn: trái sượng hoặc hư được đổi trái mới',
           'Giá đã tính theo kg thực tế khi cân',
+          'Có video cân trái trước khi giao',
         ],
         spec: [
           'Khối lượng: 2–3kg mỗi trái',
           'Giá: 145.000đ/trái 2kg, phụ thu theo cân nặng',
           'Xuất xứ: Cai Lậy, Tiền Giang',
+          'Độ chín: già 100–110 ngày, chín sau 1–2 ngày',
+          'Đóng gói: thùng carton đục lỗ, bọc lưới',
+          'Chứng nhận: VietGAP',
         ],
       },
       {
@@ -157,8 +172,16 @@ export const DEMO_KIOTS: DemoKiot[] = [
           'Ruột hồng, ráo nước, dễ tách múi',
           'Để được 2–3 tuần ở nhiệt độ phòng',
           'Hợp làm quà biếu, cúng rằm',
+          'Vỏ có tinh dầu thơm, dùng nấu nước gội đầu được',
         ],
-        spec: ['Khối lượng: 1,3–1,6kg/trái', 'Xuất xứ: Chợ Lách, Bến Tre'],
+        spec: [
+          'Khối lượng: 1,3–1,6kg/trái',
+          'Xuất xứ: Chợ Lách, Bến Tre',
+          'Độ ngọt: 10–12 độ Brix',
+          'Mùa ngon: tháng 8 đến Tết Âm lịch',
+          'Bảo quản: nhiệt độ phòng 2–3 tuần',
+          'Chứng nhận: VietGAP',
+        ],
       },
       {
         name: 'Chôm chôm nhãn (1kg)',
@@ -168,9 +191,20 @@ export const DEMO_KIOTS: DemoKiot[] = [
         category: 'nong-san',
         query: 'rambutan',
         intro:
-          'Chôm chôm nhãn trái nhỏ, cùi dày, giòn, tróc hạt, ngọt đậm như nhãn. Hái buổi sáng, đóng thùng có lỗ thông khí để giữ tươi.',
-        highlights: ['Cùi giòn, tróc hạt', 'Ngọt đậm, không chua', 'Đóng thùng thông khí, giữ tươi 3–4 ngày'],
-        spec: ['Khối lượng: 1kg (khoảng 35–40 trái)', 'Xuất xứ: Phong Điền, Cần Thơ'],
+          'Chôm chôm nhãn trái nhỏ, cùi dày, giòn, tróc hạt, ngọt đậm như nhãn. Hái buổi sáng, đóng thùng có lỗ thông khí để giữ tươi. Đây là giống chôm chôm đặc sản của Phong Điền, mỗi năm chỉ có khoảng 3 tháng.',
+        highlights: [
+          'Cùi giòn, tróc hạt',
+          'Ngọt đậm, không chua',
+          'Đóng thùng thông khí, giữ tươi 3–4 ngày',
+          'Trái chọn đều, không trái nứt hay sâu',
+        ],
+        spec: [
+          'Khối lượng: 1kg (khoảng 35–40 trái)',
+          'Xuất xứ: Phong Điền, Cần Thơ',
+          'Mùa vụ: tháng 5–8',
+          'Đóng gói: thùng carton có lỗ thông khí',
+          'Bảo quản: ngăn mát 3–4 ngày',
+        ],
       },
       {
         name: 'Thanh long ruột đỏ (1kg)',
@@ -185,8 +219,16 @@ export const DEMO_KIOTS: DemoKiot[] = [
           'Ruột đỏ đậm, ngọt hơn thanh long trắng',
           'Trái 400–500g, đều trái',
           'Hái chín tới, không chín ép',
+          'Vỏ mỏng, tai xanh tươi chứng tỏ trái mới hái',
         ],
-        spec: ['Khối lượng: 1kg (2–3 trái)', 'Xuất xứ: Châu Thành, Long An'],
+        spec: [
+          'Khối lượng: 1kg (2–3 trái)',
+          'Xuất xứ: Châu Thành, Long An',
+          'Trọng lượng trái: 400–500g',
+          'Độ ngọt: 14–16 độ Brix',
+          'Bảo quản: ngăn mát 7–10 ngày',
+          'Chứng nhận: VietGAP',
+        ],
       },
       {
         name: 'Mít Thái sấy giòn (500g)',
@@ -197,11 +239,19 @@ export const DEMO_KIOTS: DemoKiot[] = [
         query: 'dried fruit snack',
         intro:
           'Mít Thái sấy giòn bằng công nghệ sấy chân không, giữ nguyên vị ngọt tự nhiên, không thêm đường, không chất bảo quản. Miếng to, vàng đều, giòn rụm.',
-        highlights: ['Sấy chân không, ít dầu', 'Không đường, không phẩm màu', 'Túi zip tiện mang theo'],
+        highlights: [
+          'Sấy chân không, ít dầu',
+          'Không đường, không phẩm màu',
+          'Túi zip tiện mang theo',
+          'Ăn vặt lành mạnh cho cả trẻ em và người ăn kiêng',
+        ],
         spec: [
           'Khối lượng: 500g',
           'Hạn dùng: 6 tháng từ ngày sản xuất',
           'Nơi sản xuất: Cần Thơ, có giấy ATTP',
+          'Thành phần: 100% mít Thái chín',
+          'Đóng gói: túi zip có lớp nhôm chống ẩm',
+          'Năng lượng: khoảng 380 kcal/100g',
         ],
       },
       {
@@ -212,16 +262,19 @@ export const DEMO_KIOTS: DemoKiot[] = [
         category: 'thuc-pham-dac-san',
         query: 'fruit gift basket',
         intro:
-          'Giỏ trái cây biếu Tết gồm 5 loại theo mùa, xếp trong giỏ mây, bọc giấy kiếng và nơ đỏ. Có thiệp ghi lời chúc theo yêu cầu.',
+          'Giỏ trái cây biếu Tết gồm 5 loại theo mùa, xếp trong giỏ mây, bọc giấy kiếng và nơ đỏ. Có thiệp ghi lời chúc theo yêu cầu. Nhà vườn chọn trái đẹp nhất trong vườn, giao tận tay trong ngày ở Cần Thơ.',
         highlights: [
           '5 loại trái cây chọn lọc theo mùa',
           'Giỏ mây đan tay dùng lại được',
           'Miễn phí thiệp và lời chúc',
+          'Giao đúng giờ hẹn, có ảnh giỏ trước khi giao',
         ],
         spec: [
           'Tổng khối lượng: 5–6kg',
           'Kích thước giỏ: 40 × 30cm',
           'Đặt trước 1 ngày để nhà vườn chuẩn bị',
+          'Gồm: bưởi, xoài cát, thanh long, quýt hồng, nho (đổi theo mùa)',
+          'Giao hàng: trong ngày ở Cần Thơ, các tỉnh 1–2 ngày',
         ],
       },
     ],
@@ -236,6 +289,11 @@ export const DEMO_KIOTS: DemoKiot[] = [
     district: 'Hoàn Kiếm',
     color: ['#6366f1', '#ec4899'],
     caption: 'Áo thun mới về, đủ size #thoitrang #aothun #mau',
+    promises: [
+      'Ảnh sản phẩm do xưởng tự chụp, màu thật có thể đậm nhạt hơn một chút do màn hình.',
+      'Đổi size miễn phí trong 7 ngày, sản phẩm còn tem mác và chưa giặt.',
+      'Nhắn shop chiều cao, cân nặng để được tư vấn size trước khi đặt.',
+    ],
     queries: { logo: 'clothing store', cover: 'clothing rack boutique', video: 'fashion clothes' },
     products: [
       {
@@ -251,8 +309,16 @@ export const DEMO_KIOTS: DemoKiot[] = [
           'Cotton 100% 230gsm, thấm hút tốt',
           'Cổ bo dệt kim chắc chắn, không bai',
           '6 màu: trắng, đen, be, xám, xanh rêu, nâu',
+          'Đường may 2 kim chắc chắn ở vai và gấu áo',
         ],
-        spec: ['Chất liệu: cotton 100%', 'Size: S, M, L, XL', 'Sản xuất tại Việt Nam'],
+        spec: [
+          'Chất liệu: cotton 100%',
+          'Size: S, M, L, XL',
+          'Sản xuất tại Việt Nam',
+          'Định lượng: 230gsm',
+          'Form: rộng vừa (relaxed fit)',
+          'Màu: trắng, đen, be, xám, xanh rêu, nâu',
+        ],
       },
       {
         name: 'Áo sơ mi linen tay ngắn',
@@ -262,9 +328,22 @@ export const DEMO_KIOTS: DemoKiot[] = [
         category: 'thoi-trang',
         query: 'linen shirt',
         intro:
-          'Sơ mi linen tay ngắn cổ bẻ, vải đũi pha linen mát, nhẹ, hợp thời tiết nóng. Form suông thoải mái, có thể sơ vin hoặc mặc ngoài.',
-        highlights: ['Vải linen pha, mát và nhẹ', 'Nút gỗ tự nhiên', 'Ít nhăn hơn linen thường'],
-        spec: ['Chất liệu: 55% linen, 45% cotton', 'Size: M, L, XL', 'Màu: trắng ngà, xanh nhạt, be'],
+          'Sơ mi linen tay ngắn cổ bẻ, vải đũi pha linen mát, nhẹ, hợp thời tiết nóng. Form suông thoải mái, có thể sơ vin hoặc mặc ngoài. Đường may tỉ mỉ, đã giặt xử lý trước nên không co rút sau khi giặt.',
+        highlights: [
+          'Vải linen pha, mát và nhẹ',
+          'Nút gỗ tự nhiên',
+          'Ít nhăn hơn linen thường',
+          'Đã giặt xử lý trước, không co rút',
+          'Có túi ngực tiện dụng',
+        ],
+        spec: [
+          'Chất liệu: 55% linen, 45% cotton',
+          'Size: M, L, XL',
+          'Màu: trắng ngà, xanh nhạt, be',
+          'Form: suông',
+          'Dài áo size L: 72cm',
+          'Sản xuất tại Việt Nam',
+        ],
       },
       {
         name: 'Quần jean ống suông nữ',
@@ -274,13 +353,22 @@ export const DEMO_KIOTS: DemoKiot[] = [
         category: 'thoi-trang',
         query: 'women jeans',
         intro:
-          'Quần jean ống suông lưng cao, tôn dáng và che khuyết điểm. Vải denim co giãn nhẹ, mặc cả ngày không bí.',
+          'Quần jean ống suông lưng cao, tôn dáng và che khuyết điểm. Vải denim co giãn nhẹ, mặc cả ngày không bí. Đường chỉ chắc chắn, khoá kéo YKK, đi làm hay đi chơi đều dễ phối với áo thun, sơ mi.',
         highlights: [
           'Lưng cao, ống suông dài chấm gót',
           'Denim co giãn 2 chiều',
           'Wash màu xanh nhạt không phai',
+          'Khoá kéo YKK bền, êm',
+          'Có 5 túi tiện dụng',
         ],
-        spec: ['Chất liệu: 98% cotton, 2% spandex', 'Size: 26–32', 'Dài quần: 100cm'],
+        spec: [
+          'Chất liệu: 98% cotton, 2% spandex',
+          'Size: 26–32',
+          'Dài quần: 100cm',
+          'Màu: xanh nhạt, xanh đậm',
+          'Form: lưng cao, ống suông',
+          'Sản xuất tại Việt Nam',
+        ],
       },
       {
         name: 'Váy hoa nhí dáng dài',
@@ -290,9 +378,22 @@ export const DEMO_KIOTS: DemoKiot[] = [
         category: 'thoi-trang',
         query: 'floral dress',
         intro:
-          'Váy hoa nhí dáng dài cổ vuông, tay phồng nhẹ, chân váy xoè bay bổng. Vải voan lụa có lót, không lộ.',
-        highlights: ['Có lớp lót trong', 'Chun lưng sau co giãn, dễ mặc', 'Hợp đi biển, dạo phố, chụp ảnh'],
-        spec: ['Chất liệu: voan lụa, lót cotton', 'Size: S, M, L', 'Dài váy: 115cm'],
+          'Váy hoa nhí dáng dài cổ vuông, tay phồng nhẹ, chân váy xoè bay bổng. Vải voan lụa có lót, không lộ. Thiết kế nữ tính, dễ phối với sandal hay giày thể thao, hợp mặc cả mùa hè.',
+        highlights: [
+          'Có lớp lót trong',
+          'Chun lưng sau co giãn, dễ mặc',
+          'Hợp đi biển, dạo phố, chụp ảnh',
+          'Tay phồng nhẹ che bắp tay',
+        ],
+        spec: [
+          'Chất liệu: voan lụa, lót cotton',
+          'Size: S, M, L',
+          'Dài váy: 115cm',
+          'Màu: hoa nhí nền trắng, nền xanh',
+          'Form: chân váy xoè',
+          'Có khoá kéo ẩn sau lưng',
+          'Sản xuất tại Việt Nam',
+        ],
       },
       {
         name: 'Áo khoác gió 2 lớp',
@@ -302,9 +403,21 @@ export const DEMO_KIOTS: DemoKiot[] = [
         category: 'thoi-trang',
         query: 'windbreaker jacket',
         intro:
-          'Áo khoác gió 2 lớp chống nước nhẹ, cản gió tốt, lớp lót lưới thoáng khí. Có mũ tháo rời và túi khoá kéo an toàn.',
-        highlights: ['Chống nước nhẹ, cản gió', 'Mũ tháo rời được', '2 túi khoá kéo và 1 túi trong'],
-        spec: ['Chất liệu: vải dù polyester, lót lưới', 'Size: M, L, XL, XXL', 'Màu: đen, xanh navy, xám'],
+          'Áo khoác gió 2 lớp chống nước nhẹ, cản gió tốt, lớp lót lưới thoáng khí. Có mũ tháo rời và túi khoá kéo an toàn. Hợp đi xe máy, đi phượt hay mặc khi trời chuyển mưa.',
+        highlights: [
+          'Chống nước nhẹ, cản gió',
+          'Mũ tháo rời được',
+          '2 túi khoá kéo và 1 túi trong',
+          'Gấp gọn vào túi trong, dễ mang theo khi đi xa',
+        ],
+        spec: [
+          'Chất liệu: vải dù polyester, lót lưới',
+          'Size: M, L, XL, XXL',
+          'Màu: đen, xanh navy, xám',
+          'Chống nước: mưa nhỏ, mưa phùn',
+          'Khối lượng: khoảng 380g',
+          'Sản xuất tại Việt Nam',
+        ],
       },
       {
         name: 'Túi tote vải canvas',
@@ -314,9 +427,21 @@ export const DEMO_KIOTS: DemoKiot[] = [
         category: 'thoi-trang',
         query: 'canvas tote bag',
         intro:
-          'Túi tote canvas dày, đựng vừa laptop 14 inch, sách vở và đồ cá nhân. Có túi nhỏ bên trong và khoá kéo miệng túi.',
-        highlights: ['Canvas 12oz dày, đứng form', 'Khoá kéo miệng túi', 'Quai dài đeo vai thoải mái'],
-        spec: ['Kích thước: 38 × 42 × 10cm', 'Chất liệu: canvas cotton', 'Tải trọng: đến 8kg'],
+          'Túi tote canvas dày, đựng vừa laptop 14 inch, sách vở và đồ cá nhân. Có túi nhỏ bên trong và khoá kéo miệng túi. Đường may viền chắc chắn, quai được may gia cố ở 2 điểm chịu lực nên xách nặng không bung.',
+        highlights: [
+          'Canvas 12oz dày, đứng form',
+          'Khoá kéo miệng túi',
+          'Quai dài đeo vai thoải mái',
+          'Có túi nhỏ bên trong đựng điện thoại, chìa khoá',
+        ],
+        spec: [
+          'Kích thước: 38 × 42 × 10cm',
+          'Chất liệu: canvas cotton',
+          'Tải trọng: đến 8kg',
+          'Dài quai: 60cm',
+          'Màu: kem, đen, xanh rêu',
+          'Sản xuất tại Việt Nam',
+        ],
       },
       {
         name: 'Mũ bucket thêu chữ',
@@ -325,9 +450,22 @@ export const DEMO_KIOTS: DemoKiot[] = [
         stock: 90,
         category: 'thoi-trang',
         query: 'bucket hat',
-        intro: 'Mũ bucket vành vừa, thêu chữ nổi phía trước, che nắng tốt, gấp gọn bỏ túi được.',
-        highlights: ['Vải kaki cotton thoáng', 'Thêu nổi sắc nét', 'Gấp gọn không nhăn'],
-        spec: ['Vòng đầu: 56–58cm', 'Màu: đen, be, xanh lá'],
+        intro:
+          'Mũ bucket vành vừa, thêu chữ nổi phía trước, che nắng tốt, gấp gọn bỏ túi được. Đường may viền vành chắc, giặt nhiều lần vẫn giữ form, hợp đi chơi, đi biển, đi phượt.',
+        highlights: [
+          'Vải kaki cotton thoáng',
+          'Thêu nổi sắc nét',
+          'Gấp gọn không nhăn',
+          'Vành 6cm che nắng mặt và gáy',
+        ],
+        spec: [
+          'Vòng đầu: 56–58cm',
+          'Màu: đen, be, xanh lá',
+          'Chất liệu: kaki cotton',
+          'Độ rộng vành: 6cm',
+          'Size: free size',
+          'Sản xuất tại Việt Nam',
+        ],
       },
     ],
   },
@@ -341,6 +479,11 @@ export const DEMO_KIOTS: DemoKiot[] = [
     district: 'Quận 3',
     color: ['#f472b6', '#a855f7'],
     caption: 'Son dưỡng môi từ sáp ong #mypham #sonduong #mau',
+    promises: [
+      'Sản xuất tại xưởng có phiếu công bố mỹ phẩm, ghi rõ ngày sản xuất trên bao bì.',
+      'Không dùng chì, paraben, cồn khô hay hương liệu tổng hợp.',
+      'Da kích ứng trong 7 ngày đầu: shop hoàn tiền, không cần gửi lại sản phẩm.',
+    ],
     queries: { logo: 'cosmetics', cover: 'skincare products', video: 'skincare' },
     products: [
       {
@@ -356,8 +499,16 @@ export const DEMO_KIOTS: DemoKiot[] = [
           'Sáp ong và dầu dừa nguyên chất',
           'Không chì, không hương liệu tổng hợp',
           'Dùng được cho cả nam và nữ',
+          'Thỏi nhỏ gọn bỏ túi tiện mang theo',
         ],
-        spec: ['Dung tích: 5g', 'Thành phần: sáp ong, dầu dừa, bơ hạt mỡ, vitamin E'],
+        spec: [
+          'Dung tích: 5g',
+          'Thành phần: sáp ong, dầu dừa, bơ hạt mỡ, vitamin E',
+          'Dạng: thỏi vặn',
+          'Hạn dùng: 24 tháng từ ngày sản xuất',
+          'Xuất xứ: TP.HCM',
+          'Có phiếu công bố mỹ phẩm',
+        ],
       },
       {
         name: 'Sữa rửa mặt nghệ tươi (150ml)',
@@ -367,9 +518,21 @@ export const DEMO_KIOTS: DemoKiot[] = [
         category: 'my-pham',
         query: 'facial cleanser',
         intro:
-          'Sữa rửa mặt chiết xuất nghệ tươi, tạo bọt mịn, làm sạch dầu thừa mà không gây khô căng. Hợp da dầu và da hỗn hợp.',
-        highlights: ['pH 5,5 dịu nhẹ', 'Chiết xuất nghệ giúp da sáng đều màu', 'Không chứa xà phòng (SLS)'],
-        spec: ['Dung tích: 150ml', 'Dùng 2 lần mỗi ngày, sáng và tối'],
+          'Sữa rửa mặt chiết xuất nghệ tươi, tạo bọt mịn, làm sạch dầu thừa mà không gây khô căng. Hợp da dầu và da hỗn hợp. Chỉ cần một lượng nhỏ bằng hạt đậu là đủ cho cả mặt, mỗi chai dùng được khoảng 2 tháng.',
+        highlights: [
+          'pH 5,5 dịu nhẹ',
+          'Chiết xuất nghệ giúp da sáng đều màu',
+          'Không chứa xà phòng (SLS)',
+          'Dùng được khoảng 2 tháng',
+        ],
+        spec: [
+          'Dung tích: 150ml',
+          'Dùng 2 lần mỗi ngày, sáng và tối',
+          'Loại da: da dầu, da hỗn hợp',
+          'Thành phần chính: chiết xuất nghệ, glycerin, lô hội',
+          'Xuất xứ: TP.HCM',
+          'Có phiếu công bố mỹ phẩm',
+        ],
       },
       {
         name: 'Nước hoa hồng không cồn (200ml)',
@@ -379,9 +542,21 @@ export const DEMO_KIOTS: DemoKiot[] = [
         category: 'my-pham',
         query: 'toner bottle skincare',
         intro:
-          'Toner chưng cất từ cánh hoa hồng Đà Lạt, không cồn, cân bằng độ ẩm và làm dịu da sau khi rửa mặt.',
-        highlights: ['Không cồn, không gây khô da', 'Hương hoa hồng tự nhiên', 'Dùng được cho da nhạy cảm'],
-        spec: ['Dung tích: 200ml', 'Thoa bằng bông tẩy trang hoặc vỗ nhẹ bằng tay'],
+          'Toner chưng cất từ cánh hoa hồng Đà Lạt, không cồn, cân bằng độ ẩm và làm dịu da sau khi rửa mặt. Dùng sau bước rửa mặt để giúp da hấp thụ serum và kem dưỡng tốt hơn.',
+        highlights: [
+          'Không cồn, không gây khô da',
+          'Hương hoa hồng tự nhiên',
+          'Dùng được cho da nhạy cảm',
+          'Giúp các bước dưỡng sau thấm tốt hơn',
+        ],
+        spec: [
+          'Dung tích: 200ml',
+          'Thoa bằng bông tẩy trang hoặc vỗ nhẹ bằng tay',
+          'Loại da: mọi loại da, kể cả da nhạy cảm',
+          'Thành phần chính: nước cất hoa hồng, lô hội, glycerin',
+          'Xuất xứ: TP.HCM',
+          'Có phiếu công bố mỹ phẩm',
+        ],
       },
       {
         name: 'Kem chống nắng SPF50 (50ml)',
@@ -396,8 +571,16 @@ export const DEMO_KIOTS: DemoKiot[] = [
           'SPF50 PA++++ chống tia UVA/UVB',
           'Không gây bết dính',
           'Bôi lại sau mỗi 2–3 giờ khi ra nắng',
+          'Không gây cay mắt khi ra mồ hôi',
         ],
-        spec: ['Dung tích: 50ml', 'Dùng bước cuối của chu trình dưỡng da buổi sáng'],
+        spec: [
+          'Dung tích: 50ml',
+          'Dùng bước cuối của chu trình dưỡng da buổi sáng',
+          'Chỉ số: SPF50 PA++++',
+          'Loại da: mọi loại da',
+          'Xuất xứ: TP.HCM',
+          'Có phiếu công bố mỹ phẩm',
+        ],
       },
       {
         name: 'Dầu gội bồ kết (300ml)',
@@ -407,9 +590,20 @@ export const DEMO_KIOTS: DemoKiot[] = [
         category: 'my-pham',
         query: 'shampoo bottle',
         intro:
-          'Dầu gội bồ kết, vỏ bưởi và hương nhu theo công thức truyền thống, giúp sạch gàu, giảm gãy rụng, tóc mềm mượt tự nhiên.',
-        highlights: ['Bồ kết, vỏ bưởi, hương nhu', 'Không silicon, không paraben', 'Hương thảo mộc dễ chịu'],
-        spec: ['Dung tích: 300ml', 'Gội 3–4 lần mỗi tuần để có kết quả tốt nhất'],
+          'Dầu gội bồ kết, vỏ bưởi và hương nhu theo công thức truyền thống, giúp sạch gàu, giảm gãy rụng, tóc mềm mượt tự nhiên. Dầu gội ít bọt hơn dầu gội thông thường vì không dùng chất tạo bọt mạnh, nhưng vẫn sạch tóc và da đầu.',
+        highlights: [
+          'Bồ kết, vỏ bưởi, hương nhu',
+          'Không silicon, không paraben',
+          'Hương thảo mộc dễ chịu',
+          'Phù hợp cả tóc nhuộm, tóc yếu',
+        ],
+        spec: [
+          'Dung tích: 300ml',
+          'Gội 3–4 lần mỗi tuần để có kết quả tốt nhất',
+          'Thành phần chính: bồ kết, vỏ bưởi, hương nhu, sả',
+          'Loại tóc: mọi loại tóc',
+          'Xuất xứ: TP.HCM',
+        ],
       },
       {
         name: 'Mặt nạ đất sét (100g)',
@@ -419,13 +613,20 @@ export const DEMO_KIOTS: DemoKiot[] = [
         category: 'my-pham',
         query: 'clay face mask',
         intro:
-          'Mặt nạ đất sét kaolin kết hợp than tre, hút dầu và làm sạch sâu lỗ chân lông. Dùng 1–2 lần mỗi tuần.',
+          'Mặt nạ đất sét kaolin kết hợp than tre, hút dầu và làm sạch sâu lỗ chân lông. Dùng 1–2 lần mỗi tuần. Kết cấu sệt mịn, dễ tán đều, khô vừa phải sau 10 phút mà không làm căng rát da.',
         highlights: [
           'Đất sét kaolin và than tre',
           'Giúp lỗ chân lông thông thoáng',
           'Rửa sạch dễ dàng, không khô căng',
+          'Hũ 100g dùng được khoảng 20 lần',
         ],
-        spec: ['Khối lượng: 100g', 'Đắp 10–15 phút rồi rửa bằng nước ấm'],
+        spec: [
+          'Khối lượng: 100g',
+          'Đắp 10–15 phút rồi rửa bằng nước ấm',
+          'Loại da: da dầu, da hỗn hợp, da mụn',
+          'Thành phần chính: đất sét kaolin, than tre, lô hội',
+          'Xuất xứ: TP.HCM',
+        ],
       },
     ],
   },
@@ -439,6 +640,11 @@ export const DEMO_KIOTS: DemoKiot[] = [
     district: 'Hải Châu',
     color: ['#0ea5e9', '#14b8a6'],
     caption: 'Nồi chiên không dầu cho gia đình #giadung #bep #mau',
+    promises: [
+      'Hàng chính hãng, có hoá đơn và phiếu bảo hành.',
+      'Lỗi nhà sản xuất trong 7 ngày đầu: đổi sản phẩm mới, shop chịu phí gửi.',
+      'Bảo hành trực tiếp tại cửa hàng ở Hải Châu, Đà Nẵng hoặc gửi qua bưu điện.',
+    ],
     queries: { logo: 'kitchen utensils', cover: 'modern kitchen', video: 'kitchen cooking' },
     products: [
       {
@@ -454,8 +660,16 @@ export const DEMO_KIOTS: DemoKiot[] = [
           'Dung tích 5 lít, nướng được gà nguyên con 1,2kg',
           '8 chế độ nấu cài sẵn, hẹn giờ 60 phút',
           'Lòng nồi chống dính, tháo rời rửa dễ',
+          'Tự ngắt khi rút khay, an toàn cho gia đình',
         ],
-        spec: ['Công suất: 1.500W', 'Nhiệt độ: 80–200°C', 'Bảo hành: 12 tháng'],
+        spec: [
+          'Công suất: 1.500W',
+          'Nhiệt độ: 80–200°C',
+          'Bảo hành: 12 tháng',
+          'Điện áp: 220V–50Hz',
+          'Kích thước: 30 × 34 × 32cm',
+          'Khối lượng: 4,8kg',
+        ],
       },
       {
         name: 'Bình giữ nhiệt inox 500ml',
@@ -465,9 +679,21 @@ export const DEMO_KIOTS: DemoKiot[] = [
         category: 'do-gia-dung',
         query: 'thermos bottle',
         intro:
-          'Bình giữ nhiệt inox 304 hai lớp chân không, giữ nóng 12 giờ, giữ lạnh 24 giờ. Nắp vặn kín, không rò rỉ khi bỏ balo.',
-        highlights: ['Inox 304 an toàn thực phẩm', 'Giữ nóng 12h, lạnh 24h', 'Sơn tĩnh điện chống trầy'],
-        spec: ['Dung tích: 500ml', 'Chiều cao: 24cm', 'Màu: đen, trắng, xanh'],
+          'Bình giữ nhiệt inox 304 hai lớp chân không, giữ nóng 12 giờ, giữ lạnh 24 giờ. Nắp vặn kín, không rò rỉ khi bỏ balo. Thân bình nhỏ gọn vừa hộc xe máy và túi bên hông balo.',
+        highlights: [
+          'Inox 304 an toàn thực phẩm',
+          'Giữ nóng 12h, lạnh 24h',
+          'Sơn tĩnh điện chống trầy',
+          'Nắp có quai xách tiện mang theo',
+        ],
+        spec: [
+          'Dung tích: 500ml',
+          'Chiều cao: 24cm',
+          'Màu: đen, trắng, xanh',
+          'Chất liệu: inox 304, nắp nhựa PP không BPA',
+          'Khối lượng: 300g',
+          'Bảo hành: 12 tháng',
+        ],
       },
       {
         name: 'Bộ hộp đựng thực phẩm 5 món',
@@ -482,8 +708,15 @@ export const DEMO_KIOTS: DemoKiot[] = [
           'Thuỷ tinh chịu nhiệt -20°C đến 400°C',
           'Nắp gài kín có gioăng silicon',
           'Xếp chồng gọn trong tủ',
+          'Không ám mùi, không bám màu thức ăn',
         ],
-        spec: ['Dung tích: 2 hộp 370ml, 2 hộp 640ml, 1 hộp 1.040ml', 'Nắp không dùng trong lò vi sóng'],
+        spec: [
+          'Dung tích: 2 hộp 370ml, 2 hộp 640ml, 1 hộp 1.040ml',
+          'Nắp không dùng trong lò vi sóng',
+          'Chất liệu: thuỷ tinh borosilicate, nắp nhựa PP không BPA',
+          'Dùng được: lò vi sóng, lò nướng, tủ đông, máy rửa bát',
+          'Bảo hành: 12 tháng',
+        ],
       },
       {
         name: 'Tai nghe bluetooth chống ồn',
@@ -498,8 +731,16 @@ export const DEMO_KIOTS: DemoKiot[] = [
           'Chống ồn chủ động giảm đến 35dB',
           'Pin 30 giờ kèm hộp sạc',
           'Sạc nhanh 10 phút nghe 2 giờ',
+          'Có chế độ xuyên âm để nghe tiếng xung quanh',
         ],
-        spec: ['Bluetooth: 5.3', 'Cổng sạc: Type-C', 'Chống nước: IPX4'],
+        spec: [
+          'Bluetooth: 5.3',
+          'Cổng sạc: Type-C',
+          'Chống nước: IPX4',
+          'Thời lượng pin: 8 giờ, kèm hộp sạc 30 giờ',
+          'Khối lượng: 5g mỗi bên tai',
+          'Bảo hành: 12 tháng',
+        ],
       },
       {
         name: 'Sạc dự phòng 10.000mAh',
@@ -509,9 +750,21 @@ export const DEMO_KIOTS: DemoKiot[] = [
         category: 'dien-tu',
         query: 'power bank',
         intro:
-          'Sạc dự phòng 10.000mAh nhỏ gọn bằng thẻ ATM, sạc nhanh 20W cho iPhone và Android, sạc cùng lúc 2 thiết bị.',
-        highlights: ['Sạc nhanh PD 20W', 'Màn hình hiển thị % pin', 'Mạch bảo vệ quá nhiệt, quá dòng'],
-        spec: ['Dung lượng: 10.000mAh', 'Cổng: 1 Type-C, 1 USB-A', 'Khối lượng: 190g'],
+          'Sạc dự phòng 10.000mAh nhỏ gọn bằng thẻ ATM, sạc nhanh 20W cho iPhone và Android, sạc cùng lúc 2 thiết bị. Vỏ nhôm chắc chắn, mạch bảo vệ nhiều lớp, mang lên máy bay được.',
+        highlights: [
+          'Sạc nhanh PD 20W',
+          'Màn hình hiển thị % pin',
+          'Mạch bảo vệ quá nhiệt, quá dòng',
+          'Mang lên máy bay được',
+        ],
+        spec: [
+          'Dung lượng: 10.000mAh',
+          'Cổng: 1 Type-C, 1 USB-A',
+          'Khối lượng: 190g',
+          'Công suất: 20W',
+          'Kích thước: 9,5 × 6,3 × 2,3cm',
+          'Bảo hành: 12 tháng',
+        ],
       },
       {
         name: 'Cáp sạc nhanh Type-C 1m',
@@ -520,9 +773,22 @@ export const DEMO_KIOTS: DemoKiot[] = [
         stock: 400,
         category: 'dien-tu',
         query: 'usb cable',
-        intro: 'Cáp sạc Type-C bọc dù chống đứt, hỗ trợ sạc nhanh 60W và truyền dữ liệu tốc độ cao.',
-        highlights: ['Bọc dù, chịu được 10.000 lần gập', 'Sạc nhanh đến 60W', 'Đầu nhôm chắc chắn'],
-        spec: ['Chiều dài: 1m', 'Chuẩn: USB-C to USB-C'],
+        intro:
+          'Cáp sạc Type-C bọc dù chống đứt, hỗ trợ sạc nhanh 60W và truyền dữ liệu tốc độ cao. Dùng được cho điện thoại Android, iPhone 15 trở lên, máy tính bảng và laptop có cổng Type-C.',
+        highlights: [
+          'Bọc dù, chịu được 10.000 lần gập',
+          'Sạc nhanh đến 60W',
+          'Đầu nhôm chắc chắn',
+          'Tương thích iPhone 15 trở lên và Android',
+        ],
+        spec: [
+          'Chiều dài: 1m',
+          'Chuẩn: USB-C to USB-C',
+          'Công suất: tối đa 60W',
+          'Tốc độ truyền dữ liệu: 480Mbps',
+          'Màu: đen, trắng',
+          'Bảo hành: 12 tháng',
+        ],
       },
       {
         name: 'Đèn ngủ cảm ứng để bàn',
@@ -532,9 +798,21 @@ export const DEMO_KIOTS: DemoKiot[] = [
         category: 'do-gia-dung',
         query: 'bedside lamp',
         intro:
-          'Đèn ngủ cảm ứng chạm, 3 mức sáng ánh vàng dịu mắt, pin sạc dùng 8–10 giờ. Hợp đặt đầu giường, phòng em bé.',
-        highlights: ['Chạm để bật/tắt, đổi độ sáng', 'Ánh sáng vàng 3000K không chói', 'Pin sạc Type-C'],
-        spec: ['Kích thước: 12 × 12 × 18cm', 'Pin: 1.800mAh'],
+          'Đèn ngủ cảm ứng chạm, 3 mức sáng ánh vàng dịu mắt, pin sạc dùng 8–10 giờ. Hợp đặt đầu giường, phòng em bé. Thân đèn bằng nhựa ABS phủ sơn mờ, chân đế chống trượt, đặt cạnh giường hay bàn làm việc đều đẹp.',
+        highlights: [
+          'Chạm để bật/tắt, đổi độ sáng',
+          'Ánh sáng vàng 3000K không chói',
+          'Pin sạc Type-C',
+          'Có chế độ hẹn giờ tắt 30 phút',
+        ],
+        spec: [
+          'Kích thước: 12 × 12 × 18cm',
+          'Pin: 1.800mAh',
+          'Thời gian sạc: 2–3 giờ',
+          'Nhiệt độ màu: 3000K',
+          'Chất liệu: nhựa ABS',
+          'Bảo hành: 12 tháng',
+        ],
       },
     ],
   },
@@ -548,6 +826,11 @@ export const DEMO_KIOTS: DemoKiot[] = [
     district: 'Mường Thanh',
     color: ['#b45309', '#7c2d12'],
     caption: 'Thịt trâu gác bếp chuẩn vị Tây Bắc #dacsan #taybac #mau',
+    promises: [
+      'Sản phẩm do bà con trong bản làm thủ công, shop thu mua tận nơi.',
+      'Không phẩm màu, không hàn the, không chất bảo quản.',
+      'Không đúng mô tả: shop hoàn tiền 100%, không cần gửi lại hàng.',
+    ],
     queries: { logo: 'mountain village', cover: 'rice terraces', video: 'honey' },
     products: [
       {
@@ -563,11 +846,14 @@ export const DEMO_KIOTS: DemoKiot[] = [
           '100% thịt trâu bắp, không pha thịt bò',
           'Hun khói củi tự nhiên 7 ngày',
           'Kèm 1 gói chẩm chéo chấm',
+          'Có giấy chứng nhận an toàn thực phẩm',
         ],
         spec: [
           'Khối lượng: 500g (hút chân không)',
           'Hạn dùng: 6 tháng để ngăn đá, 1 tháng ngăn mát',
           'Nơi sản xuất: Điện Biên',
+          'Thành phần: thịt trâu, mắc khén, hạt dổi, ớt, gừng, sả',
+          'Cách dùng: nướng hoặc hấp 10 phút, xé sợi',
         ],
       },
       {
@@ -583,8 +869,15 @@ export const DEMO_KIOTS: DemoKiot[] = [
           'Khai thác tự nhiên, không nuôi',
           'Cam kết hoàn tiền nếu phát hiện pha trộn',
           'Đựng chai thuỷ tinh',
+          'Có thể gửi kiểm nghiệm theo yêu cầu',
         ],
-        spec: ['Dung tích: 1 lít (khoảng 1,4kg)', 'Có thể kết tinh khi lạnh, đây là hiện tượng tự nhiên'],
+        spec: [
+          'Dung tích: 1 lít (khoảng 1,4kg)',
+          'Có thể kết tinh khi lạnh, đây là hiện tượng tự nhiên',
+          'Màu: nâu sẫm',
+          'Xuất xứ: rừng Mường Nhé, Điện Biên',
+          'Hạn dùng: 24 tháng',
+        ],
       },
       {
         name: 'Chè Shan tuyết cổ thụ (200g)',
@@ -595,8 +888,19 @@ export const DEMO_KIOTS: DemoKiot[] = [
         query: 'green tea leaves',
         intro:
           'Chè Shan tuyết hái từ những cây chè cổ thụ trăm năm tuổi trên độ cao 1.500m. Búp chè phủ lông tơ trắng, nước xanh vàng, vị chát dịu và hậu ngọt sâu.',
-        highlights: ['Cây chè cổ thụ trên 100 năm tuổi', 'Sao tay thủ công', 'Pha được 5–6 nước'],
-        spec: ['Khối lượng: 200g', 'Pha: 5g chè với 150ml nước 90°C, hãm 1–2 phút'],
+        highlights: [
+          'Cây chè cổ thụ trên 100 năm tuổi',
+          'Sao tay thủ công',
+          'Pha được 5–6 nước',
+          'Đóng túi hút chân không giữ hương',
+        ],
+        spec: [
+          'Khối lượng: 200g',
+          'Pha: 5g chè với 150ml nước 90°C, hãm 1–2 phút',
+          'Độ cao vùng chè: 1.500m',
+          'Xuất xứ: Tủa Chùa, Điện Biên',
+          'Hạn dùng: 18 tháng',
+        ],
       },
       {
         name: 'Lạp xưởng hun khói (500g)',
@@ -607,8 +911,19 @@ export const DEMO_KIOTS: DemoKiot[] = [
         query: 'chinese sausage',
         intro:
           'Lạp xưởng làm từ thịt lợn bản thả đồi, tẩm rượu ngô và mắc khén, hun khói bếp củi. Vị đậm đà, thơm, không ngọt gắt như lạp xưởng miền xuôi.',
-        highlights: ['Thịt lợn bản thả đồi', 'Hun khói bếp củi', 'Không phẩm màu, không hàn the'],
-        spec: ['Khối lượng: 500g (khoảng 10 cây)', 'Chiên, nướng hoặc hấp đều ngon'],
+        highlights: [
+          'Thịt lợn bản thả đồi',
+          'Hun khói bếp củi',
+          'Không phẩm màu, không hàn the',
+          'Đóng túi hút chân không',
+        ],
+        spec: [
+          'Khối lượng: 500g (khoảng 10 cây)',
+          'Chiên, nướng hoặc hấp đều ngon',
+          'Thành phần: thịt lợn bản, rượu ngô, mắc khén, muối, đường',
+          'Xuất xứ: Điện Biên',
+          'Hạn dùng: 3 tháng ngăn mát, 6 tháng ngăn đá',
+        ],
       },
       {
         name: 'Gạo nếp nương (2kg)',
@@ -619,8 +934,19 @@ export const DEMO_KIOTS: DemoKiot[] = [
         query: 'sticky rice',
         intro:
           'Gạo nếp nương trồng trên ruộng bậc thang, hạt tròn mẩy, đồ xôi dẻo thơm, để nguội vẫn mềm. Hợp nấu xôi, làm bánh chưng, ủ rượu.',
-        highlights: ['Vụ mới, xay xát tại bản', 'Dẻo thơm, không cần ngâm lâu', 'Đóng túi hút chân không'],
-        spec: ['Khối lượng: 2kg', 'Ngâm 4–6 giờ trước khi đồ xôi'],
+        highlights: [
+          'Vụ mới, xay xát tại bản',
+          'Dẻo thơm, không cần ngâm lâu',
+          'Đóng túi hút chân không',
+          'Không chất bảo quản, không tẩy trắng',
+        ],
+        spec: [
+          'Khối lượng: 2kg',
+          'Ngâm 4–6 giờ trước khi đồ xôi',
+          'Giống: nếp nương bản địa',
+          'Xuất xứ: Mường Ảng, Điện Biên',
+          'Hạn dùng: 6 tháng từ ngày xay',
+        ],
         care: [
           'Bảo quản nơi khô ráo, thoáng mát; sau khi mở túi buộc kín.',
           'Ngon nhất trong 6 tháng kể từ ngày xay.',
@@ -639,8 +965,15 @@ export const DEMO_KIOTS: DemoKiot[] = [
           'Đan tay 100%, mỗi giỏ mất 2 ngày',
           'Mây tự nhiên đã xử lý chống mốc',
           'Có nắp đậy và quai xách',
+          'Mỗi giỏ là một sản phẩm độc bản',
         ],
-        spec: ['Kích thước: đường kính 30cm, cao 25cm', 'Màu: mây tự nhiên'],
+        spec: [
+          'Kích thước: đường kính 30cm, cao 25cm',
+          'Màu: mây tự nhiên',
+          'Chất liệu: mây rừng tự nhiên',
+          'Khối lượng: khoảng 600g',
+          'Xuất xứ: Điện Biên',
+        ],
       },
     ],
   },
@@ -654,6 +987,11 @@ export const DEMO_KIOTS: DemoKiot[] = [
     district: 'Lê Chân',
     color: ['#22c55e', '#facc15'],
     caption: 'Bộ đồ sơ sinh cotton mềm mịn #mevabe #sosinh #mau',
+    promises: [
+      'Hàng có nguồn gốc rõ ràng, có tem nhãn tiếng Việt.',
+      'Kiểm tra từng sản phẩm trước khi gói, gói kín trong túi zip sạch.',
+      'Mẹ cần tư vấn chọn size hay độ tuổi, nhắn shop trả lời trong giờ hành chính.',
+    ],
     queries: { logo: 'baby', cover: 'nursery room', video: 'baby toys' },
     products: [
       {
@@ -669,8 +1007,15 @@ export const DEMO_KIOTS: DemoKiot[] = [
           'Cotton organic mềm, thấm hút',
           'Cài nút vai, dễ mặc cho bé sơ sinh',
           'Không huỳnh quang, không formaldehyde',
+          'Đóng túi zip riêng từng bộ, tiện làm quà',
         ],
-        spec: ['Size: 0–3 tháng, 3–6 tháng, 6–12 tháng', 'Gồm 3 áo và 3 quần'],
+        spec: [
+          'Size: 0–3 tháng, 3–6 tháng, 6–12 tháng',
+          'Gồm 3 áo và 3 quần',
+          'Chất liệu: 100% cotton organic',
+          'Màu: trắng kem, xanh nhạt, vàng nhạt',
+          'Sản xuất tại Việt Nam',
+        ],
       },
       {
         name: 'Khăn sữa sợi tre (10 cái)',
@@ -680,13 +1025,20 @@ export const DEMO_KIOTS: DemoKiot[] = [
         category: 'me-va-be',
         query: 'muslin cloth baby',
         intro:
-          'Khăn sữa sợi tre 4 lớp mềm mịn, thấm hút gấp 3 lần khăn cotton, kháng khuẩn tự nhiên, nhanh khô.',
+          'Khăn sữa sợi tre 4 lớp mềm mịn, thấm hút gấp 3 lần khăn cotton, kháng khuẩn tự nhiên, nhanh khô. Mềm và dịu nhẹ cho làn da mỏng của trẻ sơ sinh, giặt máy được.',
         highlights: [
           'Sợi tre kháng khuẩn tự nhiên',
           'Mềm hơn sau mỗi lần giặt',
           'Đa năng: lau miệng, lau người, quàng cổ',
+          'Giặt máy được, nhanh khô',
         ],
-        spec: ['Kích thước: 30 × 30cm', 'Gói 10 cái nhiều màu'],
+        spec: [
+          'Kích thước: 30 × 30cm',
+          'Gói 10 cái nhiều màu',
+          'Chất liệu: 70% sợi tre, 30% cotton',
+          'Số lớp: 4 lớp',
+          'Sản xuất tại Việt Nam',
+        ],
       },
       {
         name: 'Bình sữa thuỷ tinh 240ml',
@@ -696,13 +1048,20 @@ export const DEMO_KIOTS: DemoKiot[] = [
         category: 'me-va-be',
         query: 'baby bottle',
         intro:
-          'Bình sữa thuỷ tinh borosilicate cổ rộng, núm ti silicon mềm mô phỏng ti mẹ, van chống đầy hơi giúp bé bú êm.',
+          'Bình sữa thuỷ tinh borosilicate cổ rộng, núm ti silicon mềm mô phỏng ti mẹ, van chống đầy hơi giúp bé bú êm. Thuỷ tinh không giữ mùi sữa, dùng lâu vẫn trong như mới.',
         highlights: [
           'Thuỷ tinh chịu nhiệt, không BPA',
           'Van chống sặc và đầy hơi',
           'Cổ rộng dễ pha sữa, dễ vệ sinh',
+          'Tiệt trùng được bằng nước sôi và máy tiệt trùng',
         ],
-        spec: ['Dung tích: 240ml', 'Kèm núm ti size M (3–6 tháng)'],
+        spec: [
+          'Dung tích: 240ml',
+          'Kèm núm ti size M (3–6 tháng)',
+          'Chất liệu: thuỷ tinh borosilicate, núm ti silicon',
+          'Chịu nhiệt: -20°C đến 120°C',
+          'Xuất xứ: Hàn Quốc',
+        ],
       },
       {
         name: 'Đồ chơi gỗ xếp hình',
@@ -717,8 +1076,15 @@ export const DEMO_KIOTS: DemoKiot[] = [
           'Gỗ thông tự nhiên, bo tròn cạnh',
           'Sơn gốc nước an toàn cho bé',
           'Kèm hộp gỗ đựng gọn gàng',
+          'Đạt tiêu chuẩn an toàn đồ chơi trẻ em',
         ],
-        spec: ['Số chi tiết: 30', 'Độ tuổi: từ 18 tháng'],
+        spec: [
+          'Số chi tiết: 30',
+          'Độ tuổi: từ 18 tháng',
+          'Chất liệu: gỗ thông, sơn gốc nước',
+          'Kích thước hộp: 25 × 25 × 8cm',
+          'Sản xuất tại Việt Nam',
+        ],
       },
       {
         name: 'Thức ăn hạt cho mèo (1,5kg)',
@@ -729,8 +1095,19 @@ export const DEMO_KIOTS: DemoKiot[] = [
         query: 'cat food',
         intro:
           'Hạt cho mèo mọi lứa tuổi vị cá hồi, bổ sung taurine tốt cho mắt và tim, omega 3–6 giúp lông mượt. Hạt nhỏ dễ ăn, giảm mùi phân.',
-        highlights: ['Vị cá hồi mèo thích', 'Bổ sung taurine, omega 3–6', 'Giảm búi lông và mùi phân'],
-        spec: ['Khối lượng: 1,5kg', 'Khẩu phần: 40–60g mỗi ngày cho mèo 3–5kg'],
+        highlights: [
+          'Vị cá hồi mèo thích',
+          'Bổ sung taurine, omega 3–6',
+          'Giảm búi lông và mùi phân',
+          'Túi zip kín giữ hạt luôn giòn',
+        ],
+        spec: [
+          'Khối lượng: 1,5kg',
+          'Khẩu phần: 40–60g mỗi ngày cho mèo 3–5kg',
+          'Thành phần chính: cá hồi, gạo, ngô, dầu cá',
+          'Độ đạm: 32%',
+          'Hạn dùng: 18 tháng',
+        ],
       },
       {
         name: 'Sách tô màu cho bé',
@@ -740,9 +1117,20 @@ export const DEMO_KIOTS: DemoKiot[] = [
         category: 'sach-van-phong-pham',
         query: 'coloring book',
         intro:
-          'Sách tô màu 48 trang chủ đề con vật, trái cây và phương tiện giao thông, nét vẽ to rõ, giấy dày không thấm màu sang trang sau.',
-        highlights: ['48 trang, 4 chủ đề', 'Giấy dày 120gsm', 'Có hình mẫu tô màu ở mỗi trang'],
-        spec: ['Khổ: A4', 'Độ tuổi: 3–6 tuổi'],
+          'Sách tô màu 48 trang chủ đề con vật, trái cây và phương tiện giao thông, nét vẽ to rõ, giấy dày không thấm màu sang trang sau. Mỗi trang có tên con vật bằng tiếng Việt và tiếng Anh, giúp bé vừa tô vừa học từ mới.',
+        highlights: [
+          '48 trang, 4 chủ đề',
+          'Giấy dày 120gsm',
+          'Có hình mẫu tô màu ở mỗi trang',
+          'Song ngữ Việt – Anh',
+        ],
+        spec: [
+          'Khổ: A4',
+          'Độ tuổi: 3–6 tuổi',
+          'Số trang: 48',
+          'Giấy: 120gsm',
+          'Nhà xuất bản: NXB Mỹ thuật (mẫu)',
+        ],
       },
       {
         name: 'Sữa tắm thảo dược cho bé',
@@ -757,8 +1145,15 @@ export const DEMO_KIOTS: DemoKiot[] = [
           'Thảo dược thiên nhiên lành tính',
           'Không cay mắt, không xà phòng',
           'Dùng được cho bé sơ sinh',
+          'Hương thơm nhẹ tự nhiên từ thảo mộc',
         ],
-        spec: ['Dung tích: 250ml', 'Pha 1 nắp với 5 lít nước ấm hoặc dùng trực tiếp'],
+        spec: [
+          'Dung tích: 250ml',
+          'Pha 1 nắp với 5 lít nước ấm hoặc dùng trực tiếp',
+          'Thành phần chính: lá chè xanh, kim ngân, mướp đắng',
+          'Độ tuổi: từ sơ sinh',
+          'Hạn dùng: 24 tháng',
+        ],
       },
     ],
   },

@@ -8,7 +8,11 @@ test('trang Kiot công khai: chủ xem trước bản nháp, khách thấy tạm
   browser,
 }) => {
   const { slug } = await signUpWithKiot(page, 'Vườn Thanh Long');
-  await createProductViaUi(page, { name: 'Thanh long ruột đỏ 1kg', price: '45000' });
+  await createProductViaUi(page, {
+    name: 'Thanh long ruột đỏ 1kg',
+    price: '45000',
+    description: 'Thanh long hái chín tới.\n\nĐIỂM NỔI BẬT\n• Ruột đỏ đậm\n• Ngọt mát',
+  });
   await createProductViaUi(page, { name: 'Muối ớt Tây Ninh', price: '25000', stock: '0' });
 
   const port = new URL(page.url()).port;
@@ -38,6 +42,10 @@ test('trang Kiot công khai: chủ xem trước bản nháp, khách thấy tạm
   await cards.first().getByRole('link').click();
   await guest.waitForURL(new RegExp(`^${kiotUrl}/p/[^/]+-thanh-long-ruot-do-1kg$`));
   await expect(guest.getByTestId('product-price')).toHaveText('45.000đ');
+  // Mô tả chia mục: tiêu đề IN HOA và gạch đầu dòng hiện thành danh sách.
+  const description = guest.getByTestId('product-description');
+  await expect(description.getByRole('heading', { name: 'ĐIỂM NỔI BẬT' })).toBeVisible();
+  await expect(description.getByRole('listitem')).toHaveText(['Ruột đỏ đậm', 'Ngọt mát']);
   await expect(guest.locator('meta[property="og:title"]')).toHaveAttribute(
     'content',
     'Thanh long ruột đỏ 1kg — 45.000đ',

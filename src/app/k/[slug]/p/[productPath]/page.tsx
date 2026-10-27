@@ -4,6 +4,7 @@ import { notFound, permanentRedirect } from 'next/navigation';
 import { cache } from 'react';
 import { ContactButtons } from '@/components/kiot/ContactButtons';
 import { PreviewBanner } from '@/components/kiot/PreviewBanner';
+import { ProductDescription } from '@/components/kiot/ProductDescription';
 import { ProductGallery } from '@/components/kiot/ProductGallery';
 import { ReportProduct } from '@/components/market/ReportProduct';
 import { AddToCart } from '@/components/orders/AddToCart';
@@ -86,12 +87,7 @@ export default async function ProductPage({ params }: Params) {
             <h2 id="mo-ta" className="mb-2 text-lg font-extrabold">
               Mô tả sản phẩm
             </h2>
-            <div
-              className="whitespace-pre-line leading-relaxed text-black/85"
-              data-testid="product-description"
-            >
-              {product.description}
-            </div>
+            <ProductDescription text={product.description} />
           </section>
         ) : null}
         {preview ? null : (

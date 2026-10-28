@@ -8,6 +8,8 @@ rtmp: no
 hls: no
 srt: no
 playback: no
+# MoQ (Media over QUIC) bật sẵn từ bản 1.21; tắt để chỉ còn WebRTC.
+moq: no
 
 # API quản trị CHỈ trong mạng Docker (worker hỏi trạng thái, ngắt kết nối). Không publish cổng 9997 ra host.
 api: yes

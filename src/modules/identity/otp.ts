@@ -122,11 +122,17 @@ async function consumeOtp(email: string, purpose: OtpPurpose, code: string): Pro
   return used.count === 1 ? 'ok' : 'CODE_EXPIRED';
 }
 
+// Đăng ký chỉ cần email (CEO chốt 29/10): tên tạm "Thành viên 1234", KHÔNG lấy phần trước @ vì tên hiện công khai
+// (bình luận, chat, hộp thư) sẽ làm lộ email. Người dùng đổi tên trong Cài đặt tài khoản; trang Tôi nhắc đặt tên.
+const TEMP_NAME = /^Thành viên \d{4}$/;
+const temporaryName = () => `Thành viên ${String(randomInt(1000, 10_000))}`;
+export const isTemporaryName = (name: string) => TEMP_NAME.test(name);
+
 export type OtpLoginResult =
   | { ok: true; userId: string; created: boolean }
   | { ok: false; error: 'INVALID_EMAIL' | 'CODE_INVALID' | 'CODE_EXPIRED' | 'ADMIN' | 'LOCKED' };
 
-// Đúng mã: email đã có tài khoản thì đăng nhập, chưa có thì tạo (tên tạm là phần trước @, mật khẩu ngẫu nhiên).
+// Đúng mã: email đã có tài khoản thì đăng nhập, chưa có thì tạo (tên tạm, mật khẩu ngẫu nhiên).
 // Admin chỉ đăng nhập bằng mật khẩu + 2 lớp.
 export async function loginWithEmailOtp(input: {
   email: string;
@@ -148,7 +154,7 @@ export async function loginWithEmailOtp(input: {
     const user = await db.user.create({
       data: {
         email,
-        displayName: name && name.length >= 2 ? name : email.split('@')[0]!.slice(0, 50),
+        displayName: name && name.length >= 2 ? name : temporaryName(),
         passwordHash: await hashPassword(randomBytes(32).toString('base64url')),
       },
     });

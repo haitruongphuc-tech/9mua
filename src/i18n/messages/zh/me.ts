@@ -4,6 +4,8 @@ export const me: MeMessages = {
   'me.badge.free': '免费账户',
   'me.badge.owner': '店主',
   'me.badge.admin': '管理员 / CEO',
+  'me.setName': '你正在使用临时名称。设置显示名称，让大家认出你。',
+  'me.setNameCta': '设置名称',
   'me.stat.following': '关注',
   'me.stat.followers': '粉丝',
   'me.stat.liked': '已点赞',

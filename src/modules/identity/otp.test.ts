@@ -5,7 +5,14 @@ import { clearOutbox, getOutbox } from '@/lib/mail';
 import { completeGoogleLogin } from './google';
 import { sealLinkTicket } from './link';
 import { login } from './login';
-import { addEmailWithOtp, linkWithOtp, loginWithEmailOtp, requestEmailOtp, setPasswordWithOtp } from './otp';
+import {
+  addEmailWithOtp,
+  isTemporaryName,
+  linkWithOtp,
+  loginWithEmailOtp,
+  requestEmailOtp,
+  setPasswordWithOtp,
+} from './otp';
 import { createSession } from './session';
 import { register } from './register';
 
@@ -42,7 +49,7 @@ describe('mã email (SPEC-identity.md bổ sung 29/10)', () => {
     });
   });
 
-  it('email đã có tài khoản: đăng nhập đúng tài khoản đó; không có tên thì lấy phần trước @', async () => {
+  it('email đã có tài khoản: đăng nhập đúng tài khoản đó; tài khoản mới không hỏi tên thì tên tạm không lộ email', async () => {
     setClock(new Date('2026-10-29T03:00:00Z'));
     const old = await register({ identifier: 'cu@9mua.vn', displayName: 'Anh Cũ', password: 'matkhau-9mua' });
     if (!old.ok) throw new Error('setup');
@@ -52,9 +59,13 @@ describe('mã email (SPEC-identity.md bổ sung 29/10)', () => {
       email: 'ten.tam@9mua.vn',
       code: await sendCode('ten.tam@9mua.vn'),
     });
-    expect(fresh.ok && (await db.user.findUniqueOrThrow({ where: { id: fresh.userId } })).displayName).toBe(
-      'ten.tam',
-    );
+    const name = fresh.ok
+      ? (await db.user.findUniqueOrThrow({ where: { id: fresh.userId } })).displayName
+      : '';
+    expect(name).toMatch(/^Thành viên \d{4}$/);
+    expect(name).not.toContain('ten.tam');
+    expect(isTemporaryName(name)).toBe(true);
+    expect(isTemporaryName('Chị Lan')).toBe(false);
   });
 
   it('gửi lại sau 60 giây; mỗi email tối đa 5 mã/giờ; mỗi IP tối đa 20 mã/giờ; email sai bị từ chối', async () => {

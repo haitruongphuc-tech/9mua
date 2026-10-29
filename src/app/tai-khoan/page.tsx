@@ -21,7 +21,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { logoutAction } from '@/app/(auth)/actions';
 import { getT } from '@/i18n/server';
-import { requireUser } from '@/modules/identity';
+import { isTemporaryName, requireUser } from '@/modules/identity';
 import { loadMePage } from '@/server/me-page';
 
 export const metadata: Metadata = { title: 'Tài khoản', robots: { index: false } };
@@ -89,6 +89,17 @@ export default async function MePage() {
           </span>
           <h1 className="mt-3 font-display text-[22px] font-black">{user.displayName}</h1>
           <p className="text-[12px] text-white/50">{user.phone ?? user.email}</p>
+          {isTemporaryName(user.displayName) ? (
+            // Đăng ký chỉ bằng email nên đang dùng tên tạm (CEO chốt 29/10): nhắc đặt tên trong Cài đặt.
+            <Link
+              href="/tai-khoan/cai-dat#thong-tin"
+              className="mx-auto mt-3 flex max-w-sm items-center justify-between gap-3 rounded-[14px] border border-brand/40 bg-brand/10 px-4 py-3 text-left text-[13px]"
+              data-testid="me-set-name"
+            >
+              <span>{t('me.setName')}</span>
+              <span className="shrink-0 font-black text-brand">{t('me.setNameCta')} →</span>
+            </Link>
+          ) : null}
           <span
             className={`mt-2 inline-flex h-7 items-center gap-1 rounded-full px-3 text-[12px] font-black ${
               role === 'free' ? 'bg-white/10' : 'bg-brand'

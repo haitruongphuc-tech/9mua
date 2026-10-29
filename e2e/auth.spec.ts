@@ -5,8 +5,16 @@ import { e2eDb } from './helpers/db';
 test('đăng ký bằng mã email → thấy tên → dùng chung trên Kiot → đăng xuất → đăng nhập lại bằng mã', async ({
   page,
 }) => {
-  const email = await signUpByEmail(page, { name: 'Khách E2E', next: '/tai-khoan' });
+  // Đăng ký chỉ cần email: tên tạm không lộ email; trang Tôi nhắc đặt tên, đặt trong Cài đặt tài khoản.
+  const email = await signUpByEmail(page, { next: '/tai-khoan' });
+  await expect(page.getByTestId('user-menu')).toHaveAccessibleName(/^Tôi \(Thành viên \d{4}\)$/);
+  await page.getByTestId('me-set-name').click();
+  await page.waitForURL((u) => u.pathname === '/tai-khoan/cai-dat');
+  await page.fill('#profile-name', 'Khách E2E');
+  await page.locator('#thong-tin button[type=submit]').click();
   await expect(page.getByTestId('user-menu')).toHaveAccessibleName('Tôi (Khách E2E)');
+  await page.goto('/tai-khoan');
+  await expect(page.getByTestId('me-set-name')).toHaveCount(0);
 
   // Cookie domain dùng chung: sang tên miền phụ của một Kiot vẫn đang đăng nhập.
   const port = new URL(page.url()).port;
@@ -48,7 +56,7 @@ test('mã sai thì báo lỗi; mã đúng thì vào', async ({ page }) => {
   await page.getByTestId('otp-code').fill(code);
   await page.getByTestId('otp-verify').click();
   await page.waitForURL((u) => u.pathname === '/cho');
-  await expect(page.getByTestId('user-menu')).toHaveAccessibleName(/^Tôi \(ma-/);
+  await expect(page.getByTestId('user-menu')).toHaveAccessibleName(/^Tôi \(Thành viên \d{4}\)$/);
 });
 
 test('sai mật khẩu hiện thông báo chung', async ({ page }) => {

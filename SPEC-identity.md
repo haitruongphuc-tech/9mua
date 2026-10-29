@@ -257,7 +257,9 @@ export async function register(raw: unknown): Promise<RegisterResult> {
 
 ### Email mã OTP
 - Nhập email → 9MUA gửi **mã 6 số** (email tiếng Việt, gửi qua SMTP đang dùng). Nhập đúng mã thì vào luôn, không cần mật
-  khẩu. Email chưa có tài khoản thì tạo tài khoản mới, tên tạm là phần trước `@` (đổi được ở Cài đặt), mật khẩu ngẫu nhiên.
+  khẩu. Email chưa có tài khoản thì tạo tài khoản mới, mật khẩu ngẫu nhiên.
+- **Đăng ký chỉ cần email, không hỏi tên** (CEO chốt 29/10). Tên tạm "Thành viên 1234" (4 số ngẫu nhiên), **không** lấy
+  phần trước `@` vì tên hiện công khai sẽ làm lộ email. Trang Tôi nhắc "Đặt tên hiển thị"; đặt trong Cài đặt tài khoản.
 - Mã **hết hạn sau 10 phút**, dùng 1 lần, **sai 5 lần** thì mã hỏng phải xin mã mới.
 - Chống lạm dụng: gửi lại sau **60 giây**; mỗi email tối đa **5 mã/giờ**; mỗi IP tối đa **20 mã/giờ**. Màn hình luôn báo
   "Đã gửi mã nếu email hợp lệ" để không lộ email nào đã có tài khoản.
@@ -301,7 +303,7 @@ export async function register(raw: unknown): Promise<RegisterResult> {
 - `.env`: `ZALO_APP_ID`, `ZALO_APP_SECRET`, `FACEBOOK_APP_ID`, `FACEBOOK_APP_SECRET`. Thiếu thì ẩn nút. E2E dùng màn hình giả
   như Google (chỉ khi `TEST_MODE`).
 - `index.ts` thêm (không đổi hàm cũ): `requestEmailOtp`, `loginWithEmailOtp`, `addEmailWithOtp`, `setPasswordWithOtp`, `linkWithOtp`,
-  `linkTicketEmail`, `hasContact`; luồng Zalo/Facebook `OAUTH_PROVIDERS`, `oauthMode`, `isOauthProvider`, `startOauthFlow`,
+  `linkTicketEmail`, `hasContact`, `isTemporaryName`; luồng Zalo/Facebook `OAUTH_PROVIDERS`, `oauthMode`, `isOauthProvider`, `startOauthFlow`,
   `openOauthFlow`, `profileFromCode`, `completeOauthLogin`, `sealFakeOauthCode`; vé liên kết dùng chung `linkWithTicket`,
   `openLinkTicket` (`linkGoogleWithTicket` giữ tên cũ, giờ dùng chung).
 - Giới hạn mã theo IP chỉ tính IP do Nginx gửi (`X-Real-IP`); không có IP thật thì chỉ áp giới hạn theo email.

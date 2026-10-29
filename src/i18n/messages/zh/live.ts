@@ -7,6 +7,7 @@ export const live: LiveMessages = {
   'live.stories': '24小时快拍',
   'live.addStory': '+ 快拍',
   'live.storyBy': '{name}的快拍',
+  'live.storyLive': '{name}正在直播',
   'live.closeStory': '关闭快拍',
   'live.go': '开始直播',
   'live.badge': 'LIVE',

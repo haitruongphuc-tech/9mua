@@ -17,9 +17,20 @@ function readSeen(): Set<string> {
   }
 }
 
-// Hàng Story 24 giờ ở đầu trang Live (V4): vòng cam = có Story chưa xem, xám = đã xem (nhớ trên máy người xem).
-// Bấm vào xem toàn màn hình, thanh tiến độ theo từng Story, hết thì tự sang người tiếp theo.
-export function StoriesRow({ groups }: { groups: StoryGroup[] }) {
+export type StoryLive = { id: string; host: { displayName: string } };
+
+// Hàng tròn ở đầu trang chủ (V4; SPEC-creator.md bổ sung 29/10): người đang live trước (viền đỏ, nhãn LIVE, bấm vào
+// xem live), rồi Story 24 giờ: vòng cam = có Story chưa xem, xám = đã xem (nhớ trên máy người xem). Bấm Story thì xem
+// toàn màn hình, thanh tiến độ theo từng Story, hết thì tự sang người tiếp theo.
+export function StoriesRow({
+  groups,
+  lives = [],
+  compact = false,
+}: {
+  groups: StoryGroup[];
+  lives?: StoryLive[];
+  compact?: boolean;
+}) {
   const t = useT();
   const [seen, setSeen] = useState<Set<string>>(new Set());
   const [open, setOpen] = useState<{ g: number; i: number } | null>(null);
@@ -50,14 +61,38 @@ export function StoriesRow({ groups }: { groups: StoryGroup[] }) {
     setOpen({ g: ng, i: delta > 0 ? 0 : groups[ng]!.items.length - 1 });
   }
 
+  const box = compact ? 'w-14' : 'w-16';
+  const ring = compact ? 'h-14 w-14' : 'h-16 w-16';
+
   return (
     <section
       aria-label={t('live.stories')}
-      className="no-scrollbar flex gap-3 overflow-x-auto px-4 py-3"
+      className={`no-scrollbar flex shrink-0 gap-3 overflow-x-auto px-4 ${compact ? 'py-2' : 'py-3'}`}
       data-testid="stories"
     >
-      <Link href="/video/dang?story=1" className="flex w-16 shrink-0 flex-col items-center gap-1">
-        <span className="grid h-16 w-16 place-items-center rounded-full border-2 border-dashed border-white/40 text-[22px] font-black">
+      {lives.map((l) => (
+        <Link
+          key={l.id}
+          href={`/live/${l.id}`}
+          className={`flex ${box} shrink-0 flex-col items-center gap-1`}
+          aria-label={t('live.storyLive', { name: l.host.displayName })}
+          data-testid="story-live"
+        >
+          <span className={`relative grid ${ring} place-items-center rounded-full bg-red-500 p-[3px]`}>
+            <span className="grid h-full w-full place-items-center rounded-full border-2 border-ink bg-gradient-to-br from-brand to-red-500 text-[18px] font-black">
+              {l.host.displayName.trim().charAt(0).toUpperCase() || '9'}
+            </span>
+            <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded bg-red-600 px-1 text-[9px] font-black leading-[14px]">
+              LIVE
+            </span>
+          </span>
+          <span className="w-full truncate text-center text-[11px] font-bold">{l.host.displayName}</span>
+        </Link>
+      ))}
+      <Link href="/video/dang?story=1" className={`flex ${box} shrink-0 flex-col items-center gap-1`}>
+        <span
+          className={`grid ${ring} place-items-center rounded-full border-2 border-dashed border-white/40 text-[22px] font-black`}
+        >
           +
         </span>
         <span className="w-full truncate text-center text-[11px] font-bold">{t('live.addStory')}</span>
@@ -77,12 +112,12 @@ export function StoriesRow({ groups }: { groups: StoryGroup[] }) {
                 ),
               })
             }
-            className="flex w-16 shrink-0 flex-col items-center gap-1"
+            className={`flex ${box} shrink-0 flex-col items-center gap-1`}
             aria-label={t('live.storyBy', { name: g.author.displayName })}
             data-testid="story-ring"
           >
             <span
-              className={`grid h-16 w-16 place-items-center rounded-full p-[3px] ${
+              className={`grid ${ring} place-items-center rounded-full p-[3px] ${
                 unseen ? 'bg-gradient-to-tr from-brand via-orange-400 to-yellow-300' : 'bg-white/20'
               }`}
             >

@@ -59,17 +59,31 @@ describe('feed', () => {
     expect(new Set(all)).toEqual(new Set([...old, newest.id]));
   });
 
-  it('người đã đăng nhập không thấy lại video vừa xem trong 24 giờ', async () => {
+  it('người đã đăng nhập thấy video chưa xem trước; video xem trong 24 giờ xếp sau cùng', async () => {
     const a = await createUser();
     const viewer = await createUser();
-    const v1 = await readyVideo(a.id);
-    const v2 = await readyVideo(a.id);
+    const v1 = await readyVideo(a.id, { score: 9 });
+    const v2 = await readyVideo(a.id, { score: 1 });
     await recordViews({ userId: viewer.id }, [{ videoId: v1.id, watchedSeconds: 5 }]);
-    expect((await getFeed({ userId: viewer.id })).items.map((v) => v.id)).toEqual([v2.id]);
+    expect((await getFeed({ userId: viewer.id })).items.map((v) => v.id)).toEqual([v2.id, v1.id]);
     advanceClock({ hours: 25 });
     expect((await getFeed({ userId: viewer.id })).items.map((v) => v.id).sort()).toEqual(
       [v1.id, v2.id].sort(),
     );
+  });
+
+  it('xem hết video thì feed chiếu lại video đã xem, không trống (SPEC-creator.md bổ sung 29/10)', async () => {
+    const a = await createUser();
+    const viewer = await createUser();
+    const vids = [await readyVideo(a.id), await readyVideo(a.id), await readyVideo(a.id)];
+    await recordViews(
+      { userId: viewer.id },
+      vids.map((v) => ({ videoId: v.id, watchedSeconds: 5 })),
+    );
+    const p1 = await getFeed({ userId: viewer.id }, undefined, { limit: 2 });
+    expect(p1.items).toHaveLength(2);
+    const p2 = await getFeed({ userId: viewer.id }, p1.nextCursor!, { limit: 2 });
+    expect([...p1.items, ...p2.items].map((v) => v.id).sort()).toEqual(vids.map((v) => v.id).sort());
   });
 
   it('mở link chia sẻ thì video đó đứng đầu', async () => {

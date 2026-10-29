@@ -1,10 +1,13 @@
 import type { Metadata } from 'next';
+import { StoriesRow } from '@/components/live/StoriesRow';
 import { MarketShowcase } from '@/components/market/MarketShowcase';
 import { VideoFeed } from '@/components/video/VideoFeed';
 import { ClientMessages } from '@/i18n/ClientMessages';
 import { readAnonId } from '@/lib/anon-id';
 import { env } from '@/lib/env';
+import { listStories } from '@/modules/creator';
 import { getCurrentUser } from '@/modules/identity';
+import { getLiveForViewer, listLiveNow, type LiveView } from '@/modules/live';
 import { loadFeed } from '@/server/feed';
 
 export const dynamic = 'force-dynamic';
@@ -14,12 +17,16 @@ export const metadata: Metadata = {
   openGraph: { title: '9MUA - Kiếm tiền trên 9mua.com dễ và nhanh nhất', url: '/' },
 };
 
-// Trang chủ là feed video dọc kiểu TikTok (CEO chọn 27/10/2026, docs/v4-merge-plan.md). Chưa có video nào thì
-// hiện các khối Chợ như trang chủ cũ để trang không trống.
+// Trang chủ gộp mọi thứ người dùng đăng (SPEC-creator.md bổ sung 29/10): hàng người đang live + Story ở trên, feed dọc
+// video có chèn buổi live đang phát. Web chưa có video và chưa có ai live thì hiện các khối Chợ để trang không trống.
 export default async function HomePage() {
-  const user = await getCurrentUser();
-  const feed = await loadFeed({ userId: user?.id, anonId: await readAnonId() });
-  if (feed.items.length === 0)
+  const [user, anonId] = await Promise.all([getCurrentUser(), readAnonId()]);
+  const viewer = { userId: user?.id, anonId };
+  const [feed, stories, cards] = await Promise.all([loadFeed(viewer), listStories(), listLiveNow()]);
+  const lives = (await Promise.all(cards.map((c) => getLiveForViewer(c.id, viewer)))).filter(
+    (v): v is Extract<LiveView, { kind: 'live' }> => v?.kind === 'live',
+  );
+  if (feed.items.length === 0 && lives.length === 0)
     return (
       <ClientMessages prefixes={['market.']}>
         <div className="mx-auto max-w-6xl px-4 py-6">
@@ -37,8 +44,22 @@ export default async function HomePage() {
           trang, mỹ phẩm, đồ gia dụng. Thuê Kiot online để bán hàng.
         </p>
       </div>
-      <ClientMessages prefixes={['feed.']}>
-        <VideoFeed variant="home" initial={feed.items} nextCursor={feed.nextCursor} appUrl={env().APP_URL} />
+      <ClientMessages prefixes={['feed.', 'live.', 'shop.cart.']}>
+        <VideoFeed
+          variant="home"
+          initial={feed.items}
+          nextCursor={feed.nextCursor}
+          appUrl={env().APP_URL}
+          lives={lives}
+          loggedIn={Boolean(user)}
+          header={
+            <StoriesRow
+              compact
+              groups={stories}
+              lives={lives.map((l) => ({ id: l.id, host: { displayName: l.host.displayName } }))}
+            />
+          }
+        />
       </ClientMessages>
     </>
   );

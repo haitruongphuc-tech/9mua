@@ -646,7 +646,7 @@
   E2E chạy với máy chủ hình giả; **còn chờ CEO thử MediaMTX thật trên VPS** (`docs/deploy.md` mục 12).
 - [x] **T69: Spec cho thay đổi 29/10** — menu mới, trang chủ tổng hợp (`SPEC-creator.md`), đăng nhập Zalo/Google/Facebook/
   Email OTP (`SPEC-identity.md`), Hộp thư (`SPEC-messages.md`). CEO duyệt qua chat 29/10.
-- [ ] **T70: Trang chủ tổng hợp + menu Video, Live** — xem hết video thì chiếu lại; trang chủ chèn live đang phát và hàng
+- [x] **T70: Trang chủ tổng hợp + menu Video, Live** — xem hết video thì chiếu lại; trang chủ chèn live đang phát và hàng
   Story/live; `/video` chỉ video; `/live` chỉ live.
 - [ ] **T71: Đăng ký bằng Email mã OTP, Zalo, Facebook** — liên kết bằng mật khẩu hoặc mã; thêm email trước khi mở Kiot.
 - [ ] **T72: Hộp thư** (`SPEC-messages.md`).

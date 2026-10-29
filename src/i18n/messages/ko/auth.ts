@@ -25,7 +25,6 @@ export const auth: AuthMessages = {
     '{email}에는 이미 9MUA 계정이 있습니다. 이 이메일로 받은 코드를 입력(또는 비밀번호로 로그인)하여 {provider}을(를) 연결하세요.',
   'auth.passwordLogin': '비밀번호로 로그인(기존 계정)',
   'auth.otp.email': '이메일',
-  'auth.otp.name': '이름',
   'auth.otp.send': '코드 보내기',
   'auth.otp.sending': '보내는 중…',
   'auth.otp.sent': '{email}(으)로 6자리 코드를 보냈습니다. 10분 동안 유효합니다.',

@@ -43,6 +43,7 @@ export {
   loginWithEmailOtp,
   addEmailWithOtp,
   setPasswordWithOtp,
+  isTemporaryName,
   linkWithOtp,
   linkTicketEmail,
   hasContact,

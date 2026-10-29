@@ -24,7 +24,6 @@ export const auth = {
     'Email {email} đã có tài khoản 9MUA. Nhập mã gửi về email này (hoặc đăng nhập bằng mật khẩu) để liên kết {provider}.',
   'auth.passwordLogin': 'Đăng nhập bằng mật khẩu (tài khoản cũ)',
   'auth.otp.email': 'Email',
-  'auth.otp.name': 'Tên của bạn',
   'auth.otp.send': 'Gửi mã',
   'auth.otp.sending': 'Đang gửi…',
   'auth.otp.sent': 'Đã gửi mã 6 số tới {email}. Mã có hiệu lực 10 phút.',

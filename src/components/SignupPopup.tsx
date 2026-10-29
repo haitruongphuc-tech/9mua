@@ -113,7 +113,7 @@ export function SignupPopup({
             <span className="h-px flex-1 bg-zinc-200" />
           </div>
         ) : null}
-        <EmailOtpForm next={next} tone="sheet" askName />
+        <EmailOtpForm next={next} tone="sheet" />
         <ul className="mt-4 space-y-1 text-[11px] text-zinc-500">
           <li>• {t('common.popup.perk1')}</li>
           <li>• {t('common.popup.perk2', { limit: freeLimit, threshold: voucherThreshold })}</li>

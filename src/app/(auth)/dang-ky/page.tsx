@@ -15,6 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 // Đăng ký (SPEC-identity.md bổ sung 29/10): chỉ Zalo · Google · Facebook · Email nhận mã. Không còn form SĐT + mật khẩu.
+// Email chỉ cần địa chỉ email, không hỏi tên (CEO chốt 29/10): tên đặt sau trong Cài đặt tài khoản.
 export default async function RegisterPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
   const next = safeNextPath((await searchParams).next);
   // Đã đăng nhập (vd. bấm "Tạo Kiot" ở trang chủ) thì đi thẳng tới trang cần tới.
@@ -29,7 +30,7 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
       />
       <OrDivider label={t('auth.or')} />
       <ClientMessages prefixes={['auth.']}>
-        <EmailOtpForm next={next} askName />
+        <EmailOtpForm next={next} />
       </ClientMessages>
       <p className="mt-5 text-center text-[13px] text-white/60">
         {t('auth.register.haveAccount')}{' '}

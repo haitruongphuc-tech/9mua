@@ -4,6 +4,8 @@ export const me: MeMessages = {
   'me.badge.free': 'FREEアカウント',
   'me.badge.owner': 'Kiotオーナー',
   'me.badge.admin': '管理者 / CEO',
+  'me.setName': '仮の名前を使っています。表示名を設定して、みんなに分かるようにしましょう。',
+  'me.setNameCta': '名前を設定',
   'me.stat.following': 'フォロー中',
   'me.stat.followers': 'フォロワー',
   'me.stat.liked': 'ハートした数',

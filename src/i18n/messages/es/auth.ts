@@ -25,7 +25,6 @@ export const auth: AuthMessages = {
     '{email} ya tiene una cuenta 9MUA. Introduce el código enviado a este correo (o inicia sesión con tu contraseña) para vincular {provider}.',
   'auth.passwordLogin': 'Iniciar sesión con contraseña (cuentas existentes)',
   'auth.otp.email': 'Correo electrónico',
-  'auth.otp.name': 'Tu nombre',
   'auth.otp.send': 'Enviar código',
   'auth.otp.sending': 'Enviando…',
   'auth.otp.sent': 'Enviamos un código de 6 dígitos a {email}. Es válido durante 10 minutos.',

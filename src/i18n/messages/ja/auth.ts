@@ -25,7 +25,6 @@ export const auth: AuthMessages = {
     '{email} はすでに9MUAアカウントがあります。このメールに届いたコードを入力（またはパスワードでログイン）して{provider}を連携してください。',
   'auth.passwordLogin': 'パスワードでログイン（既存アカウント）',
   'auth.otp.email': 'メールアドレス',
-  'auth.otp.name': 'お名前',
   'auth.otp.send': 'コードを送信',
   'auth.otp.sending': '送信中…',
   'auth.otp.sent': '{email} に6桁のコードを送信しました。有効期限は10分です。',

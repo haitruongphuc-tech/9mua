@@ -24,7 +24,6 @@ export const auth: AuthMessages = {
     '{email} 已有 9MUA 账号。输入发送到该邮箱的验证码（或用密码登录）以绑定 {provider}。',
   'auth.passwordLogin': '使用密码登录（老账号）',
   'auth.otp.email': '邮箱',
-  'auth.otp.name': '你的名字',
   'auth.otp.send': '发送验证码',
   'auth.otp.sending': '发送中…',
   'auth.otp.sent': '已向 {email} 发送 6 位验证码，10 分钟内有效。',

@@ -3,6 +3,8 @@ export const me = {
   'me.badge.free': 'TÀI KHOẢN FREE',
   'me.badge.owner': 'CHỦ KIOT',
   'me.badge.admin': 'ADMIN / CEO',
+  'me.setName': 'Bạn đang dùng tên tạm. Đặt tên hiển thị để mọi người nhận ra bạn.',
+  'me.setNameCta': 'Đặt tên',
   'me.stat.following': 'Following',
   'me.stat.followers': 'Followers',
   'me.stat.liked': 'Đã thả tim',

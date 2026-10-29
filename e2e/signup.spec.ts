@@ -29,13 +29,13 @@ test.describe('popup mở tài khoản (khách mới)', () => {
     await expect(popup.getByTestId('social-google')).toBeVisible();
     await expect(popup.getByTestId('social-facebook')).toBeVisible();
     const email = uniqueEmail('popup');
-    await popup.getByTestId('otp-name').fill('Khách Popup');
     await popup.getByTestId('otp-email').fill(email);
     await popup.getByTestId('otp-send').click();
     await popup.getByTestId('otp-code').fill(await codeFromMail(email));
     await popup.getByTestId('otp-verify').click();
     await page.waitForURL((u) => u.pathname === '/cho/kiot');
-    await expect(page.getByTestId('user-menu')).toHaveAccessibleName('Tôi (Khách Popup)');
+    // Chỉ cần email: tên tạm, đặt tên sau trong Cài đặt tài khoản.
+    await expect(page.getByTestId('user-menu')).toHaveAccessibleName(/^Tôi \(Thành viên \d{4}\)$/);
     await expect(popup).toBeHidden();
   });
 
@@ -53,6 +53,7 @@ test('trang đăng ký chỉ còn Zalo, Google, Facebook, Email; không còn for
   for (const p of ['zalo', 'google', 'facebook']) await expect(page.getByTestId(`social-${p}`)).toBeVisible();
   await expect(page.getByTestId('otp-email')).toBeVisible();
   await expect(page.locator('#password')).toHaveCount(0);
+  await expect(page.getByTestId('otp-name')).toHaveCount(0);
 });
 
 test('Google (giả lập): email mới → tạo tài khoản và đăng nhập', async ({ page }) => {

@@ -34,7 +34,8 @@ test('cài đặt tài khoản: đổi tên, thêm email, đổi mật khẩu', 
   await page.getByTestId('otp-send').click();
   await page.getByTestId('otp-code').fill(await codeFromMail(`acc-${stamp}@9mua.test`));
   await page.getByTestId('otp-verify').click();
-  await expect(page.getByTestId('otp-done')).toBeVisible();
+  // Thêm xong thì trang tự tải lại và hiện email hiện tại.
+  await expect(page.locator('#email')).toContainText(`Email hiện tại: acc-${stamp}@9mua.test`);
 
   await page.fill('#pw-old', 'mat-khau-1-e2e');
   await page.fill('#pw-new', 'mat-khau-2-e2e');

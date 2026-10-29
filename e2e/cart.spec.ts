@@ -30,7 +30,6 @@ test('khách chưa đăng nhập bấm Thêm vào giỏ → đăng ký → món 
   // Chờ sang hẳn trang đăng ký (đăng ký bằng mã email).
   await buyer.waitForURL((u) => u.pathname === '/dang-ky');
   const email = uniqueEmail('mua');
-  await buyer.getByTestId('otp-name').fill('Người Mua');
   await buyer.getByTestId('otp-email').fill(email);
   await buyer.getByTestId('otp-send').click();
   await buyer.getByTestId('otp-code').fill(await codeFromMail(email));

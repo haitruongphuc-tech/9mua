@@ -21,13 +21,13 @@ export async function codeFromMail(email: string, notCode?: string): Promise<str
   return code!;
 }
 
-// Đăng ký bằng mã email (SPEC-identity.md bổ sung 29/10) trên trang /dang-ky.
+// Đăng ký bằng mã email trên trang /dang-ky: chỉ cần email, tên tạm "Thành viên 1234" (CEO chốt 29/10).
+// name: đặt tên hiển thị luôn (ghi thẳng DB để các bài khác ngắn; bài auth.spec đặt tên qua Cài đặt tài khoản).
 export async function signUpByEmail(
   page: Page,
-  { name, next = '/', email = uniqueEmail() }: { name: string; next?: string; email?: string },
+  { name, next = '/', email = uniqueEmail() }: { name?: string; next?: string; email?: string } = {},
 ): Promise<string> {
   await page.goto(`/dang-ky?next=${encodeURIComponent(next)}`);
-  await page.getByTestId('otp-name').fill(name);
   await page.getByTestId('otp-email').fill(email);
   await page.getByTestId('otp-send').click();
   await expect(page.getByTestId('otp-sent')).toBeVisible();
@@ -35,6 +35,10 @@ export async function signUpByEmail(
   await page.getByTestId('otp-verify').click();
   const path = next.split('?')[0];
   await page.waitForURL((u) => u.pathname === path);
+  if (name) {
+    await e2eDb.user.update({ where: { email }, data: { displayName: name } });
+    await page.reload();
+  }
   return email;
 }
 

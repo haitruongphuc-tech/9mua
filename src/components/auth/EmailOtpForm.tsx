@@ -6,27 +6,24 @@ import { sendOtpAction, verifyOtpAction, type OtpMode } from '@/app/(auth)/otp-a
 import { TextField, type FieldTone } from '@/components/ui/TextField';
 import { useT } from '@/i18n/client';
 
-// Mã 6 số qua email (SPEC-identity.md bổ sung 29/10): bước 1 nhập email (và tên khi đăng ký) → gửi mã; bước 2 nhập
+// Mã 6 số qua email (SPEC-identity.md bổ sung 29/10): bước 1 nhập email (không hỏi tên) → gửi mã; bước 2 nhập
 // mã → vào luôn. mode "link": gửi mã về email trong vé liên kết Google/Facebook (người dùng không tự nhập email).
 // mode "add-email": thêm email cho tài khoản chưa có (mở Kiot).
 export function EmailOtpForm({
   mode = 'login',
   next = '/',
   tone = 'dark',
-  askName = false,
   linkEmail,
 }: {
   mode?: OtpMode;
   next?: string;
   tone?: Exclude<FieldTone, 'light'>;
-  askName?: boolean;
   linkEmail?: string;
 }) {
   const t = useT();
   const router = useRouter();
   const [step, setStep] = useState<'email' | 'code' | 'done'>('email');
   const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
   const [code, setCode] = useState('');
   const [sentTo, setSentTo] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -56,7 +53,6 @@ export function EmailOtpForm({
       const r = await verifyOtpAction(mode, {
         email: sentTo,
         code,
-        displayName: askName ? name : undefined,
         next,
       });
       if (r && !r.ok) return setError(r.message);
@@ -94,18 +90,6 @@ export function EmailOtpForm({
       ) : null}
       {step === 'email' ? (
         <>
-          {askName ? (
-            <TextField
-              tone={tone}
-              label={t('auth.otp.name')}
-              name="otpName"
-              autoComplete="name"
-              maxLength={50}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              data-testid="otp-name"
-            />
-          ) : null}
           {mode === 'link' ? (
             <p className={`text-[13px] ${sub}`}>{linkEmail}</p>
           ) : (

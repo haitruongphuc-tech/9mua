@@ -4,6 +4,8 @@ export const me: MeMessages = {
   'me.badge.free': 'CUENTA FREE',
   'me.badge.owner': 'DUEÑO DE KIOT',
   'me.badge.admin': 'ADMIN / CEO',
+  'me.setName': 'Estás usando un nombre temporal. Elige un nombre visible para que te reconozcan.',
+  'me.setNameCta': 'Poner nombre',
   'me.stat.following': 'Siguiendo',
   'me.stat.followers': 'Seguidores',
   'me.stat.liked': 'Corazones dados',

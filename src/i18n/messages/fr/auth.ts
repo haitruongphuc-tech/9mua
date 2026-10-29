@@ -25,7 +25,6 @@ export const auth: AuthMessages = {
     '{email} a déjà un compte 9MUA. Saisissez le code envoyé à cette adresse (ou connectez-vous avec votre mot de passe) pour lier {provider}.',
   'auth.passwordLogin': 'Se connecter avec un mot de passe (comptes existants)',
   'auth.otp.email': 'E-mail',
-  'auth.otp.name': 'Votre nom',
   'auth.otp.send': 'Envoyer le code',
   'auth.otp.sending': 'Envoi…',
   'auth.otp.sent': 'Nous avons envoyé un code à 6 chiffres à {email}. Il est valable 10 minutes.',

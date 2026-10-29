@@ -98,3 +98,28 @@ Các phần dưới đây là chỗ các module gọi nhau. Bản này chỉ th�
 - `orders`: `addToCart` nhận thêm nguồn là buổi live (`{ videoId?, liveId? }`). Kiểu cũ là một chuỗi mã video, vẫn
   dùng được.
 - Module mới: `ai` (AI Studio), `live` (livestream), `xu` (xu thưởng).
+
+## Đợt 29/10: menu mới, Hộp thư, đăng ký Zalo/Facebook/Email
+
+Bản này có:
+
+- **Thanh dưới:** Trang chủ · Video · Live · Kiot · Hộp thư. Nút **Tôi** chuyển lên ảnh đại diện góc phải trên cùng.
+  Danh bạ Kiot vào bằng nút "Xem tất cả Kiot" trong trang Kiot.
+- **Trang chủ** gộp video, buổi live đang phát và Story. Đã đăng nhập mà xem hết video thì video được chiếu lại, không còn
+  đổi sang khối Chợ.
+- **Hộp thư:** nhắn tin 1-1, tin của người lạ vào "Tin nhắn chờ", chặn, báo cáo. CEO xem cuộc trò chuyện bị báo cáo ở
+  `/admin/tin-nhan`.
+- **Đăng ký:** Zalo, Google, Facebook, Email (mã 6 số). Tài khoản cũ vẫn đăng nhập SĐT/email + mật khẩu như trước.
+
+Các bước:
+
+1. (Không bắt buộc) Tạo khoá Zalo và Facebook theo `docs/deploy.md` mục 4, điền `ZALO_APP_ID`, `ZALO_APP_SECRET`,
+   `FACEBOOK_APP_ID`, `FACEBOOK_APP_SECRET` vào `.env`. Chưa có khoá thì nút đó tự ẩn; Email và Google vẫn chạy.
+2. Cập nhật: `cd /opt/9mua && sh scripts/deploy.sh`. Database thêm 2 lần nâng cấp, **chỉ thêm bảng mới**.
+3. Script sẽ nhắc file Nginx đã đổi (thêm đường cho Hộp thư). Chép lại như mục 6 của `docs/deploy.md`:
+   ```bash
+   sudo cp deploy/nginx/9mua.conf /etc/nginx/sites-available/9mua.conf
+   [ -f /proc/net/if_inet6 ] || sudo sed -i '/listen \[::\]/d' /etc/nginx/sites-available/9mua.conf
+   sudo nginx -t && sudo systemctl reload nginx
+   ```
+4. Thử: đăng ký bằng email (nhận mã trong hộp thư), nhắn "Hỏi Kiot" từ một trang sản phẩm, xem chủ Kiot nhận được.

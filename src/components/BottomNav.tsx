@@ -1,65 +1,48 @@
 'use client';
 
-import { Clapperboard, Plus, ShoppingBasket, Store, User } from 'lucide-react';
+import { Clapperboard, House, MessageCircle, Radio, Store } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useT } from '@/i18n/client';
 import { useMe } from './MeProvider';
 
-// Thanh dưới 5 nút theo V4, hiện trên mọi màn hình (docs/BRAND.md; CEO chốt 27/10/2026, §7 mục 11):
-// Video (trang chủ) · Chợ · Live (nút giữa) · Kiot · Tôi.
+// Thanh dưới 5 nút, hiện trên mọi màn hình (CEO chốt 29/10/2026, docs/v4-merge-plan.md §7 mục 15):
+// Trang chủ · Video · Live (nút giữa) · Kiot (nội dung Chợ, /cho) · Hộp thư. "Tôi" nằm ở ảnh đại diện góc phải header.
 // base: '' trên 9mua.com; APP_URL trên trang Kiot (link về tên miền chính, không tô sáng nút nào).
 const starts = (path: string, prefix: string) => path === prefix || path.startsWith(`${prefix}/`);
-const ACCOUNT_PATHS = [
-  '/tai-khoan',
-  '/don-mua',
-  '/kiot-cua-toi',
-  '/thong-bao',
-  '/video/dang',
-  '/video/cua-toi',
-];
+// Trang tài khoản dưới /video (đăng video, video của tôi) không tô sáng nút Video.
+const ACCOUNT_VIDEO_PATHS = ['/video/dang', '/video/cua-toi'];
 
 export function BottomNav({ base = '' }: { base?: string }) {
   const pathname = usePathname();
-  const { me, notifications, liveNow } = useMe();
+  const { me, inbox, liveNow } = useMe();
   const t = useT();
-  const onAccount = ACCOUNT_PATHS.some((p) => starts(pathname, p));
   const items = [
+    { href: '/', key: 'home', label: t('common.nav.home'), Icon: House, active: pathname === '/' },
     {
-      href: '/',
+      href: '/video',
       key: 'video',
       label: t('common.nav.video'),
       Icon: Clapperboard,
-      active: pathname === '/' || (starts(pathname, '/video') && !onAccount),
-    },
-    {
-      href: '/cho',
-      key: 'market',
-      label: t('common.nav.market'),
-      Icon: ShoppingBasket,
-      active: starts(pathname, '/cho') && !starts(pathname, '/cho/kiot'),
+      active:
+        (starts(pathname, '/video') || starts(pathname, '/v')) &&
+        !ACCOUNT_VIDEO_PATHS.some((p) => starts(pathname, p)),
     },
     {
       href: '/live',
       key: 'live',
       label: t('common.nav.live'),
-      Icon: Plus,
+      Icon: Radio,
       center: true,
       active: starts(pathname, '/live'),
     },
+    { href: '/cho', key: 'kiot', label: t('common.nav.kiot'), Icon: Store, active: starts(pathname, '/cho') },
     {
-      href: '/cho/kiot',
-      key: 'kiot',
-      label: t('common.nav.kiot'),
-      Icon: Store,
-      active: starts(pathname, '/cho/kiot'),
-    },
-    {
-      href: me === null ? '/dang-nhap?next=%2Ftai-khoan' : '/tai-khoan',
-      key: 'me',
-      label: t('common.nav.me'),
-      Icon: User,
-      active: onAccount,
+      href: me === null ? '/dang-nhap?next=%2Fhop-thu' : '/hop-thu',
+      key: 'inbox',
+      label: t('common.nav.inbox'),
+      Icon: MessageCircle,
+      active: starts(pathname, '/hop-thu'),
     },
   ];
 
@@ -107,25 +90,22 @@ export function BottomNav({ base = '' }: { base?: string }) {
                   href={`${base}${href}`}
                   aria-current={active ? 'page' : undefined}
                   aria-label={
-                    key === 'me' && me !== undefined
-                      ? me
-                        ? t('common.nav.meUser', { name: me.displayName })
-                        : t('common.nav.meLogin')
-                      : undefined
+                    key === 'inbox' && inbox > 0 ? t('common.nav.inboxUnread', { count: inbox }) : undefined
                   }
-                  data-testid={key === 'me' ? 'user-menu' : undefined}
+                  data-testid={`nav-${key}`}
                   className={`relative flex w-14 flex-col items-center gap-0.5 ${
                     active ? 'text-brand' : 'text-white/60 hover:text-white'
                   }`}
                 >
                   <Icon className="h-6 w-6" aria-hidden />
                   <span className="text-[10px] font-bold">{label}</span>
-                  {key === 'me' && notifications > 0 ? (
+                  {key === 'inbox' && inbox > 0 ? (
                     <span
                       className="absolute -top-1 right-2 grid h-4 min-w-4 place-items-center rounded-full bg-danger px-1 text-[9px] font-black text-white"
-                      data-testid="nav-notifications"
+                      data-testid="nav-inbox-count"
+                      aria-hidden
                     >
-                      {notifications}
+                      {inbox > 99 ? '99+' : inbox}
                     </span>
                   ) : null}
                 </Link>

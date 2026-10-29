@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { HashtagRow } from '@/components/market/HashtagRow';
 import { MarketFeed } from '@/components/market/MarketFeed';
 import { MarketFilters } from '@/components/market/MarketFilters';
+import Link from 'next/link';
 import { MarketShowcase } from '@/components/market/MarketShowcase';
 import { ClientMessages } from '@/i18n/ClientMessages';
 import { getT } from '@/i18n/server';
@@ -41,6 +42,13 @@ export default async function MarketPage({ searchParams }: Props) {
               ? t(`market.cat.${category.slug}`)
               : t('market.title')}
         </h1>
+        <Link
+          href="/cho/kiot"
+          className="self-start rounded-full border border-white/20 bg-white/10 px-4 py-2 text-[13px] font-bold"
+          data-testid="all-kiots"
+        >
+          {t('common.allKiots')} →
+        </Link>
         <MarketFilters params={params} />
         {/* Chợ chưa lọc gì: hiện Hashtag nổi bật, Bán chạy, Video hot, Kiot nổi bật. */}
         {query === '' && !params.cursor ? (

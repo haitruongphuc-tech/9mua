@@ -32,7 +32,11 @@ test('hỏi Kiot từ trang sản phẩm → chủ Kiot trả lời → khách t
   await buyer.getByTestId('chat-send').click();
   await expect(buyer.getByTestId('toast')).toContainText('Không gửi link trong tin nhắn.');
 
-  await page.goto('/hop-thu');
+  // Thanh dưới của chủ Kiot hiện số tin chưa đọc.
+  await page.goto('/cho');
+  await expect(page.getByTestId('nav-inbox-count')).toHaveText('1');
+  await page.getByTestId('nav-inbox').click();
+  await page.waitForURL((u) => u.pathname === '/hop-thu');
   const item = page.getByTestId('inbox-item').first();
   await expect(item).toContainText('Còn hàng không shop?');
   await expect(item.getByTestId('inbox-unread')).toHaveText('1');

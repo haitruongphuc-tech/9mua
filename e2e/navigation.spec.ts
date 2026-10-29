@@ -1,31 +1,39 @@
 import { expect, test } from '@playwright/test';
 
-// T47: khung giao diện V4 — thanh dưới 5 nút trên mọi màn hình, header logo + slogan + tìm + giỏ.
-test('thanh dưới: Video · Chợ · Live · Kiot · Tôi, nút đang ở sáng lên; slogan đổi theo trang', async ({
+// Thanh dưới (CEO chốt 29/10): Trang chủ · Video · Live · Kiot · Hộp thư; "Tôi" ở ảnh đại diện góc phải header.
+test('thanh dưới: Trang chủ · Video · Live · Kiot · Hộp thư, nút đang ở sáng lên; slogan đổi theo trang', async ({
   page,
   isMobile,
 }) => {
   await page.goto('/cho');
   const nav = page.getByRole('navigation', { name: 'Điều hướng chính' });
   await expect(nav).toBeVisible();
-  await expect(nav.getByRole('link')).toHaveText(['Video', 'Chợ', 'Live', 'Kiot', 'Tôi']);
-  await expect(nav.getByRole('link', { name: 'Chợ' })).toHaveAttribute('aria-current', 'page');
+  await expect(nav.getByRole('link')).toHaveText(['Trang chủ', 'Video', 'Live', 'Kiot', 'Hộp thư']);
+  await expect(nav.getByRole('link', { name: 'Kiot' })).toHaveAttribute('aria-current', 'page');
   await expect(page.getByTestId('page-slogan')).toHaveText('Kiot nào cũng là showroom - 9MUA kết nối');
+
+  // Danh bạ Kiot không còn trên thanh dưới: vào từ nút "Xem tất cả Kiot" trong trang Kiot.
+  await page.getByTestId('all-kiots').click();
+  await page.waitForURL((u) => u.pathname === '/cho/kiot');
 
   const go = (name: string) =>
     isMobile ? nav.getByRole('link', { name }).tap() : nav.getByRole('link', { name }).click();
-  await go('Kiot');
-  await page.waitForURL((u) => u.pathname === '/cho/kiot');
-  await expect(nav.getByRole('link', { name: 'Kiot' })).toHaveAttribute('aria-current', 'page');
-  await expect(nav.getByRole('link', { name: 'Chợ' })).not.toHaveAttribute('aria-current', 'page');
+  await go('Video');
+  await page.waitForURL((u) => u.pathname === '/video');
+  await expect(nav.getByRole('link', { name: 'Video' })).toHaveAttribute('aria-current', 'page');
 
   await go('Live');
   await page.waitForURL((u) => u.pathname === '/live');
   await expect(page.getByTestId('page-slogan')).toHaveText('Nhìn thật - Mua thật - Người thật việc thật');
 
-  // Chưa đăng nhập: nút Tôi dẫn tới đăng nhập.
-  await expect(nav.getByTestId('user-menu')).toHaveAccessibleName('Tôi (đăng nhập)');
-  await expect(nav.getByTestId('user-menu')).toHaveAttribute('href', '/dang-nhap?next=%2Ftai-khoan');
+  // Chưa đăng nhập: Hộp thư và ảnh đại diện "Tôi" dẫn tới đăng nhập.
+  await expect(nav.getByRole('link', { name: 'Hộp thư' })).toHaveAttribute(
+    'href',
+    '/dang-nhap?next=%2Fhop-thu',
+  );
+  const me = page.getByRole('banner').getByTestId('user-menu');
+  await expect(me).toHaveAccessibleName('Tôi (đăng nhập)');
+  await expect(me).toHaveAttribute('href', '/dang-nhap?next=%2Ftai-khoan');
 
   // Nội dung cuối trang không bị thanh dưới che.
   // Dùng /cho/kiot vì /cho tự tải thêm sản phẩm khi cuộn tới cuối.

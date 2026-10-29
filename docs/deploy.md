@@ -154,6 +154,29 @@ Kênh chi hộ PayOS cần:
    *Authorized redirect URIs* điền đúng: `https://9mua.com/api/auth/google/callback`.
 4. Chép *Client ID* vào `GOOGLE_CLIENT_ID`, *Client secret* vào `GOOGLE_CLIENT_SECRET`.
 
+Đăng nhập Zalo (không bắt buộc; để trống thì ẩn nút "Tiếp tục với Zalo"):
+1. Vào developers.zalo.me, đăng nhập bằng Zalo của công ty → **Tạo ứng dụng** (tên `9MUA`, danh mục Thương mại điện tử).
+2. Trong ứng dụng → **Sản phẩm** → **Đăng nhập** (Social API). Mục *Callback URL* (đường dẫn quay về) điền đúng:
+   `https://9mua.com/api/auth/zalo/callback`. Nếu Zalo bắt xác thực tên miền `9mua.com`, gửi Claude nội dung Zalo yêu cầu
+   (file hoặc thẻ meta) để thêm vào web; không gửi khoá.
+3. Bật (kích hoạt) ứng dụng. Ở *Cài đặt* → *Thông tin ứng dụng*: chép **ID ứng dụng** vào `ZALO_APP_ID`, **Khoá bí mật
+   của ứng dụng** vào `ZALO_APP_SECRET`.
+4. Zalo không cho biết email/SĐT: người đăng ký bằng Zalo sẽ được hỏi thêm email khi mở Kiot.
+
+Đăng nhập Facebook (không bắt buộc; để trống thì ẩn nút "Tiếp tục với Facebook"):
+1. Vào developers.facebook.com → *My Apps* → **Create App** → chọn trường hợp dùng *Xác thực người dùng bằng Facebook Login*.
+2. *Facebook Login* → *Settings* → *Valid OAuth Redirect URIs*: `https://9mua.com/api/auth/facebook/callback`.
+3. *App settings* → *Basic*: *App Domains* `9mua.com`; *Privacy Policy URL* `https://9mua.com/chinh-sach/bao-mat`;
+   *Terms of Service URL* `https://9mua.com/chinh-sach/dieu-khoan`; *User data deletion* → *Data deletion instructions URL*
+   `https://9mua.com/chinh-sach/bao-mat` (trang có mục xoá tài khoản); biểu tượng ứng dụng là logo 9MUA.
+4. Quyền cần: `public_profile`, `email`. Để người ngoài (không phải tài khoản thử của app) đăng nhập được, Facebook bắt
+   **xác minh doanh nghiệp** (Business Verification) và chuyển app sang **Live**; có thể phải gửi duyệt quyền `email`.
+   Việc này mất vài ngày đến vài tuần; trong lúc chờ, nút Facebook chỉ dùng được với tài khoản thử của app.
+5. Chép *App ID* vào `FACEBOOK_APP_ID`, *App Secret* vào `FACEBOOK_APP_SECRET`.
+
+Mã đăng nhập qua email (luôn bật): gửi bằng SMTP Brevo đang dùng. Gói miễn phí của Brevo gửi được 300 email/ngày; đông
+người đăng ký hơn thì nâng gói ở Brevo.
+
 AI Studio (không bắt buộc, `SPEC-ai.md`):
 - `ANTHROPIC_API_KEY`: tạo ở console.anthropic.com → *API Keys* (nạp trước ít tiền, vd. 5 USD). Dùng để AI viết
   mô tả; mỗi lần khoảng 20đ.

@@ -650,7 +650,7 @@
   Story/live; `/video` chỉ video; `/live` chỉ live.
 - [x] **T71: Đăng ký bằng Email mã OTP, Zalo, Facebook** — liên kết bằng mật khẩu hoặc mã; thêm email trước khi mở Kiot.
 - [x] **T72: Hộp thư** (`SPEC-messages.md`).
-- [ ] **T73: Thanh dưới mới + ảnh đại diện trên header**, kiểm tra toàn bộ, hướng dẫn CEO lấy khoá Zalo/Facebook.
+- [x] **T73: Thanh dưới mới + ảnh đại diện trên header**, kiểm tra toàn bộ, hướng dẫn CEO lấy khoá Zalo/Facebook.
 - [x] **Đổi giao diện V4 + dịch từng trang** (gộp với T41–T46): Chợ & sản phẩm; Kiot; giỏ, đặt hàng, đơn mua;
   đăng nhập & tài khoản; Kiot của tôi; video & creator; admin.
 - [ ] **T41: Feed: thả tim 2 chạm + túi cam, thanh tiến độ, chia sẻ có QR** (S)

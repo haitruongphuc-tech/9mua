@@ -10,7 +10,7 @@ test.describe('trình duyệt tiếng Nhật', () => {
     await page.goto('/cho');
     await expect(page.locator('html')).toHaveAttribute('lang', 'ja');
     const nav = page.getByRole('navigation', { name: 'メインナビゲーション' });
-    await expect(nav.getByRole('link')).toHaveText(['動画', 'マーケット', 'ライブ', 'Kiot', 'マイページ']);
+    await expect(nav.getByRole('link')).toHaveText(['ホーム', '動画', 'ライブ', 'Kiot', '受信箱']);
     await expect(page.getByTestId('page-slogan')).toHaveText('すべてのKiotがショールーム - 9MUAがつなぐ');
   });
 });
@@ -27,7 +27,7 @@ test('chọn English → giữ khi tải lại và sang trang Kiot; giá vẫn V
   await guest.getByTestId('lang-button').click();
   await guest.getByRole('menuitemradio', { name: 'English' }).click();
   const nav = guest.getByRole('navigation', { name: 'Main navigation' });
-  await expect(nav.getByRole('link')).toHaveText(['Video', 'Market', 'Live', 'Kiot', 'Me']);
+  await expect(nav.getByRole('link')).toHaveText(['Home', 'Video', 'Live', 'Kiot', 'Inbox']);
   await expect(guest.getByTestId('page-slogan')).toHaveText('See real - Buy real - Real people');
   await expect(guest.getByRole('heading', { name: 'Nobody is live right now' })).toBeVisible();
   await expect(guest.getByTestId('lang-button')).toHaveText('EN');

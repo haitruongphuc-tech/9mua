@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { signUpWithPassword } from './helpers/auth';
 import { promoteToAdmin, setUpAdminTotp, totpCode } from './helpers/admin';
 import { signUpBuyer } from './helpers/orders';
 
@@ -21,12 +22,12 @@ test('trang CEO: người thường nhận 404; admin bắt buộc cài và nh�
   // Tài khoản CEO mới: đăng ký, nâng quyền bằng CLI, lần đầu vào phải cài 2 lớp.
   const phone = `07${String(Date.now()).slice(-8)}`;
   const ceo = await browser.newPage();
-  await ceo.goto('/dang-ky?next=/');
-  await ceo.fill('#identifier', phone);
-  await ceo.fill('#displayName', 'CEO thử');
-  await ceo.fill('#password', 'mat-khau-ceo-e2e-123');
-  await ceo.click('button[type=submit]');
-  await ceo.waitForURL((u) => u.pathname === '/');
+  await signUpWithPassword(ceo, {
+    identifier: phone,
+    name: 'CEO thử',
+    password: 'mat-khau-ceo-e2e-123',
+    next: '/',
+  });
   promoteToAdmin(phone);
   const secret = await setUpAdminTotp(ceo);
   await expect(ceo.getByTestId('todo-box')).toBeVisible();
@@ -36,7 +37,7 @@ test('trang CEO: người thường nhận 404; admin bắt buộc cài và nh�
   await other.goto('/dang-nhap?next=/admin');
   await other.fill('#identifier', phone);
   await other.fill('#password', 'mat-khau-ceo-e2e-123');
-  await other.click('button[type=submit]');
+  await other.getByTestId('login-submit').click();
   await other.waitForURL((u) => u.pathname === '/admin/xac-thuc');
   await other.fill('#totp-code', '000000');
   await other.getByRole('button', { name: 'Xác nhận' }).click();
@@ -51,12 +52,12 @@ test('trang CEO: người thường nhận 404; admin bắt buộc cài và nh�
 test('tổng quan CEO: hộp "Cần xử lý" và số liệu hiện gọn trên màn hình 375px', async ({ browser }) => {
   const page = await browser.newPage({ viewport: { width: 375, height: 800 } });
   const phone = `07${String(Date.now()).slice(-8)}`;
-  await page.goto('/dang-ky?next=/');
-  await page.fill('#identifier', phone);
-  await page.fill('#displayName', 'CEO số liệu');
-  await page.fill('#password', 'mat-khau-ceo-e2e-123');
-  await page.click('button[type=submit]');
-  await page.waitForURL((u) => u.pathname === '/');
+  await signUpWithPassword(page, {
+    identifier: phone,
+    name: 'CEO số liệu',
+    password: 'mat-khau-ceo-e2e-123',
+    next: '/',
+  });
   promoteToAdmin(phone);
   await setUpAdminTotp(page);
   await expect(page.getByTestId('todo-box')).toBeVisible();

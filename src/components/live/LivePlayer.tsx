@@ -26,10 +26,12 @@ export function LivePlayer({
   view,
   active,
   loggedIn,
+  belowTabs = false,
 }: {
   view: LiveData;
   active: boolean;
   loggedIn: boolean;
+  belowTabs?: boolean; // nằm trong feed trang chủ: chừa chỗ cho tab và nút ＋ ở mép trên
 }) {
   const t = useT();
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -269,7 +271,9 @@ export function LivePlayer({
       />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black via-black/10 to-black/40" />
 
-      <div className="absolute left-3 right-3 top-3 flex items-center justify-between gap-2">
+      <div
+        className={`absolute left-3 right-3 flex items-center justify-between gap-2 ${belowTabs ? 'top-12' : 'top-3'}`}
+      >
         <a
           href={view.host.href}
           className="flex min-w-0 items-center gap-2 rounded-full bg-black/50 py-0.5 pl-0.5 pr-3"
@@ -305,7 +309,7 @@ export function LivePlayer({
 
       {pinned ? (
         <div
-          className="absolute left-3 top-16 flex w-[240px] items-center gap-2 rounded-[14px] bg-white p-2 text-black shadow-xl"
+          className={`absolute left-3 flex w-[240px] items-center gap-2 rounded-[14px] bg-white p-2 text-black shadow-xl ${belowTabs ? 'top-[6.25rem]' : 'top-16'}`}
           data-testid="live-pinned"
         >
           <a

@@ -22,6 +22,7 @@ export const ALERT_LABELS: Record<string, string> = {
   kiot_fee_rate: 'Tỷ giá USD lệch nhiều, giá Kiot chưa đổi',
   live_reported: 'Buổi live bị nhiều người báo cáo',
   xu_budget: 'Hết ngân sách thưởng xu tháng này',
+  messages_reported: 'Tin nhắn bị nhiều người báo cáo',
 };
 
 // Không bao giờ ném lỗi: cảnh báo hỏng không được làm hỏng luồng tiền đang chạy.

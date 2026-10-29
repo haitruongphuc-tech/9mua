@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { signUpWithPassword } from './helpers/auth';
 import { activateKiot, e2eDb } from './helpers/db';
 import { createProductViaUi } from './helpers/products';
 import { signUpWithKiot } from './helpers/seller';
@@ -28,12 +29,12 @@ test('mua từ 2 Kiot bằng 1 QR → trả (PayOS giả) → cả 2 đơn đã 
   await sellerB.close();
 
   const buyer = await browser.newPage();
-  await buyer.goto('/dang-ky?next=/');
-  await buyer.fill('#identifier', `07${String(Date.now()).slice(-8)}`);
-  await buyer.fill('#displayName', 'Người Mua 2 Kiot');
-  await buyer.fill('#password', 'mat-khau-mua-2');
-  await buyer.click('button[type=submit]');
-  await buyer.waitForURL((u) => u.pathname === '/');
+  await signUpWithPassword(buyer, {
+    identifier: `07${String(Date.now()).slice(-8)}`,
+    name: 'Người Mua 2 Kiot',
+    password: 'mat-khau-mua-2',
+    next: '/',
+  });
   await addFirstProduct(buyer, slugA);
   await addFirstProduct(buyer, slugB);
 
@@ -70,12 +71,12 @@ test('mua từ 2 Kiot bằng 1 QR → trả (PayOS giả) → cả 2 đơn đã 
 test('huỷ đơn trước khi trả: hàng trả về kho', async ({ page, browser }) => {
   const slug = await sellerWithProduct(page, 'Kiot Huỷ', '20000');
   const buyer = await browser.newPage();
-  await buyer.goto('/dang-ky?next=/');
-  await buyer.fill('#identifier', `08${String(Date.now()).slice(-8)}`);
-  await buyer.fill('#displayName', 'Người Huỷ');
-  await buyer.fill('#password', 'mat-khau-huy-don');
-  await buyer.click('button[type=submit]');
-  await buyer.waitForURL((u) => u.pathname === '/');
+  await signUpWithPassword(buyer, {
+    identifier: `08${String(Date.now()).slice(-8)}`,
+    name: 'Người Huỷ',
+    password: 'mat-khau-huy-don',
+    next: '/',
+  });
   await addFirstProduct(buyer, slug);
   await buyer.goto('/dat-hang');
   for (const [id, value] of [

@@ -4,7 +4,8 @@ import { logoutAction, logoutOtherDevicesAction } from '@/app/(auth)/actions';
 import { ClientMessages } from '@/i18n/ClientMessages';
 import { getT } from '@/i18n/server';
 import { requireUser } from '@/modules/identity';
-import { Card, EmailForm, PasswordForm, ProfileForm } from '../AccountForms';
+import { EmailOtpForm } from '@/components/auth/EmailOtpForm';
+import { Card, EmailForm, PasswordForm, ProfileForm, SetPasswordForm } from '../AccountForms';
 
 export const metadata: Metadata = { title: 'Cài đặt tài khoản', robots: { index: false } };
 
@@ -17,7 +18,7 @@ export default async function AccountSettingsPage({
   const user = await requireUser();
   const [params, t] = await Promise.all([searchParams, getT()]);
   return (
-    <ClientMessages prefixes={['me.settings.']}>
+    <ClientMessages prefixes={['me.settings.', 'auth.otp.', 'auth.addEmail.']}>
       <div>
         <div className="mx-auto flex w-full max-w-md flex-col gap-4 px-4 py-6">
           <Link href="/tai-khoan" className="text-[13px] font-bold text-white/60">
@@ -26,8 +27,17 @@ export default async function AccountSettingsPage({
           <h1 className="font-display text-[22px] font-black">{t('me.settings.title')}</h1>
           {user.mustChangePassword ? <PasswordForm forced /> : null}
           <ProfileForm displayName={user.displayName} />
-          <EmailForm email={user.email} />
+          {user.email ? (
+            <EmailForm email={user.email} />
+          ) : (
+            // Chưa có email (thường là tài khoản Zalo): thêm email bằng mã, không cần mật khẩu (SPEC-identity.md 29/10).
+            <Card title={t('me.settings.addEmail')} id="email">
+              <p className="text-[13px] text-white/60">{t('me.settings.addEmailHint')}</p>
+              <EmailOtpForm mode="add-email" />
+            </Card>
+          )}
           {user.mustChangePassword ? null : <PasswordForm forced={false} />}
+          <SetPasswordForm email={user.email} />
 
           <Card title={t('me.settings.devices')} id="thiet-bi">
             {params['da-dang-xuat-thiet-bi-khac'] ? (

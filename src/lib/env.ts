@@ -48,6 +48,11 @@ const schema = z
     // Đăng nhập Google (SPEC-identity.md bổ sung 27/10). Để trống thì ẩn nút Google.
     GOOGLE_CLIENT_ID: z.preprocess((v) => (v === '' ? undefined : v), z.string().optional()),
     GOOGLE_CLIENT_SECRET: z.preprocess((v) => (v === '' ? undefined : v), z.string().optional()),
+    // Đăng nhập Zalo, Facebook (SPEC-identity.md bổ sung 29/10). Để trống thì ẩn nút.
+    ZALO_APP_ID: z.preprocess((v) => (v === '' ? undefined : v), z.string().optional()),
+    ZALO_APP_SECRET: z.preprocess((v) => (v === '' ? undefined : v), z.string().optional()),
+    FACEBOOK_APP_ID: z.preprocess((v) => (v === '' ? undefined : v), z.string().optional()),
+    FACEBOOK_APP_SECRET: z.preprocess((v) => (v === '' ? undefined : v), z.string().optional()),
     // Live (SPEC-live.md): API nội bộ của MediaMTX (không mở ra Internet). Driver fake chỉ cho test/E2E.
     MEDIA_DRIVER: z.enum(['mediamtx', 'fake']).optional(),
     MEDIAMTX_API_URL: z.string().default('http://mediamtx:9997'),
@@ -144,6 +149,17 @@ const schema = z
         message: 'Đăng nhập Google cần đủ cả GOOGLE_CLIENT_ID và GOOGLE_CLIENT_SECRET',
       });
     }
+    for (const [id, secret, label] of [
+      ['ZALO_APP_ID', 'ZALO_APP_SECRET', 'Zalo'],
+      ['FACEBOOK_APP_ID', 'FACEBOOK_APP_SECRET', 'Facebook'],
+    ] as const) {
+      if (Boolean(v[id]) !== Boolean(v[secret]))
+        ctx.addIssue({
+          code: 'custom',
+          path: [v[id] ? secret : id],
+          message: `Đăng nhập ${label} cần đủ cả ${id} và ${secret}`,
+        });
+    }
     if (driver === 'smtp') {
       for (const key of ['SMTP_HOST', 'SMTP_USER', 'SMTP_PASS'] as const) {
         if (!v[key])
@@ -206,4 +222,9 @@ let cached: Env | undefined;
 export function env(): Env {
   cached ??= parseEnv(process.env);
   return cached;
+}
+
+// Chỉ cho test: đọc lại biến môi trường sau vi.stubEnv.
+export function resetEnvCache(): void {
+  cached = undefined;
 }

@@ -3,6 +3,7 @@ import { now } from '@/lib/clock';
 import { decryptSecret, encryptSecret } from '@/lib/crypto';
 import { db } from '@/lib/db';
 import { env } from '@/lib/env';
+import { linkWithTicket, sealLinkTicket } from './link';
 import { hashPassword } from './password';
 
 // Đăng nhập Google (SPEC-identity.md, bổ sung 27/10/2026): OpenID Connect, luồng authorization code + PKCE,
@@ -181,9 +182,7 @@ export async function completeGoogleLogin(claims: GoogleClaims): Promise<GoogleL
   const existing = await db.user.findUnique({ where: { email: claims.email } });
   if (existing) {
     if (existing.role === 'admin') return { kind: 'error', error: 'ADMIN' };
-    const ticket = encryptSecret(
-      JSON.stringify({ sub: claims.sub, email: claims.email, exp: now().getTime() + FLOW_TTL_MS }),
-    );
+    const ticket = sealLinkTicket({ provider: 'google', subject: claims.sub, email: claims.email });
     return { kind: 'link-required', email: claims.email, ticket };
   }
   const user = await db.user.create({
@@ -197,18 +196,6 @@ export async function completeGoogleLogin(claims: GoogleClaims): Promise<GoogleL
   return { kind: 'login', userId: user.id };
 }
 
-// Sau khi đăng nhập mật khẩu đúng: liên kết Google nếu vé còn hạn và đúng email của tài khoản.
-export async function linkGoogleWithTicket(userId: string, ticket: string | undefined): Promise<boolean> {
-  if (!ticket) return false;
-  try {
-    const t = JSON.parse(decryptSecret(ticket)) as { sub: string; email: string; exp: number };
-    if (t.exp < now().getTime()) return false;
-    const { count } = await db.user.updateMany({
-      where: { id: userId, email: t.email, googleSub: null, role: { not: 'admin' } },
-      data: { googleSub: t.sub },
-    });
-    return count === 1;
-  } catch {
-    return false;
-  }
-}
+// Sau khi đăng nhập mật khẩu đúng: liên kết nếu vé còn hạn và đúng email của tài khoản (giữ tên cũ trong hợp đồng;
+// vé giờ dùng chung cho Google và Facebook).
+export const linkGoogleWithTicket = linkWithTicket;

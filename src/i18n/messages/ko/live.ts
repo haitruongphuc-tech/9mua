@@ -8,6 +8,7 @@ export const live: LiveMessages = {
   'live.stories': '24시간 스토리',
   'live.addStory': '+ 스토리',
   'live.storyBy': '{name}님의 스토리',
+  'live.storyLive': '{name}님 라이브 중',
   'live.closeStory': '스토리 닫기',
   'live.go': '라이브 시작',
   'live.badge': 'LIVE',

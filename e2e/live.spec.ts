@@ -48,11 +48,11 @@ async function syncMedia(request: import('@playwright/test').APIRequestContext) 
 test('phát live → xem, chat, ghim sản phẩm, thêm vào giỏ → kết thúc', async ({ page, browser }) => {
   test.setTimeout(120_000);
   await fakeCamera(page);
-  const { phone, slug } = await signUpWithKiot(page, 'Kiot Live');
+  const { email, slug } = await signUpWithKiot(page, 'Kiot Live');
   await activateKiot(slug);
   await createProductViaUi(page, { name: 'Mực một nắng live', price: '320000' });
   // Tài khoản phải tạo ít nhất 3 ngày mới được phát live (SPEC-live.md mục 1).
-  const host = await e2eDb.user.findFirstOrThrow({ where: { phone: { endsWith: phone.slice(1) } } });
+  const host = await e2eDb.user.findFirstOrThrow({ where: { email } });
   await e2eDb.user.update({
     where: { id: host.id },
     data: { createdAt: new Date(Date.now() - 5 * 86_400_000) },
@@ -75,6 +75,13 @@ test('phát live → xem, chat, ghim sản phẩm, thêm vào giỏ → kết th
   const guest = await browser.newPage();
   await guest.goto(`http://${slug}.9mua.test:3100/`);
   await expect(guest.getByTestId('kiot-live-badge')).toHaveAttribute('href', new RegExp(`/live/${live.id}$`));
+  // Trang chủ gộp (SPEC-creator.md bổ sung 29/10): hàng tròn có người đang live, feed có chèn buổi live.
+  await guest.goto('http://9mua.test:3100/');
+  await expect(guest.locator(`[data-testid="story-live"][href="/live/${live.id}"]`)).toBeVisible();
+  await expect(guest.getByTestId('feed-live').first()).toBeAttached();
+  // Menu Live chỉ còn buổi live, không còn hàng Story.
+  await guest.goto('http://9mua.test:3100/live');
+  await expect(guest.getByTestId('stories')).toHaveCount(0);
   await guest.close();
 
   // Người xem (điện thoại giả lập) vào Live.

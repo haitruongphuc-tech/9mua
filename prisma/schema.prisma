@@ -34,6 +34,36 @@ model User {
   kiot               Kiot?
   cartItems          CartItem[]
   address            BuyerAddress?
+  authIdentities     AuthIdentity[]
+}
+
+// Tài khoản Zalo/Facebook đã liên kết (SPEC-identity.md bổ sung 29/10). Google dùng cột googleSub có sẵn.
+model AuthIdentity {
+  provider  String // zalo | facebook
+  subject   String // mã tài khoản bên Zalo/Facebook
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([provider, subject])
+  @@unique([userId, provider])
+}
+
+// Mã 6 số gửi qua email (SPEC-identity.md bổ sung 29/10): đăng nhập/đăng ký, liên kết Google/Facebook, thêm email.
+// Chỉ lưu mã đã băm HMAC; IP cũng băm.
+model EmailOtp {
+  id        String    @id @default(cuid(2))
+  email     String
+  purpose   String // login | link | add-email
+  codeHash  String
+  attempts  Int       @default(0)
+  ipHash    String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime
+
+  @@index([email, createdAt])
+  @@index([ipHash, createdAt])
 }
 
 model PasswordResetToken {
@@ -973,4 +1003,99 @@ model XuEntry {
   @@unique([userId, rewardDay])
   @@index([userId, createdAt])
   @@index([createdAt])
+}
+
+// Hộp thư (SPEC-messages.md, CEO duyệt 29/10). Trò chuyện 1-1: userAId < userBId (theo thứ tự chữ) để mỗi cặp 1 dòng.
+model Conversation {
+  id            String    @id @default(cuid(2))
+  userAId       String
+  userBId       String
+  status        String // request (người lạ, chờ chấp nhận) | active
+  requestedById String?
+  acceptedAt    DateTime?
+  lastMessageAt DateTime
+  createdAt     DateTime
+
+  @@unique([userAId, userBId])
+  @@index([userBId])
+}
+
+model ConversationMember {
+  conversationId String
+  userId         String
+  lastReadAt     DateTime?
+  hiddenAt       DateTime? // "Xoá cuộc trò chuyện" chỉ ẩn phía người bấm; tin mới đến thì hiện lại
+
+  @@id([conversationId, userId])
+  @@index([userId])
+}
+
+model Message {
+  id             String    @id @default(cuid(2))
+  conversationId String
+  senderId       String
+  text           String?
+  imageId        String?
+  productId      String?
+  createdAt      DateTime
+  hiddenAt       DateTime? // CEO ẩn tin vi phạm
+  hiddenReason   String?
+
+  @@index([conversationId, createdAt])
+  @@index([senderId, createdAt])
+}
+
+// Ảnh trong tin nhắn: file riêng tư (PRIVATE_DIR), chỉ thành viên cuộc trò chuyện (và CEO khi xem báo cáo) mở được.
+model MessageImage {
+  id        String   @id @default(cuid(2))
+  ownerId   String
+  fileKey   String
+  width     Int
+  height    Int
+  createdAt DateTime
+
+  @@index([ownerId, createdAt])
+}
+
+model MessageBlock {
+  blockerId String
+  blockedId String
+  createdAt DateTime
+
+  @@id([blockerId, blockedId])
+  @@index([blockedId])
+}
+
+model MessageReport {
+  id             String    @id @default(cuid(2))
+  conversationId String
+  reporterId     String
+  reportedUserId String
+  reason         String
+  createdAt      DateTime
+  handledAt      DateTime?
+
+  @@unique([conversationId, reporterId])
+  @@index([reportedUserId, createdAt])
+  @@index([handledAt, createdAt])
+}
+
+model MessageBan {
+  id        String    @id @default(cuid(2))
+  userId    String
+  until     DateTime? // trống = vĩnh viễn
+  reason    String
+  byAdminId String? // trống = hệ thống tự cấm (3 báo cáo trong 7 ngày)
+  createdAt DateTime
+
+  @@index([userId, createdAt])
+}
+
+// Đếm cuộc trò chuyện mới mỗi ngày (giờ Việt Nam) của tài khoản Free.
+model NewConversationDaily {
+  userId String
+  day    String
+  count  Int    @default(0)
+
+  @@id([userId, day])
 }

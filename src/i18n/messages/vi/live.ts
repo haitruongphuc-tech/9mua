@@ -6,6 +6,7 @@ export const live = {
   'live.stories': 'Story 24 giờ',
   'live.addStory': '+ Story',
   'live.storyBy': 'Story của {name}',
+  'live.storyLive': '{name} đang live',
   'live.closeStory': 'Đóng Story',
   'live.go': 'Phát live',
   'live.badge': 'LIVE',

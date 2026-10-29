@@ -95,6 +95,17 @@ export async function getFeed(
   }
   for (const id of freshQueue) if (ids.length < limit && !ids.includes(id)) ids.push(id);
 
+  // Hết video chưa xem thì chiếu lại video đã xem trong 24 giờ, theo điểm (SPEC-creator.md bổ sung 29/10): feed của
+  // người đã đăng nhập không bao giờ trống khi web còn video.
+  if (viewer.userId && ids.length < limit) {
+    const taken = ids.length ? Prisma.sql`AND NOT (v.id = ANY(${ids}))` : Prisma.empty;
+    const seen = await db.$queryRaw<Row[]>`
+      SELECT v.id FROM "Video" v JOIN "User" u ON u.id = v."authorId"
+      WHERE ${VISIBLE} ${notServed} ${taken}
+      ORDER BY v.score DESC, v."readyAt" DESC LIMIT ${limit - ids.length}`;
+    ids.push(...seen.map((r) => r.id));
+  }
+
   // Trang đầu: video CEO ghim lên đầu (SPEC-admin.md bổ sung 27/10), kể cả video đã xem.
   if (!served.length && !options.first) {
     const pinned = await activePinIds('video');

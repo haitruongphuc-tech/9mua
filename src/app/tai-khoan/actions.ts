@@ -1,12 +1,15 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { headers } from 'next/headers';
 import { getT } from '@/i18n/server';
 import {
   changeEmail,
   changePassword,
   getCurrentSessionId,
+  requestEmailOtp,
   requireUser,
+  setPasswordWithOtp,
   updateProfile,
 } from '@/modules/identity';
 
@@ -48,4 +51,37 @@ export async function changePasswordAction(_p: FormState, form: FormData): Promi
   }
   revalidatePath('/tai-khoan', 'layout');
   return { ok: t('me.settings.passwordSaved') };
+}
+
+// Đặt mật khẩu mới không cần mật khẩu cũ (CEO chốt 29/10): mã gửi về email của chính tài khoản, không cho nhập email khác.
+export async function sendSetPasswordCodeAction(): Promise<FormState> {
+  const user = await requireUser();
+  const t = await getT();
+  if (!user.email) return { error: t('me.settings.setPasswordNoEmail') };
+  const r = await requestEmailOtp({
+    email: user.email,
+    purpose: 'set-password',
+    ip: (await headers()).get('x-real-ip') ?? '0.0.0.0',
+  });
+  return r.ok
+    ? { ok: t('me.settings.codeSent', { email: user.email }) }
+    : { error: t(`auth.otp.err.${r.error}`) };
+}
+
+export async function setPasswordAction(_p: FormState, form: FormData): Promise<FormState> {
+  const user = await requireUser();
+  const t = await getT();
+  const newPassword = String(form.get('newPassword') ?? '');
+  if (newPassword !== String(form.get('confirm') ?? '')) return { error: t('me.settings.mismatch') };
+  const r = await setPasswordWithOtp(user.id, (await getCurrentSessionId())!, {
+    code: String(form.get('code') ?? ''),
+    newPassword,
+  });
+  if (r.ok) {
+    revalidatePath('/tai-khoan', 'layout');
+    return { ok: t('me.settings.setPasswordSaved') };
+  }
+  if (r.error === 'INVALID_PASSWORD') return { error: t('me.settings.passwordLength') };
+  if (r.error === 'NO_EMAIL') return { error: t('me.settings.setPasswordNoEmail') };
+  return { error: t(`auth.otp.err.${r.error}`) };
 }

@@ -7,15 +7,18 @@ export function SubmitButton({
   children,
   pendingText,
   tone = 'v4',
+  testId,
 }: {
   children: React.ReactNode;
   pendingText: string;
   tone?: 'light' | 'v4';
+  testId?: string;
 }) {
   const { pending } = useFormStatus();
   return (
     <button
       type="submit"
+      data-testid={testId}
       disabled={pending}
       className={
         tone === 'v4'

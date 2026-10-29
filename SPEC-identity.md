@@ -244,3 +244,65 @@ export async function register(raw: unknown): Promise<RegisterResult> {
 - Bấm "Để sau" hoặc ✕ thì **30 ngày** không hiện lại. Không hiện trên trang đăng nhập/đăng ký, admin, thanh toán.
 - Đăng ký trong popup dùng đúng luồng đăng ký hiện có (cùng kiểm tra, cùng giới hạn).
 - Rủi ro đã báo CEO: Google có thể hạ hạng trang có popup che nội dung trên điện thoại. Popup chỉ hiện 1 lần và đóng được ngay.
+
+## Bổ sung 29/10/2026 — Đăng ký bằng Zalo, Google, Facebook, Email mã OTP (CEO duyệt qua chat)
+
+### Màn đăng ký, đăng nhập, popup
+- **Đăng ký** (trang `/dang-ky` và popup) chỉ còn 4 nút: **Zalo**, **Google**, **Facebook**, **Email** (nhận mã). Bỏ form
+  đăng ký SĐT + mật khẩu khỏi giao diện. Nút nào chưa cấu hình khoá thì ẩn (Email luôn có).
+- **Đăng nhập** (`/dang-nhap`): 4 nút trên, và form SĐT/email + mật khẩu cho tài khoản cũ và admin.
+- **Nhớ đăng nhập 30 ngày**: giữ như hiện có (phiên 30 ngày, tự gia hạn khi còn dùng), áp dụng cho mọi cách đăng nhập.
+- Tài khoản **admin** chỉ đăng nhập bằng mật khẩu + xác thực 2 lớp; Zalo, Google, Facebook, mã email đều bị từ chối.
+- Tài khoản bị khoá: mọi cách đăng nhập đều báo "Tài khoản đã bị khoá".
+
+### Email mã OTP
+- Nhập email → 9MUA gửi **mã 6 số** (email tiếng Việt, gửi qua SMTP đang dùng). Nhập đúng mã thì vào luôn, không cần mật
+  khẩu. Email chưa có tài khoản thì tạo tài khoản mới, tên tạm là phần trước `@` (đổi được ở Cài đặt), mật khẩu ngẫu nhiên.
+- Mã **hết hạn sau 10 phút**, dùng 1 lần, **sai 5 lần** thì mã hỏng phải xin mã mới.
+- Chống lạm dụng: gửi lại sau **60 giây**; mỗi email tối đa **5 mã/giờ**; mỗi IP tối đa **20 mã/giờ**. Màn hình luôn báo
+  "Đã gửi mã nếu email hợp lệ" để không lộ email nào đã có tài khoản.
+- Mã lưu dạng băm HMAC (khoá `APP_ENCRYPTION_KEY`), không bao giờ ghi log mã.
+- Mã email còn dùng để: (a) **liên kết Google/Facebook** khi email trùng tài khoản có sẵn (thay cho đăng nhập mật khẩu,
+  vì tài khoản tạo bằng mã không có mật khẩu); (b) **thêm email** vào tài khoản chưa có email.
+
+### Zalo
+- Zalo Social API OAuth v4 có **PKCE**: chuyển sang `https://oauth.zaloapp.com/v4/permission` (app_id, redirect_uri,
+  state, code_challenge S256); quay về `https://9mua.com/api/auth/zalo/callback`; máy chủ đổi mã ở
+  `https://oauth.zaloapp.com/v4/access_token` (khoá bí mật gửi trong header `secret_key`, kèm `code_verifier`), rồi lấy
+  `id`, `name` ở `https://graph.zalo.me/v2.0/me`. Không thêm thư viện npm. Token Zalo không lưu, không ghi log.
+- Zalo **không cho biết email/SĐT**: tài khoản tạo mới chỉ có tên. Đã liên kết thì đăng nhập luôn.
+
+### Facebook
+- Facebook Login (Graph API **v25.0**): hộp thoại `https://www.facebook.com/v25.0/dialog/oauth` (scope `public_profile,email`,
+  `state`), quay về `https://9mua.com/api/auth/facebook/callback`, máy chủ đổi mã ở `graph.facebook.com/v25.0/oauth/access_token`
+  rồi gọi `/me?fields=id,name,email` kèm `appsecret_proof`. Token không lưu, không ghi log.
+- Email Facebook **trùng tài khoản có sẵn** thì không tự liên kết: phải đăng nhập mật khẩu **hoặc** nhập mã gửi về email đó
+  (trong 10 phút) rồi mới liên kết. Facebook không cho email thì tạo tài khoản chỉ có tên.
+
+### Google (sửa bổ sung 27/10)
+- Email Google trùng tài khoản có sẵn: liên kết sau khi đăng nhập mật khẩu **hoặc** nhập mã gửi về email đó.
+
+### Mở Kiot cần email hoặc SĐT
+- Tài khoản không có email và SĐT (thường là tài khoản Zalo/Facebook) phải **thêm email** (xác nhận bằng mã) trước khi mở
+  Kiot, để nhận thông báo đơn hàng, hoá đơn và khôi phục tài khoản.
+
+### Đặt mật khẩu trong trang cá nhân (CEO chốt 29/10)
+- Tài khoản tạo bằng Zalo/Google/Facebook/mã email có mật khẩu ngẫu nhiên, nên không tự làm được các việc cần mật khẩu
+  (đổi tài khoản nhận tiền, đổi email, đổi mật khẩu). Cài đặt tài khoản có mục **"Đặt mật khẩu mới"**: không cần mật khẩu
+  cũ, xác nhận bằng **mã gửi về email của chính tài khoản** (không cho nhập email khác), đặt xong thì đăng xuất các thiết
+  bị khác như khi đổi mật khẩu. Admin vẫn đổi mật khẩu bằng mật khẩu cũ.
+- Ô mật khẩu ở tài khoản nhận tiền, đổi email, đổi mật khẩu có dòng gợi ý dẫn tới mục này.
+- Tài khoản chưa có email: Cài đặt tài khoản cho **thêm email bằng mã** (thay vì bằng mật khẩu).
+
+### Dữ liệu, cấu hình, hợp đồng
+- Bảng mới (không đổi bảng cũ): `EmailOtp` (email, mục đích, mã băm, số lần sai, hết hạn, đã dùng, IP băm),
+  `AuthIdentity` (nhà cung cấp `zalo` | `facebook`, mã tài khoản bên đó, userId; mỗi tài khoản 9MUA tối đa 1 Zalo, 1 Facebook).
+  Google vẫn dùng cột `googleSub` có sẵn.
+- `.env`: `ZALO_APP_ID`, `ZALO_APP_SECRET`, `FACEBOOK_APP_ID`, `FACEBOOK_APP_SECRET`. Thiếu thì ẩn nút. E2E dùng màn hình giả
+  như Google (chỉ khi `TEST_MODE`).
+- `index.ts` thêm (không đổi hàm cũ): `requestEmailOtp`, `loginWithEmailOtp`, `addEmailWithOtp`, `setPasswordWithOtp`, `linkWithOtp`,
+  `linkTicketEmail`, `hasContact`; luồng Zalo/Facebook `OAUTH_PROVIDERS`, `oauthMode`, `isOauthProvider`, `startOauthFlow`,
+  `openOauthFlow`, `profileFromCode`, `completeOauthLogin`, `sealFakeOauthCode`; vé liên kết dùng chung `linkWithTicket`,
+  `openLinkTicket` (`linkGoogleWithTicket` giữ tên cũ, giờ dùng chung).
+- Giới hạn mã theo IP chỉ tính IP do Nginx gửi (`X-Real-IP`); không có IP thật thì chỉ áp giới hạn theo email.
+- Chính sách bảo mật: thêm dữ liệu nhận từ Zalo/Facebook (mã tài khoản, tên, email nếu có).

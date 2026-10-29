@@ -38,7 +38,7 @@ export function LoginForm({ next }: { next: string }) {
         autoComplete="current-password"
         required
       />
-      <SubmitButton tone="v4" pendingText={t('auth.login.pending')}>
+      <SubmitButton tone="v4" pendingText={t('auth.login.pending')} testId="login-submit">
         {t('auth.login.submit')}
       </SubmitButton>
       <div className="flex justify-between text-[13px]">

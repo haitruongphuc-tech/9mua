@@ -1,14 +1,8 @@
 import { expect, test, type Page } from '@playwright/test';
+import { signUpByEmail } from './helpers/auth';
 
 async function signUp(page: Page, next: string) {
-  const phone = `03${String(Date.now()).slice(-8)}`;
-  await page.goto(`/dang-ky?next=${encodeURIComponent(next)}`);
-  await page.fill('#identifier', phone);
-  await page.fill('#displayName', 'Chủ Kiot E2E');
-  await page.fill('#password', 'mat-khau-kiot-e2e');
-  await page.click('button[type=submit]');
-  await page.waitForURL((u) => u.pathname === next);
-  return phone;
+  return signUpByEmail(page, { name: 'Chủ Kiot E2E', next });
 }
 
 test('tạo Kiot nháp: gợi ý địa chỉ, kiểm tra trùng/cấm, sửa địa chỉ khi còn nháp', async ({ page }) => {

@@ -7,6 +7,7 @@ export const live: LiveMessages = {
   'live.stories': '24時間ストーリー',
   'live.addStory': '+ ストーリー',
   'live.storyBy': '{name}さんのストーリー',
+  'live.storyLive': '{name}さんがライブ中',
   'live.closeStory': 'ストーリーを閉じる',
   'live.go': 'ライブ配信',
   'live.badge': 'LIVE',

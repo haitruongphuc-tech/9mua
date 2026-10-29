@@ -1,16 +1,18 @@
 import { execFileSync } from 'node:child_process';
 import { expect, test, type Page } from '@playwright/test';
+import { codeFromMail, signUpWithPassword } from './helpers/auth';
 
 const stamp = String(Date.now()).slice(-8);
 const DB = process.env.DATABASE_URL_E2E ?? 'postgresql://ninemua:ninemua@localhost:5432/ninemua_dev';
 
+// Tài khoản cũ có mật khẩu (đổi email, đổi mật khẩu cần mật khẩu hiện tại).
 async function signUp(page: Page, phone: string, password: string) {
-  await page.goto('/dang-ky?next=/tai-khoan');
-  await page.fill('#identifier', phone);
-  await page.fill('#displayName', 'Khách Tài Khoản');
-  await page.fill('#password', password);
-  await page.click('button[type=submit]');
-  await page.waitForURL((u) => u.pathname === '/tai-khoan');
+  await signUpWithPassword(page, {
+    identifier: phone,
+    name: 'Khách Tài Khoản',
+    password,
+    next: '/tai-khoan',
+  });
 }
 
 test('cài đặt tài khoản: đổi tên, thêm email, đổi mật khẩu', async ({ page }) => {
@@ -27,13 +29,12 @@ test('cài đặt tài khoản: đổi tên, thêm email, đổi mật khẩu', 
   await expect(page.getByTestId('profile-ok')).toBeVisible();
   await expect(page.getByTestId('user-menu')).toHaveAccessibleName('Tôi (Tên Mới E2E)');
 
-  await page.fill('#email-new', `acc-${stamp}@9mua.test`);
-  await page.fill('#email-password', 'sai-mat-khau');
-  await page.locator('#email button[type=submit]').click();
-  await expect(page.getByTestId('email-error')).toHaveText('Mật khẩu không đúng.');
-  await page.fill('#email-password', 'mat-khau-1-e2e');
-  await page.locator('#email button[type=submit]').click();
-  await expect(page.getByTestId('email-ok')).toBeVisible();
+  // Tài khoản chưa có email: thêm email bằng mã gửi về email đó (không cần mật khẩu).
+  await page.getByTestId('otp-email').fill(`acc-${stamp}@9mua.test`);
+  await page.getByTestId('otp-send').click();
+  await page.getByTestId('otp-code').fill(await codeFromMail(`acc-${stamp}@9mua.test`));
+  await page.getByTestId('otp-verify').click();
+  await expect(page.getByTestId('otp-done')).toBeVisible();
 
   await page.fill('#pw-old', 'mat-khau-1-e2e');
   await page.fill('#pw-new', 'mat-khau-2-e2e');
@@ -45,7 +46,7 @@ test('cài đặt tài khoản: đổi tên, thêm email, đổi mật khẩu', 
   await page.goto('/dang-nhap');
   await page.fill('#identifier', `acc-${stamp}@9mua.test`);
   await page.fill('#password', 'mat-khau-2-e2e');
-  await page.click('button[type=submit]');
+  await page.getByTestId('login-submit').click();
   await expect(page.getByTestId('user-menu')).toHaveAccessibleName('Tôi (Tên Mới E2E)');
 });
 

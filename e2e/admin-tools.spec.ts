@@ -1,4 +1,5 @@
 import { expect, test, type Browser } from '@playwright/test';
+import { signUpWithPassword } from './helpers/auth';
 import { promoteToAdmin, setUpAdminTotp, totpCode } from './helpers/admin';
 import { activateKiot, e2eDb } from './helpers/db';
 import { createProductViaUi } from './helpers/products';
@@ -9,12 +10,7 @@ const PASSWORD = 'mat-khau-ceo-e2e-123';
 async function newCeo(browser: Browser) {
   const phone = `07${String(Date.now()).slice(-8)}`;
   const page = await browser.newPage();
-  await page.goto('/dang-ky?next=/');
-  await page.fill('#identifier', phone);
-  await page.fill('#displayName', 'CEO công cụ');
-  await page.fill('#password', PASSWORD);
-  await page.click('button[type=submit]');
-  await page.waitForURL((u) => u.pathname === '/');
+  await signUpWithPassword(page, { identifier: phone, name: 'CEO công cụ', password: PASSWORD, next: '/' });
   promoteToAdmin(phone);
   const secret = await setUpAdminTotp(page);
   page.on('dialog', (d) => d.accept());

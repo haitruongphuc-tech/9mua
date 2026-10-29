@@ -14,13 +14,14 @@ export const metadata: Metadata = {
   alternates: { canonical: '/video' },
 };
 
+// Menu Video (SPEC-creator.md bổ sung 29/10): chỉ video, cùng giao diện feed trang chủ, không che thanh dưới.
 export default async function VideoFeedPage({ searchParams }: { searchParams: Promise<{ v?: string }> }) {
   const user = await getCurrentUser();
   const first = (await searchParams).v;
   const feed = await loadFeed({ userId: user?.id, anonId: await readAnonId() }, { first });
   return (
     <ClientMessages prefixes={['feed.']}>
-      <VideoFeed initial={feed.items} nextCursor={feed.nextCursor} appUrl={env().APP_URL} />
+      <VideoFeed variant="home" initial={feed.items} nextCursor={feed.nextCursor} appUrl={env().APP_URL} />
     </ClientMessages>
   );
 }

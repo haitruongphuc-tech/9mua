@@ -2,35 +2,26 @@ import { Radio } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { LiveFeed } from '@/components/live/LiveFeed';
-import { StoriesRow } from '@/components/live/StoriesRow';
 import { ClientMessages } from '@/i18n/ClientMessages';
 import { getT } from '@/i18n/server';
 import { readAnonId } from '@/lib/anon-id';
-import { listStories } from '@/modules/creator';
 import { getCurrentUser } from '@/modules/identity';
 import { getLiveForViewer, listLiveNow, type LiveView } from '@/modules/live';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Live', robots: { index: false } };
 
-// Trang Live (V4 trang 03): Story 24 giờ ở đầu, slogan, khung xem live vuốt dọc; bên cạnh là nút Phát live và danh sách
-// buổi đang live (SPEC-live.md mục 4).
+// Menu Live (V4 trang 03; SPEC-creator.md bổ sung 29/10): chỉ các buổi đang phát. Slogan, khung xem live vuốt dọc;
+// bên cạnh là nút Phát live và danh sách buổi đang live (SPEC-live.md mục 4). Story chuyển lên trang chủ.
 export default async function LivePage() {
-  const [t, stories, user, anonId, cards] = await Promise.all([
-    getT(),
-    listStories(),
-    getCurrentUser(),
-    readAnonId(),
-    listLiveNow(),
-  ]);
+  const [t, user, anonId, cards] = await Promise.all([getT(), getCurrentUser(), readAnonId(), listLiveNow()]);
   const views = (
     await Promise.all(cards.map((c) => getLiveForViewer(c.id, { userId: user?.id, anonId })))
   ).filter((v): v is Extract<LiveView, { kind: 'live' }> => v?.kind === 'live');
   return (
     <div className="mx-auto max-w-[1100px] px-3 py-4 md:px-6">
       <ClientMessages prefixes={['live.', 'shop.cart.']}>
-        <StoriesRow groups={stories} />
-        <p className="mt-3 text-center font-display text-[18px] font-black md:text-[22px]">
+        <p className="text-center font-display text-[18px] font-black md:text-[22px]">
           {t('common.slogan.live')}
         </p>
         <div className="mt-3 grid gap-4 md:grid-cols-[1.4fr_0.6fr]">

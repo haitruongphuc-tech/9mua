@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { codeFromMail, uniqueEmail } from './helpers/auth';
 import { activateKiot } from './helpers/db';
 import { createProductViaUi } from './helpers/products';
 import { signUpWithKiot } from './helpers/seller';
@@ -26,12 +27,14 @@ test('khách chưa đăng nhập bấm Thêm vào giỏ → đăng ký → món 
   // Chưa đăng nhập: chuyển sang tên miền chính để đăng nhập/đăng ký rồi tự thêm món.
   await buyer.waitForURL(/9mua\.test:\d+\/dang-nhap\?next=/);
   await buyer.getByRole('link', { name: 'Tạo tài khoản' }).click();
-  // Chờ sang hẳn trang đăng ký: trang đăng nhập cũng có ô #identifier.
+  // Chờ sang hẳn trang đăng ký (đăng ký bằng mã email).
   await buyer.waitForURL((u) => u.pathname === '/dang-ky');
-  await buyer.fill('#identifier', `05${String(Date.now()).slice(-8)}`);
-  await buyer.fill('#displayName', 'Người Mua');
-  await buyer.fill('#password', 'mat-khau-nguoi-mua');
-  await buyer.click('button[type=submit]');
+  const email = uniqueEmail('mua');
+  await buyer.getByTestId('otp-name').fill('Người Mua');
+  await buyer.getByTestId('otp-email').fill(email);
+  await buyer.getByTestId('otp-send').click();
+  await buyer.getByTestId('otp-code').fill(await codeFromMail(email));
+  await buyer.getByTestId('otp-verify').click();
   await buyer.waitForURL((u) => u.pathname === '/gio-hang');
 
   await expect(buyer.getByTestId('cart-line')).toHaveCount(1);

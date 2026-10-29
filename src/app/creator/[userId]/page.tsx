@@ -1,3 +1,4 @@
+import { MessageButton } from '@/components/inbox/MessageButton';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -86,6 +87,12 @@ export default async function CreatorPage({ params }: { params: Promise<{ userId
             loginHref={`/dang-nhap?next=${encodeURIComponent(`/creator/${p.id}`)}`}
           >
             <div className="mt-3 flex flex-wrap items-center gap-2">
+              {isSelf ? null : (
+                <MessageButton
+                  toUserId={p.id}
+                  loginHref={`/dang-nhap?next=${encodeURIComponent(`/creator/${p.id}`)}`}
+                />
+              )}
               <SocialLinks links={links} />
               {isSelf ? (
                 <Link

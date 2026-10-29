@@ -1,11 +1,19 @@
 'use client';
 
-import { useActionState, useEffect } from 'react';
+import { useActionState, useEffect, useState, useTransition } from 'react';
 import { ME_CHANGED_EVENT } from '@/components/MeProvider';
+import { NoPasswordHint } from '@/components/ui/NoPasswordHint';
 import { SubmitButton } from '@/components/ui/SubmitButton';
 import { TextField } from '@/components/ui/TextField';
 import { useT } from '@/i18n/client';
-import { changeEmailAction, changePasswordAction, updateProfileAction, type FormState } from './actions';
+import {
+  changeEmailAction,
+  changePasswordAction,
+  sendSetPasswordCodeAction,
+  setPasswordAction,
+  updateProfileAction,
+  type FormState,
+} from './actions';
 
 function Feedback({ state, id }: { state: FormState; id: string }) {
   if (state.error)
@@ -97,6 +105,7 @@ export function EmailForm({ email }: { email: string | null }) {
           autoComplete="current-password"
           required
         />
+        <NoPasswordHint />
         <SubmitButton tone="v4" pendingText={t('me.settings.saving')}>
           {t('me.settings.saveEmail')}
         </SubmitButton>
@@ -126,6 +135,7 @@ export function PasswordForm({ forced }: { forced: boolean }) {
           autoComplete="current-password"
           required
         />
+        <NoPasswordHint />
         <TextField
           tone="dark"
           label={t('me.settings.newPassword')}
@@ -149,6 +159,70 @@ export function PasswordForm({ forced }: { forced: boolean }) {
           {t('me.settings.password')}
         </SubmitButton>
       </form>
+    </Card>
+  );
+}
+
+// Đặt mật khẩu mới bằng mã gửi về email của tài khoản (không cần mật khẩu cũ) — CEO chốt 29/10.
+export function SetPasswordForm({ email }: { email: string | null }) {
+  const t = useT();
+  const [sent, setSent] = useState<FormState | null>(null);
+  const [sending, startSending] = useTransition();
+  const [state, action] = useActionState<FormState, FormData>(setPasswordAction, {});
+  return (
+    <Card title={t('me.settings.setPassword')} id="dat-mat-khau">
+      {email ? (
+        <>
+          <p className="text-[13px] text-white/60">{t('me.settings.setPasswordLead', { email })}</p>
+          {sent ? <Feedback state={sent} id="set-password-code" /> : null}
+          <button
+            type="button"
+            disabled={sending}
+            onClick={() => startSending(async () => setSent(await sendSetPasswordCodeAction()))}
+            className="h-11 rounded-full bg-white/10 text-[14px] font-black disabled:opacity-60"
+            data-testid="set-password-send"
+          >
+            {t('me.settings.sendCode')}
+          </button>
+          <form action={action} className="flex flex-col gap-4">
+            <Feedback state={state} id="set-password" />
+            <TextField
+              tone="dark"
+              label={t('me.settings.code')}
+              name="code"
+              id="setpw-code"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              maxLength={6}
+              required
+            />
+            <TextField
+              tone="dark"
+              label={t('me.settings.newPassword')}
+              hint={t('me.settings.newPasswordHint')}
+              name="newPassword"
+              id="setpw-new"
+              type="password"
+              autoComplete="new-password"
+              required
+            />
+            <TextField
+              tone="dark"
+              label={t('me.settings.confirm')}
+              name="confirm"
+              id="setpw-confirm"
+              type="password"
+              autoComplete="new-password"
+              required
+            />
+            <SubmitButton tone="v4" pendingText={t('me.settings.saving')} testId="set-password-save">
+              {t('me.settings.setPasswordSave')}
+            </SubmitButton>
+          </form>
+        </>
+      ) : (
+        <p className="text-[13px] text-white/60">{t('me.settings.setPasswordNoEmail')}</p>
+      )}
     </Card>
   );
 }

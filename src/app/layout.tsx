@@ -11,7 +11,8 @@ import { ClientMessages } from '@/i18n/ClientMessages';
 import { getLang, messagesFor } from '@/i18n/server';
 import { env } from '@/lib/env';
 import { getIntSetting } from '@/lib/settings';
-import { googleMode, hasSessionCookie } from '@/modules/identity';
+import { hasSessionCookie } from '@/modules/identity';
+import { socialModes } from '@/server/auth-modes';
 import './globals.css';
 
 const siteUrl = process.env.APP_URL ?? 'http://localhost:3000';
@@ -66,7 +67,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                     cookieDomain={root === 'localhost' ? null : `.${root}`}
                     freeLimit={freeLimit}
                     voucherThreshold={voucherThreshold}
-                    googleEnabled={googleMode() !== 'off'}
+                    modes={socialModes()}
                   />
                 </ClientMessages>
               </Suspense>

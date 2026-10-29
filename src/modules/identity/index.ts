@@ -37,3 +37,34 @@ export {
   type GoogleMode,
 } from './google';
 export type { SessionUser } from './types';
+// Bổ sung 29/10/2026 (SPEC-identity.md): mã email, Zalo, Facebook, vé liên kết dùng chung.
+export {
+  requestEmailOtp,
+  loginWithEmailOtp,
+  addEmailWithOtp,
+  setPasswordWithOtp,
+  linkWithOtp,
+  linkTicketEmail,
+  hasContact,
+  type OtpPurpose,
+  type OtpRequestResult,
+  type OtpLoginResult,
+  type AddEmailResult,
+  type SetPasswordResult,
+  type LinkOtpResult,
+} from './otp';
+export {
+  OAUTH_PROVIDERS,
+  oauthMode,
+  isOauthProvider,
+  startOauthFlow,
+  openOauthFlow,
+  profileFromCode,
+  completeOauthLogin,
+  sealFakeOauthCode,
+  type OauthProvider,
+  type OauthMode,
+  type OauthProfile,
+  type OauthLoginResult,
+} from './oauth';
+export { linkWithTicket, openLinkTicket, type LinkProvider } from './link';

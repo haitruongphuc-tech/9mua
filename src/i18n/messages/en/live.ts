@@ -7,6 +7,7 @@ export const live: LiveMessages = {
   'live.stories': '24-hour Stories',
   'live.addStory': '+ Story',
   'live.storyBy': "{name}'s Story",
+  'live.storyLive': '{name} is live',
   'live.closeStory': 'Close Story',
   'live.go': 'Go live',
   'live.badge': 'LIVE',

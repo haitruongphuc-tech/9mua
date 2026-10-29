@@ -171,3 +171,19 @@ removeVideo(videoId, adminId, reason): Promise<void>     // cho admin
 - Story hết 24 giờ không còn trong danh sách; Story không lọt vào feed chính.
 - Duet ra đúng 720×1280, có tiếng, dài bằng video mới; video gốc bị gỡ thì từ chối Duet.
 - Chạm 2 lần thích đúng 1 lần (không bỏ thích); tài khoản Free hết lượt thì báo lỗi, không đổi số.
+
+## Bổ sung 29/10/2026 — Trang chủ tổng hợp, menu Video và Live (CEO duyệt qua chat)
+
+1. **Xem hết video thì chiếu lại.** Người đã đăng nhập vẫn không thấy lại video vừa xem trong 24 giờ. Nhưng nếu trang đầu
+   của feed không đủ video chưa xem, thì lấy thêm các video đã xem (cùng thứ tự điểm) cho đủ. Trang chủ **không còn**
+   chuyển sang khối Chợ khi người đã đăng nhập xem hết; khối Chợ chỉ hiện khi web chưa có video nào.
+2. **Trang chủ `/`** gồm mọi thứ người dùng đăng:
+   - Hàng tròn trên cùng: người **đang live** trước (viền đỏ, chữ LIVE, bấm vào xem live), sau đó Story 24 giờ và nút
+     "+ Story".
+   - Feed dọc tab "Dành cho bạn": video (cả Duet) và **buổi live đang phát** chèn vào: ở vị trí thứ 2, sau đó cứ 5 video
+     chèn 1 buổi live, tới khi hết buổi live. Buổi live trong feed phát hình thật khi đang trên màn hình, giống trang Live
+     (chat, tim, giỏ hàng). Tab "Đang Follow" giữ như cũ.
+   - Chưa thêm bài đăng ảnh/chữ (để đợt sau).
+3. **Menu Video `/video`**: chỉ video, cùng giao diện feed của trang chủ (có tab Đang Follow / Dành cho bạn, không che thanh
+   dưới), không có hàng Story và không chèn live. Link chia sẻ `/v/<id>` giữ như cũ.
+4. **Menu Live `/live`**: chỉ các buổi đang phát và nút Phát live; bỏ hàng Story khỏi trang Live.

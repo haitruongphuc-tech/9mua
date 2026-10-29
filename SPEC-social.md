@@ -97,5 +97,9 @@ revokeVoucher(voucherId, adminId, reason): Promise<void>   // cho admin
 ## Boundaries
 
 - **Luôn làm:** kiểm tra quyền ở máy chủ (ghim/ẩn chỉ người đăng video); giới hạn tốc độ ở máy chủ.
-- **Hỏi trước:** tin nhắn riêng giữa người dùng; đổi voucher ra tiền; tặng voucher thứ 2.
+- **Hỏi trước:** đổi voucher ra tiền; tặng voucher thứ 2.
 - **Không bao giờ:** hiện số follower/tim/bình luận giả; cho bình luận chứa link.
+
+## Bổ sung 29/10/2026
+
+- Tin nhắn riêng giữa người dùng: CEO đã duyệt, xem `SPEC-messages.md`. `social` thêm hàm `followRelation(a, b)` cho module đó.

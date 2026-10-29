@@ -6,7 +6,7 @@ trên Chợ chung. Creator đăng video dọc 9:16 có gắn sản phẩm. CEO q
 
 | Module id | Trách nhiệm | Phụ thuộc |
 |---|---|---|
-| `identity` | Đăng ký / đăng nhập (SĐT hoặc email + mật khẩu), phiên đăng nhập, vai trò `buyer` / `seller` / `creator` / `admin` | — |
+| `identity` | Đăng ký / đăng nhập (Zalo, Google, Facebook, email mã OTP; tài khoản cũ SĐT/email + mật khẩu), phiên đăng nhập 30 ngày, vai trò `buyer` / `seller` / `creator` / `admin` | — |
 | `kiot` | Tạo Kiot (tên, slug `tenkiot`), thông tin liên hệ, TK ngân hàng nhận tiền của người bán; CRUD sản phẩm + ảnh + tồn kho; trang Kiot công khai `tenkiot.9mua.com` | `identity` |
 | `payments` | Lớp tích hợp PayOS dùng chung: tạo link/QR thanh toán, xác thực chữ ký webhook, ghi sổ giao dịch (idempotent) | — |
 | `billing` | Phí thuê Kiot 26.000đ/năm: thanh toán qua `payments`, kích hoạt / gia hạn / hết hạn Kiot | `identity`, `kiot`, `payments` |
@@ -19,6 +19,7 @@ trên Chợ chung. Creator đăng video dọc 9:16 có gắn sản phẩm. CEO q
 | `xu` | Sổ xu thưởng chỉ thêm: 9MUA tự thưởng người phát theo số người xem live hợp lệ; CEO chỉnh luật và thu hồi (`SPEC-live.md`) | `identity`, `kiot`, `live` |
 | `social` | Follow, bình luận, lưu, hashtag, tab Đang Follow, tim Kiot, giới hạn tài khoản Free, voucher mở Kiot (`SPEC-social.md`) | `identity`, `kiot`, `billing`, `creator` |
 | `ai` | AI Studio cho chủ Kiot: viết mô tả, vẽ ảnh, ghép video, đăng bán (`SPEC-ai.md`) | `identity`, `kiot`, `creator` |
+| `messages` | Hộp thư: nhắn tin 1-1, tin nhắn chờ của người lạ, chặn, báo cáo, CEO xem cuộc trò chuyện bị báo cáo (`SPEC-messages.md`) | `identity`, `kiot`, `social` |
 
 Thứ tự xây:
 `identity` → `kiot` → `payments` → `billing` → `orders` → `payouts` → `marketplace`, `creator` (song song) → `admin`

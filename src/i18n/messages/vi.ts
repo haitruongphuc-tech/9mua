@@ -4,6 +4,7 @@ import { ai } from './vi/ai';
 import { auth } from './vi/auth';
 import { common } from './vi/common';
 import { feed } from './vi/feed';
+import { inbox } from './vi/inbox';
 import { legal } from './vi/legal';
 import { live } from './vi/live';
 import { market } from './vi/market';
@@ -19,6 +20,7 @@ export const vi = {
   ...auth,
   ...common,
   ...feed,
+  ...inbox,
   ...legal,
   ...live,
   ...market,

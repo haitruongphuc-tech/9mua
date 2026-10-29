@@ -4,6 +4,19 @@ import { notifyKey } from '@/lib/notifications';
 import { hydrateVideos, type FeedVideo, type Viewer } from '@/modules/creator';
 import { consumeDailyAction } from './limits';
 
+// Một trong hai người follow người kia (SPEC-messages.md: nhắn tin vào thẳng hộp thư chính).
+export async function followRelation(a: string, b: string): Promise<boolean> {
+  const n = await db.follow.count({
+    where: {
+      OR: [
+        { followerId: a, followeeId: b },
+        { followerId: b, followeeId: a },
+      ],
+    },
+  });
+  return n > 0;
+}
+
 // Follow một tài khoản (creator / chủ Kiot) — SPEC-social.md mục 1.
 export async function toggleFollow(
   followerId: string,

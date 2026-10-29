@@ -51,20 +51,20 @@ Mục "Hộp thư" nằm ở thanh dưới (`/hop-thu`). Ưu tiên chống spam 
 ### Hợp đồng (`src/modules/messages/index.ts`)
 
 ```ts
-openConversation(userId, otherUserId, opts?: { productId?: string }): Promise<{ ok: true; conversationId: string } | { ok: false; error: 'SELF' | 'NOT_FOUND' | 'BLOCKED' | 'BANNED' }>
-sendMessage(userId, conversationId, input: { text?: string; imageId?: string; productId?: string }): Promise<{ ok: true; message: MessageView } | { ok: false; error: 'EMPTY' | 'TOO_LONG' | 'LINK' | 'TOO_FAST' | 'FREE_LIMIT' | 'NEW_ACCOUNT' | 'REQUEST_PENDING' | 'BLOCKED' | 'BANNED' | 'NOT_MEMBER' }>
+openConversation(userId, otherUserId): Promise<{ ok: true; conversationId: string } | { ok: false; error: 'SELF' | 'NOT_FOUND' | 'BLOCKED' | 'BANNED' | 'FREE_LIMIT' | 'NEW_ACCOUNT' }>
+sendMessage(userId, conversationId, input: { text?; imageId?; productId? }): Promise<{ ok: true; message: MessageView } | { ok: false; error: 'EMPTY' | 'TOO_LONG' | 'LINK' | 'TOO_FAST' | 'REQUEST_PENDING' | 'BLOCKED' | 'BANNED' | 'NOT_MEMBER' | 'IMAGE_INVALID' }>
 listConversations(userId, folder: 'inbox' | 'requests'): Promise<ConversationView[]>
-getMessages(userId, conversationId, opts?: { before?: string; after?: string }): Promise<MessageView[] | null>
-markRead(userId, conversationId): Promise<void>
-acceptRequest(userId, conversationId): Promise<{ ok: boolean }>
-deleteConversation(userId, conversationId): Promise<{ ok: boolean }>
+getConversation(userId, conversationId): Promise<ConversationDetail | null>
+getMessages(userId, conversationId, opts?: { after?: string }): Promise<MessageView[] | null>
+markRead(userId, conversationId) / acceptRequest(userId, conversationId) / deleteConversation(userId, conversationId)
 blockUser(userId, otherUserId) / unblockUser(userId, otherUserId) / listBlocked(userId)
 reportConversation(userId, conversationId, reason): Promise<{ ok: boolean }>
 unreadCount(userId): Promise<number>
-saveMessageImage(userId, file): Promise<{ ok: true; imageId: string } | { ok: false; error: string }>
-readMessageImage(userId, imageId, opts?: { admin?: boolean }): Promise<{ path: string } | null>
+saveMessageImage(userId, data: Buffer) / readMessageImage(userId, imageId, opts?: { admin?: boolean }): Promise<Buffer | null>
+productCardOf(productId): Promise<ProductCard | null>
 // admin
-listReportedConversations(), reportedConversationDetail(id), hideMessage(adminId, messageId, reason), banFromMessages(adminId, userId, days | 'forever', reason)
+listReportedConversations(), reportedConversationDetail(id), hideMessage(adminId, messageId, reason),
+banFromMessages(adminId, userId, days | 'forever', reason), markReportsHandled(adminId, conversationId), hasActiveMessageBan(userId)
 ```
 
 Cần thêm ở `social` (chỉ thêm): `followRelation(a, b): Promise<boolean>` (một trong hai follow người kia).
@@ -105,3 +105,12 @@ Cần thêm ở `social` (chỉ thêm): `followRelation(a, b): Promise<boolean>`
   thao tác của CEO.
 - **Hỏi trước:** nhắn nhóm; gửi email/thông báo đẩy cho từng tin; cho CEO đọc tin nhắn không bị báo cáo; mã hoá đầu-cuối.
 - **Không bao giờ:** cho gửi link ra ngoài; để ảnh tin nhắn công khai; ghi nội dung tin nhắn vào log; hiện số chưa đọc giả.
+
+## Ghi chú khi làm (T72)
+
+- Giới hạn "20 cuộc trò chuyện mới mỗi ngày" và "tài khoản dưới 1 ngày chỉ nhắn Kiot" kiểm lúc **mở** cuộc trò chuyện mới
+  (mở lại cuộc cũ không tính lượt). Cuộc trò chuyện chưa có tin nào không hiện trong hộp thư của ai.
+- Nhắn cho chính chủ Kiot hiện ở trang Kiot ("Nhắn tin"), trang creator ("Nhắn tin") và trang sản phẩm ("Hỏi Kiot", gắn
+  sẵn thẻ sản phẩm vào ô nhắn). Nút nằm ở tên miền phụ của Kiot vẫn đưa về `9mua.com/hop-thu`.
+- SSE `/api/hop-thu/events` đọc DB mỗi 1,5 giây (giống chat live), tự đóng sau 5 phút; Nginx tắt gom dữ liệu cho đường này.
+- Ảnh tin nhắn lưu trong thư mục riêng tư (như ảnh CCCD), xem qua `/api/hop-thu/anh/<id>` có kiểm quyền.

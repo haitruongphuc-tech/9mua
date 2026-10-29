@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { cache } from 'react';
+import { MessageButton } from '@/components/inbox/MessageButton';
 import { PreviewBanner } from '@/components/kiot/PreviewBanner';
 import { ProductDescription } from '@/components/kiot/ProductDescription';
 import { ProductGallery } from '@/components/kiot/ProductGallery';
@@ -13,7 +14,7 @@ import { getT } from '@/i18n/server';
 import { env } from '@/lib/env';
 import { formatVnd } from '@/lib/format';
 import { getCurrentUser } from '@/modules/identity';
-import { CATEGORIES, getPublicProduct, productPath } from '@/modules/kiot';
+import { CATEGORIES, getPublicProduct, kiotOwnerId, productPath } from '@/modules/kiot';
 import { kiotBasePath, kiotCanonical } from '../../../kiot-context';
 
 const viewer = cache(getCurrentUser);
@@ -57,6 +58,7 @@ export default async function ProductPage({ params }: Params) {
   const found = await load(slug, path);
   if (!found) notFound();
   const { product, kiot, preview } = found;
+  const ownerId = await kiotOwnerId(kiot.id);
   const [base, t] = await Promise.all([kiotBasePath(slug), getT()]);
   // Tên sản phẩm đổi thì đường dẫn cũ chuyển về đường dẫn đúng.
   if (`/p/${path}` !== productPath(product)) permanentRedirect(`${base}${productPath(product)}`);
@@ -89,6 +91,14 @@ export default async function ProductPage({ params }: Params) {
           </p>
           {preview ? null : (
             <AddToCart productId={product.id} maxQty={product.stock} cartUrl={`${env().APP_URL}/gio-hang`} />
+          )}
+          {preview || !ownerId ? null : (
+            <MessageButton
+              kind="ask"
+              toUserId={ownerId}
+              productId={product.id}
+              loginHref={`${env().APP_URL}/dang-nhap?next=${encodeURIComponent('/hop-thu')}`}
+            />
           )}
           <div className="flex gap-2">
             <a

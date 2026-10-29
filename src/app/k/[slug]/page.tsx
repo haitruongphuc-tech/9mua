@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { cache } from 'react';
+import { MessageButton } from '@/components/inbox/MessageButton';
 import { PreviewBanner } from '@/components/kiot/PreviewBanner';
 import { HashtagText } from '@/components/profile/HashtagText';
 import { KiotProductGrid } from '@/components/profile/KiotProductGrid';
@@ -14,7 +15,7 @@ import { ClientMessages } from '@/i18n/ClientMessages';
 import { getT } from '@/i18n/server';
 import { env } from '@/lib/env';
 import { getCurrentUser } from '@/modules/identity';
-import { listPublicProducts, provinceName } from '@/modules/kiot';
+import { kiotOwnerId, listPublicProducts, provinceName } from '@/modules/kiot';
 import { loadKiotPage } from '@/server/kiot-page';
 import { kiotBasePath, kiotCanonical } from '../kiot-context';
 
@@ -67,6 +68,7 @@ export default async function KiotPage({
   const home = base || '/';
   const tabHref = (id: Tab) => (id === 'san-pham' ? home : `${home}?tab=${id}`);
   const loginHref = `${env().APP_URL}/dang-nhap?next=${encodeURIComponent(`/k/${slug}`)}`;
+  const ownerId = await kiotOwnerId(kiot.id);
   const icons = { video: Grid3x3, 'san-pham': ShoppingBag, live: Radio } as const;
   const tabLabel = {
     video: t('profile.tab.video'),
@@ -170,6 +172,9 @@ export default async function KiotPage({
                 </p>
               ) : null}
               <div className="mt-3 flex flex-wrap items-center gap-2">
+                {viewer.isOwner || !ownerId ? null : (
+                  <MessageButton toUserId={ownerId} loginHref={loginHref} />
+                )}
                 <SocialLinks links={socialLinks} />
                 {viewer.isOwner ? (
                   <Link

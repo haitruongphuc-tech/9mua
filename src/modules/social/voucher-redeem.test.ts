@@ -55,6 +55,9 @@ describe('dùng voucher mở Kiot (SPEC-billing.md bổ sung 27/10)', () => {
   it('danh sách voucher cho CEO có tên và SĐT người nhận', async () => {
     const { user } = await sellerWithVoucher();
     const rows = await listVouchers();
-    expect(rows[0]).toMatchObject({ userId: user.id, user: { displayName: expect.any(String), phone: expect.any(String) } });
+    expect(rows[0]).toMatchObject({
+      userId: user.id,
+      user: { displayName: expect.any(String), phone: expect.any(String) },
+    });
   });
 });

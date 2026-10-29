@@ -22,6 +22,7 @@ const NAV = [
   ['/admin/ghim', 'Ghim'],
   ['/admin/noi-dung', 'Slogan & pháp lý'],
   ['/admin/live', 'Live'],
+  ['/admin/tin-nhan', 'Tin nhắn'],
   ['/admin/xu', 'Xu'],
   ['/admin/ai', 'AI Studio'],
   ['/admin/voucher', 'Voucher'],

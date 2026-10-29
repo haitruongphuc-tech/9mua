@@ -1,6 +1,13 @@
 // Hợp đồng public của module social (SPEC-social.md). Module khác chỉ import từ file này.
 export { isFreeAccount, consumeDailyAction, freeStatus } from './limits';
-export { toggleFollow, followStats, followingIds, followingFeed, notifyFollowersOfVideo } from './follow';
+export {
+  toggleFollow,
+  followStats,
+  followingIds,
+  followingFeed,
+  notifyFollowersOfVideo,
+  followRelation,
+} from './follow';
 export {
   addComment,
   listComments,

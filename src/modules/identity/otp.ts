@@ -8,10 +8,11 @@ import { renderEmail } from '@/lib/mail/templates';
 import { normalizeIdentifier } from './identifier';
 import { applyLink, openLinkTicket } from './link';
 import { hashPassword } from './password';
+import { registerInput } from './register';
 
 // Mã 6 số gửi qua email (SPEC-identity.md bổ sung 29/10): đăng nhập/đăng ký không cần mật khẩu, liên kết Google/
 // Facebook khi email trùng, thêm email cho tài khoản chưa có. Không bao giờ ghi log mã.
-export type OtpPurpose = 'login' | 'link' | 'add-email';
+export type OtpPurpose = 'login' | 'link' | 'add-email' | 'set-password';
 
 const CODE_TTL_MS = 10 * 60_000;
 const RESEND_MS = 60_000;
@@ -30,6 +31,7 @@ const SUBJECT: Record<OtpPurpose, string> = {
   login: 'mã đăng nhập 9MUA',
   link: 'mã liên kết tài khoản 9MUA',
   'add-email': 'mã xác nhận email 9MUA',
+  'set-password': 'mã đặt mật khẩu 9MUA',
 };
 
 function normalEmail(raw: string): string | null {
@@ -200,6 +202,33 @@ export async function linkWithOtp(sealed: string | undefined, code: string): Pro
   if (user.lockedAt) return { ok: false, error: 'LOCKED' };
   await applyLink(user.id, t);
   return { ok: true, userId: user.id };
+}
+
+export type SetPasswordResult =
+  | { ok: true }
+  | { ok: false; error: 'NO_EMAIL' | 'ADMIN' | 'INVALID_PASSWORD' | 'CODE_INVALID' | 'CODE_EXPIRED' };
+
+// Đặt mật khẩu mới trong trang cá nhân, không cần mật khẩu cũ (CEO chốt 29/10): xác nhận bằng mã gửi về email của chính
+// tài khoản, để người lấy được phiên đăng nhập không tự đặt mật khẩu được. Đăng xuất các thiết bị khác như khi đổi mật
+// khẩu. Admin đổi mật khẩu bằng mật khẩu cũ (hoặc lệnh trên VPS).
+export async function setPasswordWithOtp(
+  userId: string,
+  currentSessionId: string,
+  input: { code: string; newPassword: string },
+): Promise<SetPasswordResult> {
+  const user = await db.user.findUnique({ where: { id: userId } });
+  if (!user?.email) return { ok: false, error: 'NO_EMAIL' };
+  if (user.role === 'admin') return { ok: false, error: 'ADMIN' };
+  if (!registerInput.shape.password.safeParse(input.newPassword).success)
+    return { ok: false, error: 'INVALID_PASSWORD' };
+  const check = await consumeOtp(user.email, 'set-password', input.code);
+  if (check !== 'ok') return { ok: false, error: check };
+  const passwordHash = await hashPassword(input.newPassword);
+  await db.$transaction([
+    db.user.update({ where: { id: userId }, data: { passwordHash, mustChangePassword: false } }),
+    db.session.deleteMany({ where: { userId, id: { not: currentSessionId } } }),
+  ]);
+  return { ok: true };
 }
 
 // Email trong vé liên kết (để trang đăng nhập gửi mã đúng địa chỉ mà không cho người dùng tự nhập).

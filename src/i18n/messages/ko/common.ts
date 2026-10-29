@@ -25,6 +25,8 @@ export const common: CommonMessages = {
   'common.nav.inbox': '받은편지함',
   'common.nav.inboxUnread': '받은편지함 (읽지 않음 {count}개)',
   'common.allKiots': '모든 Kiot 보기',
+  'common.noPassword': 'Zalo, Google, Facebook 또는 이메일 코드로 가입해 비밀번호가 없나요?',
+  'common.setPassword': '계정 설정에서 비밀번호 설정',
   'common.lang.label': '언어',
   'common.lang.read': '슬로건 읽기',
   'common.lang.stop': '읽기 중지',

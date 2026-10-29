@@ -25,6 +25,8 @@ export const common: CommonMessages = {
   'common.nav.inbox': '收件箱',
   'common.nav.inboxUnread': '收件箱（{count} 条未读）',
   'common.allKiots': '查看所有 Kiot',
+  'common.noPassword': '使用 Zalo、Google、Facebook 或邮箱验证码注册，还没有密码？',
+  'common.setPassword': '在账号设置中设置密码',
   'common.lang.label': '语言',
   'common.lang.read': '朗读标语',
   'common.lang.stop': '停止朗读',

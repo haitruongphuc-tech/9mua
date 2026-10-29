@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 import { SubmitButton } from '@/components/ui/SubmitButton';
 import { TextField } from '@/components/ui/TextField';
+import { NoPasswordHint } from '@/components/ui/NoPasswordHint';
 import { useT } from '@/i18n/client';
 import type { Bank } from '@/modules/kiot/banks';
 import { setPayoutAccountAction, type PayoutFormState } from './payout-actions';
@@ -91,6 +92,7 @@ export function PayoutAccountForm({ banks, current }: { banks: readonly Bank[]; 
         autoComplete="current-password"
         required
       />
+      <NoPasswordHint />
       <SubmitButton pendingText={t('seller.form.saving')}>{t('seller.payacc.save')}</SubmitButton>
     </form>
   );

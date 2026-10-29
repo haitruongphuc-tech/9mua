@@ -286,13 +286,21 @@ export async function register(raw: unknown): Promise<RegisterResult> {
 - Tài khoản không có email và SĐT (thường là tài khoản Zalo/Facebook) phải **thêm email** (xác nhận bằng mã) trước khi mở
   Kiot, để nhận thông báo đơn hàng, hoá đơn và khôi phục tài khoản.
 
+### Đặt mật khẩu trong trang cá nhân (CEO chốt 29/10)
+- Tài khoản tạo bằng Zalo/Google/Facebook/mã email có mật khẩu ngẫu nhiên, nên không tự làm được các việc cần mật khẩu
+  (đổi tài khoản nhận tiền, đổi email, đổi mật khẩu). Cài đặt tài khoản có mục **"Đặt mật khẩu mới"**: không cần mật khẩu
+  cũ, xác nhận bằng **mã gửi về email của chính tài khoản** (không cho nhập email khác), đặt xong thì đăng xuất các thiết
+  bị khác như khi đổi mật khẩu. Admin vẫn đổi mật khẩu bằng mật khẩu cũ.
+- Ô mật khẩu ở tài khoản nhận tiền, đổi email, đổi mật khẩu có dòng gợi ý dẫn tới mục này.
+- Tài khoản chưa có email: Cài đặt tài khoản cho **thêm email bằng mã** (thay vì bằng mật khẩu).
+
 ### Dữ liệu, cấu hình, hợp đồng
 - Bảng mới (không đổi bảng cũ): `EmailOtp` (email, mục đích, mã băm, số lần sai, hết hạn, đã dùng, IP băm),
   `AuthIdentity` (nhà cung cấp `zalo` | `facebook`, mã tài khoản bên đó, userId; mỗi tài khoản 9MUA tối đa 1 Zalo, 1 Facebook).
   Google vẫn dùng cột `googleSub` có sẵn.
 - `.env`: `ZALO_APP_ID`, `ZALO_APP_SECRET`, `FACEBOOK_APP_ID`, `FACEBOOK_APP_SECRET`. Thiếu thì ẩn nút. E2E dùng màn hình giả
   như Google (chỉ khi `TEST_MODE`).
-- `index.ts` thêm (không đổi hàm cũ): `requestEmailOtp`, `loginWithEmailOtp`, `addEmailWithOtp`, `linkWithOtp`,
+- `index.ts` thêm (không đổi hàm cũ): `requestEmailOtp`, `loginWithEmailOtp`, `addEmailWithOtp`, `setPasswordWithOtp`, `linkWithOtp`,
   `linkTicketEmail`, `hasContact`; luồng Zalo/Facebook `OAUTH_PROVIDERS`, `oauthMode`, `isOauthProvider`, `startOauthFlow`,
   `openOauthFlow`, `profileFromCode`, `completeOauthLogin`, `sealFakeOauthCode`; vé liên kết dùng chung `linkWithTicket`,
   `openLinkTicket` (`linkGoogleWithTicket` giữ tên cũ, giờ dùng chung).

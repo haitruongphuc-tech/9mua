@@ -25,6 +25,9 @@ export const common: CommonMessages = {
   'common.nav.inbox': 'Mensajes',
   'common.nav.inboxUnread': 'Mensajes ({count} sin leer)',
   'common.allKiots': 'Ver todos los Kiots',
+  'common.noPassword':
+    '¿Te registraste con Zalo, Google, Facebook o un código por correo y no tienes contraseña?',
+  'common.setPassword': 'Crear una contraseña en Ajustes de la cuenta',
   'common.lang.label': 'Idioma',
   'common.lang.read': 'Leer el eslogan',
   'common.lang.stop': 'Dejar de leer',

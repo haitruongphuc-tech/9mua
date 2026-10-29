@@ -25,6 +25,8 @@ export const common: CommonMessages = {
   'common.nav.inbox': '受信箱',
   'common.nav.inboxUnread': '受信箱（未読 {count} 件）',
   'common.allKiots': 'すべてのKiotを見る',
+  'common.noPassword': 'Zalo・Google・Facebook・メールのコードで登録したためパスワードがありませんか？',
+  'common.setPassword': 'アカウント設定でパスワードを設定',
   'common.lang.label': '言語',
   'common.lang.read': 'スローガンを読み上げ',
   'common.lang.stop': '読み上げを停止',

@@ -24,6 +24,8 @@ export const common = {
   'common.nav.inbox': 'Hộp thư',
   'common.nav.inboxUnread': 'Hộp thư ({count} tin chưa đọc)',
   'common.allKiots': 'Xem tất cả Kiot',
+  'common.noPassword': 'Đăng ký bằng Zalo, Google, Facebook hoặc mã email nên chưa có mật khẩu?',
+  'common.setPassword': 'Đặt mật khẩu trong Cài đặt tài khoản',
   'common.lang.label': 'Ngôn ngữ',
   'common.lang.read': 'Đọc slogan',
   'common.lang.stop': 'Dừng đọc',

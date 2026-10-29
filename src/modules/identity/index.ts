@@ -42,6 +42,7 @@ export {
   requestEmailOtp,
   loginWithEmailOtp,
   addEmailWithOtp,
+  setPasswordWithOtp,
   linkWithOtp,
   linkTicketEmail,
   hasContact,
@@ -49,6 +50,7 @@ export {
   type OtpRequestResult,
   type OtpLoginResult,
   type AddEmailResult,
+  type SetPasswordResult,
   type LinkOtpResult,
 } from './otp';
 export {

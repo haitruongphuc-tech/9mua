@@ -4,7 +4,9 @@ import { db } from '@/lib/db';
 import { clearOutbox, getOutbox } from '@/lib/mail';
 import { completeGoogleLogin } from './google';
 import { sealLinkTicket } from './link';
-import { addEmailWithOtp, linkWithOtp, loginWithEmailOtp, requestEmailOtp } from './otp';
+import { login } from './login';
+import { addEmailWithOtp, linkWithOtp, loginWithEmailOtp, requestEmailOtp, setPasswordWithOtp } from './otp';
+import { createSession } from './session';
 import { register } from './register';
 
 const IP = '203.0.113.7';
@@ -16,7 +18,7 @@ function codeFromMail(to: string): string {
   return match[1];
 }
 
-async function sendCode(email: string, purpose: 'login' | 'link' | 'add-email' = 'login') {
+async function sendCode(email: string, purpose: 'login' | 'link' | 'add-email' | 'set-password' = 'login') {
   const r = await requestEmailOtp({ email, purpose, ip: IP });
   expect(r).toEqual({ ok: true });
   return codeFromMail(email.trim().toLowerCase());
@@ -209,5 +211,49 @@ describe('mã email (SPEC-identity.md bổ sung 29/10)', () => {
       ok: false,
       error: 'TICKET_EXPIRED',
     });
+  });
+
+  it('đặt mật khẩu trong trang cá nhân bằng mã gửi về email của tài khoản (CEO chốt 29/10)', async () => {
+    setClock(new Date('2026-10-29T03:00:00Z'));
+    const created = await loginWithEmailOtp({
+      email: 'datmk@9mua.vn',
+      code: await sendCode('datmk@9mua.vn'),
+    });
+    if (!created.ok) throw new Error('setup');
+    const keep = await createSession(created.userId);
+    const other = await createSession(created.userId);
+    advanceClock({ seconds: 61 });
+    const code = await sendCode('datmk@9mua.vn', 'set-password');
+    expect(await setPasswordWithOtp(created.userId, keep.sessionId, { code, newPassword: 'ngan' })).toEqual({
+      ok: false,
+      error: 'INVALID_PASSWORD',
+    });
+    expect(
+      await setPasswordWithOtp(created.userId, keep.sessionId, {
+        code: code === '000000' ? '111111' : '000000',
+        newPassword: 'mat-khau-moi-9mua',
+      }),
+    ).toEqual({ ok: false, error: 'CODE_INVALID' });
+    expect(
+      await setPasswordWithOtp(created.userId, keep.sessionId, { code, newPassword: 'mat-khau-moi-9mua' }),
+    ).toEqual({ ok: true });
+    expect(await login({ identifier: 'datmk@9mua.vn', password: 'mat-khau-moi-9mua' })).toMatchObject({
+      ok: true,
+    });
+    expect(await db.session.count({ where: { id: other.sessionId } })).toBe(0);
+    expect(await db.session.count({ where: { id: keep.sessionId } })).toBe(1);
+
+    // Chưa có email (tài khoản Zalo) và admin thì không dùng cách này.
+    const zalo = await db.user.create({ data: { displayName: 'Zalo', passwordHash: 'x' } });
+    expect(
+      await setPasswordWithOtp(zalo.id, keep.sessionId, { code, newPassword: 'mat-khau-moi-9mua' }),
+    ).toEqual({
+      ok: false,
+      error: 'NO_EMAIL',
+    });
+    await db.user.update({ where: { id: created.userId }, data: { role: 'admin' } });
+    expect(
+      await setPasswordWithOtp(created.userId, keep.sessionId, { code, newPassword: 'mat-khau-moi-9mua' }),
+    ).toEqual({ ok: false, error: 'ADMIN' });
   });
 });

@@ -4,9 +4,9 @@ import { X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { RegisterForm } from '@/app/(auth)/dang-ky/RegisterForm';
+import { EmailOtpForm } from '@/components/auth/EmailOtpForm';
+import { SocialButtons, type SocialModes } from '@/components/auth/SocialButtons';
 import { useT } from '@/i18n/client';
-import { GoogleIcon } from './GoogleIcon';
 import { LogoV4 } from './LogoV4';
 import { useMe } from './MeProvider';
 
@@ -29,12 +29,12 @@ export function SignupPopup({
   cookieDomain,
   freeLimit,
   voucherThreshold,
-  googleEnabled,
+  modes,
 }: {
   cookieDomain: string | null;
   freeLimit: number;
   voucherThreshold: number;
-  googleEnabled: boolean;
+  modes: SocialModes;
 }) {
   const t = useT();
   const { me } = useMe();
@@ -100,23 +100,20 @@ export function SignupPopup({
         <div className="mb-4 flex justify-center">
           <LogoV4 size={64} />
         </div>
-        {googleEnabled ? (
-          <>
-            <a
-              href={`/api/auth/google/start?next=${encodeURIComponent(next)}`}
-              className="flex h-11 items-center justify-center gap-2 rounded-full border border-black/10 text-[13px] font-bold hover:bg-zinc-50"
-            >
-              <GoogleIcon />
-              {t('common.google')}
-            </a>
-            <div className="my-4 flex items-center gap-3 text-[11px] text-zinc-400">
-              <span className="h-px flex-1 bg-zinc-200" />
-              {t('auth.or')}
-              <span className="h-px flex-1 bg-zinc-200" />
-            </div>
-          </>
+        <SocialButtons
+          modes={modes}
+          next={next}
+          tone="sheet"
+          labels={{ zalo: t('auth.zalo'), google: t('common.google'), facebook: t('auth.facebook') }}
+        />
+        {modes.zalo || modes.google || modes.facebook ? (
+          <div className="my-4 flex items-center gap-3 text-[11px] text-zinc-400">
+            <span className="h-px flex-1 bg-zinc-200" />
+            {t('auth.or')}
+            <span className="h-px flex-1 bg-zinc-200" />
+          </div>
         ) : null}
-        <RegisterForm next={next} tone="sheet" submitLabel={t('common.popup.submit')} showLogin={false} />
+        <EmailOtpForm next={next} tone="sheet" askName />
         <ul className="mt-4 space-y-1 text-[11px] text-zinc-500">
           <li>• {t('common.popup.perk1')}</li>
           <li>• {t('common.popup.perk2', { limit: freeLimit, threshold: voucherThreshold })}</li>

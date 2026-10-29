@@ -1,16 +1,18 @@
 import { execFileSync } from 'node:child_process';
 import { expect, test, type Page } from '@playwright/test';
+import { signUpWithPassword } from './helpers/auth';
 
 const stamp = String(Date.now()).slice(-8);
 const DB = process.env.DATABASE_URL_E2E ?? 'postgresql://ninemua:ninemua@localhost:5432/ninemua_dev';
 
+// Tài khoản cũ có mật khẩu (đổi email, đổi mật khẩu cần mật khẩu hiện tại).
 async function signUp(page: Page, phone: string, password: string) {
-  await page.goto('/dang-ky?next=/tai-khoan');
-  await page.fill('#identifier', phone);
-  await page.fill('#displayName', 'Khách Tài Khoản');
-  await page.fill('#password', password);
-  await page.click('button[type=submit]');
-  await page.waitForURL((u) => u.pathname === '/tai-khoan');
+  await signUpWithPassword(page, {
+    identifier: phone,
+    name: 'Khách Tài Khoản',
+    password,
+    next: '/tai-khoan',
+  });
 }
 
 test('cài đặt tài khoản: đổi tên, thêm email, đổi mật khẩu', async ({ page }) => {
@@ -45,7 +47,7 @@ test('cài đặt tài khoản: đổi tên, thêm email, đổi mật khẩu', 
   await page.goto('/dang-nhap');
   await page.fill('#identifier', `acc-${stamp}@9mua.test`);
   await page.fill('#password', 'mat-khau-2-e2e');
-  await page.click('button[type=submit]');
+  await page.getByTestId('login-submit').click();
   await expect(page.getByTestId('user-menu')).toHaveAccessibleName('Tôi (Tên Mới E2E)');
 });
 

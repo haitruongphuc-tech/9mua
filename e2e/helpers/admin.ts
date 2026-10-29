@@ -4,9 +4,10 @@ import { generate } from 'otplib';
 
 const DB = process.env.DATABASE_URL_E2E ?? 'postgresql://ninemua:ninemua@localhost:5432/ninemua_dev';
 
-// Nâng tài khoản (đang đăng nhập trên page) thành admin bằng lệnh CLI như trên VPS.
-export function promoteToAdmin(phone: string) {
-  execFileSync('node', ['dist/scripts/create-admin.mjs', '--phone', phone], {
+// Nâng tài khoản (đang đăng nhập trên page) thành admin bằng lệnh CLI như trên VPS (SĐT hoặc email).
+export function promoteToAdmin(identifier: string) {
+  const flag = identifier.includes('@') ? '--email' : '--phone';
+  execFileSync('node', ['dist/scripts/create-admin.mjs', flag, identifier], {
     input: '\n',
     env: { ...process.env, DATABASE_URL: DB },
   });

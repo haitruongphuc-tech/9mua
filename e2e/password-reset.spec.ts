@@ -1,14 +1,16 @@
 import { expect, test } from '@playwright/test';
+import { signUpWithPassword } from './helpers/auth';
 import { waitForMail } from './helpers/mail';
 
 const email = `e2e-${Date.now()}@9mua.test`;
 
 test('quên mật khẩu → mở link trong email → đặt mật khẩu mới → đăng nhập', async ({ page }) => {
-  await page.goto('/dang-ky');
-  await page.fill('#identifier', email);
-  await page.fill('#displayName', 'Khách Quên');
-  await page.fill('#password', 'mat-khau-cu-e2e');
-  await page.click('button[type=submit]');
+  await signUpWithPassword(page, {
+    identifier: email,
+    name: 'Khách Quên',
+    password: 'mat-khau-cu-e2e',
+    next: '/',
+  });
   await expect(page.getByTestId('user-menu')).toHaveAccessibleName('Tôi (Khách Quên)');
   await page.goto('/tai-khoan');
   await page.getByRole('button', { name: 'Đăng xuất', exact: true }).click();
@@ -32,7 +34,7 @@ test('quên mật khẩu → mở link trong email → đặt mật khẩu mới
 
   await page.fill('#identifier', email);
   await page.fill('#password', 'mat-khau-moi-e2e');
-  await page.click('button[type=submit]');
+  await page.getByTestId('login-submit').click();
   await expect(page.getByTestId('user-menu')).toHaveAccessibleName('Tôi (Khách Quên)');
 
   // Link đã dùng thì không dùng lại được.

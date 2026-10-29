@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { localizeFields } from '@/i18n/module-messages';
 import { getT } from '@/i18n/server';
-import { requireUser } from '@/modules/identity';
+import { hasContact, requireUser } from '@/modules/identity';
 import { createKiot, updateKiot } from '@/modules/kiot';
 import { redeemVoucher } from '@/modules/social';
 
@@ -50,6 +50,7 @@ async function toState(
 export async function createKiotAction(_p: KiotFormState, form: FormData): Promise<KiotFormState> {
   const user = await requireUser();
   const values = readForm(form);
+  if (!hasContact(user)) return { values, message: (await getT())('auth.addEmail.lead') };
   const result = await createKiot(user.id, values);
   if (!result.ok) return toState(values, result);
   redirect('/kiot-cua-toi?moi-tao=1');

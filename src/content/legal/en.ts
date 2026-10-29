@@ -17,7 +17,7 @@ export const en: PolicySet = {
       {
         heading: 'Accounts',
         paragraphs: [
-          'You sign up with a phone number, email or Google account and keep your password secret. Sign-up information must be truthful.',
+          'You sign up with Zalo, Google, Facebook or email (a 6-digit code) and keep your codes and password secret. Sign-up information must be truthful.',
           'Each person only uses their own account. 9MUA may lock accounts that break these rules.',
         ],
       },
@@ -110,6 +110,7 @@ export const en: PolicySet = {
         heading: 'What we collect',
         paragraphs: [
           'Phone number or email, display name, password (stored with one-way encryption, nobody can read it), delivery address and order information.',
+          'When you sign in with Zalo, Google or Facebook, 9MUA only receives your account ID, name and email (if provided), never your password or contacts. Inbox messages can only be read by the two people in the conversation; 9MUA only reviews messages that are reported, to handle violations.',
           'For sellers: contact phone, pickup address, payout bank account, and ID card photos when verifying (stored separately, only the CEO can view them).',
           'Video views, likes, follows and comments, used to suggest content.',
         ],

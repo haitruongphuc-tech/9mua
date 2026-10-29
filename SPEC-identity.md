@@ -292,6 +292,9 @@ export async function register(raw: unknown): Promise<RegisterResult> {
   Google vẫn dùng cột `googleSub` có sẵn.
 - `.env`: `ZALO_APP_ID`, `ZALO_APP_SECRET`, `FACEBOOK_APP_ID`, `FACEBOOK_APP_SECRET`. Thiếu thì ẩn nút. E2E dùng màn hình giả
   như Google (chỉ khi `TEST_MODE`).
-- `index.ts` thêm (không đổi hàm cũ): `requestEmailOtp`, `verifyEmailOtp`, `addEmailWithOtp`, `linkWithOtp`, `hasContact`,
-  các hàm luồng Zalo/Facebook (`oauthMode`, `startOauthFlow`, `openOauthFlow`, `completeOauthLogin`, `linkOauthWithTicket`).
+- `index.ts` thêm (không đổi hàm cũ): `requestEmailOtp`, `loginWithEmailOtp`, `addEmailWithOtp`, `linkWithOtp`,
+  `linkTicketEmail`, `hasContact`; luồng Zalo/Facebook `OAUTH_PROVIDERS`, `oauthMode`, `isOauthProvider`, `startOauthFlow`,
+  `openOauthFlow`, `profileFromCode`, `completeOauthLogin`, `sealFakeOauthCode`; vé liên kết dùng chung `linkWithTicket`,
+  `openLinkTicket` (`linkGoogleWithTicket` giữ tên cũ, giờ dùng chung).
+- Giới hạn mã theo IP chỉ tính IP do Nginx gửi (`X-Real-IP`); không có IP thật thì chỉ áp giới hạn theo email.
 - Chính sách bảo mật: thêm dữ liệu nhận từ Zalo/Facebook (mã tài khoản, tên, email nếu có).

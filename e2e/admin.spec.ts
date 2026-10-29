@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { expect, test } from '@playwright/test';
+import { signUpWithPassword } from './helpers/auth';
 import { E2E_CRON_TOKEN } from '../playwright.config';
 import { promoteToAdmin, setUpAdminTotp } from './helpers/admin';
 import { e2eDb } from './helpers/db';
@@ -45,12 +46,12 @@ test('CEO: "Cần xử lý" có yêu cầu rút → Chi qua PayOS (giả) → h�
   // CEO đăng nhập + 2 lớp.
   const ceo = await browser.newPage();
   const phone = `07${String(Date.now()).slice(-8)}`;
-  await ceo.goto('/dang-ky?next=/');
-  await ceo.fill('#identifier', phone);
-  await ceo.fill('#displayName', 'CEO duyệt');
-  await ceo.fill('#password', 'mat-khau-ceo-e2e-123');
-  await ceo.click('button[type=submit]');
-  await ceo.waitForURL((u) => u.pathname === '/');
+  await signUpWithPassword(ceo, {
+    identifier: phone,
+    name: 'CEO duyệt',
+    password: 'mat-khau-ceo-e2e-123',
+    next: '/',
+  });
   promoteToAdmin(phone);
   await setUpAdminTotp(ceo);
   await expect(ceo.getByTestId('todo-payouts')).toBeVisible();
@@ -84,12 +85,12 @@ test('CEO: "Cần xử lý" có yêu cầu rút → Chi qua PayOS (giả) → h�
 test('CEO: mọi trang hàng chờ mở được, không lỗi', async ({ browser }) => {
   const ceo = await browser.newPage();
   const phone = `07${String(Date.now()).slice(-8)}`;
-  await ceo.goto('/dang-ky?next=/');
-  await ceo.fill('#identifier', phone);
-  await ceo.fill('#displayName', 'CEO xem');
-  await ceo.fill('#password', 'mat-khau-ceo-e2e-123');
-  await ceo.click('button[type=submit]');
-  await ceo.waitForURL((u) => u.pathname === '/');
+  await signUpWithPassword(ceo, {
+    identifier: phone,
+    name: 'CEO xem',
+    password: 'mat-khau-ceo-e2e-123',
+    next: '/',
+  });
   promoteToAdmin(phone);
   await setUpAdminTotp(ceo);
   for (const [path, heading] of [
@@ -122,12 +123,12 @@ test('CEO: tra cứu và khoá Kiot, cài đặt có kiểm hợp lệ, công t�
 
   const ceo = await browser.newPage();
   const phone = `07${String(Date.now()).slice(-8)}`;
-  await ceo.goto('/dang-ky?next=/');
-  await ceo.fill('#identifier', phone);
-  await ceo.fill('#displayName', 'CEO tra cứu');
-  await ceo.fill('#password', 'mat-khau-ceo-e2e-123');
-  await ceo.click('button[type=submit]');
-  await ceo.waitForURL((u) => u.pathname === '/');
+  await signUpWithPassword(ceo, {
+    identifier: phone,
+    name: 'CEO tra cứu',
+    password: 'mat-khau-ceo-e2e-123',
+    next: '/',
+  });
   promoteToAdmin(phone);
   await setUpAdminTotp(ceo);
   ceo.on('dialog', (d) => void d.accept());

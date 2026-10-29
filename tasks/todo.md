@@ -648,7 +648,7 @@
   Email OTP (`SPEC-identity.md`), Hộp thư (`SPEC-messages.md`). CEO duyệt qua chat 29/10.
 - [x] **T70: Trang chủ tổng hợp + menu Video, Live** — xem hết video thì chiếu lại; trang chủ chèn live đang phát và hàng
   Story/live; `/video` chỉ video; `/live` chỉ live.
-- [ ] **T71: Đăng ký bằng Email mã OTP, Zalo, Facebook** — liên kết bằng mật khẩu hoặc mã; thêm email trước khi mở Kiot.
+- [x] **T71: Đăng ký bằng Email mã OTP, Zalo, Facebook** — liên kết bằng mật khẩu hoặc mã; thêm email trước khi mở Kiot.
 - [ ] **T72: Hộp thư** (`SPEC-messages.md`).
 - [ ] **T73: Thanh dưới mới + ảnh đại diện trên header**, kiểm tra toàn bộ, hướng dẫn CEO lấy khoá Zalo/Facebook.
 - [x] **Đổi giao diện V4 + dịch từng trang** (gộp với T41–T46): Chợ & sản phẩm; Kiot; giỏ, đặt hàng, đơn mua;

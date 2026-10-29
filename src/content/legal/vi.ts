@@ -17,7 +17,7 @@ export const vi: PolicySet = {
       {
         heading: 'Tài khoản',
         paragraphs: [
-          'Bạn đăng ký bằng số điện thoại, email hoặc tài khoản Google, và tự giữ bí mật mật khẩu. Thông tin đăng ký phải đúng sự thật.',
+          'Bạn đăng ký bằng Zalo, Google, Facebook hoặc email (nhận mã 6 số), và tự giữ bí mật mã, mật khẩu. Thông tin đăng ký phải đúng sự thật.',
           'Mỗi người chỉ dùng tài khoản của chính mình. 9MUA được khoá tài khoản vi phạm quy chế này.',
         ],
       },
@@ -110,6 +110,7 @@ export const vi: PolicySet = {
         heading: 'Thông tin 9MUA thu thập',
         paragraphs: [
           'Số điện thoại hoặc email, tên hiển thị, mật khẩu (lưu dạng mã hoá một chiều, không ai đọc được), địa chỉ nhận hàng, thông tin đơn hàng.',
+          'Đăng nhập bằng Zalo, Google hoặc Facebook: 9MUA chỉ nhận mã tài khoản, tên và email (nếu bên đó cho), không nhận mật khẩu hay danh bạ của bạn. Tin nhắn trong Hộp thư chỉ hai người trong cuộc trò chuyện xem được; 9MUA chỉ xem đoạn tin nhắn bị báo cáo để xử lý vi phạm.',
           'Với người bán: số điện thoại liên hệ, địa chỉ lấy hàng, tài khoản ngân hàng nhận tiền, và ảnh căn cước khi xác minh (lưu riêng, chỉ CEO xem được).',
           'Lượt xem, lượt thích, theo dõi và bình luận trên video để gợi ý nội dung.',
         ],

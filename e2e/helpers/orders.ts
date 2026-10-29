@@ -1,17 +1,9 @@
 import { expect, type Browser, type Page } from '@playwright/test';
+import { newBuyerPage } from './auth';
 
-let seq = 0;
-
+// Người mua mới: đăng ký bằng mã email trong một trang riêng.
 export async function signUpBuyer(browser: Browser, name = 'Người Mua E2E'): Promise<Page> {
-  seq += 1;
-  const buyer = await browser.newPage();
-  await buyer.goto('/dang-ky?next=/');
-  await buyer.fill('#identifier', `09${String(Date.now() + seq).slice(-8)}`);
-  await buyer.fill('#displayName', name);
-  await buyer.fill('#password', 'mat-khau-nguoi-mua-e2e');
-  await buyer.click('button[type=submit]');
-  await buyer.waitForURL((u) => u.pathname === '/');
-  return buyer;
+  return newBuyerPage(browser, name);
 }
 
 export async function addFirstProductOfKiot(buyer: Page, slug: string) {

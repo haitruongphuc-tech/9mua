@@ -34,6 +34,36 @@ model User {
   kiot               Kiot?
   cartItems          CartItem[]
   address            BuyerAddress?
+  authIdentities     AuthIdentity[]
+}
+
+// Tài khoản Zalo/Facebook đã liên kết (SPEC-identity.md bổ sung 29/10). Google dùng cột googleSub có sẵn.
+model AuthIdentity {
+  provider  String // zalo | facebook
+  subject   String // mã tài khoản bên Zalo/Facebook
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([provider, subject])
+  @@unique([userId, provider])
+}
+
+// Mã 6 số gửi qua email (SPEC-identity.md bổ sung 29/10): đăng nhập/đăng ký, liên kết Google/Facebook, thêm email.
+// Chỉ lưu mã đã băm HMAC; IP cũng băm.
+model EmailOtp {
+  id        String    @id @default(cuid(2))
+  email     String
+  purpose   String // login | link | add-email
+  codeHash  String
+  attempts  Int       @default(0)
+  ipHash    String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime
+
+  @@index([email, createdAt])
+  @@index([ipHash, createdAt])
 }
 
 model PasswordResetToken {

@@ -22,6 +22,7 @@ export async function createVideoAction(input: {
   };
   autoCaptions?: boolean; // phụ đề tự động (SPEC-creator.md V5.4), riêng công tắc auto_captions
   look?: string; // bộ lọc màu, làm đẹp (SPEC-creator.md V5.5), công tắc camera
+  stitch?: { ofId: string; fromSec: number; toSec: number } | null; // Stitch (V5.5 mục 4), công tắc camera
   beauty?: number;
 }): Promise<{ error: string }> {
   const user = await requireUser();
@@ -53,6 +54,14 @@ export async function createVideoAction(input: {
     productIds: Array.isArray(input.productIds) ? input.productIds.map(String).slice(0, 10) : [],
     kind: input.kind === 'story' ? 'story' : 'video',
     duetOfId: typeof input.duetOfId === 'string' ? input.duetOfId : null,
+    stitch:
+      camera && input.stitch && typeof input.stitch.ofId === 'string'
+        ? {
+            ofId: input.stitch.ofId,
+            fromSec: Number(input.stitch.fromSec),
+            toSec: Number(input.stitch.toSec),
+          }
+        : null,
     options: { ...postOptions, ...looks, ...(autoCaptions ? { autoCaptions } : {}) },
   });
   if (!result.ok) return { error: (await getT())(`post.err.${result.error}`) };

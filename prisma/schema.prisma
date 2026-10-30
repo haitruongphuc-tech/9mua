@@ -614,6 +614,10 @@ model Video {
   // Bộ lọc màu và làm đẹp 0–3 (SPEC-creator.md V5.5), máy chủ áp khi xử lý.
   look            String?
   beauty          Int              @default(0)
+  // Stitch (SPEC-creator.md V5.5 mục 4): đoạn 1–5 giây của video gốc ghép vào đầu video mới.
+  stitchOfId      String?
+  stitchFromSec   Float?
+  stitchToSec     Float?
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   products        VideoProduct[]

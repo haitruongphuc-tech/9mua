@@ -229,3 +229,63 @@ export async function composeDuet(
   await run('ffmpeg', duetArgs(newSrc, origSrc, outMp4, opts), TRANSCODE_TIMEOUT_MS);
   await makePoster(outMp4, outPoster, opts.durationSec);
 }
+
+// Stitch (SPEC-creator.md V5.5 mục 4): đoạn [from, to] của video gốc rồi tới video mới, cùng đưa về 720×1280. Đoạn nào
+// không có tiếng thì thêm im lặng đúng độ dài để nối được.
+export function stitchArgs(
+  origSrc: string,
+  newSrc: string,
+  outMp4: string,
+  opts: {
+    fromSec: number;
+    toSec: number;
+    newSec: number;
+    origAudio: boolean;
+    newAudio: boolean;
+    maxSec: number;
+  },
+): string[] {
+  const clip = opts.toSec - opts.fromSec;
+  const frame =
+    'scale=720:1280:force_original_aspect_ratio=decrease,pad=720:1280:(ow-iw)/2:(oh-ih)/2,setsar=1,fps=30,format=yuv420p';
+  const inputs = ['-ss', opts.fromSec.toFixed(3), '-t', clip.toFixed(3), '-i', origSrc, '-i', newSrc];
+  let next = 2;
+  const silence = (seconds: number) => {
+    inputs.push('-f', 'lavfi', '-t', seconds.toFixed(3), '-i', 'anullsrc=r=44100:cl=stereo');
+    return `${next++}:a`;
+  };
+  const a0 = opts.origAudio ? '0:a:0' : silence(clip);
+  const a1 = opts.newAudio ? '1:a:0' : silence(opts.newSec);
+  const norm = 'aresample=44100,aformat=sample_fmts=fltp:channel_layouts=stereo';
+  return [
+    '-nostdin',
+    '-hide_banner',
+    '-loglevel',
+    'error',
+    '-y',
+    ...inputs,
+    '-filter_complex',
+    `[0:v]${frame}[v0];[1:v]${frame}[v1];[${a0}]${norm}[a0];[${a1}]${norm}[a1];[v0][a0][v1][a1]concat=n=2:v=1:a=1[v][a]`,
+    '-map',
+    '[v]',
+    '-map',
+    '[a]',
+    ...ENCODE_ARGS,
+    '-t',
+    String(Math.min(clip + opts.newSec, opts.maxSec + 1)),
+    '-f',
+    'mp4',
+    outMp4,
+  ];
+}
+
+export async function composeStitch(
+  origSrc: string,
+  newSrc: string,
+  outMp4: string,
+  outPoster: string,
+  opts: Parameters<typeof stitchArgs>[3],
+) {
+  await run('ffmpeg', stitchArgs(origSrc, newSrc, outMp4, opts), TRANSCODE_TIMEOUT_MS);
+  await makePoster(outMp4, outPoster, opts.toSec - opts.fromSec + opts.newSec);
+}

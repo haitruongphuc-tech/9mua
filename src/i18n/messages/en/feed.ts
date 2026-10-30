@@ -24,6 +24,8 @@ export const feed: FeedMessages = {
   'feed.editVideo': '✏️ Edit video',
   'feed.pinError': "Couldn't pin, please try again.",
   'feed.cc': 'Captions',
+  'feed.stitch': 'Stitch',
+  'feed.stitchWith': 'Stitch @{name}',
   'feed.close': 'Close',
   'feed.unmute': 'Tap to unmute',
   'feed.pinned': '📌 PINNED',

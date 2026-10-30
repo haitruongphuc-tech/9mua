@@ -87,6 +87,12 @@ export const post = {
   'post.look.mem': 'Mềm',
   'post.beauty': 'Làm đẹp: {level}',
   'post.beautyHint': 'Làm mịn và sáng nhẹ toàn khung hình, không chỉnh khuôn mặt.',
+  'post.stitchWith': 'Stitch với @{name}',
+  'post.stitchFrom': 'Bắt đầu: giây {sec}',
+  'post.stitchLength': 'Độ dài đoạn lấy',
+  'post.stitchHint': 'Đoạn gốc 1–5 giây đứng trước, sau đó là video bạn quay hoặc chọn.',
+  'post.err.STITCH_INVALID':
+    'Không Stitch được video này (chủ video đã tắt Stitch, video không còn, hoặc đoạn chọn không phải 1–5 giây).',
   'post.err.tooBig': 'Video tối đa 100MB.',
   'post.err.tooLong': 'Video dài hơn {sec} giây, hãy cắt ngắn rồi đăng lại.',
   'post.err.upload': 'Tải lên thất bại, hãy thử lại.',

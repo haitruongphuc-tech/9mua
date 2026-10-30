@@ -75,6 +75,7 @@ export function VideoUploadForm({
   remaining,
   initialMode,
   duet,
+  stitch,
   provinces,
   defaultProvince,
   limits,
@@ -82,6 +83,7 @@ export function VideoUploadForm({
   remaining: Record<Mode, number>;
   initialMode: Mode;
   duet: { id: string; author: string; posterUrl: string | null } | null;
+  stitch: { id: string; author: string; fileUrl: string; durationSec: number } | null;
   provinces: { slug: string; name: string }[];
   defaultProvince: string;
   // Giới hạn theo công tắc long_video (SPEC-creator.md V5.1). Bật thì tải từng phần 8MB, gửi tiếp được khi rớt mạng.
@@ -90,7 +92,7 @@ export function VideoUploadForm({
   const maxSec = (m: Mode) => (m === 'story' ? STORY_SEC : limits.maxSec);
   const t = useT();
   // Duet luôn là video thường.
-  const [mode, setMode] = useState<Mode>(duet ? 'video' : initialMode);
+  const [mode, setMode] = useState<Mode>(duet || stitch ? 'video' : initialMode);
   const [file, setFile] = useState<File | null>(null);
   const [caption, setCaption] = useState('');
   const [query, setQuery] = useState('');
@@ -124,6 +126,11 @@ export function VideoUploadForm({
   const [recorderOpen, setRecorderOpen] = useState(false);
   const [recorded, setRecorded] = useState<RecordedSegment[] | null>(null);
   const [look, setLook] = useState<Look>('goc');
+  // Stitch: chọn đoạn 1–5 giây của video gốc (SPEC-creator.md V5.5 mục 4).
+  const [stitchFrom, setStitchFrom] = useState(0);
+  const [stitchLen, setStitchLen] = useState(3);
+  const stitchMaxLen = stitch ? Math.max(1, Math.min(5, Math.floor(stitch.durationSec - stitchFrom))) : 5;
+  const stitchRef = useRef<HTMLVideoElement>(null);
   const [beauty, setBeauty] = useState(0);
   const lookCss =
     [CSS_LOOKS[look] === 'none' ? '' : CSS_LOOKS[look], cssBeauty(beauty)].filter(Boolean).join(' ') ||
@@ -201,6 +208,9 @@ export function VideoUploadForm({
       productIds: picked.map((p) => p.id),
       kind: mode,
       duetOfId: duet?.id ?? null,
+      stitch: stitch
+        ? { ofId: stitch.id, fromSec: stitchFrom, toSec: stitchFrom + Math.min(stitchLen, stitchMaxLen) }
+        : null,
       options:
         postOptions && mode === 'video'
           ? {
@@ -238,7 +248,55 @@ export function VideoUploadForm({
       // Ô nhập và nút trong các nhóm (không phải nút đăng ở thanh dính) được cuộn tới phải nằm trên thanh nút dính ở đáy và menu dưới (không bị che trên điện thoại).
       className="flex flex-col gap-4 [&_fieldset]:min-w-0 [&_fieldset_button]:scroll-mb-44 [&_input]:scroll-mb-44 [&_select]:scroll-mb-44 [&_textarea]:scroll-mb-44"
     >
-      {duet ? (
+      {stitch ? (
+        <fieldset
+          className="flex flex-col gap-2 rounded-[16px] border border-brand/40 bg-white/5 p-3"
+          data-testid="stitch-picker"
+        >
+          <legend className="px-1 font-black">✂️ {t('post.stitchWith', { name: stitch.author })}</legend>
+          <video
+            ref={stitchRef}
+            src={stitch.fileUrl}
+            muted
+            playsInline
+            className="mx-auto max-h-48 rounded-[12px] bg-black"
+            onLoadedMetadata={(e) => (e.currentTarget.currentTime = stitchFrom)}
+          />
+          <label className="flex items-center gap-3 text-[12px] font-bold text-white/70">
+            {t('post.stitchFrom', { sec: stitchFrom.toFixed(1) })}
+            <input
+              type="range"
+              min={0}
+              max={Math.max(0, Math.floor((stitch.durationSec - 1) * 2) / 2)}
+              step={0.5}
+              value={stitchFrom}
+              onChange={(e) => {
+                setStitchFrom(Number(e.target.value));
+                if (stitchRef.current) stitchRef.current.currentTime = Number(e.target.value);
+              }}
+              className="flex-1 accent-[#ff6b00]"
+              data-testid="stitch-from"
+            />
+          </label>
+          <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={t('post.stitchLength')}>
+            {[1, 2, 3, 4, 5].map((n) => (
+              <button
+                key={n}
+                type="button"
+                role="radio"
+                aria-checked={Math.min(stitchLen, stitchMaxLen) === n}
+                disabled={n > stitchMaxLen}
+                onClick={() => setStitchLen(n)}
+                className={`h-8 rounded-full border px-3 text-[12px] font-bold disabled:opacity-30 ${Math.min(stitchLen, stitchMaxLen) === n ? 'border-brand bg-brand text-white' : 'border-white/15 text-white/70'}`}
+                data-testid={`stitch-len-${n}`}
+              >
+                {n}s
+              </button>
+            ))}
+          </div>
+          <span className="text-[12px] text-white/60">{t('post.stitchHint')}</span>
+        </fieldset>
+      ) : duet ? (
         <div
           className="flex items-center gap-3 rounded-[16px] border border-brand/40 bg-white/5 p-3"
           data-testid="duet-banner"

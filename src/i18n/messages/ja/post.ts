@@ -88,6 +88,12 @@ export const post: PostMessages = {
   'post.look.mem': 'ソフト',
   'post.beauty': '美肌：{level}',
   'post.beautyHint': '画面全体を少しなめらかに明るくします。顔は変えません。',
+  'post.stitchWith': '@{name} とつなぐ',
+  'post.stitchFrom': '開始：{sec} 秒',
+  'post.stitchLength': '切り取る長さ',
+  'post.stitchHint': '元動画の 1〜5 秒が先に流れ、そのあと撮影・選択した動画が続きます。',
+  'post.err.STITCH_INVALID':
+    'この動画はつなげません（投稿者がオフにした、動画がない、または 1〜5 秒ではない）。',
   'post.err.tooBig': '動画は100MBまでです。',
   'post.err.tooLong': '動画が{sec}秒を超えています。短くしてから投稿してください。',
   'post.err.upload': 'アップロードに失敗しました。もう一度お試しください。',

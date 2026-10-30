@@ -111,7 +111,8 @@ export type CreateVideoResult =
         | 'DRAFT_LIMIT'
         | 'TOO_LONG'
         | 'ACCOUNT_TOO_NEW'
-        | 'LONG_DAILY_LIMIT';
+        | 'LONG_DAILY_LIMIT'
+        | 'STITCH_INVALID';
     };
 
 // Tạo video từ file đã tải lên (SPEC-creator.md mục 1). Video ở trạng thái processing cho tới khi worker xong.
@@ -123,6 +124,7 @@ export async function createVideoUpload(
     productIds: string[];
     kind?: 'video' | 'story';
     duetOfId?: string | null;
+    stitch?: { ofId: string; fromSec: number; toSec: number } | null; // Stitch (SPEC-creator.md V5.5 mục 4)
     // Quyền riêng tư, cho bình luận/Duet/tải về, nháp, hẹn giờ, địa điểm, nhãn AI (SPEC-creator.md V5.3).
     options?: PostOptions;
     aiStudio?: boolean; // video làm từ AI Studio: luôn có nhãn AI, không gỡ được
@@ -133,6 +135,7 @@ export async function createVideoUpload(
   const kind = meta.kind === 'story' ? 'story' : 'video';
   // Duet chỉ với video thường đang trên feed (không Duet Story, không Duet chính Story).
   const duetOfId = kind === 'video' && meta.duetOfId ? meta.duetOfId : null;
+  const stitch = kind === 'video' && !duetOfId && meta.stitch ? meta.stitch : null;
   const file = uploadPath(userId, uploadId);
   const info = file ? await stat(file).catch(() => null) : null;
   if (!file || !info) return { ok: false, error: 'NOT_FOUND' };
@@ -147,7 +150,7 @@ export async function createVideoUpload(
     return discard({ ok: false as const, error: 'BAD_FORMAT' as const });
   // Video dài: đo thời lượng thật bằng ffprobe (không tin số trình duyệt gửi), xếp vào hàng long.
   let sourceSec: number | null = null;
-  if (limits.long && kind === 'video' && !duetOfId) {
+  if (limits.long && kind === 'video' && !duetOfId && !stitch) {
     sourceSec = (await probe(file).catch(() => null))?.durationSec ?? null;
     const longError = sourceSec !== null ? await checkLongVideo(userId, sourceSec, limits) : null;
     if (longError) return discard({ ok: false as const, error: longError });
@@ -179,6 +182,26 @@ export async function createVideoUpload(
   )
     return { ok: false, error: 'DUET_INVALID' };
 
+  // Stitch: video gốc công khai, còn cho Duet/Stitch, là MP4; đoạn lấy dài 1–5 giây và nằm trong video gốc.
+  if (stitch) {
+    const from = Number(stitch.fromSec);
+    const to = Number(stitch.toSec);
+    const orig = await db.video.findFirst({
+      where: {
+        id: String(stitch.ofId),
+        status: 'ready',
+        kind: 'video',
+        visibility: 'public',
+        allowRemix: true,
+        fileUrl: { endsWith: '.mp4' },
+      },
+      select: { durationSec: true },
+    });
+    const length = to - from;
+    if (!orig || !(from >= 0) || !(length >= 0.999) || length > 5.001 || to > (orig.durationSec ?? 0) + 0.05)
+      return { ok: false, error: 'STITCH_INVALID' };
+  }
+
   const productIds = [...new Set(meta.productIds.filter(Boolean))];
   if (productIds.length > MAX_PRODUCTS_PER_VIDEO) return { ok: false, error: 'PRODUCT_INVALID' };
   for (const id of productIds) {
@@ -208,6 +231,9 @@ export async function createVideoUpload(
         hashtags: extractHashtags(caption),
         kind,
         duetOfId,
+        stitchOfId: stitch ? String(stitch.ofId) : null,
+        stitchFromSec: stitch ? Number(stitch.fromSec) : null,
+        stitchToSec: stitch ? Number(stitch.toSec) : null,
         visibility: isVisibility(meta.options?.visibility) ? meta.options.visibility : 'public',
         allowComments: meta.options?.allowComments ?? true,
         allowRemix: meta.options?.allowRemix ?? true,

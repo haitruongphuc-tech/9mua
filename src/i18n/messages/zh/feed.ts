@@ -24,6 +24,8 @@ export const feed: FeedMessages = {
   'feed.editVideo': '✏️ 编辑视频',
   'feed.pinError': '置顶失败，请重试。',
   'feed.cc': '字幕',
+  'feed.stitch': '拼接',
+  'feed.stitchWith': '拼接 @{name}',
   'feed.close': '关闭',
   'feed.unmute': '点击开启声音',
   'feed.pinned': '📌 置顶',

@@ -83,6 +83,7 @@ export function VideoFeed({
   // Công cụ xem (SPEC-creator.md V5.2, công tắc feed_tools): thanh tua, tốc độ, tự cuộn — nhớ trong trình duyệt.
   const tools = useFeature('feed_tools');
   const postOptions = useFeature('post_options');
+  const camera = useFeature('camera');
   const seeks = useRef<(HTMLInputElement | null)[]>([]);
   const [speed, setSpeed] = useState(1);
   const [autoScroll, setAutoScroll] = useState(false);
@@ -647,6 +648,15 @@ export function VideoFeed({
                         {t('feed.pinned')}
                       </span>
                     ) : null}
+                    {v.stitchOf ? (
+                      <Link
+                        href={`/v/${v.stitchOf.id}`}
+                        className="flex items-center gap-1 rounded-full bg-brand px-2 py-1 text-[10px] font-black"
+                        data-testid="feed-stitch-label"
+                      >
+                        ✂️ {t('feed.stitchWith', { name: v.stitchOf.authorName })} ↗
+                      </Link>
+                    ) : null}
                     {v.duetOfId ? (
                       <Link
                         href={`/v/${v.duetOfId}`}
@@ -969,6 +979,15 @@ export function VideoFeed({
         >
           <Repeat2 className="h-4 w-4" aria-hidden /> {t('feed.duet')}
         </Link>
+        {camera && sheet && !sheet.video.mine ? (
+          <Link
+            href={`/video/dang?stitch=${sheet.video.id}`}
+            className="mb-2 flex items-center gap-2 border-b border-black/10 py-3 font-bold"
+            data-testid="feed-stitch"
+          >
+            ✂️ {t('feed.stitch')}
+          </Link>
+        ) : null}
         {REPORT_REASONS.map((reason) => (
           <button
             key={reason}

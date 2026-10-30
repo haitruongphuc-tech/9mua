@@ -92,6 +92,12 @@ export const post: PostMessages = {
   'post.look.mem': 'Suave',
   'post.beauty': 'Belleza: {level}',
   'post.beautyHint': 'Suaviza e ilumina ligeramente toda la imagen; no cambia la cara.',
+  'post.stitchWith': 'Stitch con @{name}',
+  'post.stitchFrom': 'Inicio: {sec} s',
+  'post.stitchLength': 'Duración del fragmento',
+  'post.stitchHint': 'Primero va el fragmento de 1 a 5 segundos y luego el video que grabes o elijas.',
+  'post.err.STITCH_INVALID':
+    'No se puede hacer Stitch de este video (el autor lo desactivó, ya no existe o el fragmento no es de 1 a 5 segundos).',
   'post.err.tooBig': 'Máximo 100 MB por video.',
   'post.err.tooLong': 'El video dura más de {sec} segundos, recórtalo y vuelve a intentarlo.',
   'post.err.upload': 'Error al subir, inténtalo de nuevo.',

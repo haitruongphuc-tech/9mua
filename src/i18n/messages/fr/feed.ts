@@ -24,6 +24,8 @@ export const feed: FeedMessages = {
   'feed.editVideo': '✏️ Modifier la vidéo',
   'feed.pinError': "Impossible d'épingler, réessayez.",
   'feed.cc': 'Sous-titres',
+  'feed.stitch': 'Stitch',
+  'feed.stitchWith': 'Stitch @{name}',
   'feed.close': 'Fermer',
   'feed.unmute': 'Touchez pour le son',
   'feed.pinned': '📌 ÉPINGLÉ',

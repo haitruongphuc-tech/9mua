@@ -24,6 +24,8 @@ export const feed: FeedMessages = {
   'feed.editVideo': '✏️ 영상 수정',
   'feed.pinError': '고정하지 못했어요. 다시 시도해 주세요.',
   'feed.cc': '자막',
+  'feed.stitch': 'Stitch',
+  'feed.stitchWith': 'Stitch @{name}',
   'feed.close': '닫기',
   'feed.unmute': '탭해서 소리 켜기',
   'feed.pinned': '📌 고정',

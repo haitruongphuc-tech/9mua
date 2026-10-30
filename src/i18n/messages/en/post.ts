@@ -91,6 +91,12 @@ export const post: PostMessages = {
   'post.look.mem': 'Soft',
   'post.beauty': 'Beauty: {level}',
   'post.beautyHint': 'Smooths and brightens the whole frame slightly; faces are not changed.',
+  'post.stitchWith': 'Stitch with @{name}',
+  'post.stitchFrom': 'Start: {sec}s',
+  'post.stitchLength': 'Clip length',
+  'post.stitchHint': 'The 1–5 second clip plays first, then the video you record or pick.',
+  'post.err.STITCH_INVALID':
+    "Can't stitch this video (the owner turned Stitch off, it's gone, or the clip isn't 1–5 seconds).",
   'post.err.tooBig': 'Videos can be at most 100MB.',
   'post.err.tooLong': 'The video is longer than {sec} seconds, please trim it and try again.',
   'post.err.upload': 'Upload failed, please try again.',

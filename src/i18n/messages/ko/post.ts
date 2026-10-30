@@ -88,6 +88,12 @@ export const post: PostMessages = {
   'post.look.mem': '부드럽게',
   'post.beauty': '뷰티: {level}',
   'post.beautyHint': '화면 전체를 살짝 매끈하고 밝게 해요. 얼굴은 바꾸지 않아요.',
+  'post.stitchWith': '@{name} 님과 Stitch',
+  'post.stitchFrom': '시작: {sec}초',
+  'post.stitchLength': '자를 길이',
+  'post.stitchHint': '원본 1~5초가 먼저 나오고, 이어서 촬영하거나 고른 영상이 나와요.',
+  'post.err.STITCH_INVALID':
+    '이 영상은 Stitch할 수 없어요 (주인이 Stitch를 껐거나, 영상이 없거나, 1~5초가 아니에요).',
   'post.err.tooBig': '동영상은 최대 100MB예요.',
   'post.err.tooLong': '동영상이 {sec}초보다 길어요. 잘라서 다시 올려 주세요.',
   'post.err.upload': '업로드에 실패했어요. 다시 시도해 주세요.',

@@ -25,6 +25,7 @@ import {
 } from './renditions';
 import {
   composeDuet,
+  composeStitch,
   LONG_TRANSCODE_TIMEOUT_MS,
   makePoster,
   MAX_DURATION_SEC,
@@ -96,10 +97,11 @@ export async function processNextJob(): Promise<boolean> {
     let reason = source
       ? rejectReason(source, maxSec, limits.long)
       : 'File không phải video MP4, MOV hoặc WebM';
-    // Duet: cần file video gốc còn trên feed (SPEC-creator.md bổ sung 27/10).
-    const original = video.duetOfId
+    // Duet / Stitch: cần file video gốc còn trên feed (SPEC-creator.md bổ sung 27/10, V5.5 mục 4).
+    const remixOfId = video.duetOfId ?? video.stitchOfId;
+    const original = remixOfId
       ? await db.video.findFirst({
-          where: { id: video.duetOfId, status: 'ready', kind: 'video', fileUrl: { endsWith: '.mp4' } },
+          where: { id: remixOfId, status: 'ready', kind: 'video', fileUrl: { endsWith: '.mp4' } },
         })
       : null;
     let originalPath = original?.fileUrl ? imageStore().localPath(original.fileUrl) : null;
@@ -111,6 +113,7 @@ export async function processNextJob(): Promise<boolean> {
       if (await ext.download(original.fileUrl, dest).catch(() => false)) originalPath = dest;
     }
     if (!reason && video.duetOfId && !originalPath) reason = 'Video gốc để Duet không còn trên 9MUA';
+    if (!reason && video.stitchOfId && !originalPath) reason = 'Video gốc để Stitch không còn trên 9MUA';
     if (reason) {
       await fail(job, reason);
       return true;
@@ -126,7 +129,17 @@ export async function processNextJob(): Promise<boolean> {
     // Bộ lọc màu, làm đẹp (SPEC-creator.md V5.5) — không áp cho Duet (ghép 2 video).
     const look = originalPath ? null : lookFilter(video.look as never, video.beauty);
     const levels = hls ? hlsLevels(source!.video!, (await getSetting('video_enable_1080')) === 'true') : [];
-    if (originalPath) {
+    if (originalPath && video.stitchOfId) {
+      const orig = await probe(originalPath);
+      await composeStitch(originalPath, job.sourcePath, outMp4, outPoster, {
+        fromSec: video.stitchFromSec ?? 0,
+        toSec: video.stitchToSec ?? 1,
+        newSec: source!.durationSec,
+        origAudio: orig.hasAudio,
+        newAudio: source!.hasAudio,
+        maxSec,
+      });
+    } else if (originalPath) {
       const orig = await probe(originalPath);
       await composeDuet(job.sourcePath, originalPath, outMp4, outPoster, {
         durationSec: source!.durationSec,

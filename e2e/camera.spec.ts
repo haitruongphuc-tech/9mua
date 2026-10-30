@@ -48,3 +48,40 @@ test('quay 2 đoạn trong app, chọn bộ lọc, đăng → máy chủ ghép v
   expect(done.status).toBe('ready');
   expect(done.height).toBe(1280);
 });
+
+// Stitch (SPEC-creator.md V5.5 mục 4): từ nút ⋯ của video người khác, chọn đoạn 1 giây, chọn video của mình, đăng.
+test('Stitch: chọn đoạn của video gốc + video của mình → nhãn "Stitch @tên"', async ({ browser }) => {
+  test.setTimeout(90_000);
+  const stamp = String(Date.now()).slice(-6);
+  const owner = await newBuyerPage(browser, `Gốc ${stamp}`);
+  await owner.goto('/video/dang');
+  await owner.getByTestId('video-input').setInputFiles('tests/fixtures/videos/landscape.mp4');
+  await owner.getByTestId('video-caption').fill(`Video gốc ${stamp}`);
+  await owner.getByRole('button', { name: 'Đăng video' }).click();
+  await owner.waitForURL((u) => u.pathname === '/video/cua-toi');
+  await owner.request.get('http://localhost:3100/api/internal/video/process', {
+    headers: { 'x-internal-token': E2E_CRON_TOKEN },
+  });
+  const original = await e2eDb.video.findFirstOrThrow({ where: { caption: `Video gốc ${stamp}` } });
+
+  const me = await newBuyerPage(browser, `Stitch ${stamp}`);
+  await me.goto(`/v/${original.id}`);
+  await me.getByTestId('feed-item').first().getByTestId('feed-report').click();
+  await me.getByTestId('feed-stitch').click();
+  await me.waitForURL(`**/video/dang?stitch=${original.id}`);
+  await expect(me.getByTestId('stitch-picker')).toContainText(`Stitch với @Gốc ${stamp}`);
+  await me.getByTestId('stitch-len-1').click();
+  await me.getByTestId('video-input').setInputFiles('tests/fixtures/videos/landscape.mp4');
+  await me.getByTestId('video-caption').fill(`Có Stitch ${stamp}`);
+  await me.getByRole('button', { name: 'Đăng video' }).click();
+  await me.waitForURL((u) => u.pathname === '/video/cua-toi' && u.searchParams.has('moi'));
+  await me.request.get('http://localhost:3100/api/internal/video/process', {
+    headers: { 'x-internal-token': E2E_CRON_TOKEN },
+  });
+  const v = await e2eDb.video.findFirstOrThrow({ where: { caption: `Có Stitch ${stamp}` } });
+  expect(v).toMatchObject({ status: 'ready', stitchOfId: original.id, stitchFromSec: 0, stitchToSec: 1 });
+  await me.goto(`/v/${v.id}`);
+  await expect(me.getByTestId('feed-item').first().getByTestId('feed-stitch-label')).toContainText(
+    `Stitch @Gốc ${stamp}`,
+  );
+});

@@ -697,7 +697,7 @@ Nhánh `nang-cap-mot-dot`. Trừ App (C32–C36). Mỗi task: test trước → 
 - [x] **T89: Kho video ngoài + trang Dung lượng** (C06).
 - [x] **T90: Phụ đề tự động (OpenAI Whisper, tắt sẵn)** (C51).
 - [x] **T91: Quay trong app, bộ lọc màu, làm đẹp** (C08, C09).
-- [ ] **T92: Stitch** (C09).
+- [x] **T92: Stitch** (C09).
 - [ ] **T93: Chỉnh video: cắt, ghép, chữ, nhãn dán** (C89).
 - [ ] **T94: Âm thanh từ video người dùng + thịnh hành** (C90).
 - [ ] **T95: Tải về, nhúng, TikTok/Instagram, gửi qua Hộp thư** (C03–C05, C65).

@@ -4,6 +4,7 @@ import { getT } from '@/i18n/server';
 import { getVideo, MAX_VIDEOS_PER_DAY, videoLimits, videosToday } from '@/modules/creator';
 import { getKiotByOwner, PROVINCES } from '@/modules/kiot';
 import { requireUser } from '@/modules/identity';
+import { isFeatureOn } from '@/lib/features';
 import { VideoUploadForm } from './VideoUploadForm';
 import { requireCommitment } from '@/server/commitment';
 
@@ -15,21 +16,23 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function UploadVideoPage({
   searchParams,
 }: {
-  searchParams: Promise<{ duet?: string; story?: string }>;
+  searchParams: Promise<{ duet?: string; story?: string; stitch?: string }>;
 }) {
   const user = await requireUser();
   const params = await searchParams;
   await requireCommitment(
     user.id,
-    `/video/dang${params.story ? '?story=1' : params.duet ? `?duet=${params.duet}` : ''}`,
+    `/video/dang${params.story ? '?story=1' : params.duet ? `?duet=${params.duet}` : params.stitch ? `?stitch=${params.stitch}` : ''}`,
   );
-  const [t, videos, stories, duet, kiot, limits] = await Promise.all([
+  // Stitch (SPEC-creator.md V5.5 mục 4): chỉ video công khai còn cho Duet/Stitch, là MP4 (máy chủ kiểm lại khi đăng).
+  const [t, videos, stories, duet, kiot, limits, stitch] = await Promise.all([
     getT(),
     videosToday(user.id),
     videosToday(user.id, 'story'),
     params.duet ? getVideo(params.duet, {}) : Promise.resolve(null),
     getKiotByOwner(user.id),
     videoLimits(),
+    params.stitch && (await isFeatureOn('camera')) ? getVideo(params.stitch, {}) : Promise.resolve(null),
   ]);
   return (
     <div className="mx-auto flex w-full max-w-lg flex-col gap-4 px-4 py-6">
@@ -43,6 +46,16 @@ export default async function UploadVideoPage({
           }}
           initialMode={params.story ? 'story' : 'video'}
           duet={duet ? { id: duet.id, author: duet.author.displayName, posterUrl: duet.posterUrl } : null}
+          stitch={
+            stitch && stitch.fileUrl.endsWith('.mp4')
+              ? {
+                  id: stitch.id,
+                  author: stitch.author.displayName,
+                  fileUrl: stitch.fileUrl,
+                  durationSec: stitch.durationSec ?? 0,
+                }
+              : null
+          }
           provinces={PROVINCES.map((p) => ({ slug: p.slug, name: p.name }))}
           defaultProvince={kiot?.province ?? ''}
           limits={{ long: limits.long, maxBytes: limits.maxBytes, maxSec: limits.maxSec }}

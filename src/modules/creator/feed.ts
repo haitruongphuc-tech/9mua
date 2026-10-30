@@ -39,6 +39,7 @@ export type FeedVideo = {
   mine: boolean; // người đang xem là người đăng: hiện nút Ghim / Sửa
   sdUrl: string | null; // MP4 480p cho mạng chậm / tiết kiệm dữ liệu (SPEC-creator.md V5.1)
   captionsUrl: string | null; // phụ đề tự động đã bật cho người xem (SPEC-creator.md V5.4)
+  stitchOf: { id: string; authorName: string } | null; // "Stitch với @tên" (SPEC-creator.md V5.5 mục 4)
 };
 
 export const FEED_PAGE = 8;
@@ -194,6 +195,17 @@ export async function hydrateVideos(ids: string[], viewer: Viewer): Promise<Feed
     activePinIds('video'),
   ]);
   const captionsOn = await isFeatureOn('auto_captions');
+  const stitchIds = [...new Set(videos.map((v) => v.stitchOfId).filter((x): x is string => Boolean(x)))];
+  const stitchSources = stitchIds.length
+    ? await db.video.findMany({ where: { id: { in: stitchIds } }, select: { id: true, authorId: true } })
+    : [];
+  const stitchAuthors = await db.user.findMany({
+    where: { id: { in: stitchSources.map((s) => s.authorId) } },
+    select: { id: true, displayName: true },
+  });
+  const stitchName = new Map(
+    stitchSources.map((s) => [s.id, stitchAuthors.find((a) => a.id === s.authorId)?.displayName ?? '']),
+  );
   const pinnedSet = new Set(pins);
   const authors = await db.user.findMany({
     where: { id: { in: videos.map((v) => v.authorId) } },
@@ -228,6 +240,7 @@ export async function hydrateVideos(ids: string[], viewer: Viewer): Promise<Feed
       profilePinned: v.profilePinnedAt !== null,
       mine: viewer.userId === v.authorId,
       sdUrl: v.renditions[0]?.path ?? null,
+      stitchOf: v.stitchOfId ? { id: v.stitchOfId, authorName: stitchName.get(v.stitchOfId) ?? '' } : null,
       captionsUrl:
         captionsOn && v.captions?.status === 'ready' && v.captions.published
           ? `/api/video/${v.id}/phu-de`

@@ -24,6 +24,8 @@ export const feed: FeedMessages = {
   'feed.editVideo': '✏️ Editar video',
   'feed.pinError': 'No se pudo fijar, inténtalo de nuevo.',
   'feed.cc': 'Subtítulos',
+  'feed.stitch': 'Stitch',
+  'feed.stitchWith': 'Stitch @{name}',
   'feed.close': 'Cerrar',
   'feed.unmute': 'Toca para activar el sonido',
   'feed.pinned': '📌 FIJADO',

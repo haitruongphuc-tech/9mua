@@ -24,6 +24,8 @@ export const feed: FeedMessages = {
   'feed.editVideo': '✏️ 動画を編集',
   'feed.pinError': '固定できませんでした。もう一度お試しください。',
   'feed.cc': '字幕',
+  'feed.stitch': 'つなぐ',
+  'feed.stitchWith': '@{name} とつなぐ',
   'feed.close': '閉じる',
   'feed.unmute': 'タップで音声オン',
   'feed.pinned': '📌 固定',

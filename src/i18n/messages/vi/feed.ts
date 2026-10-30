@@ -23,6 +23,8 @@ export const feed = {
   'feed.editVideo': '✏️ Sửa video',
   'feed.pinError': 'Chưa ghim được, hãy thử lại.',
   'feed.cc': 'Phụ đề',
+  'feed.stitch': 'Stitch',
+  'feed.stitchWith': 'Stitch @{name}',
   'feed.close': 'Đóng',
   'feed.unmute': 'Chạm để bật tiếng',
   'feed.pinned': '📌 GHIM',

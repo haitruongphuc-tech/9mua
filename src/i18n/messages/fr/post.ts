@@ -92,6 +92,13 @@ export const post: PostMessages = {
   'post.look.mem': 'Doux',
   'post.beauty': 'Beauté : {level}',
   'post.beautyHint': "Lisse et éclaircit légèrement toute l'image ; le visage n'est pas modifié.",
+  'post.stitchWith': 'Stitch avec @{name}',
+  'post.stitchFrom': 'Début : {sec} s',
+  'post.stitchLength': "Longueur de l'extrait",
+  'post.stitchHint':
+    "L'extrait de 1 à 5 secondes passe d'abord, puis la vidéo que vous filmez ou choisissez.",
+  'post.err.STITCH_INVALID':
+    "Impossible de faire un Stitch de cette vidéo (désactivé par l'auteur, vidéo supprimée, ou extrait hors 1–5 secondes).",
   'post.err.tooBig': '100 Mo maximum par vidéo.',
   'post.err.tooLong': 'La vidéo dépasse {sec} secondes, raccourcissez-la puis réessayez.',
   'post.err.upload': 'Échec de l’envoi, réessayez.',

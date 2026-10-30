@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import type { VideoThumb } from '@/modules/creator';
+import { HoldPreview } from './HoldPreview';
 
 // pinnedLabel: trang cá nhân hiện nhãn "Ghim" trên video được ghim lên đầu (SPEC-creator.md V5.3).
 export function VideoGrid({
@@ -30,6 +31,7 @@ export function VideoGrid({
                 unoptimized
               />
             ) : null}
+            {v.previewUrl ? <HoldPreview url={v.previewUrl} /> : null}
             {pinnedLabel && v.pinned ? (
               <span
                 className="absolute left-1.5 top-1.5 rounded-full bg-white px-2 py-0.5 text-[10px] font-black text-black"

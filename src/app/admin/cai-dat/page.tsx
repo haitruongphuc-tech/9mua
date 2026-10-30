@@ -131,6 +131,15 @@ export default async function SettingsPage({ searchParams }: { searchParams: Fla
           s.video_long_daily_minutes,
           'Chỉ tính video dài hơn 60 giây. Mặc định 120 phút.',
         )}
+        <label className="flex items-center gap-2 text-sm font-bold">
+          <input
+            type="checkbox"
+            name="video_enable_1080"
+            defaultChecked={s.video_enable_1080 === 'true'}
+            className="h-5 w-5 accent-brand"
+          />
+          Thêm mức 1080p cho video dài (tốn thêm dung lượng và thời gian xử lý)
+        </label>
         <ConfirmSubmit confirm="Lưu các thay đổi cài đặt?">Lưu cài đặt</ConfirmSubmit>
       </form>
       <section

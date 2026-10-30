@@ -1,6 +1,9 @@
+import { randomBytes } from 'node:crypto';
 import { now } from '@/lib/clock';
 import { db } from '@/lib/db';
 import { hasLink } from '@/lib/links';
+import { imageStore } from '@/lib/media/image-store';
+import { processCroppedImage, type ImageError } from '@/lib/media/process-image';
 import { notifyKey } from '@/lib/notifications';
 import { getProductForCheckout, PROVINCES, provinceName } from '@/modules/kiot';
 import { extractHashtags } from './hashtags';
@@ -315,6 +318,7 @@ export type VideoForEdit = {
   placeName: string | null;
   aiGenerated: boolean;
   aiStudio: boolean;
+  posterChoices: string[];
   products: { id: string; name: string; price: number; thumbUrl: string | null }[];
 };
 
@@ -344,8 +348,43 @@ export async function videoForEdit(userId: string, videoId: string): Promise<Vid
     placeName: v.placeName,
     aiGenerated: v.aiGenerated,
     aiStudio: v.aiStudio,
+    posterChoices: v.posterChoices,
     products: products
       .filter((p) => p !== null)
       .map((p) => ({ id: p.id, name: p.name, price: p.price, thumbUrl: p.imageUrl })),
   };
+}
+
+// Đổi ảnh bìa (SPEC-creator.md V5.1 mục 6, V5.3 mục 7): chọn 1 trong 3 ảnh gợi ý, hoặc tải ảnh riêng (JPG, PNG, WebP
+// ≤ 10MB, cắt 9:16, bỏ thông tin ẩn như ảnh sản phẩm). Ảnh bìa cũ không phải ảnh gợi ý thì xoá.
+export async function setVideoCover(
+  userId: string,
+  videoId: string,
+  input: { choice: string } | { image: Buffer },
+): Promise<{ ok: true; posterUrl: string } | { ok: false; error: 'NOT_FOUND' | 'BAD_CHOICE' | ImageError }> {
+  const v = await db.video.findFirst({
+    where: {
+      id: videoId,
+      authorId: userId,
+      kind: 'video',
+      status: { in: ['draft', 'scheduled', 'ready', 'hidden'] },
+    },
+  });
+  if (!v) return { ok: false, error: 'NOT_FOUND' };
+  let posterUrl: string;
+  if ('choice' in input) {
+    if (!v.posterChoices.includes(input.choice)) return { ok: false, error: 'BAD_CHOICE' };
+    posterUrl = input.choice;
+  } else {
+    const processed = await processCroppedImage(input.image, { width: 720, height: 1280 });
+    if (!processed.ok) return processed;
+    posterUrl = await imageStore().save(
+      `videos/covers/${v.id}-${randomBytes(6).toString('hex')}.webp`,
+      processed.data,
+    );
+  }
+  await db.video.update({ where: { id: v.id }, data: { posterUrl } });
+  if (v.posterUrl && v.posterUrl !== posterUrl && !v.posterChoices.includes(v.posterUrl))
+    await imageStore().remove(v.posterUrl);
+  return { ok: true, posterUrl };
 }

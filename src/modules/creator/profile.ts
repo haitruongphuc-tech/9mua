@@ -8,6 +8,7 @@ export type VideoThumb = {
   likes: number;
   authorName: string;
   pinned?: boolean; // ghim lên đầu trang cá nhân (SPEC-creator.md V5.3)
+  previewUrl?: string | null; // ảnh xem trước động khi giữ ngón tay / di chuột (SPEC-creator.md V5.1)
 };
 
 export type CreatorProfile = {
@@ -63,6 +64,7 @@ export async function getCreatorProfile(
       caption: v.caption,
       views: v.views,
       likes: v.likes,
+      previewUrl: v.previewUrl,
       authorName: user.displayName,
       pinned: v.profilePinnedAt !== null,
     })),
@@ -90,6 +92,7 @@ export async function getHotVideos(limit = 8): Promise<VideoThumb[]> {
       caption: v.caption,
       views: v.views,
       likes: v.likes,
+      previewUrl: v.previewUrl,
       authorName: name.get(v.authorId)!,
     }));
 }

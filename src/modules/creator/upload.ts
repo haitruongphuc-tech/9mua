@@ -165,7 +165,15 @@ export async function createVideoUpload(
   if (
     duetOfId &&
     !(await db.video.count({
-      where: { id: duetOfId, status: 'ready', kind: 'video', visibility: 'public', allowRemix: true },
+      // Video dài (HLS) không Duet được: Duet ghép trên file MP4 ≤ 60 giây.
+      where: {
+        id: duetOfId,
+        status: 'ready',
+        kind: 'video',
+        visibility: 'public',
+        allowRemix: true,
+        fileUrl: { endsWith: '.mp4' },
+      },
     }))
   )
     return { ok: false, error: 'DUET_INVALID' };

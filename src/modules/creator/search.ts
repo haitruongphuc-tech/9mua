@@ -34,6 +34,7 @@ export async function searchVideos(query: string, limit: number): Promise<VideoT
             caption: v.caption,
             views: v.views,
             likes: v.likes,
+            previewUrl: v.previewUrl,
             authorName: name.get(v.authorId) ?? '',
           },
         ]

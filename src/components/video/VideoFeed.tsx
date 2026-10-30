@@ -24,6 +24,7 @@ import { formatVnd } from '@/lib/format';
 import type { LiveView } from '@/modules/live';
 import type { SocialFeedVideo } from '@/modules/social';
 import { CommentsSheet } from './CommentsSheet';
+import { attachHls, isHls, prefersLowData } from './hls';
 import { interleaveLives } from './interleave';
 import { ShareSheet } from './ShareSheet';
 import { Sheet } from './Sheet';
@@ -164,6 +165,48 @@ export function VideoFeed({
   );
   const activeEntry = entries[active];
   const activeVideoId = activeEntry?.kind === 'video' ? activeEntry.video.id : undefined;
+
+  // Nhiều mức chất lượng (SPEC-creator.md V5.1): mạng chậm thì phát bản 480p; video dài HLS chỉ gắn trình phát cho video
+  // đang xem và 1 video trước/sau, video cuộn xa thì gỡ để đỡ tốn bộ nhớ.
+  const [lowData, setLowData] = useState(false);
+  useEffect(() => setLowData(prefersLowData()), []);
+  const hlsAttached = useRef(new Map<string, { el: HTMLVideoElement; detach: () => void }>());
+  useEffect(() => {
+    const near = new Map<string, { el: HTMLVideoElement; url: string }>();
+    for (let i = Math.max(0, active - 1); i <= active + 1; i++) {
+      const entry = entries[i];
+      const el = videos.current[i];
+      if (entry?.kind === 'video' && el && isHls(entry.video.fileUrl))
+        near.set(entry.video.id, { el, url: entry.video.fileUrl });
+    }
+    for (const [id, a] of hlsAttached.current)
+      if (near.get(id)?.el !== a.el) {
+        a.detach();
+        hlsAttached.current.delete(id);
+      }
+    for (const [id, { el, url }] of near) {
+      if (hlsAttached.current.has(id)) continue;
+      let gone = false;
+      const slot: { el: HTMLVideoElement; detach: () => void } = {
+        el,
+        detach: () => {
+          gone = true;
+        },
+      };
+      hlsAttached.current.set(id, slot);
+      void attachHls(el, url).then((detach) => {
+        if (gone) detach();
+        else slot.detach = detach;
+      });
+    }
+  }, [active, entries]);
+  useEffect(() => {
+    const attached = hlsAttached.current;
+    return () => {
+      for (const a of attached.values()) a.detach();
+      attached.clear();
+    };
+  }, []);
 
   const loginHref = (videoId?: string) =>
     `/dang-nhap?next=${encodeURIComponent(videoId ? `/v/${videoId}` : '/')}`;
@@ -473,7 +516,7 @@ export function VideoFeed({
                   ref={(el) => {
                     videos.current[i] = el;
                   }}
-                  src={v.fileUrl}
+                  src={isHls(v.fileUrl) ? undefined : lowData && v.sdUrl ? v.sdUrl : v.fileUrl}
                   poster={v.posterUrl ?? undefined}
                   muted={muted}
                   playsInline

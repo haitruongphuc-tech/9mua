@@ -178,8 +178,8 @@ export function VideoUploadForm({
   return (
     <form
       onSubmit={submit}
-      // Ô nhập được cuộn tới phải nằm trên thanh nút dính ở đáy và menu dưới (không bị che trên điện thoại).
-      className="flex flex-col gap-4 [&_input]:scroll-mb-44 [&_select]:scroll-mb-44 [&_textarea]:scroll-mb-44"
+      // Ô nhập và nút được cuộn tới phải nằm trên thanh nút dính ở đáy và menu dưới (không bị che trên điện thoại).
+      className="flex flex-col gap-4 [&_button]:scroll-mb-44 [&_input]:scroll-mb-44 [&_select]:scroll-mb-44 [&_textarea]:scroll-mb-44"
     >
       {duet ? (
         <div

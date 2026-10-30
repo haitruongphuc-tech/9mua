@@ -85,6 +85,7 @@ export async function viewHistory(
             caption: v.caption,
             views: v.views,
             likes: v.likes,
+            previewUrl: v.previewUrl,
             authorName: name.get(v.authorId) ?? '',
             viewedAt: r.lastViewedAt,
           },

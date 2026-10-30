@@ -1,18 +1,30 @@
 import { randomBytes } from 'node:crypto';
-import { mkdir, rm, unlink } from 'node:fs/promises';
+import { mkdir, rm, stat, unlink } from 'node:fs/promises';
 import path from 'node:path';
 import type { VideoJob } from '@prisma/client';
 import { now } from '@/lib/clock';
 import { db } from '@/lib/db';
 import { env } from '@/lib/env';
 import { imageStore } from '@/lib/media/image-store';
+import { getSetting } from '@/lib/settings';
 import { notifyKey } from '@/lib/notifications';
 import { runVideoReadyHooks } from './hooks';
 import { initialScore } from './score';
 import { videoLimits } from './limits';
 import {
+  hlsInitFile,
+  hlsLevels,
+  listFiles,
+  makeCovers,
+  makeHls,
+  makeMp4Sd,
+  makePreview,
+  SD_BOX,
+} from './renditions';
+import {
   composeDuet,
   LONG_TRANSCODE_TIMEOUT_MS,
+  makePoster,
   MAX_DURATION_SEC,
   MAX_STORY_SEC,
   probe,
@@ -84,7 +96,9 @@ export async function processNextJob(): Promise<boolean> {
       : 'File không phải video MP4, MOV hoặc WebM';
     // Duet: cần file video gốc còn trên feed (SPEC-creator.md bổ sung 27/10).
     const original = video.duetOfId
-      ? await db.video.findFirst({ where: { id: video.duetOfId, status: 'ready', kind: 'video' } })
+      ? await db.video.findFirst({
+          where: { id: video.duetOfId, status: 'ready', kind: 'video', fileUrl: { endsWith: '.mp4' } },
+        })
       : null;
     const originalPath = original?.fileUrl ? imageStore().localPath(original.fileUrl) : null;
     if (!reason && video.duetOfId && !originalPath) reason = 'Video gốc để Duet không còn trên 9MUA';
@@ -95,6 +109,12 @@ export async function processNextJob(): Promise<boolean> {
     await mkdir(work, { recursive: true });
     const outMp4 = path.join(work, 'video.mp4');
     const outPoster = path.join(work, 'poster.jpg');
+    // Nhiều mức chất lượng (SPEC-creator.md V5.1, khi bật long_video): video thường, không Story, không Duet.
+    // Video dài ra HLS đoạn 6 giây; video ≤ 60 giây ra MP4 720p + 480p. Cả hai có 3 ảnh bìa và ảnh xem trước động.
+    const extras = limits.long && !story && !originalPath;
+    const hls = extras && long;
+    const hlsDir = path.join(work, 'hls');
+    const levels = hls ? hlsLevels(source!.video!, (await getSetting('video_enable_1080')) === 'true') : [];
     if (originalPath) {
       const orig = await probe(originalPath);
       await composeDuet(job.sourcePath, originalPath, outMp4, outPoster, {
@@ -102,12 +122,28 @@ export async function processNextJob(): Promise<boolean> {
         newAudio: source!.hasAudio,
         origAudio: orig.hasAudio,
       });
+    } else if (hls) {
+      await makeHls(job.sourcePath, hlsDir, levels, source!.hasAudio, maxSec, LONG_TRANSCODE_TIMEOUT_MS);
+      await makePoster(job.sourcePath, outPoster, source!.durationSec);
     } else
       await transcode(job.sourcePath, outMp4, outPoster, source!.durationSec, {
         maxSec,
         timeoutMs: long ? LONG_TRANSCODE_TIMEOUT_MS : undefined,
       });
-    const result = await probe(outMp4);
+    // HLS: kích thước đo ở file init của mức cao nhất (đã xoay đúng chiều); thời lượng theo file gốc.
+    const result = await probe(hls ? await hlsInitFile(path.join(hlsDir, `${levels.at(-1)}p`)) : outMp4);
+    const durationSec = hls ? Math.min(source!.durationSec, maxSec) : result.durationSec;
+    const playable = hls ? job.sourcePath : outMp4;
+    const sdPath = path.join(work, 'video-sd.mp4');
+    const sd =
+      extras &&
+      !hls &&
+      !!result.video &&
+      (result.video.width > SD_BOX.width || result.video.height > SD_BOX.height);
+    if (sd) await makeMp4Sd(outMp4, sdPath);
+    const coverFiles = extras ? await makeCovers(playable, work, durationSec) : [];
+    const previewPath = path.join(work, 'preview.webp');
+    if (extras) await makePreview(playable, previewPath, durationSec);
 
     const t = now();
     // Nháp / hẹn giờ (SPEC-creator.md V5.3): xử lý xong vẫn chưa lên feed. Hẹn giờ đã qua lúc xử lý xong thì đăng luôn.
@@ -121,8 +157,40 @@ export async function processNextJob(): Promise<boolean> {
     const finalStatus = video.draft ? 'draft' : scheduled ? 'scheduled' : 'ready';
     const key = `videos/${t.getUTCFullYear()}/${String(t.getUTCMonth() + 1).padStart(2, '0')}/${video.id}-${randomBytes(6).toString('hex')}`;
     const store = imageStore();
-    const fileUrl = await store.saveFile(`${key}.mp4`, outMp4);
+    const renditions: { kind: 'mp4' | 'hls'; height: number; path: string; bytes: bigint }[] = [];
+    let fileUrl: string;
+    if (hls) {
+      const files = await listFiles(hlsDir);
+      const urls = new Map<string, string>();
+      for (const f of files)
+        urls.set(f.rel, await store.saveFile(`${key}-hls/${f.rel}`, path.join(hlsDir, f.rel)));
+      fileUrl = urls.get('master.m3u8')!;
+      for (const h of levels)
+        renditions.push({
+          kind: 'hls',
+          height: h,
+          path: urls.get(`${h}p/index.m3u8`)!,
+          bytes: BigInt(files.filter((f) => f.rel.startsWith(`${h}p/`)).reduce((sum, f) => sum + f.bytes, 0)),
+        });
+    } else {
+      const bytes = BigInt((await stat(outMp4)).size);
+      fileUrl = await store.saveFile(`${key}.mp4`, outMp4);
+      if (extras) renditions.push({ kind: 'mp4', height: 720, path: fileUrl, bytes });
+      if (sd) {
+        const sdBytes = BigInt((await stat(sdPath)).size);
+        renditions.push({
+          kind: 'mp4',
+          height: 480,
+          path: await store.saveFile(`${key}-480.mp4`, sdPath),
+          bytes: sdBytes,
+        });
+      }
+    }
     const posterUrl = await store.saveFile(`${key}.jpg`, outPoster);
+    const posterChoices: string[] = [];
+    for (const [i, file] of coverFiles.entries())
+      posterChoices.push(await store.saveFile(`${key}-c${i + 1}.jpg`, file));
+    const previewUrl = extras ? await store.saveFile(`${key}-p.webp`, previewPath) : null;
     await db.$transaction([
       db.video.update({
         where: { id: video.id },
@@ -130,7 +198,9 @@ export async function processNextJob(): Promise<boolean> {
           status: finalStatus,
           fileUrl,
           posterUrl,
-          durationSec: result.durationSec,
+          posterChoices,
+          previewUrl,
+          durationSec,
           width: result.video?.width,
           height: result.video?.height,
           readyAt: finalStatus === 'ready' ? t : null,
@@ -139,6 +209,7 @@ export async function processNextJob(): Promise<boolean> {
           expiresAt: story ? new Date(t.getTime() + 24 * 3_600_000) : null,
         },
       }),
+      db.videoRendition.createMany({ data: renditions.map((r) => ({ videoId: video.id, ...r })) }),
       db.videoJob.update({ where: { id: job.id }, data: { status: 'done', error: null } }),
     ]);
     await unlink(job.sourcePath).catch(() => {});

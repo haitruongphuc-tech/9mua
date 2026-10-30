@@ -39,6 +39,40 @@ test('bật video dài: tải từng phần → ghép → worker chuyển mã �
         .filter({ hasText: `Từng phần ${stamp}` })
         .getByTestId('my-video-status'),
     ).toContainText('Đã đăng');
+
+    // Nhiều mức chất lượng (SPEC-creator.md V5.1): 3 ảnh bìa gợi ý, đổi ảnh bìa sau khi đăng, ảnh xem trước ở lưới.
+    const ready = await e2eDb.video.findUniqueOrThrow({ where: { id: video.id } });
+    expect(ready.posterChoices).toHaveLength(3);
+    await page.goto(`/video/cua-toi/${video.id}/sua`);
+    await expect(page.getByTestId('cover-choice')).toHaveCount(4); // ảnh bìa hiện tại + 3 ảnh gợi ý
+    await page.getByTestId('cover-choice').nth(2).click();
+    await expect(page.getByText('Đã đổi ảnh bìa.')).toBeVisible();
+    expect((await e2eDb.video.findUniqueOrThrow({ where: { id: video.id } })).posterUrl).toBe(
+      ready.posterChoices[1],
+    );
+    await page.goto(`/creator/${video.authorId}`);
+    await expect(page.getByTestId('grid-preview').first()).toBeAttached();
+
+    // Video dài 75 giây (tài khoản ≥ 3 ngày) → HLS; trang xem gắn trình phát HLS.
+    await e2eDb.user.update({
+      where: { id: video.authorId },
+      data: { createdAt: new Date(Date.now() - 5 * 86_400_000) },
+    });
+    await page.goto('/video/dang');
+    await page.getByTestId('video-input').setInputFiles('tests/fixtures/videos/long-75s.mp4');
+    await page.getByTestId('video-caption').fill(`Dài 75 giây ${stamp}`);
+    await page.getByRole('button', { name: 'Đăng video' }).click();
+    await page.waitForURL((u) => u.pathname === '/video/cua-toi' && u.searchParams.has('moi'));
+    await page.request.get('http://localhost:3100/api/internal/video/process', {
+      headers: { 'x-internal-token': E2E_CRON_TOKEN },
+    });
+    const long = await e2eDb.video.findFirstOrThrow({ where: { caption: `Dài 75 giây ${stamp}` } });
+    expect(long).toMatchObject({ status: 'ready', fileUrl: expect.stringMatching(/master\.m3u8$/) });
+    await page.goto(`/v/${long.id}`);
+    const el = page.getByTestId('feed-item').first().locator('video');
+    await expect
+      .poll(() => el.evaluate((v: HTMLVideoElement) => v.currentSrc || v.src))
+      .toMatch(/^blob:|m3u8$/);
   } finally {
     await setSwitch('off');
   }

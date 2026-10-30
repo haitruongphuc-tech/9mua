@@ -53,9 +53,25 @@ export async function reportVideo(
   return { ok: true, autoHidden: true };
 }
 
-export async function removeVideoFiles(v: { fileUrl: string | null; posterUrl: string | null }) {
+// Xoá mọi file của video: bản chính, ảnh bìa, và các bản thêm (SPEC-creator.md V5.1): MP4 480p, cả thư mục HLS,
+// 3 ảnh bìa gợi ý, ảnh xem trước động.
+export async function removeVideoFiles(v: {
+  id?: string;
+  fileUrl: string | null;
+  posterUrl: string | null;
+  previewUrl?: string | null;
+  posterChoices?: string[];
+}) {
   const store = imageStore();
-  await Promise.all([v.fileUrl && store.remove(v.fileUrl), v.posterUrl && store.remove(v.posterUrl)]);
+  const extra = v.id
+    ? (
+        await db.videoRendition.findMany({ where: { videoId: v.id, kind: 'mp4' }, select: { path: true } })
+      ).map((r) => r.path)
+    : [];
+  const files = new Set([v.posterUrl, v.previewUrl, ...(v.posterChoices ?? []), ...extra].filter(Boolean));
+  if (v.fileUrl?.endsWith('/master.m3u8')) await store.removeDir(v.fileUrl.slice(0, -'/master.m3u8'.length));
+  else if (v.fileUrl) files.add(v.fileUrl);
+  await Promise.all([...files].map((url) => store.remove(url!)));
 }
 
 // Người đăng xoá video của mình: gỡ khỏi feed và xoá file. Đơn cũ vẫn giữ mã video nguồn để thống kê.

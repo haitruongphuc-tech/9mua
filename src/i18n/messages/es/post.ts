@@ -44,6 +44,11 @@ export const post: PostMessages = {
   'post.editLead':
     'Edita el texto, los productos, la privacidad y la ubicación. No se puede cambiar el archivo de video.',
   'post.editSave': 'Guardar cambios',
+  'post.cover': 'Portada',
+  'post.coverPick': 'Usar esta portada',
+  'post.coverUpload': '＋ Subir',
+  'post.coverSaved': 'Portada cambiada.',
+  'post.coverError': 'No se pudo cambiar la portada. Usa una imagen JPG, PNG o WebP de hasta 10 MB.',
   'post.err.tooBig': 'Máximo 100 MB por video.',
   'post.err.tooLong': 'El video dura más de {sec} segundos, recórtalo y vuelve a intentarlo.',
   'post.err.upload': 'Error al subir, inténtalo de nuevo.',

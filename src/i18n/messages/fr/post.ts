@@ -44,6 +44,11 @@ export const post: PostMessages = {
   'post.editLead':
     'Modifiez la légende, les produits, la confidentialité et le lieu. Le fichier vidéo ne peut pas être remplacé.',
   'post.editSave': 'Enregistrer',
+  'post.cover': 'Couverture',
+  'post.coverPick': 'Utiliser cette couverture',
+  'post.coverUpload': '＋ Envoyer',
+  'post.coverSaved': 'Couverture modifiée.',
+  'post.coverError': 'Impossible de changer la couverture. Utilisez une image JPG, PNG ou WebP de 10 Mo max.',
   'post.err.tooBig': '100 Mo maximum par vidéo.',
   'post.err.tooLong': 'La vidéo dépasse {sec} secondes, raccourcissez-la puis réessayez.',
   'post.err.upload': 'Échec de l’envoi, réessayez.',

@@ -36,6 +36,7 @@ export type FeedVideo = {
   edited: boolean;
   profilePinned: boolean;
   mine: boolean; // người đang xem là người đăng: hiện nút Ghim / Sửa
+  sdUrl: string | null; // MP4 480p cho mạng chậm / tiết kiệm dữ liệu (SPEC-creator.md V5.1)
 };
 
 export const FEED_PAGE = 8;
@@ -176,7 +177,10 @@ export async function hydrateVideos(ids: string[], viewer: Viewer): Promise<Feed
   const [videos, likes, pins] = await Promise.all([
     db.video.findMany({
       where: { id: { in: ids } },
-      include: { products: { orderBy: { position: 'asc' } } },
+      include: {
+        products: { orderBy: { position: 'asc' } },
+        renditions: { where: { kind: 'mp4', height: 480 }, select: { path: true } },
+      },
     }),
     viewer.userId
       ? db.videoLike.findMany({
@@ -219,6 +223,7 @@ export async function hydrateVideos(ids: string[], viewer: Viewer): Promise<Feed
       edited: v.editedAt !== null,
       profilePinned: v.profilePinnedAt !== null,
       mine: viewer.userId === v.authorId,
+      sdUrl: v.renditions[0]?.path ?? null,
     });
   }
   return out;

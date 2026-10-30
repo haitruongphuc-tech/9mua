@@ -1,4 +1,4 @@
-import { copyFile, mkdir, rename, unlink, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, rename, rm, unlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { env } from '@/lib/env';
 
@@ -8,6 +8,8 @@ export interface ImageStore {
   // Chuyển một file đã có (vd. video vừa chuyển mã) vào kho công khai; file nguồn bị xoá.
   saveFile(key: string, sourcePath: string): Promise<string>;
   remove(url: string): Promise<void>;
+  // Xoá cả thư mục (bản HLS của video dài có hàng trăm đoạn 6 giây).
+  removeDir(urlPrefix: string): Promise<void>;
   // Đường dẫn trên đĩa của một file đã lưu (worker cần để ghép Duet). null nếu không phải file của kho này.
   localPath(url: string): string | null;
 }
@@ -51,6 +53,15 @@ export class LocalImageStore implements ImageStore {
     if (!url.startsWith('/uploads/')) return;
     const target = resolveUploadPath(this.root, url.slice('/uploads/'.length).split('/'));
     if (target) await unlink(target).catch(() => {});
+  }
+
+  async removeDir(urlPrefix: string): Promise<void> {
+    if (!urlPrefix.startsWith('/uploads/')) return;
+    const parts = urlPrefix.slice('/uploads/'.length).split('/').filter(Boolean);
+    // Chỉ xoá thư mục con của videos/ (không bao giờ xoá cả UPLOAD_DIR).
+    if (parts[0] !== 'videos' || parts.length < 2) return;
+    const target = resolveUploadPath(this.root, parts);
+    if (target) await rm(target, { recursive: true, force: true });
   }
 }
 

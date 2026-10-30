@@ -27,6 +27,7 @@ export async function saveSettingsAction(form: FormData): Promise<void> {
     video_long_max_seconds: intOf(form.get('video_long_max_seconds')),
     video_max_mb: intOf(form.get('video_max_mb')),
     video_long_daily_minutes: intOf(form.get('video_long_daily_minutes')),
+    video_enable_1080: form.get('video_enable_1080') === 'on' ? 'true' : 'false',
   });
   back(
     '/admin/cai-dat',

@@ -34,6 +34,24 @@ export function EditVideoForm({
   const [aiUsed, setAiUsed] = useState(video.aiGenerated);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  // Ảnh bìa (SPEC-creator.md V5.1 mục 6): chọn 1 trong 3 ảnh gợi ý hoặc tải ảnh riêng; đổi ngay, không cần bấm Lưu.
+  const [poster, setPoster] = useState(video.posterUrl);
+  const [coverMsg, setCoverMsg] = useState<{ ok: boolean; text: string } | null>(null);
+
+  async function changeCover(body: { choice: string } | { file: File }) {
+    setCoverMsg(null);
+    const form = new FormData();
+    form.set('videoId', video.id);
+    if ('choice' in body) form.set('choice', body.choice);
+    else form.set('file', body.file);
+    const res = (await fetch('/api/video/cover', { method: 'POST', body: form })
+      .then((r) => r.json())
+      .catch(() => null)) as { ok: boolean; posterUrl?: string } | null;
+    if (res?.ok && res.posterUrl) {
+      setPoster(res.posterUrl);
+      setCoverMsg({ ok: true, text: t('post.coverSaved') });
+    } else setCoverMsg({ ok: false, text: t('post.coverError') });
+  }
 
   useEffect(() => {
     const controller = new AbortController();
@@ -81,10 +99,55 @@ export function EditVideoForm({
   return (
     <form
       onSubmit={submit}
-      // Ô nhập được cuộn tới phải nằm trên thanh nút dính ở đáy và menu dưới.
-      className="flex flex-col gap-4 [&_input]:scroll-mb-44 [&_select]:scroll-mb-44 [&_textarea]:scroll-mb-44"
+      // Ô nhập và nút được cuộn tới phải nằm trên thanh nút dính ở đáy và menu dưới.
+      className="flex flex-col gap-4 [&_button]:scroll-mb-44 [&_input]:scroll-mb-44 [&_select]:scroll-mb-44 [&_textarea]:scroll-mb-44"
       data-testid="edit-video-form"
     >
+      <fieldset className="flex flex-col gap-2" data-testid="edit-cover">
+        <legend className="mb-1 text-[12px] font-bold text-white/70">{t('post.cover')}</legend>
+        <div className="flex gap-2 overflow-x-auto">
+          {[...new Set([poster, ...video.posterChoices].filter((u): u is string => Boolean(u)))].map(
+            (url) => (
+              <button
+                key={url}
+                type="button"
+                onClick={() => url !== poster && void changeCover({ choice: url })}
+                aria-pressed={url === poster}
+                aria-label={t('post.coverPick')}
+                disabled={url !== poster && !video.posterChoices.includes(url)}
+                className={`relative h-28 w-16 shrink-0 overflow-hidden rounded-[10px] border-2 ${
+                  url === poster ? 'border-brand' : 'border-transparent'
+                }`}
+                data-testid="cover-choice"
+              >
+                <Image src={url} alt="" fill sizes="64px" className="object-cover" unoptimized />
+              </button>
+            ),
+          )}
+          <label className="flex h-28 w-16 shrink-0 cursor-pointer items-center justify-center rounded-[10px] border border-dashed border-white/30 text-center text-[11px] font-bold text-white/70">
+            {t('post.coverUpload')}
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="sr-only"
+              data-testid="cover-file"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) void changeCover({ file: f });
+                e.target.value = '';
+              }}
+            />
+          </label>
+        </div>
+        {coverMsg ? (
+          <p
+            role={coverMsg.ok ? 'status' : 'alert'}
+            className={`text-[12px] font-bold ${coverMsg.ok ? 'text-green-300' : 'text-red-400'}`}
+          >
+            {coverMsg.text}
+          </p>
+        ) : null}
+      </fieldset>
       <label className="flex flex-col gap-2 text-[13px] font-bold">
         {t('post.caption')}
         <textarea

@@ -34,6 +34,7 @@ export const SETTING_DEFAULTS = {
   video_long_max_seconds: '3600',
   video_max_mb: '2048',
   video_long_daily_minutes: '120',
+  video_enable_1080: 'false', // thêm mức HLS 1080p khi video gốc ≥ 1080p (tốn thêm dung lượng và thời gian xử lý)
 } as const;
 
 export type SettingKey = keyof typeof SETTING_DEFAULTS;

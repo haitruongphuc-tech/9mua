@@ -120,7 +120,7 @@ export async function transcode(
 }
 
 // Ảnh bìa: khung hình ở giây thứ 1 (hoặc giữa video nếu ngắn hơn 2 giây).
-async function makePoster(outMp4: string, outPoster: string, durationSec: number) {
+export async function makePoster(outMp4: string, outPoster: string, durationSec: number) {
   await run(
     'ffmpeg',
     [

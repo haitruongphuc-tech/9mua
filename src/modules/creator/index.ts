@@ -71,6 +71,7 @@ export {
   pinToProfile,
   editVideo,
   videoForEdit,
+  setVideoCover,
   countDrafts,
   placeLabel,
   scheduleOk,

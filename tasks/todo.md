@@ -705,7 +705,7 @@ Nhánh `nang-cap-mot-dot`. Trừ App (C32–C36). Mỗi task: test trước → 
 - [x] **T97: Bài đăng ảnh + chữ** (C86).
 
 ### Mạng xã hội
-- [ ] **T98: Tim bình luận, @nhắc tên, từ cấm** (C25, C52, C67).
+- [x] **T98: Tim bình luận, @nhắc tên, từ cấm** (C25, C52, C67).
 - [ ] **T99: Trả lời bình luận bằng video** (C64).
 - [ ] **T100: Thông báo mới + cài đặt thông báo** (C66).
 - [ ] **T101: Bạn chung, gợi ý follow, tab Đã thích** (C23, C24, C62).

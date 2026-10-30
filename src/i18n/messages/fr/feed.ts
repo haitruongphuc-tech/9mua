@@ -70,6 +70,12 @@ export const feed: FeedMessages = {
   'feed.comments.pinned': '📌 Épinglé',
   'feed.comments.hide': 'Masquer',
   'feed.comments.reportAction': 'Signaler',
+  'feed.comments.like': 'Aimer le commentaire',
+  'feed.comments.unhide': 'Réafficher',
+  'feed.comments.mutedOwn':
+    "Ce commentaire est masqué pour les autres (il contient un mot bloqué par l'auteur).",
+  'feed.comments.mutedCount': '{count} commentaires masqués pour des mots bloqués',
+  'feed.comments.editMuted': 'Modifier les mots bloqués',
   'feed.comments.reported': 'Commentaire signalé.',
   'feed.comments.author': 'Auteur',
   'feed.comments.err.HAS_LINK': 'Les commentaires ne peuvent pas contenir de lien.',

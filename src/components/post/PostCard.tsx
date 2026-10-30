@@ -4,6 +4,7 @@ import { Bookmark, Heart, MessageCircle, Share2 } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useT } from '@/i18n/client';
+import { RichText } from '@/components/ui/RichText';
 import { formatVnd } from '@/lib/format';
 import type { PostView } from '@/modules/creator';
 
@@ -63,19 +64,7 @@ export function PostCard({
       }
       data-testid="post-text"
     >
-      {post.text.split(/(#[\p{L}\p{N}_]+)/u).map((part, k) =>
-        part.startsWith('#') ? (
-          <Link
-            key={k}
-            href={`/hashtag/${encodeURIComponent(part.slice(1))}`}
-            className="font-bold hover:underline"
-          >
-            {part}
-          </Link>
-        ) : (
-          part
-        ),
-      )}
+      <RichText text={post.text} />
     </p>
   );
   const btn = 'flex flex-col items-center gap-0.5 text-[11px] font-bold';

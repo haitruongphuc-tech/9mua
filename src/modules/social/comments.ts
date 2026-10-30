@@ -1,15 +1,21 @@
 import { now } from '@/lib/clock';
 import { blockedEitherIds, isBlockedEither } from '@/lib/blocks';
 import { db } from '@/lib/db';
+import { withinRate } from '@/lib/rate-window';
 import { notifyKey } from '@/lib/notifications';
 import { canViewVideo } from '@/modules/creator';
 import { hasLink } from './links';
+import { isFeatureOn } from '@/lib/features';
+import { recordMentions } from './mentions';
+import { containsMuted, mutedFolded } from './muted';
 
 // Bình luận video (SPEC-social.md mục 3).
 export const MAX_COMMENT = 300;
 export const COMMENT_GAP_MS = 10_000;
 export const COMMENTS_PER_DAY = 100;
 export const COMMENT_AUTO_HIDE_REPORTERS = 5;
+export const COMMENT_LIKES_PER_MINUTE = 60;
+export const COMMENT_TOP_LIKES = 3; // từ 3 tim trở lên thì đứng trên (sau bình luận ghim)
 
 export type CommentView = {
   id: string;
@@ -17,6 +23,9 @@ export type CommentView = {
   createdAt: Date;
   pinned: boolean;
   atSecond: number | null; // bình luận theo phút khi xem tập phim (SPEC-creator.md V5.9 mục 5)
+  likeCount: number;
+  liked: boolean;
+  mutedHidden: boolean; // ẩn vì có từ cấm của chủ video (chỉ người viết và chủ video thấy)
   author: { id: string; displayName: string; avatarUrl: string | null };
   byVideoAuthor: boolean;
   replies: Omit<CommentView, 'replies'>[];
@@ -66,9 +75,23 @@ export async function addComment(
 
   const at =
     !rootId && Number.isInteger(atSecond) && atSecond! >= 0 && atSecond! <= 24 * 3600 ? atSecond! : null;
+  // Từ cấm của chủ video (SPEC-social.md V5.4 mục 3): bình luận tự ẩn, người viết vẫn thấy.
+  const social = await isFeatureOn('social_more');
+  const muted = social && userId !== video.authorId && containsMuted(text, await mutedFolded(video.authorId));
   const c = await db.comment.create({
-    data: { videoId, userId, parentId: rootId, text, atSecond: at, createdAt: t },
+    data: {
+      videoId,
+      userId,
+      parentId: rootId,
+      text,
+      atSecond: at,
+      createdAt: t,
+      ...(muted ? { hiddenAt: t, hiddenReason: 'keyword' } : {}),
+    },
   });
+  if (muted) return { ok: true, id: c.id };
+  if (social)
+    await recordMentions({ type: 'comment', id: c.id, url: `/video?v=${videoId}&binh-luan=1` }, userId, text);
   const me = await db.user.findUnique({ where: { id: userId }, select: { displayName: true } });
   const vars = { name: me?.displayName ?? '9MUA', text: text.slice(0, 60) };
   if (video.authorId !== userId)
@@ -82,18 +105,37 @@ export async function addComment(
 export async function listComments(
   videoId: string,
   viewerId?: string | null,
-): Promise<{ items: CommentView[]; total: number }> {
+): Promise<{ items: CommentView[]; total: number; mutedHidden: CommentView[] }> {
   const video = await db.video.findUnique({ where: { id: videoId }, select: { authorId: true } });
-  if (!video) return { items: [], total: 0 };
+  if (!video) return { items: [], total: 0, mutedHidden: [] };
   const blocked = await blockedEitherIds(viewerId);
-  if (blocked.has(video.authorId)) return { items: [], total: 0 };
+  if (blocked.has(video.authorId)) return { items: [], total: 0, mutedHidden: [] };
+  const owner = viewerId === video.authorId;
+  // Bình luận ẩn vì từ cấm: người viết thấy bình luận của mình; chủ video thấy trong mục "Đã ẩn" để hiện lại.
   const rows = (
     await db.comment.findMany({
-      where: { videoId, hiddenAt: null },
+      where: {
+        videoId,
+        OR: [
+          { hiddenAt: null },
+          ...(viewerId ? [{ hiddenReason: 'keyword', userId: viewerId }] : []),
+          ...(owner ? [{ hiddenReason: 'keyword' }] : []),
+        ],
+      },
       orderBy: { createdAt: 'asc' },
       take: 500,
     })
   ).filter((r) => !blocked.has(r.userId));
+  const likedSet = new Set(
+    viewerId
+      ? (
+          await db.commentLike.findMany({
+            where: { userId: viewerId, commentId: { in: rows.map((r) => r.id) } },
+            select: { commentId: true },
+          })
+        ).map((l) => l.commentId)
+      : [],
+  );
   const users = await db.user.findMany({
     where: { id: { in: [...new Set(rows.map((r) => r.userId))] } },
     select: { id: true, displayName: true, avatarUrl: true },
@@ -105,6 +147,9 @@ export async function listComments(
     createdAt: r.createdAt,
     pinned: Boolean(r.pinnedAt),
     atSecond: r.atSecond,
+    likeCount: r.likeCount,
+    liked: likedSet.has(r.id),
+    mutedHidden: r.hiddenReason === 'keyword' && r.hiddenAt !== null,
     author: name.get(r.userId) ?? { id: r.userId, displayName: '9MUA', avatarUrl: null },
     byVideoAuthor: r.userId === video.authorId,
   });
@@ -113,9 +158,19 @@ export async function listComments(
     ...view(r),
     replies: rows.filter((x) => x.parentId === r.id).map(view),
   }));
-  // Bình luận ghim lên đầu, còn lại mới nhất trước.
-  items.sort((a, b) => Number(b.pinned) - Number(a.pinned) || b.createdAt.getTime() - a.createdAt.getTime());
-  return { items, total: rows.length };
+  // Thứ tự (SPEC-social.md V5.4 mục 1): ghim → từ 3 tim trở lên, nhiều tim trước → mới nhất.
+  const top = (c: CommentView) => (c.likeCount >= COMMENT_TOP_LIKES ? c.likeCount : 0);
+  items.sort(
+    (a, b) =>
+      Number(b.pinned) - Number(a.pinned) || top(b) - top(a) || b.createdAt.getTime() - a.createdAt.getTime(),
+  );
+  // Chủ video: bình luận bị ẩn vì từ cấm tách riêng (đầu bảng hiện "Đã ẩn N bình luận…").
+  const visible = owner ? items.filter((c) => !c.mutedHidden || c.author.id === viewerId) : items;
+  return {
+    items: visible,
+    total: rows.filter((r) => r.hiddenAt === null).length,
+    mutedHidden: owner ? items.filter((c) => c.mutedHidden && c.author.id !== viewerId) : [],
+  };
 }
 
 export async function commentCounts(videoIds: string[]): Promise<Map<string, number>> {
@@ -149,12 +204,45 @@ export async function pinComment(commentId: string, ownerId: string): Promise<{ 
   return { ok: true };
 }
 
+// Tim bình luận (SPEC-social.md V5.4 mục 1): bấm lần nữa để bỏ; tối đa 60 lần mỗi phút; không tính giới hạn Free.
+export async function toggleCommentLike(
+  userId: string,
+  commentId: string,
+): Promise<
+  { ok: true; liked: boolean; likeCount: number } | { ok: false; error: 'NOT_FOUND' | 'RATE_LIMIT' }
+> {
+  const c = await db.comment.findFirst({ where: { id: commentId, hiddenAt: null } });
+  if (!c || !(await canViewVideo(c.videoId, userId))) return { ok: false, error: 'NOT_FOUND' };
+  if (!(await withinRate(`comment-like:${userId}`, COMMENT_LIKES_PER_MINUTE)))
+    return { ok: false, error: 'RATE_LIMIT' };
+  const key = { commentId_userId: { commentId, userId } };
+  const had = await db.commentLike.findUnique({ where: key });
+  const updated = await db.$transaction(async (tx) => {
+    if (had) await tx.commentLike.delete({ where: key });
+    else await tx.commentLike.create({ data: { commentId, userId, createdAt: now() } });
+    return tx.comment.update({
+      where: { id: commentId },
+      data: { likeCount: { increment: had ? -1 : 1 } },
+      select: { likeCount: true },
+    });
+  });
+  return { ok: true, liked: !had, likeCount: Math.max(0, updated.likeCount) };
+}
+
+// Chủ video bấm "Hiện lại" một bình luận bị ẩn vì từ cấm.
+export async function unhideMutedComment(commentId: string, ownerId: string): Promise<{ ok: boolean }> {
+  const c = await ownerComment(commentId, ownerId);
+  if (!c || c.hiddenReason !== 'keyword') return { ok: false };
+  await db.comment.update({ where: { id: c.id }, data: { hiddenAt: null, hiddenReason: null } });
+  return { ok: true };
+}
+
 export async function hideComment(commentId: string, ownerId: string): Promise<{ ok: boolean }> {
   const c = await ownerComment(commentId, ownerId);
   if (!c) return { ok: false };
   await db.comment.update({
     where: { id: c.id },
-    data: { hiddenAt: now(), hiddenById: ownerId, pinnedAt: null },
+    data: { hiddenAt: now(), hiddenById: ownerId, hiddenReason: 'owner', pinnedAt: null },
   });
   return { ok: true };
 }

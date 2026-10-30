@@ -70,6 +70,12 @@ export const feed: FeedMessages = {
   'feed.comments.pinned': '📌 Fijado',
   'feed.comments.hide': 'Ocultar',
   'feed.comments.reportAction': 'Denunciar',
+  'feed.comments.like': 'Me gusta el comentario',
+  'feed.comments.unhide': 'Mostrar de nuevo',
+  'feed.comments.mutedOwn':
+    'Este comentario está oculto para otros (tiene una palabra que el autor silenció).',
+  'feed.comments.mutedCount': '{count} comentarios ocultos por palabras silenciadas',
+  'feed.comments.editMuted': 'Editar palabras silenciadas',
   'feed.comments.reported': 'Comentario denunciado.',
   'feed.comments.author': 'Autor',
   'feed.comments.err.HAS_LINK': 'Los comentarios no pueden tener enlaces.',

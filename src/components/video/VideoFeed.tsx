@@ -27,6 +27,7 @@ import { CommentsSheet } from './CommentsSheet';
 import { attachHls, isHls, prefersLowData } from './hls';
 import { interleaveLives, interleavePosts } from './interleave';
 import { PostCard } from '@/components/post/PostCard';
+import { RichText } from '@/components/ui/RichText';
 import type { PostView } from '@/modules/creator';
 import { ShareMore } from './ShareMore';
 import { ShareSheet } from './ShareSheet';
@@ -731,19 +732,7 @@ export function VideoFeed({
                   ) : null}
                   {v.caption ? (
                     <p className="mt-1 line-clamp-3 text-[14px] text-white/85">
-                      {v.caption.split(/(#[\p{L}\p{N}_]+)/u).map((part, k) =>
-                        part.startsWith('#') ? (
-                          <Link
-                            key={k}
-                            href={`/hashtag/${encodeURIComponent(part.slice(1))}`}
-                            className="font-bold hover:underline"
-                          >
-                            {part}
-                          </Link>
-                        ) : (
-                          part
-                        ),
-                      )}
+                      <RichText text={v.caption} />
                     </p>
                   ) : null}
                   {v.captionsUrl ? (

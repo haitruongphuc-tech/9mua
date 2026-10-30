@@ -5,6 +5,7 @@ import { getT } from '@/i18n/server';
 import { isFeatureOn } from '@/lib/features';
 import { createPost } from '@/modules/creator';
 import { requireUser } from '@/modules/identity';
+import { recordMentions } from '@/modules/social';
 
 // Đăng bài ảnh + chữ (SPEC-creator.md V5.10, công tắc posts). Máy chủ kiểm lại mọi giới hạn.
 export async function createPostAction(input: {
@@ -28,5 +29,11 @@ export async function createPostAction(input: {
     draft: options && input.draft === true,
   });
   if (!r.ok) return { error: t(`post.article.err.${r.error}`) };
+  if (!(options && input.draft === true))
+    await recordMentions(
+      { type: 'post', id: r.postId, url: `/p/${r.postId}` },
+      user.id,
+      String(input.text ?? ''),
+    );
   redirect(`/p/${r.postId}`);
 }

@@ -2,6 +2,7 @@ import { getT } from '@/i18n/server';
 import { featureGuard } from '@/lib/features';
 import { addPostComment, listPostComments } from '@/modules/creator';
 import { getCurrentUser } from '@/modules/identity';
+import { recordMentions } from '@/modules/social';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,7 +26,10 @@ export async function POST(request: Request, { params }: Ctx) {
   const user = await getCurrentUser();
   if (!user) return Response.json({ ok: false, message: t('feed.share.err.LOGIN') }, { status: 401 });
   const body = (await request.json().catch(() => null)) as { text?: unknown } | null;
-  const r = await addPostComment(user.id, (await params).id, typeof body?.text === 'string' ? body.text : '');
+  const postId = (await params).id;
+  const text = typeof body?.text === 'string' ? body.text : '';
+  const r = await addPostComment(user.id, postId, text);
+  if (r.ok) await recordMentions({ type: 'post_comment', id: r.id, url: `/p/${postId}` }, user.id, text);
   return r.ok
     ? Response.json(r)
     : Response.json({ ok: false, message: t(`feed.post.err.${r.error}`) }, { status: 400 });

@@ -4,7 +4,8 @@ import { logoutAction, logoutOtherDevicesAction } from '@/app/(auth)/actions';
 import { ClientMessages } from '@/i18n/ClientMessages';
 import { getT } from '@/i18n/server';
 import { handleInfo, requireUser } from '@/modules/identity';
-import { listBlockedUsers } from '@/modules/social';
+import { listBlockedUsers, listMutedKeywords, MENTION_POLICIES, mentionPolicyOf } from '@/modules/social';
+import { addMutedKeywordAction, removeMutedKeywordAction, setMentionPolicyAction } from './social-actions';
 import { Avatar } from '@/components/ui/Avatar';
 import { BlockButton } from '@/components/social/BlockButton';
 import { isFeatureOn } from '@/lib/features';
@@ -18,7 +19,7 @@ export const metadata: Metadata = { title: 'Cài đặt tài khoản', robots: {
 export default async function AccountSettingsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ 'da-dang-xuat-thiet-bi-khac'?: string }>;
+  searchParams: Promise<{ 'da-dang-xuat-thiet-bi-khac'?: string; 'da-luu'?: string; 'loi-tu-cam'?: string }>;
 }) {
   const user = await requireUser();
   const [params, t, handleOn, blockOn] = await Promise.all([
@@ -28,6 +29,10 @@ export default async function AccountSettingsPage({
     isFeatureOn('social_more'),
   ]);
   const blocked = blockOn ? await listBlockedUsers(user.id) : [];
+  // Nhắc tên và từ cấm (SPEC-social.md V5.4), công tắc social_more.
+  const muted = blockOn ? await listMutedKeywords(user.id) : [];
+  const policy = blockOn ? await mentionPolicyOf(user.id) : 'everyone';
+  const mutedError = params['loi-tu-cam'];
   const handle = handleOn ? await handleInfo(user.id) : null;
   return (
     <ClientMessages prefixes={['me.settings.', 'auth.otp.', 'auth.addEmail.']}>
@@ -43,6 +48,78 @@ export default async function AccountSettingsPage({
               handle={handle.handle}
               nextChange={handle.nextChangeAt ? formatDate(handle.nextChangeAt, t.lang) : null}
             />
+          ) : null}
+          {blockOn ? (
+            <Card title={t('me.settings.mention.title')} id="nhac-ten">
+              <form
+                action={setMentionPolicyAction}
+                className="flex flex-col gap-2"
+                data-testid="mention-policy"
+              >
+                {MENTION_POLICIES.map((p) => (
+                  <label key={p} className="flex items-center gap-2 text-[13px]">
+                    <input
+                      type="radio"
+                      name="policy"
+                      value={p}
+                      defaultChecked={policy === p}
+                      className="accent-[#ff6b00]"
+                    />
+                    {t(`me.settings.mention.${p}`)}
+                  </label>
+                ))}
+                <button
+                  type="submit"
+                  className="h-10 w-fit rounded-full bg-white/10 px-4 text-[12px] font-black"
+                >
+                  {t('me.settings.save')}
+                </button>
+              </form>
+            </Card>
+          ) : null}
+          {blockOn ? (
+            <Card title={t('me.settings.muted.title', { count: muted.length })} id="tu-cam">
+              <p className="text-[12px] text-white/60">{t('me.settings.muted.hint')}</p>
+              {mutedError ? (
+                <p role="alert" className="text-[12px] font-bold text-red-300">
+                  {t(
+                    `me.settings.muted.err.${mutedError === 'LIMIT' ? 'LIMIT' : mutedError === 'DUPLICATE' ? 'DUPLICATE' : 'INVALID'}`,
+                  )}
+                </p>
+              ) : null}
+              <ul className="flex flex-wrap gap-2" data-testid="muted-words">
+                {muted.map((m) => (
+                  <li key={m.id}>
+                    <form action={removeMutedKeywordAction.bind(null, m.id)}>
+                      <button
+                        type="submit"
+                        className="h-8 rounded-full bg-white/10 px-3 text-[12px] font-bold"
+                        aria-label={t('me.settings.muted.remove', { word: m.word })}
+                      >
+                        {m.word} ✕
+                      </button>
+                    </form>
+                  </li>
+                ))}
+              </ul>
+              <form action={addMutedKeywordAction} className="flex gap-2">
+                <input
+                  name="word"
+                  required
+                  maxLength={30}
+                  placeholder={t('me.settings.muted.placeholder')}
+                  className="h-11 min-w-0 flex-1 rounded-[14px] border border-white/15 bg-white/10 px-3 text-[14px] text-white"
+                  data-testid="muted-input"
+                />
+                <button
+                  type="submit"
+                  className="h-11 shrink-0 rounded-full bg-brand px-4 text-[12px] font-black text-white"
+                  data-testid="muted-add"
+                >
+                  {t('me.settings.muted.add')}
+                </button>
+              </form>
+            </Card>
           ) : null}
           {/* Tên, ảnh, giới thiệu chuyển sang trang Sửa hồ sơ (SPEC-social.md bổ sung 30/10, A2). */}
           <Card title={t('me.settings.info')} id="thong-tin">

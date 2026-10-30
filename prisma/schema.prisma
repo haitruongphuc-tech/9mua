@@ -33,6 +33,8 @@ model User {
   bio                 String?
   // @tên (SPEC-identity.md V5.1): tự đặt cho tài khoản cũ; đổi 30 ngày một lần, @tên cũ giữ 30 ngày để chuyển hướng.
   handle              String?              @unique
+  // "Ai được nhắc tên tôi" (SPEC-social.md V5.4 mục 2): everyone | following | nobody.
+  mentionPolicy       String               @default("everyone")
   handleChangedAt     DateTime?
   previousHandle      String?              @unique
   previousHandleUntil DateTime?
@@ -740,6 +742,47 @@ model PostReport {
   @@index([status, createdAt])
 }
 
+// Đếm số lần làm một việc trong cửa sổ 1 phút (vd. tim bình luận tối đa 60 lần mỗi phút), không phụ thuộc bấm rồi bỏ.
+model RateWindow {
+  key         String   @id // "<việc>:<userId>"
+  windowStart DateTime
+  count       Int      @default(0)
+}
+
+// Tim bình luận (SPEC-social.md V5.4 mục 1).
+model CommentLike {
+  commentId String
+  userId    String
+  createdAt DateTime @default(now())
+
+  @@id([commentId, userId])
+  @@index([userId, createdAt])
+}
+
+// Nhắc tên @ (SPEC-social.md V5.4 mục 2). sourceType: comment | video | post | post_comment.
+model Mention {
+  id         String   @id @default(cuid(2))
+  sourceType String
+  sourceId   String
+  userId     String
+  byUserId   String
+  createdAt  DateTime @default(now())
+
+  @@unique([sourceType, sourceId, userId])
+  @@index([userId, createdAt])
+}
+
+// Từ cấm (SPEC-social.md V5.4 mục 3): folded = bỏ dấu, chữ thường để so khớp nguyên từ.
+model MutedKeyword {
+  id        String   @id @default(cuid(2))
+  userId    String
+  word      String
+  folded    String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, folded])
+}
+
 // Cảm xúc trên bài viết (SPEC-social.md V5.8): mỗi người một cảm xúc mỗi bài.
 model Reaction {
   userId    String
@@ -1076,17 +1119,20 @@ model Follow {
 }
 
 model Comment {
-  id          String    @id @default(cuid(2))
-  videoId     String
-  userId      String
-  parentId    String?
-  text        String
-  pinnedAt    DateTime?
-  hiddenAt    DateTime?
-  hiddenById  String?
-  reportCount Int       @default(0)
-  atSecond    Int? // bình luận theo phút khi xem tập phim (SPEC-creator.md V5.9 mục 5)
-  createdAt   DateTime  @default(now())
+  id           String    @id @default(cuid(2))
+  videoId      String
+  userId       String
+  parentId     String?
+  text         String
+  pinnedAt     DateTime?
+  hiddenAt     DateTime?
+  hiddenById   String?
+  reportCount  Int       @default(0)
+  atSecond     Int? // bình luận theo phút khi xem tập phim (SPEC-creator.md V5.9 mục 5)
+  // Tim bình luận và ẩn theo từ cấm (SPEC-social.md V5.4): hiddenReason = keyword | owner | reports.
+  likeCount    Int       @default(0)
+  hiddenReason String?
+  createdAt    DateTime  @default(now())
 
   @@index([videoId, createdAt])
   @@index([userId, createdAt])

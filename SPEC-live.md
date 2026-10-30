@@ -165,6 +165,7 @@ không chuyển cho người khác, không mua được bằng tiền. Khách kh
 9. **CEO chỉnh luật** trong `/admin/xu`: các mức thưởng, ngân sách tháng, số phút tối thiểu. Luật mới áp dụng cho buổi
    live bắt đầu sau khi lưu. Trang này cũng hiện ngân sách đã dùng trong tháng.
 10. **Dùng xu** (gia hạn Kiot, đẩy video/live lên đầu) **chưa làm trong đợt này**. Sẽ viết vào `SPEC-billing.md` sau.
+    *Cập nhật 30/10/2026:* đã viết, chờ CEO duyệt: `SPEC-billing.md` V5.1 và `SPEC-creator.md` V5.11 (mã C94, tắt sẵn).
 
 ### Hợp đồng (`src/modules/xu/index.ts`)
 

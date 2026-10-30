@@ -299,9 +299,9 @@ Giữ nguyên đường dẫn để link đã chia sẻ không hỏng.
   Mỗi video tối đa 1 thông báo thích mỗi giờ.
 - Trang `/tai-khoan/cai-dat` mục "Thông báo": bật/tắt từng loại. Mặc định bật hết.
 
-### V5.6 Điểm thưởng (C01, M1) — công tắc `feature.points`
+### V5.6 Điểm thưởng (C01, M1) — công tắc `feature.points`, đổi xu `feature.points_exchange`
 
-1. **Chỉ để hiển thị.** Không đổi ra xu, tiền, voucher hay quà. CEO đổi ý thì phải có spec mới.
+1. Điểm **đổi được ra xu** (CEO chốt 30/10). Không đổi ra tiền, voucher hay quà. Phần đổi xu tắt sẵn.
 2. Luật mặc định (CEO chỉnh trong `/admin/cai-dat`):
    - +5 khi thả tim một video lần đầu (không tính video của mình).
    - +10 khi follow một người lần đầu.
@@ -311,6 +311,14 @@ Giữ nguyên đường dẫn để link đã chia sẻ không hỏng.
    lần nữa; điểm từ tài khoản bị khoá bị thu hồi bằng dòng trừ.
 4. Sổ chỉ thêm `PointEntry` (userId, kind, points, refType, refId, vnDay, createdAt), khoá duy nhất (userId, kind, refId).
 5. Hiển thị: hiệu ứng "+5 · chuỗi x2" bay lên cạnh nút tim (M1), "+10"/"+20" khi follow; tổng điểm trên trang Tôi.
+6. **Đổi điểm ra xu** (trang Tôi → "Đổi điểm"), mặc định CEO chỉnh trong `/admin/xu`:
+   - **1.000 điểm = 1 xu**; mỗi lần đổi tối thiểu 1.000 điểm, tối đa 1 lần mỗi ngày.
+   - Mỗi người tối đa **30 xu mỗi tháng** từ điểm; tài khoản tạo từ 7 ngày, không có vi phạm còn hiệu lực.
+   - Ngân sách xu đổi từ điểm **10.000 xu mỗi tháng** cho toàn hệ thống, tách khỏi ngân sách thưởng live. Hết ngân sách thì báo
+     "Đã hết lượt đổi tháng này".
+   - Trong một transaction: dòng trừ `PointEntry(kind = 'exchange')` và dòng cộng `XuEntry(kind = 'points_exchange')` cùng mã
+     tham chiếu; bấm 2 lần không đổi 2 lần.
+   - `XuEntry` thêm cột `refId` (trống) và khoá duy nhất `(kind, refId)` cho các loại dòng mới.
 
 ### V5.7 Sự kiện và Kỷ niệm (C26) — công tắc `feature.events`
 

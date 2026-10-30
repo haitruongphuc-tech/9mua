@@ -16,20 +16,18 @@
 | 4 | Thư viện mới, thêm cột vào bảng đang có dữ liệu | Đồng ý. **Chỉ thêm cột/bảng**, không xoá hay sửa dữ liệu cũ. |
 | 5 | Vui chơi có tiền, GHN/GHTK, thanh toán khi nhận hàng, trả chi phí tự động | **Làm luôn**, tắt sẵn. Trả chi phí tự động đi qua kênh chi hộ PayOS, chỉ trả cho người nhận CEO đã duyệt, có mức trần và ngân sách. |
 | 6 | AI kiểm duyệt | **Viết sẵn, chưa kích hoạt.** CEO điền khoá sau. Dùng lại Claude như AI Studio. |
-
-Đề xuất của Claude cho các câu CEO chưa trả lời (CEO sửa khi duyệt spec):
-
-- Ai được đăng video dài hơn 60 giây: tài khoản tạo từ **3 ngày** trở lên.
-- Điểm thưởng (C01): **chỉ hiển thị**, không đổi ra xu hay tiền.
-- Xử lý vi phạm 3 lần (C21): **dùng thêm**, giữ luật "5 người báo cáo thì tự ẩn".
-- "Làm hết tất cả" được hiểu là gồm cả các đợt đã lên kế hoạch trước đây: B (bài ảnh + chữ, cảm xúc, đăng lại), C (chỉnh video,
-  nhạc nền), D (Nhóm), E (hoa hồng creator). Mã mới: **C86–C92** (mục 2). Đợt A đã làm xong trên `main` (T74–T78, mã C93).
+| 7 | Ai được đăng video dài hơn 60 giây | Tài khoản tạo từ **3 ngày** trở lên. |
+| 8 | Điểm thưởng (C01) | **Đổi ra xu.** Tỉ lệ, mức trần và ngân sách do CEO chỉnh (mặc định ở `SPEC-social.md` V5.6). Phần đổi xu tắt sẵn. |
+| 9 | Xử lý vi phạm 3 lần (C21) | **Dùng thêm**, giữ luật "5 người báo cáo thì tự ẩn". |
+| 10 | "Làm hết" gồm những gì | **Tất cả, trừ App trên điện thoại.** Gồm cả các đợt đã lên kế hoạch: B (bài ảnh + chữ, cảm xúc, đăng lại), C (chỉnh video, nhạc nền), D (Nhóm), E (hoa hồng creator) = C86–C92, và **dùng xu** (gia hạn Kiot, đẩy video/live) = C94. Đợt A đã làm xong trên `main` (T74–T78, mã C93). |
+| 11 | Phụ đề tự động | CEO giao Claude chọn. Claude đề xuất **OpenAI Whisper** (mục 4). |
+| 12 | Nhạc nền | **Lấy từ âm thanh của video mọi người đăng lên** ("dùng âm thanh này" như TikTok). CEO vẫn tải nhạc lên được nếu muốn. |
 
 ## 2. Bảng tra mã → spec
 
 | Mã | Chức năng | Spec |
 |---|---|---|
-| C01 | Điểm thưởng | SPEC-social §V5.6 |
+| C01 | Điểm thưởng, đổi điểm ra xu | SPEC-social §V5.6 |
 | C02 | Watch: phim ngắn nhiều tập | SPEC-creator §V5.9 |
 | C03–C05, C65 | Tải về, nhúng, TikTok/Instagram, gửi qua Hộp thư | SPEC-creator §V5.7, SPEC-messages §V5.1 |
 | C06, C07 | Video dài 60 phút / 2GB, nhiều mức chất lượng, 3 ảnh bìa, ảnh xem trước | SPEC-creator §V5.1 |
@@ -45,6 +43,7 @@
 | C26 | Sự kiện, Kỷ niệm | SPEC-social §V5.7 |
 | C27–C29 | Kiot kéo thả 50 mẫu, nhập Page, bảo hành | SPEC-kiot §V5.3–V5.5 |
 | C30 | Vui chơi có tiền | SPEC-play (module mới) |
+| C94 | Dùng xu: gia hạn Kiot, đẩy video/live lên đầu | SPEC-billing §V5.1, SPEC-creator §V5.11 |
 | C31, C85 | GHN/GHTK, thanh toán khi nhận hàng | SPEC-orders §V5.4–V5.5, SPEC-payouts §V5.1 |
 | C32–C36 | App | **Để sau** |
 | C37, C39–C41 | Nhãn "Cổng thế giới đã mở", Hướng dẫn, slogan trang mới, Pháp lý thêm STK và con dấu | SPEC-admin §V5.4 |
@@ -82,7 +81,9 @@ Công tắc tắt thì nút, trang và API của nhóm đó ẩn hẳn (API tr�
 | `feature.watch` | C02 | bật | |
 | `feature.posts` | C86, C87, C88 | bật | |
 | `feature.groups` | C91 | bật | |
-| `feature.points` | C01 | bật | Chỉ hiển thị, không đụng tiền |
+| `feature.points` | C01 (cộng điểm, hiển thị) | bật | |
+| `feature.points_exchange` | C01 (đổi điểm ra xu) | **tắt** | Xu dùng thay tiền trong 9MUA |
+| `feature.xu_spend` | C94 | **tắt** | Xu thay tiền phí Kiot, giảm doanh thu tiền mặt |
 | `feature.social_more` | C23–C25, C62, C64, C66–C68 | bật | |
 | `feature.events` | C26 | bật | |
 | `feature.commitment` | C10, C11 | bật | |
@@ -124,10 +125,10 @@ Mỗi dịch vụ có driver `fake` cho dev/test, như PayOS và AI Studio. Thi�
 |---|---|---|---|
 | Cloudflare R2 (hoặc dịch vụ cùng chuẩn S3) | Kho video ngoài | `STORAGE_S3_ENDPOINT`, `STORAGE_S3_BUCKET`, `STORAGE_S3_KEY`, `STORAGE_S3_SECRET`, `STORAGE_PUBLIC_URL` | Mở tài khoản, tạo bucket, gắn tên miền `media.9mua.com` |
 | Claude (Anthropic) | AI kiểm duyệt | `ANTHROPIC_API_KEY` (đã có cho AI Studio), `MODERATION_MONTHLY_BUDGET_VND` | Đặt ngân sách tháng |
-| Dịch vụ nghe giọng nói | Phụ đề tự động | `STT_PROVIDER`, `STT_API_KEY` | **Chọn nhà cung cấp** (câu hỏi mở) |
+| OpenAI Whisper (đề xuất) | Phụ đề tự động | `STT_PROVIDER=openai`, `OPENAI_API_KEY` | Mở tài khoản OpenAI API, nạp tiền trả trước |
 | Dịch vụ bản đồ (MapTiler hoặc Goong) | Bản đồ nhiệt, ghim vị trí Kiot | `MAP_TILE_URL`, `MAP_API_KEY` | Mở tài khoản |
 | GHN, GHTK | Giao hàng, thu hộ COD | `GHN_TOKEN`, `GHN_SHOP_ID`, `GHTK_TOKEN` | Ký hợp đồng tài khoản doanh nghiệp 9MUA CO.,LTD |
-| CAS | Số dư, biến động tài khoản MBBank | `BANKFEED_PROVIDER`, `BANKFEED_WEBHOOK_SECRET`, `BANKFEED_API_KEY` | **Xác nhận tên dịch vụ** và tài liệu kết nối (câu hỏi mở) |
+| Casso ("CAS" trong bản V4.7) | Số dư, biến động tài khoản MBBank công ty | `CASSO_API_KEY`, `CASSO_WEBHOOK_SECRET` | Mở tài khoản Casso, liên kết tài khoản MBBank doanh nghiệp, tạo khoá và webhook |
 | Apple | Đăng nhập bằng Apple | `APPLE_CLIENT_ID`, `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY` | Tài khoản Apple Developer (99 USD/năm) |
 | Facebook, YouTube, TikTok, Zalo OA, Instagram, Shopee | Nhập Page | `PAGEIMPORT_<MẠNG>_*` | Xin duyệt ứng dụng với từng mạng |
 | PayOS chi hộ | Trả chi phí tự động, rút tiền thưởng, hoa hồng | đã có `PAYOS_PAYOUT_*` | Nạp tiền vào tài khoản chi hộ |
@@ -156,13 +157,13 @@ Chỉ thêm. Cột mới trên bảng đang có dữ liệu đều **cho phép t
   `scheduled`), `Product` (warranty, ratingAvg, ratingCount, weightGram, lengthCm, widthCm, heightCm, commissionRate), `OrderItem`
   (variantId, variantLabel), `Order` (paymentMethod, couponId, discountVnd, shippingPaidBy, codFeeVnd, shipmentId),
   `Comment` (postId, atSecond, likeCount, replyVideoId), `LiveSession` (scheduleId, guestUserId,
-  recordingVideoId).
+  recordingVideoId), `XuEntry` (refId; khoá duy nhất `(kind, refId)` cho các loại dòng mới), `KiotSubscription` (cách trả `xu`).
 - **Bảng mới** (định nghĩa ở spec từng module): ViewHistory, VideoNotInterested, VideoRendition, Series, SeriesFollow,
   Sound, Post, PostImage, Reaction, Repost, CommentLike, Mention, UserBlock, MutedKeyword, PointEntry, Event, EventInterest,
   CommunityGroup, CommunityMember, CommunityPost, CommitmentVersion, Commitment, SearchLog, ProductReview, ReviewMedia,
   ReviewReport, OriginDossier, OriginFile, FakeReport, ModerationCheck, Strike, KanbanCard, Expense, ExpensePayee,
   ExpensePayment, BankTransaction, ProductVariant, Coupon, CouponRedemption, FlashSale, Shipment, ShipmentEvent,
-  CodRemittance, EarningEntry, LiveSchedule, LiveReminder, LiveModerator,
+  CodRemittance, EarningEntry, LiveSchedule, LiveReminder, LiveModerator, Boost,
   MessageMedia, PageImport, PlayGame, PlayTurn, LeaderboardWeek.
 - **Sổ chỉ thêm** (không sửa, không xoá; sửa sai bằng dòng bù): PointEntry, Commitment, Strike, ExpensePayment,
   BankTransaction, CouponRedemption, CodRemittance, EarningEntry, ShipmentEvent, cùng các sổ tiền đang có.
@@ -182,11 +183,11 @@ Chỉ thêm. Cột mới trên bảng đang có dữ liệu đều **cho phép t
 - Video 60 phút: ổ đĩa, băng thông, thời gian xử lý trên VPS 2 nhân. Video dài có hàng chờ riêng, video ≤ 60 giây luôn đi trước.
 - Live tăng giới hạn, ghi hình, mời khách: tốn băng thông và ổ đĩa; giữ giới hạn cũ tới khi CEO nâng máy.
 - Các phần đụng tiền tắt sẵn, mỗi phần có sổ chỉ thêm, mức trần và nhật ký CEO.
-- Nhạc nền (C90): thư viện nhạc do 9MUA tự tải lên; người dùng chỉ dùng âm thanh trong thư viện hoặc âm thanh gốc của
-  video khác trên 9MUA.
+- Nhạc nền (C90): âm thanh lấy từ video người dùng đăng lên. Người đăng tắt được việc cho người khác dùng âm thanh của mình;
+  CEO gỡ được một âm thanh (video đã đăng vẫn phát, không ai chọn mới được); có lý do báo cáo "Vi phạm bản quyền".
+- Đổi điểm ra xu (C01) và dùng xu (C94): xu thay tiền trong 9MUA nên có tỉ lệ, mức trần mỗi người và ngân sách tháng; tắt sẵn.
 
-## 9. Câu hỏi còn mở (không chặn việc viết code; chặn việc bật công tắc)
+## 9. Câu hỏi còn mở
 
-1. Phụ đề tự động (C51) dùng nhà cung cấp nào?
-2. "CAS" là dịch vụ nào, có tài liệu kết nối không?
-3. Thư viện nhạc nền (C90): CEO tải nhạc lên, hay để trống tới khi có nhạc?
+Không còn câu hỏi chặn việc viết code. CEO xác nhận đề xuất phụ đề (OpenAI Whisper) và Casso khi duyệt; tỉ lệ đổi điểm ra xu và
+giá xu khi dùng chỉnh được trong Admin sau.

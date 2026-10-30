@@ -284,7 +284,10 @@ Xem `SPEC-social.md` mục "Bổ sung 30/10/2026 — Đợt A" (A1, A3, A4). Hoa
 
 ### V5.4 Phụ đề tự động (C51) — công tắc `feature.auto_captions`
 
-1. Người đăng bật "Phụ đề tự động" khi đăng. Sau khi xử lý video, driver nghe giọng nói (`STT_PROVIDER`) tạo phụ đề WebVTT.
+1. Người đăng bật "Phụ đề tự động" khi đăng. Sau khi xử lý video, driver nghe giọng nói tạo phụ đề WebVTT.
+   Nhà cung cấp đề xuất: **OpenAI Whisper** (`STT_PROVIDER=openai`, `OPENAI_API_KEY`), vì trả thẳng phụ đề có mốc thời gian, nhận
+   tiếng Việt, giá khoảng 0,006 USD mỗi phút (cần kiểm lại trên trang giá OpenAI khi mở tài khoản). Driver tách riêng để đổi sang
+   nhà cung cấp khác (Google, FPT.AI) mà không sửa module. Máy chủ tách tiếng ra file âm thanh nhỏ trước khi gửi.
 2. Người đăng xem và sửa chữ phụ đề ở `/video/cua-toi` trước khi bật cho người xem.
 3. Người xem có nút "CC" bật/tắt phụ đề, nhớ lựa chọn.
 4. Chỉ video ≤ 10 phút. Ngân sách tháng `stt.monthly_budget_vnd`; hết ngân sách thì bỏ qua, báo người đăng và CEO.
@@ -316,11 +319,14 @@ Xem `SPEC-social.md` mục "Bổ sung 30/10/2026 — Đợt A" (A1, A3, A4). Hoa
      Máy chủ vẽ bằng font Be Vietnam Pro.
    - Nhãn dán: 24 nhãn dán của 9MUA (Mua ngay, Giảm giá, Mới, Freeship, Hàng thật…), vị trí và thời gian như chữ.
    - Mọi chỉnh sửa lưu thành `editSpec` (JSON) trên `Video`; máy chủ dựng một lần khi xử lý.
-2. **Âm thanh (C90):**
-   - Thư viện nhạc của 9MUA: CEO tải lên ở `/admin/am-thanh` (tên, nguồn/ca sĩ, file MP3 hoặc M4A ≤ 10MB, ≤ 5 phút) và gỡ
-     được. Người dùng không tải nhạc lên.
-   - Khi đăng: chọn nhạc, chọn đoạn bắt đầu, chỉnh âm lượng tiếng gốc và nhạc (0–100%).
-   - "Dùng âm thanh này": trên video cho phép `allowRemix`, lấy tiếng của video đó làm âm thanh cho video mới.
+2. **Âm thanh (C90)** — CEO chốt 30/10: **lấy từ âm thanh của video mọi người đăng lên**, như TikTok:
+   - Mỗi video `public` có tiếng và cho phép `allowRemix` tự tạo một âm thanh gốc "Âm thanh gốc – @tên" (máy chủ tách tiếng khi
+     xử lý video). Người đăng đặt lại tên âm thanh được.
+   - "Dùng âm thanh này" trên video, hoặc tìm trong "Âm thanh" khi đăng: lấy tiếng đó làm nhạc nền cho video mới.
+   - Mục "Âm thanh thịnh hành": 50 âm thanh được dùng nhiều nhất 7 ngày. Tìm âm thanh theo tên.
+   - CEO vẫn tải nhạc lên được ở `/admin/am-thanh` (tên, nguồn, MP3/M4A ≤ 10MB, ≤ 5 phút) nếu muốn.
+   - Khi đăng: chọn âm thanh, chọn đoạn bắt đầu, chỉnh âm lượng tiếng gốc và nhạc (0–100%).
+   - Người đăng tắt `allowRemix` thì âm thanh của video đó không chọn mới được nữa; video đã dùng vẫn phát.
    - Trang `/am-thanh/<id>`: tên âm thanh, số video dùng, lưới video.
    - Bảng `Sound`: kind (`library` | `original`), title, artist, sourceVideoId, path, durationSec, status (`active` | `removed`).
      Cột `Video.soundId`. Âm thanh bị gỡ thì video đã đăng vẫn phát; không chọn mới được.
@@ -372,6 +378,18 @@ Xem `SPEC-social.md` mục "Bổ sung 30/10/2026 — Đợt A" (A1, A3, A4). Hoa
 4. Bảng `Post` (id, authorId, text, bgColor, visibility, allowComments, soundId, status, createdAt) và `PostImage`. Bảng
    `Comment`, `SavedVideo`, báo cáo thêm cột `postId` (trống), mỗi dòng có đúng một trong `videoId` hoặc `postId`.
 
+### V5.11 Đẩy video và live lên đầu bằng xu (C94) — công tắc `feature.xu_spend`
+
+1. Video `public` đã đăng của mình: nút ⋯ → "Đẩy video". Giá mặc định **10 xu mỗi giờ** (CEO chỉnh trong `/admin/xu`),
+   chọn 1–24 giờ.
+2. Trong thời gian đẩy, video được chèn ở **vị trí thứ 3** trong feed Dành cho bạn của người chưa xem video đó, mỗi người xem
+   tối đa 1 lần, có nhãn "Được đẩy". Toàn hệ thống tối đa 20 video được đẩy cùng lúc; đủ thì xếp hàng theo thời điểm trả.
+3. Đang live: người phát bấm "Đẩy live", **10 xu mỗi 30 phút**; buổi live được chèn ở vị trí thứ 1 trong feed trang chủ.
+4. Trừ xu bằng `XuEntry(kind = 'spend_boost', refId = mã lượt đẩy)`. Số dư xu không đủ hoặc đang âm thì không đẩy được.
+5. Video bị gỡ, chuyển riêng tư hoặc buổi live kết thúc trước giờ: hoàn phần xu chưa dùng bằng `XuEntry(kind = 'boost_refund')`.
+6. Người đăng xem số lượt hiển thị và lượt xem có được trong thời gian đẩy ở `/video/cua-toi`.
+7. Bảng `Boost` (id, userId, videoId hoặc liveId, xu, startsAt, endsAt, impressions, status).
+
 ### Hợp đồng mới của `creator` (chỉ thêm)
 
 ```ts
@@ -407,5 +425,5 @@ createPost(userId, input): Promise<Result>; updatePost; deletePost; canViewPost
 ### Boundaries V5
 
 - **Không bao giờ:** phát file chưa qua xử lý; cho xem video không `public` qua bất kỳ đường nào khi không đủ quyền; xoá bản trên
-  VPS trước khi bản trên kho ngoài đọc lại khớp; để người dùng tải nhạc vào thư viện.
+  VPS trước khi bản trên kho ngoài đọc lại khớp; tạo âm thanh dùng lại từ video không `public` hoặc đã tắt `allowRemix`.
 - **Hỏi trước:** bật 1080p; tăng giới hạn tổng phút mỗi ngày; cho Story dài hơn 30 giây.

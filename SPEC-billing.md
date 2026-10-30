@@ -124,3 +124,22 @@ Không có. Mọi quyết định đều theo những gì đã chốt. Các mụ
   billing không gọi ngược social) và gọi `billing.grantVoucherYear(tx, kiotId)` trong cùng transaction.
   CEO xem và thu hồi voucher chưa dùng ở `/admin/voucher`.
 
+
+## Bổ sung 30/10/2026 — Nâng cấp một đợt (V5)
+
+> **Trạng thái: chờ CEO duyệt.** Quyết định, công tắc, dữ liệu: `docs/nang-cap-mot-dot.md`.
+
+### V5.1 Kích hoạt và gia hạn Kiot bằng xu (C94) — công tắc `feature.xu_spend`, **tắt sẵn**
+
+1. Trang kích hoạt / gia hạn Kiot có thêm lựa chọn "Trả bằng xu". Số xu = phí 1 năm tính theo VNĐ hiện tại (giá 1 USD theo tỷ giá
+   Vietcombank), chia 1.000 rồi **làm tròn lên** (1 xu dùng thay 1.000đ, theo quyết định cũ).
+2. Phải đủ xu cho cả 1 năm; không trộn xu và tiền trong một lần trả. Số dư xu âm thì không dùng được.
+3. Trong một transaction: dòng `XuEntry(kind = 'spend_kiot', refId = mã kỳ thuê)` trừ xu và gia hạn Kiot y như khi PayOS báo đã trả.
+   Bảng thanh toán phí thuê ghi cách trả `xu`.
+4. Báo cáo doanh thu (Tổng quan, Tài chính) tách riêng "phí Kiot trả bằng xu": không phải tiền mặt vào tài khoản.
+5. Mỗi Kiot tối đa 1 lần trả bằng xu mỗi 12 tháng (CEO chỉnh), để xu không thay hẳn doanh thu phí thuê.
+
+### Kiểm thử V5 (riêng `billing`)
+
+- Không đủ xu thì từ chối; đủ xu thì gia hạn đúng 1 năm và trừ đúng số xu; bấm 2 lần chỉ trừ 1 lần.
+- Báo cáo doanh thu không cộng phí trả bằng xu vào tiền mặt.

@@ -244,10 +244,12 @@ lúc làm và CEO sửa được.
    - Khoản trả bằng thẻ: không chuyển tiền; tới hạn thì hiện "Thẻ tự trừ — chờ xác nhận", CEO bấm "Đã trừ".
    - Nút "Tạo QR trả" (VietQR tới người nhận, CEO tự trả) và "QR nạp quỹ chi hộ" (VietQR tới tài khoản quỹ chi hộ PayOS).
 
-### V5.7 Số dư và biến động tài khoản qua CAS (C46) — công tắc `feature.bank_feed`, chờ khoá
+### V5.7 Số dư và biến động tài khoản qua Casso (C46) — công tắc `feature.bank_feed`, chờ khoá
 
-- Driver `bankfeed` (dịch vụ do CEO xác nhận, có driver `fake`). Nhận biến động qua webhook `/api/bankfeed/webhook`
-  (kiểm khoá bí mật) và kéo lại mỗi 15 phút để không sót.
+- "CAS" trong bản V4.7 là dịch vụ đọc biến động tài khoản ngân hàng; Claude đề xuất **Casso**, cùng công ty làm PayOS mà 9MUA
+  đang dùng. Driver `bankfeed` (driver `casso` và `fake`). Nhận biến động qua webhook `/api/bankfeed/webhook` (kiểm khoá bí mật
+  `CASSO_WEBHOOK_SECRET`) và kéo lại mỗi 15 phút để không sót (tài khoản MBBank doanh nghiệp đồng bộ tối đa 1 lần mỗi 15 phút;
+  webhook lỗi nhiều lần có thể bị Casso tắt).
 - Sổ chỉ thêm `BankTransaction` (providerTxnId duy nhất, amount, direction, balanceAfter, description, occurredAt).
 - Hiện số dư mới nhất, 20 biến động gần nhất, trạng thái kết nối (xanh/đỏ).
 - **Chỉ để xem.** Không dùng biến động ngân hàng để đánh dấu đơn đã trả (việc đó vẫn do PayOS).

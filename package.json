@@ -19,9 +19,11 @@
     "db:deploy": "prisma migrate deploy",
     "test:e2e": "playwright test",
     "build:scripts": "node scripts/build-scripts.mjs",
-    "user:create-admin": "npm run build:scripts --silent && node dist/scripts/create-admin.mjs"
+    "user:create-admin": "npm run build:scripts --silent && node dist/scripts/create-admin.mjs",
+    "media:migrate": "npm run build:scripts --silent && node dist/scripts/media-migrate.mjs"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "3.1150.0",
     "@fontsource/be-vietnam-pro": "5.3.0",
     "@node-rs/argon2": "2.2.2",
     "@payos/node": "2.0.5",

@@ -14,7 +14,9 @@ export function middleware(request: NextRequest) {
 
   // CSP theo nonce chỉ bật ở bản build production (next dev cần eval cho tải lại nóng).
   const csp =
-    process.env.NODE_ENV === 'production' ? buildCsp(crypto.randomUUID().replace(/-/g, ''), appUrl) : null;
+    process.env.NODE_ENV === 'production'
+      ? buildCsp(crypto.randomUUID().replace(/-/g, ''), appUrl, process.env.STORAGE_PUBLIC_URL || undefined)
+      : null;
   if (csp) headers.set('content-security-policy', csp); // Next.js đọc nonce từ đây để gắn vào script của nó
 
   const secure = (res: NextResponse) => {

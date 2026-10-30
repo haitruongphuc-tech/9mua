@@ -53,6 +53,15 @@ const schema = z
     ZALO_APP_SECRET: z.preprocess((v) => (v === '' ? undefined : v), z.string().optional()),
     FACEBOOK_APP_ID: z.preprocess((v) => (v === '' ? undefined : v), z.string().optional()),
     FACEBOOK_APP_SECRET: z.preprocess((v) => (v === '' ? undefined : v), z.string().optional()),
+    // Kho video ngoài chuẩn S3 (SPEC-creator.md V5.1 mục 9; Cloudflare R2: vùng "auto"). Thiếu khoá thì video lưu trên VPS.
+    // Driver fake chỉ cho dev/test.
+    STORAGE_DRIVER: z.enum(['s3', 'fake']).optional(),
+    STORAGE_S3_ENDPOINT: z.preprocess((v) => (v === '' ? undefined : v), z.url().optional()),
+    STORAGE_S3_REGION: z.string().default('auto'),
+    STORAGE_S3_BUCKET: z.preprocess((v) => (v === '' ? undefined : v), z.string().optional()),
+    STORAGE_S3_KEY: z.preprocess((v) => (v === '' ? undefined : v), z.string().optional()),
+    STORAGE_S3_SECRET: z.preprocess((v) => (v === '' ? undefined : v), z.string().optional()),
+    STORAGE_PUBLIC_URL: z.preprocess((v) => (v === '' ? undefined : v), z.url().optional()),
     // Live (SPEC-live.md): API nội bộ của MediaMTX (không mở ra Internet). Driver fake chỉ cho test/E2E.
     MEDIA_DRIVER: z.enum(['mediamtx', 'fake']).optional(),
     MEDIAMTX_API_URL: z.string().default('http://mediamtx:9997'),

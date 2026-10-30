@@ -5,7 +5,7 @@ import type { VideoJob } from '@prisma/client';
 import { now } from '@/lib/clock';
 import { db } from '@/lib/db';
 import { env } from '@/lib/env';
-import { imageStore } from '@/lib/media/image-store';
+import { externalStore, imageStore, videoStore } from '@/lib/media/image-store';
 import { getSetting } from '@/lib/settings';
 import { notifyKey } from '@/lib/notifications';
 import { runVideoReadyHooks } from './hooks';
@@ -100,7 +100,14 @@ export async function processNextJob(): Promise<boolean> {
           where: { id: video.duetOfId, status: 'ready', kind: 'video', fileUrl: { endsWith: '.mp4' } },
         })
       : null;
-    const originalPath = original?.fileUrl ? imageStore().localPath(original.fileUrl) : null;
+    let originalPath = original?.fileUrl ? imageStore().localPath(original.fileUrl) : null;
+    // Video gốc nằm ở kho ngoài (SPEC-creator.md V5.1 mục 9): tải về thư mục làm việc để ghép.
+    const ext = externalStore();
+    if (!originalPath && original?.fileUrl && ext?.owns(original.fileUrl)) {
+      await mkdir(work, { recursive: true });
+      const dest = path.join(work, 'original.mp4');
+      if (await ext.download(original.fileUrl, dest).catch(() => false)) originalPath = dest;
+    }
     if (!reason && video.duetOfId && !originalPath) reason = 'Video gốc để Duet không còn trên 9MUA';
     if (reason) {
       await fail(job, reason);
@@ -156,7 +163,8 @@ export async function processNextJob(): Promise<boolean> {
     const scheduled = !video.draft && video.publishAt && video.publishAt > t;
     const finalStatus = video.draft ? 'draft' : scheduled ? 'scheduled' : 'ready';
     const key = `videos/${t.getUTCFullYear()}/${String(t.getUTCMonth() + 1).padStart(2, '0')}/${video.id}-${randomBytes(6).toString('hex')}`;
-    const store = imageStore();
+    // Mọi file của video này ghi cùng một nơi (kho ngoài khi bật external_storage, còn lại trên VPS).
+    const store = await videoStore();
     const renditions: { kind: 'mp4' | 'hls'; height: number; path: string; bytes: bigint }[] = [];
     let fileUrl: string;
     if (hls) {

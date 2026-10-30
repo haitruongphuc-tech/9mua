@@ -8,6 +8,7 @@ await build({
     { in: 'scripts/payos-confirm-webhook.ts', out: 'payos-confirm-webhook' },
     { in: 'scripts/seed-demo.ts', out: 'seed-demo' },
     { in: 'worker/index.ts', out: 'worker' },
+    { in: 'scripts/media-migrate.ts', out: 'media-migrate' },
   ],
   outdir: 'dist/scripts',
   outExtension: { '.js': '.mjs' },

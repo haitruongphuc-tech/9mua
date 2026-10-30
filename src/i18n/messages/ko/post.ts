@@ -39,6 +39,7 @@ export const post: PostMessages = {
   'post.err.PRODUCT_INVALID': '판매가 끝난 상품이 있어요. 선택을 해제하고 다시 시도해 주세요(최대 3개).',
   'post.err.CAPTION_TOO_LONG': '설명은 최대 300자예요.',
   'post.err.DUET_INVALID': '듀엣할 원본 동영상이 9MUA에 없어요.',
+  'post.err.COMMITMENT_REQUIRED': '먼저 9MUA 콘텐츠 서약에 동의해 주세요.',
   'post.mine.title': '내 동영상',
   'post.mine.new': '+ 동영상 올리기',
   'post.mine.uploaded': '업로드했어요. 동영상을 처리 중이며 보통 1분 안에 끝나요 — 끝나면 알려 드려요.',

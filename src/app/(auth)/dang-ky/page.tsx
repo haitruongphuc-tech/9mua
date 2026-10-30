@@ -5,6 +5,7 @@ import { EmailOtpForm } from '@/components/auth/EmailOtpForm';
 import { SocialButtons } from '@/components/auth/SocialButtons';
 import { ClientMessages } from '@/i18n/ClientMessages';
 import { getT } from '@/i18n/server';
+import { isFeatureOn } from '@/lib/features';
 import { safeNextPath } from '@/lib/safe-next-path';
 import { getCurrentUser } from '@/modules/identity';
 import { socialModes } from '@/server/auth-modes';
@@ -30,7 +31,7 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
       />
       <OrDivider label={t('auth.or')} />
       <ClientMessages prefixes={['auth.']}>
-        <EmailOtpForm next={next} />
+        <EmailOtpForm next={next} commit={await isFeatureOn('commitment')} />
       </ClientMessages>
       <p className="mt-5 text-center text-[13px] text-white/60">
         {t('auth.register.haveAccount')}{' '}

@@ -29,6 +29,8 @@ export async function signUpByEmail(
 ): Promise<string> {
   await page.goto(`/dang-ky?next=${encodeURIComponent(next)}`);
   await page.getByTestId('otp-email').fill(email);
+  // Đăng ký phải tick Cam kết nội dung (SPEC-identity.md V5.6).
+  await page.getByTestId('otp-commit').check();
   await page.getByTestId('otp-send').click();
   await expect(page.getByTestId('otp-sent')).toBeVisible();
   await page.getByTestId('otp-code').fill(await codeFromMail(email));
@@ -42,6 +44,14 @@ export async function signUpByEmail(
   return email;
 }
 
+// Bảng M5 (/cam-ket/dong-y): tick đủ 4 ô rồi bấm "Tôi cam kết" (SPEC-identity.md V5.6).
+export async function acceptCommitmentOnPage(page: Page) {
+  await page.waitForURL((u) => u.pathname === '/cam-ket/dong-y');
+  const form = page.getByTestId('commitment-form');
+  for (const box of await form.getByRole('checkbox').all()) await box.check();
+  await page.getByTestId('commitment-accept').click();
+}
+
 export async function newBuyerPage(browser: Browser, name: string): Promise<Page> {
   const page = await browser.newPage();
   await signUpByEmail(page, { name });
@@ -52,8 +62,19 @@ export async function newBuyerPage(browser: Browser, name: string): Promise<Page
 export async function createPasswordUser(identifier: string, name: string, password: string) {
   const id = normalizeIdentifier(identifier);
   if (!id) throw new Error(`SĐT/email không hợp lệ: ${identifier}`);
-  return e2eDb.user.create({
+  const user = await e2eDb.user.create({
     data: { ...id.where, displayName: name, passwordHash: await hashPassword(password) },
+  });
+  // Như người đã đồng ý cam kết nội dung bản hiện tại (SPEC-identity.md V5.6), để các bài khác không vướng bảng M5.
+  await acceptCurrentCommitment(user.id);
+  return user;
+}
+
+export async function acceptCurrentCommitment(userId: string) {
+  const latest = await e2eDb.commitmentVersion.findFirst({ orderBy: { version: 'desc' } });
+  await e2eDb.commitment.createMany({
+    data: [{ userId, version: latest?.version ?? 1 }],
+    skipDuplicates: true,
   });
 }
 

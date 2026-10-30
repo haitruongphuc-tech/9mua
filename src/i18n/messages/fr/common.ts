@@ -35,6 +35,21 @@ export const common: CommonMessages = {
   'common.block.limit': 'Vous pouvez bloquer jusqu’à 1 000 personnes.',
   'common.block.list': 'Comptes bloqués',
   'common.block.empty': 'Vous n’avez bloqué personne.',
+  'common.commit.title': 'Engagement de contenu 9MUA',
+  'common.commit.intro': 'Avant de publier ou de vendre sur 9MUA, acceptez ces 4 points :',
+  'common.commit.line1':
+    'Je ne publie que des contenus et produits réels et véridiques que j’ai le droit d’utiliser.',
+  'common.commit.line2': 'Je ne vends pas de contrefaçons, de produits interdits ou d’origine inconnue.',
+  'common.commit.line3': 'Je ne publie pas de contenu violent, sexuel, frauduleux ou insultant.',
+  'common.commit.line4':
+    'Je suis responsable de mes contenus et j’accepte que 9MUA retire ceux qui enfreignent les règles.',
+  'common.commit.agree': 'Je m’engage',
+  'common.commit.tickAll': 'Cochez les 4 cases pour continuer.',
+  'common.commit.updated':
+    'L’Engagement de contenu vient d’être mis à jour. Merci de le relire et de l’accepter.',
+  'common.commit.signup': 'J’accepte l’Engagement de contenu 9MUA',
+  'common.commit.view': 'Voir l’engagement',
+  'common.commit.version': 'Version {version}',
   'common.cart.label': 'Panier ({count} articles)',
   'common.nav.label': 'Navigation principale',
   'common.nav.video': 'Vidéo',

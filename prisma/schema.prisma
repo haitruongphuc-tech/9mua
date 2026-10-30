@@ -1081,6 +1081,28 @@ model UserBlock {
   @@index([blockedId])
 }
 
+// Cam kết nội dung (SPEC-identity.md V5.6). lines = null nghĩa là 4 dòng mặc định (dịch 7 thứ tiếng); CEO sửa chữ thì tạo bản
+// mới có lines riêng và mọi người được hỏi lại.
+model CommitmentVersion {
+  version       Int      @id
+  lines         Json?
+  publishedAt   DateTime @default(now())
+  publishedById String?
+}
+
+// Sổ chỉ thêm: ai đồng ý bản nào, lúc nào, từ IP nào (chỉ admin xem).
+model Commitment {
+  id         String   @id @default(cuid(2))
+  userId     String
+  version    Int
+  acceptedAt DateTime @default(now())
+  ip         String?
+  userAgent  String?
+
+  @@unique([userId, version])
+  @@index([userId])
+}
+
 model MessageBlock {
   blockerId String
   blockedId String

@@ -60,6 +60,7 @@ export const seller: SellerMessages = {
   'seller.err.ALREADY_HAS_KIOT': 'Votre compte a déjà un Kiot.',
   'seller.err.NO_KIOT': 'Vous n’avez pas encore de Kiot.',
   'seller.err.PRODUCT_LIMIT': 'Ce Kiot a atteint le maximum de 500 produits.',
+  'seller.err.COMMITMENT_REQUIRED': 'Veuillez d’abord accepter l’Engagement de contenu 9MUA.',
   'seller.err.TOO_MANY_PENDING':
     'Trop de photos envoyées sans être utilisées. Enregistrez d’abord le produit.',
   'seller.err.NOT_FOUND': 'Produit introuvable.',

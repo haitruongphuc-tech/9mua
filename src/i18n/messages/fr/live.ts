@@ -79,6 +79,7 @@ export const live: LiveMessages = {
   'live.publish.err.LIVE_BANNED': 'Ce compte est interdit de live.',
   'live.publish.err.INVALID_INPUT':
     'Saisissez un titre (100 caractères max.) et choisissez un produit en vente.',
+  'live.publish.err.COMMITMENT_REQUIRED': 'Veuillez d’abord accepter l’Engagement de contenu 9MUA.',
   'live.publish.err.media': 'Impossible d’envoyer la vidéo au serveur, réessayez.',
   'live.xu.title': 'Mes xu',
   'live.xu.tile': 'Xu',

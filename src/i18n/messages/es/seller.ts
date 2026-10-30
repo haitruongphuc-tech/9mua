@@ -58,6 +58,7 @@ export const seller: SellerMessages = {
   'seller.err.ALREADY_HAS_KIOT': 'Tu cuenta ya tiene un Kiot.',
   'seller.err.NO_KIOT': 'Aún no tienes un Kiot.',
   'seller.err.PRODUCT_LIMIT': 'El Kiot llegó al máximo de 500 productos.',
+  'seller.err.COMMITMENT_REQUIRED': 'Primero acepta el Compromiso de contenido de 9MUA.',
   'seller.err.TOO_MANY_PENDING':
     'Subiste demasiadas fotos sin usar. Guarda primero el producto y luego sube más.',
   'seller.err.NOT_FOUND': 'Producto no encontrado.',

@@ -40,6 +40,7 @@ export const post: PostMessages = {
   'post.err.PRODUCT_INVALID': 'Un producto ya no está a la venta. Quítalo e inténtalo de nuevo (máximo 3).',
   'post.err.CAPTION_TOO_LONG': 'Máximo 300 caracteres.',
   'post.err.DUET_INVALID': 'El video original de este dúo ya no está en 9MUA.',
+  'post.err.COMMITMENT_REQUIRED': 'Primero acepta el Compromiso de contenido de 9MUA.',
   'post.mine.title': 'Mis videos',
   'post.mine.new': '+ Publicar video',
   'post.mine.uploaded':

@@ -38,6 +38,7 @@ export const post = {
   'post.err.PRODUCT_INVALID': 'Có sản phẩm không còn bán. Hãy bỏ chọn rồi thử lại (tối đa 3 sản phẩm).',
   'post.err.CAPTION_TOO_LONG': 'Chú thích tối đa 300 ký tự.',
   'post.err.DUET_INVALID': 'Video gốc để Duet không còn trên 9MUA.',
+  'post.err.COMMITMENT_REQUIRED': 'Bạn cần đồng ý Cam kết nội dung 9MUA trước khi làm việc này.',
   'post.mine.title': 'Video của tôi',
   'post.mine.new': '+ Đăng video',
   'post.mine.uploaded':

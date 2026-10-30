@@ -6,6 +6,8 @@ import { getT } from '@/i18n/server';
 import { LINK_COOKIE, googleCookieOptions } from '@/lib/google-cookies';
 import { safeNextPath } from '@/lib/safe-next-path';
 import {
+  acceptCommitment,
+  currentCommitment,
   addEmailWithOtp,
   getCurrentUser,
   linkTicketEmail,
@@ -45,7 +47,7 @@ export async function sendOtpAction(mode: OtpMode, rawEmail: string): Promise<Ot
 
 export async function verifyOtpAction(
   mode: OtpMode,
-  input: { email: string; code: string; displayName?: string; next?: string },
+  input: { email: string; code: string; displayName?: string; next?: string; commit?: boolean },
 ): Promise<OtpVerifyResult> {
   const jar = await cookies();
   const next = safeNextPath(input.next);
@@ -65,6 +67,16 @@ export async function verifyOtpAction(
   const r = await loginWithEmailOtp({ email: input.email, code: input.code, displayName: input.displayName });
   if (!r.ok) return { ok: false, message: await message(r.error) };
   await startSession(r.userId);
+  // Đăng ký có tick cam kết nội dung: ghi sổ ngay (SPEC-identity.md V5.6).
+  if (input.commit) {
+    const h = await headers();
+    await acceptCommitment(
+      r.userId,
+      (await currentCommitment()).version,
+      h.get('x-real-ip'),
+      h.get('user-agent'),
+    );
+  }
   // Vừa được yêu cầu xác nhận để liên kết Google/Facebook mà đăng nhập bằng mã đúng email đó: liên kết luôn.
   const ticket = jar.get(LINK_COOKIE)?.value;
   if (ticket) {

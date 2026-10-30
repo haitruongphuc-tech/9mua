@@ -54,6 +54,7 @@ export const ai: AiMessages = {
   'ai.err.AI_ERROR': 'AI 正忙，请稍后再试。',
   'ai.err.INVALID_INPUT': '请检查刚才输入的信息。',
   'ai.err.PRODUCT_LIMIT': '店铺已有 500 件商品。',
+  'ai.err.COMMITMENT_REQUIRED': '请先同意 9MUA 内容承诺。',
   'ai.err.NOT_READY': '视频尚未制作完成。',
   'ai.err.generic': '出错了，请重试。',
   'ai.v.note300': '备注最多 300 个字符',

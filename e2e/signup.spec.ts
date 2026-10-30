@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { codeFromMail, signUpWithPassword, uniqueEmail } from './helpers/auth';
+import { acceptCommitmentOnPage, codeFromMail, signUpWithPassword, uniqueEmail } from './helpers/auth';
 import { e2eDb } from './helpers/db';
 
 const stamp = () => String(Date.now()).slice(-8);
@@ -63,6 +63,8 @@ test('Google (giả lập): email mới → tạo tài khoản và đăng nhập
   await page.fill('#google-email', email);
   await page.fill('#google-name', 'Bạn Google');
   await page.getByRole('button', { name: 'Tiếp tục' }).click();
+  // Tài khoản mới: bảng cam kết nội dung trước khi vào web (SPEC-identity.md V5.6).
+  await acceptCommitmentOnPage(page);
   await page.waitForURL((u) => u.pathname === '/cho');
   await expect(page.getByTestId('user-menu')).toHaveAccessibleName('Tôi (Bạn Google)');
   expect((await e2eDb.user.findUniqueOrThrow({ where: { email } })).googleSub).toBe(`fake-${email}`);
@@ -127,6 +129,7 @@ test('Zalo (giả lập): tạo tài khoản chỉ có tên; mở Kiot phải th
   await page.fill('#oauth-id', `zalo-${stamp()}`);
   await page.fill('#oauth-name', 'Anh Zalo');
   await page.getByRole('button', { name: 'Tiếp tục' }).click();
+  await acceptCommitmentOnPage(page);
   await page.waitForURL((u) => u.pathname === '/kiot-cua-toi/tao');
   await expect(page.getByTestId('user-menu')).toHaveAccessibleName('Tôi (Anh Zalo)');
   await expect(page.getByTestId('add-email-gate')).toBeVisible();

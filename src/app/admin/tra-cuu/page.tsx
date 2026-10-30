@@ -5,6 +5,7 @@ import { STATUS_LABELS } from '@/components/orders/status';
 import { formatDateTimeVN, formatDateVN, formatVnd } from '@/lib/format';
 import { kiotOrigin } from '@/lib/urls';
 import { requireAdminVerified, searchKiots, searchOrders, searchUsers } from '@/modules/admin';
+import { commitmentRecords } from '@/modules/identity';
 import type { FlashParams } from '../flash';
 import * as act from './actions';
 import { TempPassword } from './TempPassword';
@@ -28,6 +29,10 @@ export default async function LookupPage({ searchParams }: { searchParams: Flash
     type === 'kiot' ? searchKiots(q) : [],
     type === 'don' ? searchOrders(q) : [],
   ]);
+  // Cam kết nội dung: bản nào, lúc nào, IP nào — chỉ admin xem (SPEC-identity.md V5.6).
+  const commitments = new Map(
+    await Promise.all(users.map(async (u) => [u.id, (await commitmentRecords(u.id))[0] ?? null] as const)),
+  );
   return (
     <section className="flex flex-col gap-4 px-4 py-5">
       <h1 className="text-xl font-extrabold">Tra cứu</h1>
@@ -83,6 +88,14 @@ export default async function LookupPage({ searchParams }: { searchParams: Flash
             <Link href={`/creator/${u.id}`} className="underline">
               trang cá nhân
             </Link>
+          </p>
+          <p className="text-sm text-white/70" data-testid="user-commitment">
+            {(() => {
+              const c = commitments.get(u.id);
+              return c
+                ? `Cam kết nội dung: bản ${c.version} lúc ${formatDateTimeVN(c.acceptedAt)} · IP ${c.ip ?? '—'}`
+                : 'Chưa đồng ý cam kết nội dung';
+            })()}
           </p>
           <div className="flex flex-wrap gap-2">
             {u.lockedAt ? (

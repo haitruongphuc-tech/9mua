@@ -56,6 +56,7 @@ export const ai: AiMessages = {
   'ai.err.AI_ERROR': 'The AI is busy. Please try again later.',
   'ai.err.INVALID_INPUT': 'Please check what you entered.',
   'ai.err.PRODUCT_LIMIT': 'Your Kiot already has 500 products.',
+  'ai.err.COMMITMENT_REQUIRED': 'Please accept the 9MUA Content Commitment first.',
   'ai.err.NOT_READY': 'the video is not ready yet.',
   'ai.err.generic': 'Something went wrong. Please try again.',
   'ai.v.note300': 'Notes can be up to 300 characters',

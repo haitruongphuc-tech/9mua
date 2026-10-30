@@ -10,11 +10,13 @@ import { hasContact, requireUser } from '@/modules/identity';
 import { getKiotByOwner } from '@/modules/kiot';
 import { createKiotAction } from '../actions';
 import { KiotForm } from '../KiotForm';
+import { requireCommitment } from '@/server/commitment';
 
 export const metadata: Metadata = { title: 'Tạo Kiot', robots: { index: false } };
 
 export default async function CreateKiotPage() {
   const user = await requireUser();
+  await requireCommitment(user.id, '/kiot-cua-toi/tao');
   if (await getKiotByOwner(user.id)) redirect('/kiot-cua-toi');
   const [t, fee] = await Promise.all([getT(), getKiotFee()]);
   // Tài khoản Zalo/Facebook chưa có email hay SĐT: thêm email (xác nhận bằng mã) trước (SPEC-identity.md bổ sung 29/10).

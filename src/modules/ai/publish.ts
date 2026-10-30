@@ -20,7 +20,7 @@ export type StudioDraft = {
 
 export type PublishResult =
   | { ok: true; productId: string; videoId?: string; videoError?: string }
-  | { ok: false; error: 'NOT_OWNER' | 'PRODUCT_LIMIT' }
+  | { ok: false; error: 'NOT_OWNER' | 'PRODUCT_LIMIT' | 'COMMITMENT_REQUIRED' }
   | { ok: false; error: 'INVALID_INPUT'; fields: Partial<Record<string, string>> };
 
 const BAD_IMAGES = 'Ảnh không hợp lệ, hãy tải lại ảnh';

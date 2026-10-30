@@ -54,6 +54,7 @@ export const seller: SellerMessages = {
   'seller.err.ALREADY_HAS_KIOT': '이 계정에는 이미 Kiot이 있어요.',
   'seller.err.NO_KIOT': '아직 Kiot이 없어요.',
   'seller.err.PRODUCT_LIMIT': '상품이 최대 500개에 도달했어요.',
+  'seller.err.COMMITMENT_REQUIRED': '먼저 9MUA 콘텐츠 서약에 동의해 주세요.',
   'seller.err.TOO_MANY_PENDING': '쓰지 않은 사진을 너무 많이 올렸어요. 상품을 먼저 저장한 뒤 더 올려 주세요.',
   'seller.err.NOT_FOUND': '상품을 찾을 수 없어요.',
   'seller.err.generic': '문제가 생겼어요. 다시 시도해 주세요.',

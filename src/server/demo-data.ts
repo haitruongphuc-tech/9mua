@@ -11,7 +11,7 @@ import { db } from '@/lib/db';
 import { env } from '@/lib/env';
 import { imageStore, resolveUploadPath } from '@/lib/media/image-store';
 import { createVideoUpload, saveUpload } from '@/modules/creator';
-import { register } from '@/modules/identity';
+import { acceptCommitment, currentCommitment, register } from '@/modules/identity';
 import {
   createKiot,
   createProduct,
@@ -104,6 +104,8 @@ export async function seedDemoData(options: {
     if (!user.ok) fail('tài khoản', user);
     const userId = user.ok ? user.userId : '';
 
+    // Tài khoản mẫu do CEO tạo: coi như đã đồng ý cam kết nội dung bản hiện tại (SPEC-identity.md V5.6).
+    await acceptCommitment(userId, (await currentCommitment()).version, null, 'demo-data');
     const kiot = await createKiot(userId, {
       name: k.name,
       slug: k.slug,

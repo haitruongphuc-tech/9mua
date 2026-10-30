@@ -56,6 +56,7 @@ export const seller = {
   'seller.err.ALREADY_HAS_KIOT': 'Tài khoản của bạn đã có Kiot.',
   'seller.err.NO_KIOT': 'Bạn chưa có Kiot.',
   'seller.err.PRODUCT_LIMIT': 'Kiot đã đạt tối đa 500 sản phẩm.',
+  'seller.err.COMMITMENT_REQUIRED': 'Bạn cần đồng ý Cam kết nội dung 9MUA trước khi làm việc này.',
   'seller.err.TOO_MANY_PENDING': 'Bạn đã tải quá nhiều ảnh chưa dùng. Hãy lưu sản phẩm trước rồi tải tiếp.',
   'seller.err.NOT_FOUND': 'Không tìm thấy sản phẩm.',
   'seller.err.generic': 'Có lỗi, vui lòng thử lại.',

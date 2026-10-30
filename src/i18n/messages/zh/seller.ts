@@ -54,6 +54,7 @@ export const seller: SellerMessages = {
   'seller.err.ALREADY_HAS_KIOT': '你的账户已有店铺。',
   'seller.err.NO_KIOT': '你还没有店铺。',
   'seller.err.PRODUCT_LIMIT': '店铺商品已达上限500个。',
+  'seller.err.COMMITMENT_REQUIRED': '请先同意 9MUA 内容承诺。',
   'seller.err.TOO_MANY_PENDING': '你上传了太多未使用的图片。请先保存商品再继续上传。',
   'seller.err.NOT_FOUND': '找不到商品。',
   'seller.err.generic': '出错了，请重试。',

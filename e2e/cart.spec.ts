@@ -31,6 +31,7 @@ test('khách chưa đăng nhập bấm Thêm vào giỏ → đăng ký → món 
   await buyer.waitForURL((u) => u.pathname === '/dang-ky');
   const email = uniqueEmail('mua');
   await buyer.getByTestId('otp-email').fill(email);
+  await buyer.getByTestId('otp-commit').check();
   await buyer.getByTestId('otp-send').click();
   await buyer.getByTestId('otp-code').fill(await codeFromMail(email));
   await buyer.getByTestId('otp-verify').click();

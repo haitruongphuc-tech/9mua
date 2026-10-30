@@ -74,6 +74,7 @@ export const live = {
   'live.publish.err.ALREADY_LIVE': 'Bạn đang có một buổi live chưa kết thúc.',
   'live.publish.err.LIVE_BANNED': 'Tài khoản đang bị cấm phát live.',
   'live.publish.err.INVALID_INPUT': 'Nhập tiêu đề (tối đa 100 ký tự) và chọn sản phẩm còn bán.',
+  'live.publish.err.COMMITMENT_REQUIRED': 'Bạn cần đồng ý Cam kết nội dung 9MUA trước khi làm việc này.',
   'live.publish.err.media': 'Không gửi được hình lên máy chủ, hãy thử lại.',
   'live.xu.title': 'Xu của tôi',
   'live.xu.tile': 'Xu',

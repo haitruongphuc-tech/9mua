@@ -76,6 +76,7 @@ export const live: LiveMessages = {
   'live.publish.err.ALREADY_LIVE': '아직 종료되지 않은 라이브가 있어요.',
   'live.publish.err.LIVE_BANNED': '이 계정은 라이브가 금지되었어요.',
   'live.publish.err.INVALID_INPUT': '제목(최대 100자)을 입력하고 판매 중인 상품을 고르세요.',
+  'live.publish.err.COMMITMENT_REQUIRED': '먼저 9MUA 콘텐츠 서약에 동의해 주세요.',
   'live.publish.err.media': '서버로 영상을 보내지 못했어요. 다시 시도해 주세요.',
   'live.xu.title': '내 xu',
   'live.xu.tile': 'xu',

@@ -14,11 +14,14 @@ export function EmailOtpForm({
   next = '/',
   tone = 'dark',
   linkEmail,
+  commit = false,
 }: {
   mode?: OtpMode;
   next?: string;
   tone?: Exclude<FieldTone, 'light'>;
   linkEmail?: string;
+  // Trang đăng ký: phải tick "Tôi đồng ý Cam kết nội dung 9MUA" mới gửi mã (SPEC-identity.md V5.6).
+  commit?: boolean;
 }) {
   const t = useT();
   const router = useRouter();
@@ -29,6 +32,7 @@ export function EmailOtpForm({
   const [error, setError] = useState<string | null>(null);
   const [wait, setWait] = useState(0);
   const [pending, start] = useTransition();
+  const [agreed, setAgreed] = useState(false);
 
   useEffect(() => {
     if (wait <= 0) return;
@@ -54,6 +58,7 @@ export function EmailOtpForm({
         email: sentTo,
         code,
         next,
+        commit: commit && agreed,
       });
       if (r && !r.ok) return setError(r.message);
       if (mode === 'add-email') {
@@ -106,7 +111,30 @@ export function EmailOtpForm({
               data-testid="otp-email"
             />
           )}
-          <button type="submit" disabled={pending} className={button} data-testid="otp-send">
+          {commit ? (
+            <label className={`flex items-start gap-2 text-[13px] ${sub}`}>
+              <input
+                type="checkbox"
+                checked={agreed}
+                onChange={(e) => setAgreed(e.target.checked)}
+                required
+                className="mt-0.5 h-4 w-4 shrink-0 accent-[#ff6b00]"
+                data-testid="otp-commit"
+              />
+              <span>
+                {t('common.commit.signup')} ·{' '}
+                <a href="/cam-ket" target="_blank" rel="noopener" className="font-bold text-brand underline">
+                  {t('common.commit.view')}
+                </a>
+              </span>
+            </label>
+          ) : null}
+          <button
+            type="submit"
+            disabled={pending || (commit && !agreed)}
+            className={button}
+            data-testid="otp-send"
+          >
             {pending ? t('auth.otp.sending') : mode === 'link' ? t('auth.otp.linkSend') : t('auth.otp.send')}
           </button>
         </>

@@ -54,6 +54,7 @@ export const ai: AiMessages = {
   'ai.err.AI_ERROR': 'AI가 바쁩니다. 잠시 후 다시 시도해 주세요.',
   'ai.err.INVALID_INPUT': '입력한 정보를 확인해 주세요.',
   'ai.err.PRODUCT_LIMIT': 'Kiot의 상품이 이미 500개입니다.',
+  'ai.err.COMMITMENT_REQUIRED': '먼저 9MUA 콘텐츠 서약에 동의해 주세요.',
   'ai.err.NOT_READY': '영상이 아직 준비되지 않았습니다.',
   'ai.err.generic': '오류가 발생했습니다. 다시 시도해 주세요.',
   'ai.v.note300': '메모는 최대 300자입니다',

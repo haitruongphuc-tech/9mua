@@ -6,6 +6,7 @@ import { db } from '@/lib/db';
 import { imageStore } from '@/lib/media/image-store';
 import { processImage, type ImageError } from '@/lib/media/process-image';
 import { CATEGORY_SLUGS } from './categories';
+import { hasCurrentCommitment } from '@/modules/identity';
 
 export const MAX_PRODUCTS_PER_KIOT = 500;
 export const MAX_IMAGES_PER_PRODUCT = 6;
@@ -113,8 +114,11 @@ export async function createProduct(
   userId: string,
   raw: ProductInput,
 ): Promise<
-  { ok: true; productId: string } | { ok: false; error: 'NO_KIOT' | 'PRODUCT_LIMIT' } | InvalidInput
+  | { ok: true; productId: string }
+  | { ok: false; error: 'NO_KIOT' | 'PRODUCT_LIMIT' | 'COMMITMENT_REQUIRED' }
+  | InvalidInput
 > {
+  if (!(await hasCurrentCommitment(userId))) return { ok: false, error: 'COMMITMENT_REQUIRED' };
   const kiotId = await ownerKiotId(userId);
   if (!kiotId) return { ok: false, error: 'NO_KIOT' };
   const input = parse(raw);

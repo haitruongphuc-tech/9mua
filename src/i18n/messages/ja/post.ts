@@ -39,6 +39,7 @@ export const post: PostMessages = {
   'post.err.PRODUCT_INVALID': '販売終了の商品があります。選択を外してもう一度お試しください（最大3つ）。',
   'post.err.CAPTION_TOO_LONG': '説明は300文字までです。',
   'post.err.DUET_INVALID': 'デュエット元の動画は9MUAにありません。',
+  'post.err.COMMITMENT_REQUIRED': '先に9MUAコンテンツ誓約に同意してください。',
   'post.mine.title': '自分の動画',
   'post.mine.new': '+ 動画を投稿',
   'post.mine.uploaded':

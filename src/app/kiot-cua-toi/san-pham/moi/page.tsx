@@ -5,11 +5,13 @@ import { requireUser } from '@/modules/identity';
 import { getKiotByOwner, MAX_IMAGES_PER_PRODUCT } from '@/modules/kiot';
 import { createProductAction } from '../actions';
 import { ProductForm } from '../ProductForm';
+import { requireCommitment } from '@/server/commitment';
 
 export const metadata: Metadata = { title: 'Thêm sản phẩm', robots: { index: false } };
 
 export default async function NewProductPage() {
   const user = await requireUser();
+  await requireCommitment(user.id, '/kiot-cua-toi/san-pham/moi');
   if (!(await getKiotByOwner(user.id))) redirect('/kiot-cua-toi/tao');
   const t = await getT();
   return (

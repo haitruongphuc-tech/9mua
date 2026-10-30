@@ -55,6 +55,7 @@ export const seller: SellerMessages = {
   'seller.err.ALREADY_HAS_KIOT': 'このアカウントにはすでにKiotがあります。',
   'seller.err.NO_KIOT': 'まだKiotがありません。',
   'seller.err.PRODUCT_LIMIT': '商品数が上限の500件に達しました。',
+  'seller.err.COMMITMENT_REQUIRED': '先に9MUAコンテンツ誓約に同意してください。',
   'seller.err.TOO_MANY_PENDING': '未使用の写真が多すぎます。商品を保存してからアップロードしてください。',
   'seller.err.NOT_FOUND': '商品が見つかりません。',
   'seller.err.generic': 'エラーが発生しました。もう一度お試しください。',

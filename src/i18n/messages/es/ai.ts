@@ -56,6 +56,7 @@ export const ai: AiMessages = {
   'ai.err.AI_ERROR': 'La IA está ocupada. Inténtalo más tarde.',
   'ai.err.INVALID_INPUT': 'Revisa los datos que escribiste.',
   'ai.err.PRODUCT_LIMIT': 'Tu Kiot ya tiene 500 productos.',
+  'ai.err.COMMITMENT_REQUIRED': 'Primero acepta el Compromiso de contenido de 9MUA.',
   'ai.err.NOT_READY': 'el vídeo aún no está listo.',
   'ai.err.generic': 'Algo salió mal. Inténtalo de nuevo.',
   'ai.v.note300': 'La nota admite como máximo 300 caracteres',

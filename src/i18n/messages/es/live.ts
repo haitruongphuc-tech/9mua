@@ -76,6 +76,7 @@ export const live: LiveMessages = {
   'live.publish.err.ALREADY_LIVE': 'Ya tienes un directo sin terminar.',
   'live.publish.err.LIVE_BANNED': 'Esta cuenta tiene prohibido emitir en directo.',
   'live.publish.err.INVALID_INPUT': 'Escribe un título (máx. 100 caracteres) y elige un producto a la venta.',
+  'live.publish.err.COMMITMENT_REQUIRED': 'Primero acepta el Compromiso de contenido de 9MUA.',
   'live.publish.err.media': 'No se pudo enviar el video al servidor, inténtalo de nuevo.',
   'live.xu.title': 'Mis xu',
   'live.xu.tile': 'Xu',

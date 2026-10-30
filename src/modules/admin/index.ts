@@ -64,4 +64,4 @@ export {
 } from './devices';
 export { pinsOverview, unpin } from './pins';
 // Bổ sung 30/10/2026 (SPEC-admin.md V5.0): công tắc chức năng.
-export { setFeatureSwitch, featureStates } from './features';
+export { setFeatureSwitch, featureStates, publishCommitmentText } from './features';

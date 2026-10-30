@@ -14,6 +14,8 @@ export async function createUser(overrides: { displayName?: string; password?: s
     password: overrides.password ?? 'matkhau-9mua',
   });
   if (!result.ok) throw new Error(`createUser thất bại: ${JSON.stringify(result)}`);
+  // Người dùng thử đã đồng ý cam kết nội dung bản 1 (SPEC-identity.md V5.6), như người đăng ký qua form.
+  await db.commitment.create({ data: { userId: result.userId, version: 1 } });
   return { id: result.userId, phone, password: overrides.password ?? 'matkhau-9mua' };
 }
 

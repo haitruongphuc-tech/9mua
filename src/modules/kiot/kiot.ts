@@ -2,7 +2,7 @@ import { Prisma, type Kiot } from '@prisma/client';
 import { z } from 'zod';
 import { now } from '@/lib/clock';
 import { db } from '@/lib/db';
-import { normalizeIdentifier } from '@/modules/identity';
+import { hasCurrentCommitment, normalizeIdentifier } from '@/modules/identity';
 import { validateSlug, type SlugCheck } from './slug';
 
 export type KiotStatus = 'draft' | 'active' | 'expired' | 'locked';
@@ -57,8 +57,13 @@ export async function createKiot(
   userId: string,
   raw: KiotInput,
 ): Promise<
-  { ok: true; kiotId: string } | { ok: false; error: 'ALREADY_HAS_KIOT' } | SlugError | InvalidInput
+  | { ok: true; kiotId: string }
+  | { ok: false; error: 'ALREADY_HAS_KIOT' | 'COMMITMENT_REQUIRED' }
+  | SlugError
+  | InvalidInput
 > {
+  // Phải đồng ý cam kết nội dung bản mới nhất (SPEC-identity.md V5.6).
+  if (!(await hasCurrentCommitment(userId))) return { ok: false, error: 'COMMITMENT_REQUIRED' };
   const input = parseInput(raw);
   if (!input.ok) return input;
   const slugCheck = validateSlug(input.data.slug);

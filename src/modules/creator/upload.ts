@@ -11,6 +11,7 @@ import { resolveUploadPath } from '@/lib/media/image-store';
 import { getProductForCheckout } from '@/modules/kiot';
 import { extractHashtags } from './hashtags';
 import { isVisibility, type VideoOptions } from './visibility';
+import { hasCurrentCommitment } from '@/modules/identity';
 
 export const MAX_VIDEO_BYTES = 100 * 1024 * 1024;
 export const MAX_VIDEOS_PER_DAY = 10;
@@ -86,7 +87,8 @@ export type CreateVideoResult =
         | 'BAD_FORMAT'
         | 'PRODUCT_INVALID'
         | 'CAPTION_TOO_LONG'
-        | 'DUET_INVALID';
+        | 'DUET_INVALID'
+        | 'COMMITMENT_REQUIRED';
     };
 
 // Tạo video từ file đã tải lên (SPEC-creator.md mục 1). Video ở trạng thái processing cho tới khi worker xong.
@@ -101,6 +103,8 @@ export async function createVideoUpload(
     options?: VideoOptions; // quyền riêng tư, cho bình luận/Duet/tải về (SPEC-creator.md V5.3)
   },
 ): Promise<CreateVideoResult> {
+  // Phải đồng ý cam kết nội dung bản mới nhất (SPEC-identity.md V5.6).
+  if (!(await hasCurrentCommitment(userId))) return { ok: false, error: 'COMMITMENT_REQUIRED' };
   const kind = meta.kind === 'story' ? 'story' : 'video';
   // Duet chỉ với video thường đang trên feed (không Duet Story, không Duet chính Story).
   const duetOfId = kind === 'video' && meta.duetOfId ? meta.duetOfId : null;

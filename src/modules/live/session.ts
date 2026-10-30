@@ -2,6 +2,7 @@ import type { LiveSession } from '@prisma/client';
 import { now } from '@/lib/clock';
 import { db } from '@/lib/db';
 import { getIntSetting } from '@/lib/settings';
+import { hasCurrentCommitment } from '@/modules/identity';
 import { getKiotByOwner, getProductForCheckout, isKiotActive } from '@/modules/kiot';
 import { runLiveEndedHooks } from './hooks';
 import { mediaServer } from './media';
@@ -13,7 +14,8 @@ export const NO_MEDIA_END_MS = 60_000;
 export const MAX_TITLE = 100;
 export const OPEN = ['created', 'live'];
 
-export type StartError = 'ACCOUNT_TOO_NEW' | 'LIVE_FULL' | 'ALREADY_LIVE' | 'LIVE_BANNED' | 'INVALID_INPUT';
+export type StartError =
+  'ACCOUNT_TOO_NEW' | 'LIVE_FULL' | 'ALREADY_LIVE' | 'LIVE_BANNED' | 'INVALID_INPUT' | 'COMMITMENT_REQUIRED';
 
 export async function activeLiveBan(userId: string, at = now()) {
   return db.liveBan.findFirst({
@@ -36,6 +38,8 @@ export async function startLive(
 ): Promise<
   { ok: true; liveId: string; whipUrl: string; publishToken: string } | { ok: false; error: StartError }
 > {
+  // Phải đồng ý cam kết nội dung bản mới nhất (SPEC-identity.md V5.6).
+  if (!(await hasCurrentCommitment(userId))) return { ok: false, error: 'COMMITMENT_REQUIRED' };
   const title = input.title.trim().replace(/\s+/g, ' ');
   if (!title || title.length > MAX_TITLE) return { ok: false, error: 'INVALID_INPUT' };
   if (input.pinProductId && !(await pinnable(input.pinProductId)))

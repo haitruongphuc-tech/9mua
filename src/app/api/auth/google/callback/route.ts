@@ -3,7 +3,13 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { env } from '@/lib/env';
 import { GOOGLE_FLOW_COOKIE, GOOGLE_LINK_COOKIE, googleCookieOptions } from '@/lib/google-cookies';
 import { safeNextPath } from '@/lib/safe-next-path';
-import { claimsFromCode, completeGoogleLogin, openGoogleFlow, startSession } from '@/modules/identity';
+import {
+  claimsFromCode,
+  completeGoogleLogin,
+  hasCurrentCommitment,
+  openGoogleFlow,
+  startSession,
+} from '@/modules/identity';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,5 +34,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${app}/dang-nhap?lien-ket-google=1&next=${next}`);
   }
   await startSession(result.userId);
-  return NextResponse.redirect(`${app}${safeNextPath(flow.next)}`);
+  const next = safeNextPath(flow.next);
+  // Tài khoản mới tạo bằng Google: hiện bảng cam kết nội dung trước khi vào web (SPEC-identity.md V5.6).
+  if (result.created && !(await hasCurrentCommitment(result.userId)))
+    return NextResponse.redirect(`${app}/cam-ket/dong-y?next=${encodeURIComponent(next)}`);
+  return NextResponse.redirect(`${app}${next}`);
 }

@@ -41,6 +41,7 @@ export const post: PostMessages = {
   'post.err.PRODUCT_INVALID': 'A product is no longer for sale. Unselect it and try again (max 3 products).',
   'post.err.CAPTION_TOO_LONG': 'Captions can be at most 300 characters.',
   'post.err.DUET_INVALID': 'The original video for this Duet is no longer on 9MUA.',
+  'post.err.COMMITMENT_REQUIRED': 'Please accept the 9MUA Content Commitment first.',
   'post.mine.title': 'My videos',
   'post.mine.new': '+ Post video',
   'post.mine.uploaded':

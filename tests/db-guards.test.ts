@@ -19,6 +19,7 @@ describe('chốt chặn trong database', () => {
         'AiUsage_append_only',
         'KiotFeeRateLog_append_only',
         'XuEntry_append_only',
+        'Commitment_append_only',
         'Product_search_name',
       ]),
     );

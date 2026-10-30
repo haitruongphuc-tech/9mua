@@ -166,7 +166,7 @@ export const sealFakeGoogleCode = (claims: GoogleClaims, nonce: string) =>
   encryptSecret(JSON.stringify({ ...claims, nonce }));
 
 export type GoogleLoginResult =
-  | { kind: 'login'; userId: string }
+  | { kind: 'login'; userId: string; created?: boolean } // created: vừa tạo tài khoản mới (bổ sung 30/10)
   | { kind: 'link-required'; email: string; ticket: string }
   | { kind: 'error'; error: 'ADMIN' | 'LOCKED' };
 
@@ -193,7 +193,7 @@ export async function completeGoogleLogin(claims: GoogleClaims): Promise<GoogleL
       passwordHash: await hashPassword(randomBytes(32).toString('base64url')),
     },
   });
-  return { kind: 'login', userId: user.id };
+  return { kind: 'login', userId: user.id, created: true };
 }
 
 // Sau khi đăng nhập mật khẩu đúng: liên kết nếu vé còn hạn và đúng email của tài khoản (giữ tên cũ trong hợp đồng;

@@ -75,6 +75,7 @@ export const live: LiveMessages = {
   'live.publish.err.ALREADY_LIVE': '你有一场直播尚未结束。',
   'live.publish.err.LIVE_BANNED': '该账号已被禁止直播。',
   'live.publish.err.INVALID_INPUT': '请输入标题（最多 100 字）并选择在售商品。',
+  'live.publish.err.COMMITMENT_REQUIRED': '请先同意 9MUA 内容承诺。',
   'live.publish.err.media': '无法向服务器发送画面，请重试。',
   'live.xu.title': '我的金币',
   'live.xu.tile': '金币',

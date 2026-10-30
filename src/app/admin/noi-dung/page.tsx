@@ -5,7 +5,8 @@ import { DICTS } from '@/i18n/messages';
 import { LEGAL_DEFAULTS, LEGAL_FIELDS, parseLegal } from '@/lib/legal';
 import { getAllSettings, requireAdminVerified } from '@/modules/admin';
 import type { FlashParams } from '../flash';
-import { saveContentAction } from './actions';
+import { currentCommitment } from '@/modules/identity';
+import { publishCommitmentAction, saveContentAction } from './actions';
 import { SLOGAN_KEYS, SLOGAN_PAGES } from './keys';
 
 export const dynamic = 'force-dynamic';
@@ -23,7 +24,8 @@ const LEGAL_LABELS = {
 
 export default async function ContentPage({ searchParams }: { searchParams: FlashParams }) {
   await requireAdminVerified();
-  const [s, params] = await Promise.all([getAllSettings(), searchParams]);
+  const [s, params, commitment] = await Promise.all([getAllSettings(), searchParams, currentCommitment()]);
+  const commitDefaults = DICTS.vi;
   let slogans: Record<string, Record<string, string>> = {};
   try {
     slogans = JSON.parse(s.slogans_json) as typeof slogans;
@@ -77,6 +79,37 @@ export default async function ContentPage({ searchParams }: { searchParams: Flas
           ))}
         </div>
         <ConfirmSubmit confirm="Lưu slogan và thông tin pháp lý?">Lưu</ConfirmSubmit>
+      </form>
+
+      {/* Cam kết nội dung (SPEC-identity.md V5.6): đăng bản mới thì mọi người được hỏi lại. */}
+      <form
+        action={publishCommitmentAction}
+        className="flex flex-col gap-3 rounded-[18px] border border-white/10 bg-white/5 p-4"
+        data-testid="admin-commitment"
+      >
+        <h2 className="text-lg font-extrabold">Cam kết nội dung · bản {commitment.version}</h2>
+        <p className="text-sm text-white/60">
+          Đăng bản mới thì mọi người phải đọc và đồng ý lại trước khi đăng video, sản phẩm, live hay tạo Kiot.
+        </p>
+        {[1, 2, 3, 4].map((i) => (
+          <label key={i} className="flex flex-col gap-1 text-sm font-bold">
+            Dòng {i}
+            <textarea
+              name={`commit.${i}`}
+              required
+              maxLength={200}
+              rows={2}
+              defaultValue={
+                commitment.lines?.[i - 1] ??
+                commitDefaults[`common.commit.line${i}` as keyof typeof commitDefaults]
+              }
+              className="rounded-[14px] border border-white/15 bg-white/10 p-3 text-base font-normal text-white"
+            />
+          </label>
+        ))}
+        <ConfirmSubmit confirm="Đăng bản cam kết mới? Mọi người sẽ phải đồng ý lại.">
+          Đăng bản mới
+        </ConfirmSubmit>
       </form>
     </section>
   );

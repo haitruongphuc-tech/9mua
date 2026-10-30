@@ -55,6 +55,7 @@ export const ai: AiMessages = {
   'ai.err.AI_ERROR': 'AI が混み合っています。しばらくしてからお試しください。',
   'ai.err.INVALID_INPUT': '入力内容をご確認ください。',
   'ai.err.PRODUCT_LIMIT': 'Kiot の商品数が上限の500件に達しています。',
+  'ai.err.COMMITMENT_REQUIRED': '先に9MUAコンテンツ誓約に同意してください。',
   'ai.err.NOT_READY': '動画がまだできていません。',
   'ai.err.generic': 'エラーが発生しました。もう一度お試しください。',
   'ai.v.note300': 'メモは300文字までです',

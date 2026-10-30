@@ -5,6 +5,7 @@ import { LINK_COOKIE, googleCookieOptions, oauthFlowCookie } from '@/lib/google-
 import { safeNextPath } from '@/lib/safe-next-path';
 import {
   completeOauthLogin,
+  hasCurrentCommitment,
   isOauthProvider,
   openOauthFlow,
   profileFromCode,
@@ -37,5 +38,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.redirect(`${app}/dang-nhap?lien-ket=${provider}&next=${next}`);
   }
   await startSession(result.userId);
-  return NextResponse.redirect(`${app}${safeNextPath(flow.next)}`);
+  const next = safeNextPath(flow.next);
+  // Tài khoản mới tạo bằng Zalo/Facebook: hiện bảng cam kết nội dung trước khi vào web (SPEC-identity.md V5.6).
+  if (result.created && !(await hasCurrentCommitment(result.userId)))
+    return NextResponse.redirect(`${app}/cam-ket/dong-y?next=${encodeURIComponent(next)}`);
+  return NextResponse.redirect(`${app}${next}`);
 }

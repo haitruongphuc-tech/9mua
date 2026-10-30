@@ -38,6 +38,7 @@ export const post: PostMessages = {
   'post.err.PRODUCT_INVALID': '有商品已下架。请取消选择后重试（最多3个商品）。',
   'post.err.CAPTION_TOO_LONG': '说明最多300个字符。',
   'post.err.DUET_INVALID': '合拍的原视频已不在9MUA。',
+  'post.err.COMMITMENT_REQUIRED': '请先同意 9MUA 内容承诺。',
   'post.mine.title': '我的视频',
   'post.mine.new': '+ 发布视频',
   'post.mine.uploaded': '已上传。视频正在处理，通常1分钟内完成——完成后会通知你。',

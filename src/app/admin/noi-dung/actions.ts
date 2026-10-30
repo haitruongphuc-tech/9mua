@@ -3,7 +3,7 @@
 import { LANGS } from '@/i18n/config';
 import { LEGAL_FIELDS } from '@/lib/legal';
 import { invalidateCached } from '@/lib/ttl-cache';
-import { requireAdminVerified, updateSettings } from '@/modules/admin';
+import { publishCommitmentText, requireAdminVerified, updateSettings } from '@/modules/admin';
 import { SLOGAN_KEYS } from './keys';
 import { back } from '../flash';
 
@@ -33,6 +33,17 @@ export async function saveContentAction(form: FormData): Promise<void> {
   });
   invalidateCached('slogans-json');
   invalidateCached('legal-info');
+  back(
+    '/admin/noi-dung',
+    r.ok ? { ok: true, message: r.message ?? 'Đã lưu.' } : { ok: false, message: r.error },
+  );
+}
+
+// Đăng bản cam kết nội dung mới (SPEC-identity.md V5.6): 4 dòng; mọi người được hỏi lại ở lần làm việc cần cam kết.
+export async function publishCommitmentAction(form: FormData): Promise<void> {
+  const admin = await requireAdminVerified();
+  const lines = [1, 2, 3, 4].map((i) => clean(form.get(`commit.${i}`), 200));
+  const r = await publishCommitmentText(admin.id, lines);
   back(
     '/admin/noi-dung',
     r.ok ? { ok: true, message: r.message ?? 'Đã lưu.' } : { ok: false, message: r.error },

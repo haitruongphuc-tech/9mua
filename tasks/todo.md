@@ -686,7 +686,7 @@ Nhánh `nang-cap-mot-dot`. Trừ App (C32–C36). Mỗi task: test trước → 
 - [x] **T80: @tên người dùng** (C69).
 - [x] **T81: Chặn toàn web** (C68).
 - [x] **T82: Quyền riêng tư video + `canViewVideo`** (C50).
-- [ ] **T83: Cam kết nội dung** (C10, C11).
+- [x] **T83: Cam kết nội dung** (C10, C11).
 
 ### Video
 - [ ] **T84: Thanh tua, tốc độ, xoay ngang, tự cuộn** (C57–C59, C63).

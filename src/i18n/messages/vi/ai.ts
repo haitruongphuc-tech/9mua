@@ -54,6 +54,7 @@ export const ai = {
   'ai.err.AI_ERROR': 'AI đang bận, thử lại sau.',
   'ai.err.INVALID_INPUT': 'Kiểm tra lại thông tin vừa nhập.',
   'ai.err.PRODUCT_LIMIT': 'Kiot đã đủ 500 sản phẩm.',
+  'ai.err.COMMITMENT_REQUIRED': 'Bạn cần đồng ý Cam kết nội dung 9MUA trước khi làm việc này.',
   'ai.err.NOT_READY': 'video chưa ghép xong.',
   'ai.err.generic': 'Có lỗi, hãy thử lại.',
   'ai.v.note300': 'Ghi chú tối đa 300 ký tự',

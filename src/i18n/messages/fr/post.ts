@@ -41,6 +41,7 @@ export const post: PostMessages = {
     'Un produit n’est plus en vente. Désélectionnez-le et réessayez (3 produits maximum).',
   'post.err.CAPTION_TOO_LONG': '300 caractères maximum pour la légende.',
   'post.err.DUET_INVALID': 'La vidéo d’origine de ce duo n’est plus sur 9MUA.',
+  'post.err.COMMITMENT_REQUIRED': 'Veuillez d’abord accepter l’Engagement de contenu 9MUA.',
   'post.mine.title': 'Mes vidéos',
   'post.mine.new': '+ Publier une vidéo',
   'post.mine.uploaded':

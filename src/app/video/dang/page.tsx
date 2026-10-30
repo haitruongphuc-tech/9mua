@@ -4,6 +4,7 @@ import { getT } from '@/i18n/server';
 import { getVideo, MAX_VIDEOS_PER_DAY, videosToday } from '@/modules/creator';
 import { requireUser } from '@/modules/identity';
 import { VideoUploadForm } from './VideoUploadForm';
+import { requireCommitment } from '@/server/commitment';
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getT())('post.title'), robots: { index: false } };
@@ -17,6 +18,10 @@ export default async function UploadVideoPage({
 }) {
   const user = await requireUser();
   const params = await searchParams;
+  await requireCommitment(
+    user.id,
+    `/video/dang${params.story ? '?story=1' : params.duet ? `?duet=${params.duet}` : ''}`,
+  );
   const [t, videos, stories, duet] = await Promise.all([
     getT(),
     videosToday(user.id),

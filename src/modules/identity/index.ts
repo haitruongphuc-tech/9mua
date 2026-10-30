@@ -93,3 +93,12 @@ export {
   RESERVED_HANDLES,
   type SetHandleResult,
 } from './handle';
+// Bổ sung 30/10/2026 (SPEC-identity.md V5.6): cam kết nội dung.
+export {
+  currentCommitment,
+  hasCurrentCommitment,
+  acceptCommitment,
+  publishCommitment,
+  commitmentRecords,
+  type CommitmentText,
+} from './commitment';

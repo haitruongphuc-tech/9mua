@@ -258,26 +258,35 @@ export function VideoUploadForm({
           })}
         </ul>
       </fieldset>
-      {progress !== null ? (
-        <div className="flex flex-col gap-1" aria-live="polite">
-          <div className="h-2 overflow-hidden rounded-full bg-white/10">
-            <div className="h-full bg-brand" style={{ width: `${progress}%` }} />
+      {/* Nút đăng luôn nằm ở đáy màn hình, ngay trên thanh menu dưới: trên iPhone form dài (khung xem trước, danh
+          sách sản phẩm) nên nút cuối form bị khuất, người dùng chọn video xong không thấy chỗ bấm đăng. */}
+      <div className="sticky bottom-[calc(4rem+1px+env(safe-area-inset-bottom))] z-30 -mx-4 flex flex-col gap-2 border-t border-white/10 bg-ink/95 px-4 py-3 backdrop-blur-xl">
+        {progress !== null ? (
+          <div className="flex flex-col gap-1" aria-live="polite">
+            <div className="h-2 overflow-hidden rounded-full bg-white/10">
+              <div className="h-full bg-brand" style={{ width: `${progress}%` }} />
+            </div>
+            <span className="text-[12px] text-white/60" data-testid="video-progress">
+              {progress < 100 ? t('post.uploading', { pct: progress }) : t('post.saving')}
+            </span>
           </div>
-          <span className="text-[12px] text-white/60" data-testid="video-progress">
-            {progress < 100 ? t('post.uploading', { pct: progress }) : t('post.saving')}
-          </span>
-        </div>
-      ) : null}
-      <button
-        type="submit"
-        disabled={!file || Boolean(error) || progress !== null || remaining[mode] <= 0}
-        className="h-12 rounded-full bg-brand font-black text-white shadow-[0_0_20px_rgb(255_107_0/0.35)] disabled:opacity-50"
-      >
-        {t(mode === 'story' ? 'post.submitStory' : 'post.submit')}
-      </button>
-      <p className="text-center text-[12px] text-white/50">
-        {t(mode === 'story' ? 'post.remainingStory' : 'post.remaining', { count: remaining[mode] })}
-      </p>
+        ) : null}
+        <button
+          type="submit"
+          disabled={!file || Boolean(error) || progress !== null || remaining[mode] <= 0}
+          className="h-12 rounded-full bg-brand font-black text-white shadow-[0_0_20px_rgb(255_107_0/0.35)] disabled:opacity-50"
+        >
+          {t(mode === 'story' ? 'post.submitStory' : 'post.submit')}
+        </button>
+        {/* Nút chưa bấm được thì nói lý do ngay dưới nút (lỗi video quá dài/quá nặng cũng hiện ở đây). */}
+        <p className="text-center text-[12px] text-white/50" data-testid="video-submit-hint">
+          {!file && remaining[mode] > 0
+            ? t('post.pickFirst')
+            : error && progress === null
+              ? error
+              : t(mode === 'story' ? 'post.remainingStory' : 'post.remaining', { count: remaining[mode] })}
+        </p>
+      </div>
     </form>
   );
 }

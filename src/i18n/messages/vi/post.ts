@@ -19,6 +19,7 @@ export const post = {
   'post.submitStory': 'Đăng Story',
   'post.remaining': 'Hôm nay bạn còn đăng được {count} video.',
   'post.remainingStory': 'Hôm nay bạn còn đăng được {count} Story.',
+  'post.pickFirst': "Chọn video ở trên trước.",
   'post.err.tooBig': 'Video tối đa 100MB.',
   'post.err.tooLong': 'Video dài hơn {sec} giây, hãy cắt ngắn rồi đăng lại.',
   'post.err.upload': 'Tải lên thất bại, hãy thử lại.',

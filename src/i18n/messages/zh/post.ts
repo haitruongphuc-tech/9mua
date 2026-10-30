@@ -19,6 +19,7 @@ export const post: PostMessages = {
   'post.submitStory': '发布快拍',
   'post.remaining': '今天还能发布{count}个视频。',
   'post.remainingStory': '今天还能发布{count}个快拍。',
+  'post.pickFirst': "请先在上方选择视频。",
   'post.err.tooBig': '视频最大100MB。',
   'post.err.tooLong': '视频超过{sec}秒，请剪短后重新发布。',
   'post.err.upload': '上传失败，请重试。',

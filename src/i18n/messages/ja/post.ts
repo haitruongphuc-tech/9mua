@@ -20,6 +20,7 @@ export const post: PostMessages = {
   'post.submitStory': 'ストーリーを投稿',
   'post.remaining': '今日はあと{count}本の動画を投稿できます。',
   'post.remainingStory': '今日はあと{count}件のストーリーを投稿できます。',
+  'post.pickFirst': "まず上で動画を選んでください。",
   'post.err.tooBig': '動画は100MBまでです。',
   'post.err.tooLong': '動画が{sec}秒を超えています。短くしてから投稿してください。',
   'post.err.upload': 'アップロードに失敗しました。もう一度お試しください。',

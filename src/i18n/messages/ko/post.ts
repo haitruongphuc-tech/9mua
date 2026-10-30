@@ -20,6 +20,7 @@ export const post: PostMessages = {
   'post.submitStory': '스토리 올리기',
   'post.remaining': '오늘 동영상을 {count}개 더 올릴 수 있어요.',
   'post.remainingStory': '오늘 스토리를 {count}개 더 올릴 수 있어요.',
+  'post.pickFirst': "먼저 위에서 동영상을 선택하세요.",
   'post.err.tooBig': '동영상은 최대 100MB예요.',
   'post.err.tooLong': '동영상이 {sec}초보다 길어요. 잘라서 다시 올려 주세요.',
   'post.err.upload': '업로드에 실패했어요. 다시 시도해 주세요.',

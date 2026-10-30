@@ -23,7 +23,7 @@
 - Điểm thưởng (C01): **chỉ hiển thị**, không đổi ra xu hay tiền.
 - Xử lý vi phạm 3 lần (C21): **dùng thêm**, giữ luật "5 người báo cáo thì tự ẩn".
 - "Làm hết tất cả" được hiểu là gồm cả các đợt đã lên kế hoạch trước đây: B (bài ảnh + chữ, cảm xúc, đăng lại), C (chỉnh video,
-  nhạc nền), D (Nhóm), E (hoa hồng creator). Mã mới: **C86–C93** (mục 2). Spec Đợt A (`SPEC-social.md`) gộp vào đợt này.
+  nhạc nền), D (Nhóm), E (hoa hồng creator). Mã mới: **C86–C92** (mục 2). Đợt A đã làm xong trên `main` (T74–T78, mã C93).
 
 ## 2. Bảng tra mã → spec
 
@@ -63,7 +63,7 @@
 | C90 | Âm thanh: nhạc nền từ thư viện 9MUA, "dùng âm thanh này" (Đợt C cũ) | SPEC-creator §V5.6 |
 | C91 | Nhóm (Đợt D cũ) | SPEC-social §V5.10 |
 | C92 | Hoa hồng creator khi bán hộ (Đợt E cũ) | SPEC-payouts §V5.2 |
-| C93 | Đợt A: trang cá nhân, tìm kiếm chung, nút ＋ Đăng, thống kê creator | SPEC-social "Đợt A" (giữ nguyên, sửa đường dẫn theo C69) |
+| C93 | Đợt A: trang cá nhân, tìm kiếm chung, nút ＋ Đăng, thống kê creator | **Đã xong** (T74–T78). Đợt này chỉ đổi đường dẫn theo C69 và thêm tab Kiot |
 
 ## 3. Công tắc chức năng
 
@@ -170,7 +170,7 @@ Chỉ thêm. Cột mới trên bảng đang có dữ liệu đều **cho phép t
 ## 7. Cách làm và đưa lên web
 
 1. CEO duyệt bộ spec này một lần.
-2. Claude viết `tasks/plan.md` và `tasks/todo.md` cho đợt (T74 trở đi), rồi code một mạch trên nhánh `nang-cap-mot-dot`.
+2. Claude viết `tasks/plan.md` và `tasks/todo.md` cho đợt (T79 trở đi), rồi code một mạch trên nhánh `nang-cap-mot-dot`.
    Mỗi task: test trước → code → `npm run lint && npm test` → một commit. Đẩy lên GitHub sau mỗi task.
 3. Review toàn bộ, chạy e2e trên điện thoại và máy tính.
 4. CEO đưa lên web một lần bằng `scripts/deploy.sh`. Database chỉ thêm bảng và cột.

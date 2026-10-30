@@ -114,7 +114,7 @@ revokeVoucher(voucherId, adminId, reason): Promise<void>   // cho admin
 >
 > Các đợt sau: B (bài chữ + ảnh, cảm xúc, đăng lại), C (chỉnh video, nhạc nền), D (nhóm), E (hoa hồng).
 >
-> **Cập nhật 30/10/2026:** CEO chốt làm hết trong một đợt (`docs/nang-cap-mot-dot.md`). Đợt A gộp vào đợt đó (mã C93).
+> **Cập nhật 30/10/2026:** Đợt A đã làm xong trên `main` (T74–T78). Đợt nâng cấp một đợt (`docs/nang-cap-mot-dot.md`) chỉ đổi thêm:
 > Đường dẫn trang cá nhân đổi theo C69: chính là `9mua.com/@<tên>`, link `/creator/<id>` chuyển hướng 301 sang đó.
 > Trang Tìm kiếm thêm tab Kiot và tìm theo vị trí (`SPEC-marketplace.md` V5).
 

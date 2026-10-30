@@ -9,21 +9,38 @@ import { imageStore } from '@/lib/media/image-store';
 import { notifyKey } from '@/lib/notifications';
 import { runVideoReadyHooks } from './hooks';
 import { initialScore } from './score';
-import { composeDuet, MAX_DURATION_SEC, MAX_STORY_SEC, probe, rejectReason, transcode } from './transcode';
+import { videoLimits } from './limits';
+import {
+  composeDuet,
+  LONG_TRANSCODE_TIMEOUT_MS,
+  MAX_DURATION_SEC,
+  MAX_STORY_SEC,
+  probe,
+  rejectReason,
+  ToolError,
+  transcode,
+} from './transcode';
 
 export const MAX_ATTEMPTS = 3;
-// Việc "running" mà không xong sau 15 phút (worker chết giữa chừng) được lấy lại.
+// Việc "running" mà không xong sau 15 phút (worker chết giữa chừng) được lấy lại; việc video dài sau 3 giờ 15 phút.
 const STALE_LOCK_MS = 15 * 60_000;
+const STALE_LONG_LOCK_MS = LONG_TRANSCODE_TIMEOUT_MS + 15 * 60_000;
 
 // Lấy 1 việc bằng FOR UPDATE SKIP LOCKED: nhiều worker chạy song song không bao giờ lấy trùng một video.
+// Hàng chờ (SPEC-creator.md V5.1): luôn lấy việc short trước; việc long chỉ khi không còn việc short, mỗi lúc 1 việc.
 export async function claimJob(): Promise<VideoJob | null> {
-  const staleBefore = new Date(now().getTime() - STALE_LOCK_MS);
+  const staleShort = new Date(now().getTime() - STALE_LOCK_MS);
+  const staleLong = new Date(now().getTime() - STALE_LONG_LOCK_MS);
   const rows = await db.$queryRaw<VideoJob[]>`
     UPDATE "VideoJob" SET status = 'running', "lockedAt" = ${now()}, attempts = attempts + 1, "updatedAt" = ${now()}
     WHERE id = (
-      SELECT id FROM "VideoJob"
-      WHERE status = 'queued' OR (status = 'running' AND "lockedAt" < ${staleBefore})
-      ORDER BY "createdAt" FOR UPDATE SKIP LOCKED LIMIT 1
+      SELECT j.id FROM "VideoJob" j
+      WHERE (j.status = 'queued'
+          OR (j.status = 'running' AND j."lockedAt" < CASE WHEN j.lane = 'long' THEN ${staleLong} ELSE ${staleShort} END))
+        AND (j.lane = 'short' OR NOT EXISTS (
+          SELECT 1 FROM "VideoJob" r
+          WHERE r.lane = 'long' AND r.status = 'running' AND r."lockedAt" >= ${staleLong} AND r.id <> j.id))
+      ORDER BY (j.lane = 'long'), j."createdAt" FOR UPDATE SKIP LOCKED LIMIT 1
     )
     RETURNING *`;
   return rows[0] ?? null;
@@ -55,11 +72,15 @@ export async function processNextJob(): Promise<boolean> {
   }
 
   const work = path.join(env().PRIVATE_DIR, 'video-work', job.id);
+  const long = job.lane === 'long';
   try {
     const source = await probe(job.sourcePath).catch(() => null);
     const story = video.kind === 'story';
+    // Video dài (hàng long) theo giới hạn CEO đặt; hàng short giữ ≤ 60 giây, Story ≤ 30 giây.
+    const limits = await videoLimits();
+    const maxSec = story ? MAX_STORY_SEC : long && limits.long ? limits.maxSec : MAX_DURATION_SEC;
     let reason = source
-      ? rejectReason(source, story ? MAX_STORY_SEC : MAX_DURATION_SEC)
+      ? rejectReason(source, maxSec, limits.long)
       : 'File không phải video MP4, MOV hoặc WebM';
     // Duet: cần file video gốc còn trên feed (SPEC-creator.md bổ sung 27/10).
     const original = video.duetOfId
@@ -81,7 +102,11 @@ export async function processNextJob(): Promise<boolean> {
         newAudio: source!.hasAudio,
         origAudio: orig.hasAudio,
       });
-    } else await transcode(job.sourcePath, outMp4, outPoster, source!.durationSec);
+    } else
+      await transcode(job.sourcePath, outMp4, outPoster, source!.durationSec, {
+        maxSec,
+        timeoutMs: long ? LONG_TRANSCODE_TIMEOUT_MS : undefined,
+      });
     const result = await probe(outMp4);
 
     const t = now();
@@ -141,7 +166,9 @@ export async function processNextJob(): Promise<boolean> {
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
     console.error(`[worker] video ${video.id} lỗi (lần ${job.attempts}):`, message);
-    if (job.attempts >= MAX_ATTEMPTS)
+    if (long && e instanceof ToolError && message.includes('chạy quá'))
+      await fail(job, 'Video dài xử lý quá 3 giờ, hãy cắt ngắn rồi đăng lại');
+    else if (job.attempts >= MAX_ATTEMPTS)
       await fail(job, 'Không xử lý được video, hãy thử quay lại hoặc chọn file khác');
     else
       await db.videoJob.update({

@@ -1,4 +1,4 @@
-import { expireDrafts } from '@/modules/creator';
+import { cleanupUploadSessions, expireDrafts } from '@/modules/creator';
 import { assignMissingHandles } from '@/modules/identity';
 import { isFeatureOn } from '@/lib/features';
 import { publishScheduledVideos } from './creator';
@@ -12,6 +12,8 @@ const TICK_JOBS: Job[] = [
   { name: 'handles', run: () => assignMissingHandles(500) },
   // Video hẹn giờ (SPEC-creator.md V5.3): worker chạy mỗi phút, cron này là dự phòng khi worker dừng.
   { name: 'scheduled-videos', run: () => publishScheduledVideos() },
+  // Phiên tải video từng phần quá 24 giờ: xoá file tạm (SPEC-creator.md V5.1).
+  { name: 'upload-sessions', run: () => cleanupUploadSessions() },
 ];
 
 const DAILY_JOBS: Job[] = [

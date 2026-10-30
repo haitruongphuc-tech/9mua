@@ -117,6 +117,20 @@ export default async function SettingsPage({ searchParams }: { searchParams: Fla
           />
           Đang tặng voucher mở Kiot
         </label>
+        <h2 className="mt-2 text-lg font-extrabold">Video dài (khi bật công tắc long_video)</h2>
+        {num(
+          'Video dài tối đa (giây)',
+          'video_long_max_seconds',
+          s.video_long_max_seconds,
+          'Mặc định 3.600 giây (60 phút). Công tắc tắt thì video tối đa 60 giây.',
+        )}
+        {num('Dung lượng video tối đa (MB)', 'video_max_mb', s.video_max_mb, 'Mặc định 2.048MB (2GB).')}
+        {num(
+          'Tổng phút video dài mỗi người mỗi ngày',
+          'video_long_daily_minutes',
+          s.video_long_daily_minutes,
+          'Chỉ tính video dài hơn 60 giây. Mặc định 120 phút.',
+        )}
         <ConfirmSubmit confirm="Lưu các thay đổi cài đặt?">Lưu cài đặt</ConfirmSubmit>
       </form>
       <section

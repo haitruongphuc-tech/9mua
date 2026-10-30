@@ -13,6 +13,8 @@ import { extractHashtags } from './hashtags';
 import { isVisibility } from './visibility';
 import { hasCurrentCommitment } from '@/modules/identity';
 import { MAX_DRAFTS, normalizePlace, scheduleOk, type PostOptions } from './posting';
+import { checkLongVideo, SHORT_MAX_SEC, videoLimits } from './limits';
+import { probe } from './transcode';
 
 export const MAX_VIDEO_BYTES = 100 * 1024 * 1024;
 export const MAX_VIDEOS_PER_DAY = 10;
@@ -33,6 +35,14 @@ export async function videosToday(userId: string, kind: 'video' | 'story' = 'vid
 
 export class UploadTooLarge extends Error {}
 
+// Chỗ ghi file tải lên mới (dùng chung cho tải một lần và ghép từ nhiều phần).
+export async function newUploadTarget(userId: string): Promise<{ uploadId: string; target: string }> {
+  const uploadId = randomBytes(16).toString('hex');
+  const target = uploadPath(userId, uploadId)!;
+  await mkdir(path.dirname(target), { recursive: true, mode: 0o750 });
+  return { uploadId, target };
+}
+
 // Ghi luồng tải lên xuống đĩa, cắt ngay khi vượt 100MB (không giữ cả file trong RAM).
 export async function saveUpload(
   userId: string,
@@ -42,9 +52,7 @@ export async function saveUpload(
   const [videos, stories] = await Promise.all([videosToday(userId), videosToday(userId, 'story')]);
   if (videos >= MAX_VIDEOS_PER_DAY && stories >= MAX_VIDEOS_PER_DAY)
     return { ok: false, error: 'DAILY_LIMIT' };
-  const uploadId = randomBytes(16).toString('hex');
-  const target = uploadPath(userId, uploadId)!;
-  await mkdir(path.dirname(target), { recursive: true, mode: 0o750 });
+  const { uploadId, target } = await newUploadTarget(userId);
   let size = 0;
   const limiter = new Transform({
     transform(chunk: Buffer, _enc, done) {
@@ -63,14 +71,21 @@ export async function saveUpload(
   return { ok: true, uploadId, size };
 }
 
-// Nhận dạng nhanh bằng chữ ký đầu file (MP4/MOV có "ftyp", WebM/MKV có EBML). ffprobe kiểm kỹ ở worker.
-export async function looksLikeVideo(file: string): Promise<boolean> {
+// Nhận dạng nhanh bằng chữ ký đầu file (MP4/MOV có "ftyp", WebM/MKV có EBML, AVI có "RIFF…AVI " khi bật video dài).
+// ffprobe kiểm kỹ ở worker.
+export async function looksLikeVideo(file: string, avi = false): Promise<boolean> {
   const fh = await open(file, 'r');
   try {
     const head = Buffer.alloc(12);
     const { bytesRead } = await fh.read(head, 0, 12, 0);
     if (bytesRead < 12) return false;
     const box = head.subarray(4, 8).toString('latin1');
+    if (
+      avi &&
+      head.subarray(0, 4).toString('latin1') === 'RIFF' &&
+      head.subarray(8, 12).toString('latin1') === 'AVI '
+    )
+      return true;
     return ['ftyp', 'moov', 'mdat', 'wide', 'free'].includes(box) || head.readUInt32BE(0) === 0x1a45dfa3;
   } finally {
     await fh.close();
@@ -92,7 +107,10 @@ export type CreateVideoResult =
         | 'COMMITMENT_REQUIRED'
         | 'SCHEDULE_INVALID'
         | 'PLACE_INVALID'
-        | 'DRAFT_LIMIT';
+        | 'DRAFT_LIMIT'
+        | 'TOO_LONG'
+        | 'ACCOUNT_TOO_NEW'
+        | 'LONG_DAILY_LIMIT';
     };
 
 // Tạo video từ file đã tải lên (SPEC-creator.md mục 1). Video ở trạng thái processing cho tới khi worker xong.
@@ -121,8 +139,19 @@ export async function createVideoUpload(
     await unlink(file).catch(() => {});
     return result;
   };
-  if (info.size > MAX_VIDEO_BYTES) return discard({ ok: false as const, error: 'TOO_LARGE' as const });
-  if (!(await looksLikeVideo(file))) return discard({ ok: false as const, error: 'BAD_FORMAT' as const });
+  // Giới hạn theo công tắc long_video (SPEC-creator.md V5.1): tắt thì như cũ 100MB, 60 giây.
+  const limits = await videoLimits();
+  if (info.size > limits.maxBytes) return discard({ ok: false as const, error: 'TOO_LARGE' as const });
+  if (!(await looksLikeVideo(file, limits.long)))
+    return discard({ ok: false as const, error: 'BAD_FORMAT' as const });
+  // Video dài: đo thời lượng thật bằng ffprobe (không tin số trình duyệt gửi), xếp vào hàng long.
+  let sourceSec: number | null = null;
+  if (limits.long && kind === 'video' && !duetOfId) {
+    sourceSec = (await probe(file).catch(() => null))?.durationSec ?? null;
+    const longError = sourceSec !== null ? await checkLongVideo(userId, sourceSec, limits) : null;
+    if (longError) return discard({ ok: false as const, error: longError });
+  }
+  const lane = sourceSec !== null && sourceSec > SHORT_MAX_SEC + 0.5 ? 'long' : 'short';
   const caption = meta.caption.trim();
   if (caption.length > MAX_CAPTION) return { ok: false, error: 'CAPTION_TOO_LONG' };
   // Nháp và hẹn giờ chỉ cho video thường (Story tự hết hạn sau 24 giờ).
@@ -180,11 +209,12 @@ export async function createVideoUpload(
         placeName: place.placeName ?? null,
         aiGenerated: meta.aiStudio === true || meta.options?.aiGenerated === true,
         aiStudio: meta.aiStudio === true,
+        sourceSec,
         createdAt: now(),
         products: { create: productIds.map((productId, position) => ({ productId, position })) },
       },
     });
-    await tx.videoJob.create({ data: { videoId: video.id, sourcePath: file, createdAt: now() } });
+    await tx.videoJob.create({ data: { videoId: video.id, sourcePath: file, lane, createdAt: now() } });
     return { ok: true, videoId: video.id };
   });
 }

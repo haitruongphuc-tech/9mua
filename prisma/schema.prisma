@@ -605,6 +605,7 @@ model Video {
   aiGenerated     Boolean        @default(false) // chip "Nội dung tạo bằng AI"
   aiStudio        Boolean        @default(false) // làm từ AI Studio: nhãn AI không gỡ được
   editedAt        DateTime? // sửa chữ, sản phẩm, địa điểm sau khi đăng → "Đã chỉnh sửa"
+  sourceSec       Float? // thời lượng file gốc đo bằng ffprobe khi tạo (SPEC-creator.md V5.1): tính 120 phút video dài/ngày
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
   products        VideoProduct[]
@@ -634,10 +635,31 @@ model VideoJob {
   attempts   Int       @default(0)
   lockedAt   DateTime?
   error      String?
+  // Hàng chờ (SPEC-creator.md V5.1): worker luôn lấy việc short trước; việc long (video > 60 giây) mỗi lúc 1 việc.
+  lane       String    @default("short")
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
 
   @@index([status, createdAt])
+}
+
+// Phiên tải video lên từng phần 8MB (SPEC-creator.md V5.1 mục 3). Phần lưu ở PRIVATE_DIR/video-chunks/<id>/, xoá sau
+// khi ghép hoặc khi phiên quá 24 giờ. Mỗi người tối đa 3 phiên đang mở.
+model VideoUploadSession {
+  id          String   @id
+  userId      String
+  fileName    String
+  size        BigInt
+  durationSec Float? // đo ở trình duyệt; máy chủ đo lại bằng ffprobe khi tạo video
+  partSize    Int
+  parts       Int
+  status      String   @default("open") // open | assembling | done | expired
+  uploadId    String?
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime
+
+  @@index([userId, status])
+  @@index([status, expiresAt])
 }
 
 model VideoLike {

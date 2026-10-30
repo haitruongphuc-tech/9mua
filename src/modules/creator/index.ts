@@ -85,3 +85,16 @@ export {
   type VideoForEdit,
   type TimingResult,
 } from './posting';
+// Bổ sung 30/10/2026 (SPEC-creator.md V5.1): video dài, tải lên từng phần, hàng chờ short/long.
+export { videoLimits, checkLongVideo, SHORT_MAX_BYTES, SHORT_MAX_SEC, type VideoLimits } from './limits';
+export {
+  openUploadSession,
+  uploadSessionStatus,
+  putUploadPart,
+  completeUploadSession,
+  cleanupUploadSessions,
+  diskFreeRatio,
+  PART_SIZE,
+  MAX_OPEN_SESSIONS,
+  type OpenSessionResult,
+} from './chunked';

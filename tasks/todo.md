@@ -692,7 +692,7 @@ Nhánh `nang-cap-mot-dot`. Trừ App (C32–C36). Mỗi task: test trước → 
 - [x] **T84: Thanh tua, tốc độ, xoay ngang, tự cuộn** (C57–C59, C63).
 - [x] **T85: Không quan tâm + lịch sử đã xem** (C60, C61).
 - [x] **T86: Nháp, hẹn giờ, địa điểm, ghim, nhãn AI, sửa sau khi đăng** (C48, C49, C53–C56). Đổi ảnh bìa sau khi đăng làm cùng T88 (3 ảnh bìa); báo người mới được nhắc tên khi sửa làm cùng T98 (@nhắc tên).
-- [ ] **T87: Tải lên từng phần + video dài + hàng chờ short/long** (C06).
+- [x] **T87: Tải lên từng phần + video dài + hàng chờ short/long** (C06).
 - [ ] **T88: Nhiều mức chất lượng, 3 ảnh bìa, ảnh xem trước động** (C07).
 - [ ] **T89: Kho video ngoài + trang Dung lượng** (C06).
 - [ ] **T90: Phụ đề tự động (OpenAI Whisper, tắt sẵn)** (C51).

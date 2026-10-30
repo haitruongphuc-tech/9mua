@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { ClientMessages } from '@/i18n/ClientMessages';
 import { getT } from '@/i18n/server';
-import { getVideo, MAX_VIDEOS_PER_DAY, videosToday } from '@/modules/creator';
+import { getVideo, MAX_VIDEOS_PER_DAY, videoLimits, videosToday } from '@/modules/creator';
 import { getKiotByOwner, PROVINCES } from '@/modules/kiot';
 import { requireUser } from '@/modules/identity';
 import { VideoUploadForm } from './VideoUploadForm';
@@ -23,12 +23,13 @@ export default async function UploadVideoPage({
     user.id,
     `/video/dang${params.story ? '?story=1' : params.duet ? `?duet=${params.duet}` : ''}`,
   );
-  const [t, videos, stories, duet, kiot] = await Promise.all([
+  const [t, videos, stories, duet, kiot, limits] = await Promise.all([
     getT(),
     videosToday(user.id),
     videosToday(user.id, 'story'),
     params.duet ? getVideo(params.duet, {}) : Promise.resolve(null),
     getKiotByOwner(user.id),
+    videoLimits(),
   ]);
   return (
     <div className="mx-auto flex w-full max-w-lg flex-col gap-4 px-4 py-6">
@@ -44,6 +45,7 @@ export default async function UploadVideoPage({
           duet={duet ? { id: duet.id, author: duet.author.displayName, posterUrl: duet.posterUrl } : null}
           provinces={PROVINCES.map((p) => ({ slug: p.slug, name: p.name }))}
           defaultProvince={kiot?.province ?? ''}
+          limits={{ long: limits.long, maxBytes: limits.maxBytes, maxSec: limits.maxSec }}
         />
       </ClientMessages>
     </div>

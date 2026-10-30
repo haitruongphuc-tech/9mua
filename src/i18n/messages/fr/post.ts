@@ -62,6 +62,16 @@ export const post: PostMessages = {
   'post.err.DRAFT_LIMIT': "Vous avez déjà 20 brouillons. Publiez-en ou supprimez-en d'abord.",
   'post.err.AI_LOCKED': 'Les vidéos créées dans AI Studio gardent toujours le label IA.',
   'post.err.INVALID': 'Certaines informations sont invalides, vérifiez-les.',
+  'post.err.DISABLED': 'Cette fonction est désactivée pour le moment.',
+  'post.err.TOO_LONG': 'La vidéo dépasse la durée autorisée.',
+  'post.err.ACCOUNT_TOO_NEW': "Les vidéos de plus de 60 secondes demandent un compte d'au moins 3 jours.",
+  'post.err.LONG_DAILY_LIMIT':
+    "Vous pouvez publier jusqu'à 120 minutes de vidéos de plus de 60 secondes par jour.",
+  'post.err.TOO_MANY_SESSIONS': 'Vous avez 3 envois en cours. Terminez-en un ou attendez 24 heures.',
+  'post.err.STORAGE_FULL': 'Le stockage vidéo est plein pour le moment, réessayez plus tard.',
+  'post.err.INCOMPLETE': "L'envoi n'est pas terminé. Touchez publier à nouveau pour continuer.",
+  'post.err.tooBigMb': "Les vidéos peuvent faire jusqu'à {mb} Mo.",
+  'post.uploadingDetail': 'Envoi {pct}% · {speed}/s · environ {eta} restant',
   'post.mine.title': 'Mes vidéos',
   'post.mine.new': '+ Publier une vidéo',
   'post.mine.uploaded':

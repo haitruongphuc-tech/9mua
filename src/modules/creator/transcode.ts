@@ -5,6 +5,7 @@ import { runTool as run, ToolError } from '@/lib/media/run-tool';
 export const MAX_DURATION_SEC = 60;
 export const MAX_STORY_SEC = 30; // Story 24 giờ (SPEC-creator.md bổ sung 27/10)
 export const TRANSCODE_TIMEOUT_MS = 5 * 60_000;
+export const LONG_TRANSCODE_TIMEOUT_MS = 3 * 3_600_000; // video dài xử lý quá 3 giờ thì failed (SPEC-creator.md V5.1)
 const PROBE_TIMEOUT_MS = 30_000;
 
 export { ToolError };
@@ -41,10 +42,11 @@ export async function probe(path: string): Promise<Probe> {
 
 const ACCEPTED_FORMATS = ['mov', 'mp4', 'matroska', 'webm'];
 
-// Lý do không nhận video (hiển thị cho người đăng), hoặc null nếu dùng được.
-export function rejectReason(p: Probe, maxSec: number = MAX_DURATION_SEC): string | null {
-  if (!ACCEPTED_FORMATS.some((f) => p.formatName.split(',').includes(f)) || !p.video || p.video.width === 0)
-    return 'File không phải video MP4, MOV hoặc WebM';
+// Lý do không nhận video (hiển thị cho người đăng), hoặc null nếu dùng được. avi: nhận thêm AVI khi bật video dài.
+export function rejectReason(p: Probe, maxSec: number = MAX_DURATION_SEC, avi = false): string | null {
+  const formats = avi ? [...ACCEPTED_FORMATS, 'avi'] : ACCEPTED_FORMATS;
+  if (!formats.some((f) => p.formatName.split(',').includes(f)) || !p.video || p.video.width === 0)
+    return avi ? 'File không phải video MP4, MOV, WebM hoặc AVI' : 'File không phải video MP4, MOV hoặc WebM';
   if (p.video.width * p.video.height > 4096 * 4096) return 'Độ phân giải video quá lớn';
   if (!(p.durationSec > 0)) return 'Không đọc được thời lượng video';
   if (p.durationSec > maxSec + 0.5) return `Video dài hơn ${maxSec} giây`;
@@ -53,7 +55,13 @@ export function rejectReason(p: Probe, maxSec: number = MAX_DURATION_SEC): strin
 
 // MP4 H.264 + AAC, tối đa 720×1280, faststart, bỏ mọi metadata gốc (GPS, máy quay). ffmpeg tự xoay theo
 // cờ xoay của iPhone nên video ra đúng chiều và không còn cờ xoay.
-export async function transcode(src: string, outMp4: string, outPoster: string, durationSec: number) {
+export async function transcode(
+  src: string,
+  outMp4: string,
+  outPoster: string,
+  durationSec: number,
+  opts: { maxSec?: number; timeoutMs?: number } = {},
+) {
   await run(
     'ffmpeg',
     [
@@ -101,12 +109,12 @@ export async function transcode(src: string, outMp4: string, outPoster: string, 
       '-movflags',
       '+faststart',
       '-t',
-      String(MAX_DURATION_SEC + 1),
+      String((opts.maxSec ?? MAX_DURATION_SEC) + 1),
       '-f',
       'mp4',
       outMp4,
     ],
-    TRANSCODE_TIMEOUT_MS,
+    opts.timeoutMs ?? TRANSCODE_TIMEOUT_MS,
   );
   await makePoster(outMp4, outPoster, durationSec);
 }

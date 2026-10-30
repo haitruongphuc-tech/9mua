@@ -30,6 +30,10 @@ export const SETTING_DEFAULTS = {
   // Nội dung CEO sửa ở /admin/noi-dung (SPEC-admin.md bổ sung 27/10), lưu dạng JSON.
   slogans_json: '{}', // { "home": { "vi": "...", "en": "..." }, ... } — trống thì dùng từ điển
   legal_info_json: '{}', // xem src/lib/legal.ts
+  // Video dài (SPEC-creator.md V5.1, chỉ dùng khi bật công tắc long_video)
+  video_long_max_seconds: '3600',
+  video_max_mb: '2048',
+  video_long_daily_minutes: '120',
 } as const;
 
 export type SettingKey = keyof typeof SETTING_DEFAULTS;

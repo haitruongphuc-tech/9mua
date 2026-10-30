@@ -24,6 +24,9 @@ export async function saveSettingsAction(form: FormData): Promise<void> {
     social_free_daily_limit: intOf(form.get('social_free_daily_limit')),
     social_voucher_threshold: intOf(form.get('social_voucher_threshold')),
     social_voucher_enabled: form.get('social_voucher_enabled') === 'on' ? 'true' : 'false',
+    video_long_max_seconds: intOf(form.get('video_long_max_seconds')),
+    video_max_mb: intOf(form.get('video_max_mb')),
+    video_long_daily_minutes: intOf(form.get('video_long_daily_minutes')),
   });
   back(
     '/admin/cai-dat',

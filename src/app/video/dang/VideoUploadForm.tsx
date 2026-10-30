@@ -8,11 +8,17 @@ import { useT } from '@/i18n/client';
 import { formatVnd } from '@/lib/format';
 import type { PickableProduct } from '@/app/api/video/products/route';
 import { createVideoAction } from './actions';
+import { chunkedUpload, type UploadProgress } from './chunked-upload';
 
-const MAX_BYTES = 100 * 1024 * 1024;
 const MAX_CAPTION = 300;
-const MAX_SEC = { video: 60, story: 30 } as const;
-type Mode = keyof typeof MAX_SEC;
+const STORY_SEC = 30;
+type Mode = 'video' | 'story';
+
+const mb = (bytes: number) => `${(bytes / 1024 / 1024).toFixed(bytes >= 10 * 1024 * 1024 ? 0 : 1)}MB`;
+const clockText = (sec: number) =>
+  sec >= 3600
+    ? `${Math.floor(sec / 3600)}:${String(Math.floor((sec % 3600) / 60)).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`
+    : `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
 
 function putWithProgress(
   file: File,
@@ -42,13 +48,17 @@ export function VideoUploadForm({
   duet,
   provinces,
   defaultProvince,
+  limits,
 }: {
   remaining: Record<Mode, number>;
   initialMode: Mode;
   duet: { id: string; author: string; posterUrl: string | null } | null;
   provinces: { slug: string; name: string }[];
   defaultProvince: string;
+  // Giới hạn theo công tắc long_video (SPEC-creator.md V5.1). Bật thì tải từng phần 8MB, gửi tiếp được khi rớt mạng.
+  limits: { long: boolean; maxBytes: number; maxSec: number };
 }) {
+  const maxSec = (m: Mode) => (m === 'story' ? STORY_SEC : limits.maxSec);
   const t = useT();
   // Duet luôn là video thường.
   const [mode, setMode] = useState<Mode>(duet ? 'video' : initialMode);
@@ -58,6 +68,8 @@ export function VideoUploadForm({
   const [results, setResults] = useState<PickableProduct[]>([]);
   const [picked, setPicked] = useState<PickableProduct[]>([]);
   const [progress, setProgress] = useState<number | null>(null);
+  const [detail, setDetail] = useState<UploadProgress | null>(null);
+  const [durationSec, setDurationSec] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const preview = useRef<HTMLVideoElement>(null);
   // Quyền riêng tư và tuỳ chọn khi đăng (SPEC-creator.md V5.3, công tắc post_options).
@@ -87,14 +99,21 @@ export function VideoUploadForm({
   function choose(f: File | undefined) {
     setError(null);
     if (!f) return;
-    if (f.size > MAX_BYTES) return setError(t('post.err.tooBig'));
+    setDurationSec(null);
+    if (f.size > limits.maxBytes)
+      return setError(
+        limits.long
+          ? t('post.err.tooBigMb', { mb: Math.round(limits.maxBytes / 1024 / 1024) })
+          : t('post.err.tooBig'),
+      );
     setFile(f);
     // Kiểm sơ bộ thời lượng trên máy (server kiểm lại bằng ffprobe). Trình duyệt không đọc được thì bỏ qua.
     const url = URL.createObjectURL(f);
     const v = preview.current;
     if (v) {
       v.onloadedmetadata = () => {
-        if (v.duration > MAX_SEC[mode] + 0.5) setError(t('post.err.tooLong', { sec: MAX_SEC[mode] }));
+        if (Number.isFinite(v.duration)) setDurationSec(v.duration);
+        if (v.duration > maxSec(mode) + 0.5) setError(t('post.err.tooLong', { sec: maxSec(mode) }));
       };
       v.src = url;
     }
@@ -105,10 +124,19 @@ export function VideoUploadForm({
     if (!file || error) return;
     const asDraft = (e.nativeEvent as SubmitEvent).submitter?.getAttribute('value') === 'draft';
     setProgress(0);
-    const up = await putWithProgress(file, setProgress, {
-      failed: t('post.err.upload'),
-      offline: t('post.err.offline'),
-    });
+    const messages = { failed: t('post.err.upload'), offline: t('post.err.offline') };
+    const up = limits.long
+      ? await chunkedUpload(
+          file,
+          durationSec,
+          (p) => {
+            setProgress(p.pct);
+            setDetail(p);
+          },
+          messages,
+        )
+      : await putWithProgress(file, setProgress, messages);
+    setDetail(null);
     if (!up.ok || !up.uploadId) {
       setProgress(null);
       return setError(up.message ?? t('post.err.upload'));
@@ -203,10 +231,14 @@ export function VideoUploadForm({
         <span aria-hidden className="text-3xl">
           🎬
         </span>
-        {file ? file.name : t('post.pick', { sec: MAX_SEC[mode] })}
+        {file ? file.name : t('post.pick', { sec: maxSec(mode) })}
         <input
           type="file"
-          accept="video/mp4,video/quicktime,video/webm"
+          accept={
+            limits.long
+              ? 'video/mp4,video/quicktime,video/webm,video/x-msvideo,.avi'
+              : 'video/mp4,video/quicktime,video/webm'
+          }
           className="sr-only"
           data-testid="video-input"
           onChange={(e) => choose(e.target.files?.[0])}
@@ -382,7 +414,15 @@ export function VideoUploadForm({
               <div className="h-full bg-brand" style={{ width: `${progress}%` }} />
             </div>
             <span className="text-[12px] text-white/60" data-testid="video-progress">
-              {progress < 100 ? t('post.uploading', { pct: progress }) : t('post.saving')}
+              {progress >= 100
+                ? t('post.saving')
+                : detail && detail.bytesPerSec > 0 && detail.etaSec !== null
+                  ? t('post.uploadingDetail', {
+                      pct: progress,
+                      speed: mb(detail.bytesPerSec),
+                      eta: clockText(detail.etaSec),
+                    })
+                  : t('post.uploading', { pct: progress })}
             </span>
           </div>
         ) : null}

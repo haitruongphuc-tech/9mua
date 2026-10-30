@@ -28,20 +28,26 @@ export function detectImageType(buf: Buffer): ImageType | null {
 export type ProcessedImage = { ok: true; main: Buffer; thumb: Buffer; width: number; height: number };
 export type ImageError = 'TOO_LARGE' | 'NOT_AN_IMAGE' | 'HEIC_UNSUPPORTED' | 'TOO_MANY_PIXELS';
 
+// Kiểm tra chung trước khi xử lý: dung lượng, loại file thật, số điểm ảnh.
+async function checkImage(input: Buffer): Promise<ImageError | null> {
+  if (input.length > MAX_IMAGE_BYTES) return 'TOO_LARGE';
+  const type = detectImageType(input);
+  if (!type) return 'NOT_AN_IMAGE';
+  // Bản sharp dựng sẵn không có codec HEVC; iPhone tự đổi HEIC → JPEG khi ô chọn file không nhận HEIC.
+  if (type === 'heic') return 'HEIC_UNSUPPORTED';
+  const meta = await sharp(input).metadata();
+  if (!meta.width || !meta.height) return 'NOT_AN_IMAGE';
+  if (meta.width * meta.height > MAX_PIXELS) return 'TOO_MANY_PIXELS';
+  return null;
+}
+
 // Ảnh sản phẩm: xoay đúng chiều theo EXIF, thu về WebP 1200px + 400px, bỏ toàn bộ metadata (GPS…).
 export async function processImage(
   input: Buffer,
 ): Promise<ProcessedImage | { ok: false; error: ImageError }> {
-  if (input.length > MAX_IMAGE_BYTES) return { ok: false, error: 'TOO_LARGE' };
-  const type = detectImageType(input);
-  if (!type) return { ok: false, error: 'NOT_AN_IMAGE' };
-  // Bản sharp dựng sẵn không có codec HEVC; iPhone tự đổi HEIC → JPEG khi ô chọn file không nhận HEIC.
-  if (type === 'heic') return { ok: false, error: 'HEIC_UNSUPPORTED' };
-
   try {
-    const meta = await sharp(input).metadata();
-    if (!meta.width || !meta.height) return { ok: false, error: 'NOT_AN_IMAGE' };
-    if (meta.width * meta.height > MAX_PIXELS) return { ok: false, error: 'TOO_MANY_PIXELS' };
+    const error = await checkImage(input);
+    if (error) return { ok: false, error };
 
     const base = () => sharp(input, { limitInputPixels: MAX_PIXELS, failOn: 'error' }).rotate();
     const { data: main, info } = await base()
@@ -57,4 +63,23 @@ export async function processImage(
     return { ok: false, error: 'NOT_AN_IMAGE' };
   }
 }
+// Ảnh cắt đúng khung (ảnh đại diện vuông, ảnh bìa 3:1): cắt phần giữa, WebP, bỏ metadata. Ảnh nhỏ hơn khung thì phóng lên.
+export async function processCroppedImage(
+  input: Buffer,
+  size: { width: number; height: number },
+): Promise<{ ok: true; data: Buffer } | { ok: false; error: ImageError }> {
+  try {
+    const error = await checkImage(input);
+    if (error) return { ok: false, error };
+    const data = await sharp(input, { limitInputPixels: MAX_PIXELS, failOn: 'error' })
+      .rotate()
+      .resize(size.width, size.height, { fit: 'cover', position: 'centre' })
+      .webp({ quality: 80, effort: 4 })
+      .toBuffer();
+    return { ok: true, data };
+  } catch {
+    return { ok: false, error: 'NOT_AN_IMAGE' };
+  }
+}
+
 // Câu báo lỗi theo từng ngôn ngữ: khoá "seller.img.<mã lỗi>" (src/i18n/module-messages.ts).

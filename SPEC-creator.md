@@ -187,3 +187,8 @@ removeVideo(videoId, adminId, reason): Promise<void>     // cho admin
 3. **Menu Video `/video`**: chỉ video, cùng giao diện feed của trang chủ (có tab Đang Follow / Dành cho bạn, không che thanh
    dưới), không có hàng Story và không chèn live. Link chia sẻ `/v/<id>` giữ như cũ.
 4. **Menu Live `/live`**: chỉ các buổi đang phát và nút Phát live; bỏ hàng Story khỏi trang Live.
+
+## Bổ sung 30/10/2026 — Thống kê creator, tìm video, nút "＋ Đăng" (Đợt A)
+
+Xem `SPEC-social.md` mục "Bổ sung 30/10/2026 — Đợt A" (A1, A3, A4). Hoa hồng creator vẫn ở mục "Hỏi trước"
+(làm ở Đợt E, có spec riêng).

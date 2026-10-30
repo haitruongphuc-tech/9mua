@@ -99,6 +99,28 @@ export const post: PostMessages = {
     "L'extrait de 1 à 5 secondes passe d'abord, puis la vidéo que vous filmez ou choisissez.",
   'post.err.STITCH_INVALID':
     "Impossible de faire un Stitch de cette vidéo (désactivé par l'auteur, vidéo supprimée, ou extrait hors 1–5 secondes).",
+  'post.err.EDIT_INVALID':
+    "Les retouches de la vidéo ne sont pas valides (texte avec un lien, trop long, ou découpe de moins d'1 seconde).",
+  'post.edit.title': 'Modifier la vidéo',
+  'post.edit.trimStart': 'Début : {sec} s',
+  'post.edit.trimEnd': 'Fin : {sec} s',
+  'post.edit.textHint': 'Texte sur la vidéo (60 caractères max.)',
+  'post.edit.addText': 'Ajouter le texte',
+  'post.edit.color': 'Couleur du texte',
+  'post.edit.stickers': 'Autocollants',
+  'post.edit.from': 'Afficher à partir de (s)',
+  'post.edit.to': 'Masquer à (s)',
+  'post.edit.remove': 'Supprimer',
+  'post.edit.dragHint':
+    "Faites glisser le texte et les autocollants sur l'aperçu pour les placer. Le serveur les dessine sur la vidéo.",
+  'post.edit.clips': 'Extraits à assembler ({count})',
+  'post.edit.addClip': 'Ajouter un extrait',
+  'post.edit.moveUp': 'Monter',
+  'post.edit.moveDown': 'Descendre',
+  'post.edit.clipRecorded': 'Extrait filmé {n}',
+  'post.edit.joinHint':
+    "Les extraits sont assemblés dans cet ordre, {sec} secondes max. au total. Touchez un extrait pour l'aperçu.",
+  'post.edit.tooManyClips': '{max} extraits maximum.',
   'post.err.tooBig': '100 Mo maximum par vidéo.',
   'post.err.tooLong': 'La vidéo dépasse {sec} secondes, raccourcissez-la puis réessayez.',
   'post.err.upload': 'Échec de l’envoi, réessayez.',

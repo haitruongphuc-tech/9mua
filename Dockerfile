@@ -27,6 +27,8 @@ COPY --from=build --chown=node:node /app/.next/standalone ./
 COPY --from=build --chown=node:node /app/.next/static ./.next/static
 COPY --from=build --chown=node:node /app/public ./public
 COPY --from=build --chown=node:node /app/dist/scripts ./dist/scripts
+# Font để worker vẽ chữ, nhãn dán lên video (SPEC-creator.md V5.6).
+COPY --from=build --chown=node:node /app/assets ./assets
 COPY --chown=node:node deploy/docker/entrypoint.sh /usr/local/bin/entrypoint
 RUN mkdir -p /data/uploads /data/private && chown -R node:node /data
 USER node

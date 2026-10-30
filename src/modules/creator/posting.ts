@@ -32,6 +32,7 @@ export type PostOptions = VideoOptions & {
   autoCaptions?: boolean; // phụ đề tự động (SPEC-creator.md V5.4)
   look?: string | null; // bộ lọc màu (SPEC-creator.md V5.5)
   beauty?: number; // làm đẹp 0–3
+  editSpec?: unknown; // chỉnh video (SPEC-creator.md V5.6 mục 1), kiểm bằng parseEditSpec
 };
 
 // Giờ hẹn hợp lệ: từ 15 phút tới 30 ngày sau.

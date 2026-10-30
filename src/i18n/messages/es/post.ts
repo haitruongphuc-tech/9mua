@@ -98,6 +98,28 @@ export const post: PostMessages = {
   'post.stitchHint': 'Primero va el fragmento de 1 a 5 segundos y luego el video que grabes o elijas.',
   'post.err.STITCH_INVALID':
     'No se puede hacer Stitch de este video (el autor lo desactivó, ya no existe o el fragmento no es de 1 a 5 segundos).',
+  'post.err.EDIT_INVALID':
+    'Las ediciones del video no son válidas (el texto tiene un enlace, es muy largo o el recorte dura menos de 1 segundo).',
+  'post.edit.title': 'Editar video',
+  'post.edit.trimStart': 'Inicio: {sec} s',
+  'post.edit.trimEnd': 'Final: {sec} s',
+  'post.edit.textHint': 'Texto en el video (máx. 60 caracteres)',
+  'post.edit.addText': 'Añadir texto',
+  'post.edit.color': 'Color del texto',
+  'post.edit.stickers': 'Stickers',
+  'post.edit.from': 'Mostrar desde el segundo',
+  'post.edit.to': 'Ocultar en el segundo',
+  'post.edit.remove': 'Quitar',
+  'post.edit.dragHint':
+    'Arrastra el texto y los stickers en la vista previa para colocarlos. El servidor los dibuja en el video.',
+  'post.edit.clips': 'Clips para unir ({count})',
+  'post.edit.addClip': 'Añadir un clip',
+  'post.edit.moveUp': 'Subir',
+  'post.edit.moveDown': 'Bajar',
+  'post.edit.clipRecorded': 'Clip grabado {n}',
+  'post.edit.joinHint':
+    'Los clips se unen en este orden, máximo {sec} segundos en total. Toca un clip para verlo.',
+  'post.edit.tooManyClips': 'Máximo {max} clips.',
   'post.err.tooBig': 'Máximo 100 MB por video.',
   'post.err.tooLong': 'El video dura más de {sec} segundos, recórtalo y vuelve a intentarlo.',
   'post.err.upload': 'Error al subir, inténtalo de nuevo.',

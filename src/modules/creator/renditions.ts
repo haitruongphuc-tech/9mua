@@ -1,6 +1,7 @@
 import { readdir, readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { runTool as run } from '@/lib/media/run-tool';
+import { trimArgs, type Trim } from './transcode';
 
 // Nhiều mức chất lượng (SPEC-creator.md V5.1 mục 5–7, công tắc long_video). Tham số ffmpeg là mảng cố định, không qua
 // shell; đường dẫn do hệ thống tự đặt.
@@ -28,11 +29,12 @@ export function hlsArgs(
   hasAudio: boolean,
   maxSec: number,
   look: string | null = null,
+  trim: Trim | null = null,
 ): string[] {
   const filter =
     `[0:v]${look ? `${look},` : ''}split=${levels.length}${levels.map((_, i) => `[s${i}]`).join('')};` +
     levels.map((h, i) => `[s${i}]${scaleShort(h)}[v${i}]`).join(';');
-  const args = [...BASE, '-i', src, '-filter_complex', filter];
+  const args = [...BASE, ...trimArgs(trim), '-i', src, '-filter_complex', filter];
   levels.forEach((h, i) => {
     const kbps = BITRATE[h]!;
     args.push(
@@ -98,8 +100,9 @@ export async function makeHls(
   maxSec: number,
   timeoutMs: number,
   look: string | null = null,
+  trim: Trim | null = null,
 ): Promise<void> {
-  await run('ffmpeg', hlsArgs(src, outDir, levels, hasAudio, maxSec, look), timeoutMs);
+  await run('ffmpeg', hlsArgs(src, outDir, levels, hasAudio, maxSec, look, trim), timeoutMs);
 }
 
 // Tên file init của một mức: 1 mức thì "init.mp4", nhiều mức thì "init_<thứ tự>.mp4" — đọc từ dòng EXT-X-MAP.

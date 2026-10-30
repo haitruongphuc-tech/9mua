@@ -618,6 +618,8 @@ model Video {
   stitchOfId      String?
   stitchFromSec   Float?
   stitchToSec     Float?
+  // Chỉnh video trước khi đăng (SPEC-creator.md V5.6 mục 1): cắt đầu/cuối, chữ, nhãn dán; máy chủ dựng một lần.
+  editSpec        Json?
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   products        VideoProduct[]

@@ -10,6 +10,7 @@ import { getSetting } from '@/lib/settings';
 import { notifyKey } from '@/lib/notifications';
 import { queueCaptions } from './captions';
 import { lookFilter } from './look';
+import { overlayFilter, parseEditSpec } from './edit-spec';
 import { runVideoReadyHooks } from './hooks';
 import { initialScore } from './score';
 import { videoLimits } from './limits';
@@ -126,8 +127,17 @@ export async function processNextJob(): Promise<boolean> {
     const extras = limits.long && !story && !originalPath;
     const hls = extras && long;
     const hlsDir = path.join(work, 'hls');
-    // Bộ lọc màu, làm đẹp (SPEC-creator.md V5.5) — không áp cho Duet (ghép 2 video).
-    const look = originalPath ? null : lookFilter(video.look as never, video.beauty);
+    // Bộ lọc màu, làm đẹp (SPEC-creator.md V5.5), chữ và nhãn dán, cắt đầu/cuối (V5.6) — không áp cho Duet/Stitch.
+    const edit = originalPath ? null : parseEditSpec(video.editSpec ?? undefined);
+    const overlay = edit ? await overlayFilter(edit, work) : null;
+    const look =
+      [originalPath ? null : lookFilter(video.look as never, video.beauty), overlay]
+        .filter(Boolean)
+        .join(',') || null;
+    const trim =
+      edit && (edit.trimStart > 0 || edit.trimEnd !== null)
+        ? { start: edit.trimStart, len: edit.trimEnd !== null ? edit.trimEnd - edit.trimStart : null }
+        : null;
     const levels = hls ? hlsLevels(source!.video!, (await getSetting('video_enable_1080')) === 'true') : [];
     if (originalPath && video.stitchOfId) {
       const orig = await probe(originalPath);
@@ -155,6 +165,7 @@ export async function processNextJob(): Promise<boolean> {
         maxSec,
         LONG_TRANSCODE_TIMEOUT_MS,
         look,
+        trim,
       );
       await makePoster(job.sourcePath, outPoster, source!.durationSec);
     } else
@@ -162,10 +173,13 @@ export async function processNextJob(): Promise<boolean> {
         maxSec,
         timeoutMs: long ? LONG_TRANSCODE_TIMEOUT_MS : undefined,
         look,
+        trim,
       });
     // HLS: kích thước đo ở file init của mức cao nhất (đã xoay đúng chiều); thời lượng theo file gốc.
     const result = await probe(hls ? await hlsInitFile(path.join(hlsDir, `${levels.at(-1)}p`)) : outMp4);
-    const durationSec = hls ? Math.min(source!.durationSec, maxSec) : result.durationSec;
+    const durationSec = hls
+      ? Math.min(trim ? (trim.len ?? source!.durationSec - trim.start) : source!.durationSec, maxSec)
+      : result.durationSec;
     const playable = hls ? job.sourcePath : outMp4;
     const sdPath = path.join(work, 'video-sd.mp4');
     const sd =

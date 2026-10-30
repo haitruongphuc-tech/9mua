@@ -24,12 +24,17 @@ export async function createVideoAction(input: {
   look?: string; // bộ lọc màu, làm đẹp (SPEC-creator.md V5.5), công tắc camera
   stitch?: { ofId: string; fromSec: number; toSec: number } | null; // Stitch (V5.5 mục 4), công tắc camera
   beauty?: number;
+  editSpec?: unknown; // cắt, chữ, nhãn dán (V5.6 mục 1), công tắc camera; máy chủ kiểm bằng parseEditSpec
 }): Promise<{ error: string }> {
   const user = await requireUser();
   const autoCaptions = input.autoCaptions === true && (await isFeatureOn('auto_captions'));
   const camera = await isFeatureOn('camera');
   const looks = camera
-    ? { look: typeof input.look === 'string' ? input.look : null, beauty: Number(input.beauty) || 0 }
+    ? {
+        look: typeof input.look === 'string' ? input.look : null,
+        beauty: Number(input.beauty) || 0,
+        editSpec: input.editSpec,
+      }
     : {};
   // Tuỳ chọn khi đăng chỉ nhận khi công tắc post_options bật (SPEC-creator.md V5.3).
   const postOptions =

@@ -16,6 +16,7 @@ import { MAX_DRAFTS, normalizePlace, scheduleOk, type PostOptions } from './post
 import { checkLongVideo, SHORT_MAX_SEC, videoLimits } from './limits';
 import { probe } from './transcode';
 import { isLook, MAX_BEAUTY } from './look';
+import { isEmptyEdit, parseEditSpec } from './edit-spec';
 
 export const MAX_VIDEO_BYTES = 100 * 1024 * 1024;
 export const MAX_VIDEOS_PER_DAY = 10;
@@ -112,7 +113,8 @@ export type CreateVideoResult =
         | 'TOO_LONG'
         | 'ACCOUNT_TOO_NEW'
         | 'LONG_DAILY_LIMIT'
-        | 'STITCH_INVALID';
+        | 'STITCH_INVALID'
+        | 'EDIT_INVALID';
     };
 
 // Tạo video từ file đã tải lên (SPEC-creator.md mục 1). Video ở trạng thái processing cho tới khi worker xong.
@@ -164,6 +166,9 @@ export async function createVideoUpload(
   if (publishAt && !scheduleOk(publishAt)) return { ok: false, error: 'SCHEDULE_INVALID' };
   const place = normalizePlace({ province: meta.options?.province, placeName: meta.options?.placeName });
   if (!place) return { ok: false, error: 'PLACE_INVALID' };
+  // Chỉnh video: chỉ video thường; giá trị lạ thì từ chối cả lần đăng (không âm thầm bỏ qua).
+  const editSpec = kind === 'video' ? parseEditSpec(meta.options?.editSpec) : parseEditSpec(undefined);
+  if (!editSpec) return { ok: false, error: 'EDIT_INVALID' };
 
   // Duet chỉ với video công khai còn cho phép Duet/Stitch (SPEC-creator.md V5.3).
   if (
@@ -246,6 +251,7 @@ export async function createVideoUpload(
         aiStudio: meta.aiStudio === true,
         sourceSec,
         wantCaptions: kind === 'video' && meta.options?.autoCaptions === true,
+        editSpec: isEmptyEdit(editSpec) ? undefined : editSpec,
         look: isLook(meta.options?.look) && meta.options.look !== 'goc' ? meta.options.look : null,
         beauty:
           Number.isInteger(meta.options?.beauty) &&

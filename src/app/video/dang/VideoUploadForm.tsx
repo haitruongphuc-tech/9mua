@@ -8,13 +8,28 @@ import { useT } from '@/i18n/client';
 import { formatVnd } from '@/lib/format';
 import type { PickableProduct } from '@/app/api/video/products/route';
 import { createVideoAction } from './actions';
-import { CameraRecorder, type RecordedSegment } from './CameraRecorder';
+import { CameraRecorder } from './CameraRecorder';
 import { chunkedUpload, type UploadProgress } from './chunked-upload';
 import { CSS_LOOKS, cssBeauty, LOOKS, MAX_BEAUTY, type Look } from '@/lib/looks';
+import { MAX_CLIPS, type EditSpec } from '@/lib/edit-spec';
+import { EditOverlay, EditPanel, emptyEdit } from './VideoEditor';
 
 const MAX_CAPTION = 300;
 const STORY_SEC = 30;
 type Mode = 'video' | 'story';
+
+// Một đoạn để ghép (SPEC-creator.md V5.6 mục 1): đoạn quay trong app hoặc file chọn thêm. seconds là thời lượng sau khi
+// đổi tốc độ (null: trình duyệt chưa đọc được).
+type Clip = {
+  key: number;
+  name: string;
+  blob: Blob;
+  speed: number;
+  seconds: number | null;
+  recorded: boolean;
+};
+const MAX_JOIN_PARTS = 20; // bằng MAX_SEGMENTS của máy chủ
+const MAX_JOIN_BYTES = 200 * 1024 * 1024; // bằng giới hạn của /api/video/recording
 
 const mb = (bytes: number) => `${(bytes / 1024 / 1024).toFixed(bytes >= 10 * 1024 * 1024 ? 0 : 1)}MB`;
 const clockText = (sec: number) =>
@@ -24,7 +39,7 @@ const clockText = (sec: number) =>
 
 // Gửi các đoạn quay trong app (SPEC-creator.md V5.5) để máy chủ ghép, có thanh tiến trình.
 function postRecording(
-  segments: RecordedSegment[],
+  segments: { blob: Blob; speed: number }[],
   onProgress: (pct: number) => void,
   messages: { failed: string; offline: string },
 ): Promise<{ ok: boolean; uploadId?: string; message?: string }> {
@@ -124,7 +139,12 @@ export function VideoUploadForm({
     [],
   );
   const [recorderOpen, setRecorderOpen] = useState(false);
-  const [recorded, setRecorded] = useState<RecordedSegment[] | null>(null);
+  // Đoạn quay và đoạn ghép thêm (V5.6): có đoạn thì gửi qua /api/video/recording để máy chủ nối theo thứ tự.
+  const [clips, setClips] = useState<Clip[]>([]);
+  const [shownClip, setShownClip] = useState(0);
+  const clipKey = useRef(0);
+  const [edit, setEdit] = useState<EditSpec>(emptyEdit);
+  const [time, setTime] = useState(0);
   const [look, setLook] = useState<Look>('goc');
   // Stitch: chọn đoạn 1–5 giây của video gốc (SPEC-creator.md V5.5 mục 4).
   const [stitchFrom, setStitchFrom] = useState(0);
@@ -135,8 +155,94 @@ export function VideoUploadForm({
   const lookCss =
     [CSS_LOOKS[look] === 'none' ? '' : CSS_LOOKS[look], cssBeauty(beauty)].filter(Boolean).join(' ') ||
     'none';
-  const recordedSec = recorded?.reduce((sum, s) => sum + s.seconds / s.speed, 0) ?? 0;
-  const ready = Boolean(file || recorded?.length);
+  const recordedClips = clips.filter((c) => c.recorded);
+  const recordedSec = recordedClips.reduce((sum, c) => sum + (c.seconds ?? 0), 0);
+  const ready = Boolean(file || clips.length);
+  const editing = cameraOn && mode === 'video' && !duet && !stitch && ready;
+  const totalSec = file
+    ? durationSec
+    : clips.length && clips.every((c) => c.seconds !== null)
+      ? clips.reduce((sum, c) => sum + c.seconds!, 0)
+      : null;
+  const shown = file ? null : (clips[shownClip] ?? null);
+  const shownOffset = clips.slice(0, shownClip).reduce((sum, c) => sum + (c.seconds ?? 0), 0);
+  const shownBlob = shown?.blob;
+  const shownSpeed = shown?.speed ?? 1;
+
+  // Khung xem trước chiếu đoạn đang chọn đúng tốc độ đã quay; chữ và nhãn dán hiện theo giây của video ghép.
+  useEffect(() => {
+    const v = preview.current;
+    if (!v || !shownBlob) return;
+    const url = URL.createObjectURL(shownBlob);
+    v.onloadedmetadata = null;
+    v.src = url;
+    v.defaultPlaybackRate = shownSpeed;
+    v.playbackRate = shownSpeed;
+    return () => URL.revokeObjectURL(url);
+  }, [shownBlob, shownSpeed]);
+
+  const newClip = (
+    blob: Blob,
+    name: string,
+    speed: number,
+    seconds: number | null,
+    recorded: boolean,
+  ): Clip => ({
+    key: ++clipKey.current,
+    name,
+    blob,
+    speed,
+    seconds,
+    recorded,
+  });
+
+  // Thời lượng file chọn thêm đo bằng thẻ video ẩn (máy chủ đo lại khi ghép).
+  // Giữ tham chiếu tới thẻ đang đo: thẻ không gắn vào trang có thể bị dọn trước khi đọc xong.
+  const measuring = useRef(new Set<HTMLVideoElement>());
+  const setClipSeconds = (key: number, sec: number) =>
+    setClips((list) => list.map((c) => (c.key === key && c.seconds === null ? { ...c, seconds: sec } : c)));
+  function measure(clip: Clip) {
+    const v = document.createElement('video');
+    const url = URL.createObjectURL(clip.blob);
+    const done = () => {
+      measuring.current.delete(v);
+      URL.revokeObjectURL(url);
+    };
+    v.preload = 'metadata';
+    v.muted = true;
+    v.onloadedmetadata = () => {
+      if (Number.isFinite(v.duration)) setClipSeconds(clip.key, v.duration / clip.speed);
+      done();
+    };
+    v.onerror = done;
+    measuring.current.add(v);
+    v.src = url;
+    v.load();
+  }
+
+  function joinClips(base: Clip[], added: Clip[]) {
+    const list = [...base, ...added];
+    const files = list.filter((c) => !c.recorded).length;
+    if (list.length > MAX_JOIN_PARTS || files > MAX_CLIPS)
+      return setError(t('post.edit.tooManyClips', { max: MAX_CLIPS }));
+    if (list.reduce((sum, c) => sum + c.blob.size, 0) > MAX_JOIN_BYTES)
+      return setError(t('post.err.TOO_LARGE'));
+    setError(null);
+    setFile(null);
+    setClips(list);
+    setEdit((e) => ({ ...e, trimStart: 0, trimEnd: null }));
+    list.filter((c) => c.seconds === null).forEach(measure);
+  }
+
+  // Đổi thứ tự / bỏ một đoạn ghép.
+  const moveClip = (index: number, by: -1 | 1) =>
+    setClips((list) => {
+      const next = [...list];
+      const [c] = next.splice(index, 1);
+      next.splice(Math.min(next.length, Math.max(0, index + by)), 0, c!);
+      return next;
+    });
+  const currentAsClips = () => (file ? [newClip(file, file.name, 1, durationSec, false)] : clips);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -155,7 +261,9 @@ export function VideoUploadForm({
   function choose(f: File | undefined) {
     setError(null);
     if (!f) return;
-    setRecorded(null);
+    if (cameraOn && clips.length) return joinClips(clips, [newClip(f, f.name, 1, null, false)]);
+    setClips([]);
+    setEdit(emptyEdit());
     setDurationSec(null);
     if (f.size > limits.maxBytes)
       return setError(
@@ -182,8 +290,8 @@ export function VideoUploadForm({
     const asDraft = (e.nativeEvent as SubmitEvent).submitter?.getAttribute('value') === 'draft';
     setProgress(0);
     const messages = { failed: t('post.err.upload'), offline: t('post.err.offline') };
-    const up = recorded?.length
-      ? await postRecording(recorded, setProgress, messages)
+    const up = clips.length
+      ? await postRecording(clips, setProgress, messages)
       : !file
         ? { ok: false, message: messages.failed }
         : limits.long
@@ -226,6 +334,7 @@ export function VideoUploadForm({
       autoCaptions: captionsOn && mode === 'video' && autoCaptions,
       look: cameraOn && mode === 'video' ? look : undefined,
       beauty: cameraOn && mode === 'video' ? beauty : undefined,
+      editSpec: editing ? edit : undefined,
     });
     setProgress(null);
     if (result?.error) setError(result.error);
@@ -349,9 +458,11 @@ export function VideoUploadForm({
           onClose={() => setRecorderOpen(false)}
           onDone={(segments) => {
             setRecorderOpen(false);
-            setFile(null);
-            setError(null);
-            setRecorded(segments);
+            // Quay lại thì thay các đoạn quay cũ, giữ các file đã chọn để ghép.
+            joinClips(
+              currentAsClips().filter((c) => !c.recorded),
+              segments.map((s) => newClip(s.blob, '', s.speed, s.seconds / s.speed, true)),
+            );
           }}
         />
       ) : null}
@@ -362,15 +473,15 @@ export function VideoUploadForm({
           className="flex h-12 items-center justify-center gap-2 rounded-[18px] bg-white/10 font-black"
           data-testid="camera-open"
         >
-          📷 {recorded?.length ? t('post.camera.again') : t('post.camera.open')}
+          📷 {recordedClips.length ? t('post.camera.again') : t('post.camera.open')}
         </button>
       ) : null}
-      {recorded?.length ? (
+      {recordedClips.length ? (
         <p
           className="rounded-[14px] bg-white/5 px-4 py-3 text-center text-[13px] font-bold"
           data-testid="recorded-info"
         >
-          {t('post.camera.recorded', { count: recorded.length, sec: recordedSec.toFixed(1) })}
+          {t('post.camera.recorded', { count: recordedClips.length, sec: recordedSec.toFixed(1) })}
         </p>
       ) : null}
       <label className="flex cursor-pointer flex-col items-center gap-2 rounded-[18px] border-2 border-dashed border-brand/60 bg-white/5 p-6 text-center font-bold">
@@ -390,15 +501,125 @@ export function VideoUploadForm({
           onChange={(e) => choose(e.target.files?.[0])}
         />
       </label>
-      <video
-        ref={preview}
-        className="mx-auto max-h-64 rounded-[14px]"
-        style={{ filter: lookCss }}
-        muted
-        playsInline
-        controls
-        hidden={!file}
-      />
+      {editing && clips.length ? (
+        <fieldset className="flex flex-col gap-2" data-testid="edit-clips">
+          <legend className="mb-1 text-[12px] font-bold text-white/70">
+            {t('post.edit.clips', { count: clips.length })}
+          </legend>
+          <ol className="flex flex-col gap-1.5">
+            {clips.map((c, i) => (
+              <li
+                key={c.key}
+                className={`flex items-center gap-1 rounded-[12px] border px-2 text-[12px] ${i === shownClip ? 'border-brand bg-brand/10' : 'border-white/10 bg-white/5'}`}
+                data-testid="edit-clip"
+              >
+                <button
+                  type="button"
+                  onClick={() => setShownClip(i)}
+                  className="flex h-10 min-w-0 flex-1 items-center gap-2 text-left"
+                >
+                  <span className="font-black tabular-nums">{i + 1}.</span>
+                  <span className="min-w-0 flex-1 truncate font-bold">
+                    {c.recorded ? t('post.edit.clipRecorded', { n: i + 1 }) : c.name}
+                  </span>
+                  <span className="shrink-0 tabular-nums text-white/60">
+                    {c.seconds !== null ? `${c.seconds.toFixed(1)}s` : '…'}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => moveClip(i, -1)}
+                  disabled={i === 0}
+                  aria-label={t('post.edit.moveUp')}
+                  className="h-9 w-9 shrink-0 rounded-full font-black disabled:opacity-30"
+                  data-testid="edit-clip-up"
+                >
+                  ↑
+                </button>
+                <button
+                  type="button"
+                  onClick={() => moveClip(i, 1)}
+                  disabled={i === clips.length - 1}
+                  aria-label={t('post.edit.moveDown')}
+                  className="h-9 w-9 shrink-0 rounded-full font-black disabled:opacity-30"
+                  data-testid="edit-clip-down"
+                >
+                  ↓
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setClips((list) => list.filter((x) => x.key !== c.key));
+                    setShownClip(0);
+                    setEdit((e) => ({ ...e, trimStart: 0, trimEnd: null }));
+                  }}
+                  aria-label={t('post.edit.remove')}
+                  className="h-9 w-9 shrink-0 rounded-full font-black"
+                >
+                  ✕
+                </button>
+              </li>
+            ))}
+          </ol>
+          <span className="text-[11px] text-white/50">{t('post.edit.joinHint', { sec: limits.maxSec })}</span>
+        </fieldset>
+      ) : null}
+      {editing && clips.filter((c) => !c.recorded).length + (file ? 1 : 0) < MAX_CLIPS ? (
+        <label className="flex h-11 cursor-pointer items-center justify-center gap-2 rounded-[14px] border border-white/15 bg-white/5 text-[13px] font-black">
+          ＋ {t('post.edit.addClip')}
+          <input
+            type="file"
+            multiple
+            accept="video/mp4,video/quicktime,video/webm"
+            className="sr-only"
+            data-testid="edit-add-clip"
+            onChange={(e) => {
+              const files = Array.from(e.target.files ?? []);
+              e.target.value = '';
+              if (files.length)
+                joinClips(
+                  currentAsClips(),
+                  files.map((f) => newClip(f, f.name, 1, null, false)),
+                );
+            }}
+          />
+        </label>
+      ) : null}
+      <EditOverlay
+        spec={editing ? edit : emptyEdit()}
+        time={time}
+        onMove={(kind, index, x, y) =>
+          setEdit((e) => ({ ...e, [kind]: e[kind].map((it, i) => (i === index ? { ...it, x, y } : it)) }))
+        }
+      >
+        <video
+          ref={preview}
+          className="mx-auto max-h-64 rounded-[14px]"
+          style={{ filter: lookCss }}
+          muted
+          playsInline
+          controls
+          hidden={!file && !clips.length}
+          onTimeUpdate={(e) => setTime(shownOffset + e.currentTarget.currentTime / shownSpeed)}
+          onLoadedMetadata={(e) => {
+            const sec = e.currentTarget.duration;
+            if (shown && Number.isFinite(sec)) setClipSeconds(shown.key, sec / shown.speed);
+          }}
+          data-testid="video-preview"
+        />
+      </EditOverlay>
+      {editing ? (
+        <EditPanel
+          spec={edit}
+          duration={totalSec}
+          onChange={(next) => {
+            // Kéo thanh cắt đầu thì khung xem trước nhảy tới chỗ đó (video một file).
+            if (file && preview.current && next.trimStart !== edit.trimStart)
+              preview.current.currentTime = next.trimStart;
+            setEdit(next);
+          }}
+        />
+      ) : null}
       {cameraOn && mode === 'video' ? (
         <fieldset className="flex min-w-0 flex-col gap-2" data-testid="video-looks">
           <legend className="mb-1 text-[12px] font-bold text-white/70">{t('post.look.title')}</legend>

@@ -10,6 +10,11 @@ const PROBE_TIMEOUT_MS = 30_000;
 
 export { ToolError };
 
+// Cắt đầu/cuối (SPEC-creator.md V5.6 mục 1): tua tới giây bắt đầu và chỉ đọc đúng độ dài, trước khi chuyển mã.
+export type Trim = { start: number; len: number | null };
+export const trimArgs = (trim: Trim | null | undefined): string[] =>
+  trim ? ['-ss', trim.start.toFixed(3), ...(trim.len ? ['-t', trim.len.toFixed(3)] : [])] : [];
+
 export type Probe = {
   formatName: string;
   durationSec: number;
@@ -60,7 +65,7 @@ export async function transcode(
   outMp4: string,
   outPoster: string,
   durationSec: number,
-  opts: { maxSec?: number; timeoutMs?: number; look?: string | null } = {},
+  opts: { maxSec?: number; timeoutMs?: number; look?: string | null; trim?: Trim | null } = {},
 ) {
   await run(
     'ffmpeg',
@@ -70,6 +75,7 @@ export async function transcode(
       '-loglevel',
       'error',
       '-y',
+      ...trimArgs(opts.trim),
       '-i',
       src,
       '-map',

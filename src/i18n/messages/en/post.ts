@@ -97,6 +97,28 @@ export const post: PostMessages = {
   'post.stitchHint': 'The 1–5 second clip plays first, then the video you record or pick.',
   'post.err.STITCH_INVALID':
     "Can't stitch this video (the owner turned Stitch off, it's gone, or the clip isn't 1–5 seconds).",
+  'post.err.EDIT_INVALID':
+    'The video edits are invalid (text has a link, is too long, or the trim is shorter than 1 second).',
+  'post.edit.title': 'Edit video',
+  'post.edit.trimStart': 'Start: {sec}s',
+  'post.edit.trimEnd': 'End: {sec}s',
+  'post.edit.textHint': 'Text on video (up to 60 characters)',
+  'post.edit.addText': 'Add text',
+  'post.edit.color': 'Text color',
+  'post.edit.stickers': 'Stickers',
+  'post.edit.from': 'Show from second',
+  'post.edit.to': 'Hide at second',
+  'post.edit.remove': 'Remove',
+  'post.edit.dragHint':
+    'Drag text and stickers on the preview to place them. The server draws them onto the video.',
+  'post.edit.clips': 'Clips to join ({count})',
+  'post.edit.addClip': 'Add a clip',
+  'post.edit.moveUp': 'Move up',
+  'post.edit.moveDown': 'Move down',
+  'post.edit.clipRecorded': 'Recorded clip {n}',
+  'post.edit.joinHint':
+    'Clips are joined in this order, {sec} seconds max in total. Tap a clip to preview it.',
+  'post.edit.tooManyClips': 'Up to {max} clips.',
   'post.err.tooBig': 'Videos can be at most 100MB.',
   'post.err.tooLong': 'The video is longer than {sec} seconds, please trim it and try again.',
   'post.err.upload': 'Upload failed, please try again.',

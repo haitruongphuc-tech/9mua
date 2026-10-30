@@ -620,6 +620,12 @@ model Video {
   stitchToSec     Float?
   // Chỉnh video trước khi đăng (SPEC-creator.md V5.6 mục 1): cắt đầu/cuối, chữ, nhãn dán; máy chủ dựng một lần.
   editSpec        Json?
+  // Nhạc nền (SPEC-creator.md V5.6 mục 2): trộn vào file khi xử lý; giây bắt đầu, âm lượng nhạc và tiếng gốc 0–100.
+  soundId         String?
+  sound           Sound?           @relation(fields: [soundId], references: [id])
+  soundStartSec   Float?
+  soundVolume     Int?
+  originalVolume  Int?
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   products        VideoProduct[]
@@ -631,6 +637,25 @@ model Video {
   @@index([authorId, createdAt])
   @@index([kind, status, expiresAt])
   @@index([status, publishAt])
+  @@index([soundId, status, readyAt])
+}
+
+// Âm thanh (SPEC-creator.md V5.6 mục 2): library = CEO tải lên ở /admin/am-thanh; original = tự tách từ video công khai
+// cho phép dùng lại. Gỡ (removed) thì không chọn mới được; video đã dùng vẫn phát vì tiếng đã trộn vào file.
+model Sound {
+  id            String   @id @default(cuid(2))
+  kind          String // library | original
+  title         String? // trống: âm thanh gốc chưa đặt tên → "Âm thanh gốc – @tên"
+  artist        String? // nguồn / nghệ sĩ của nhạc thư viện
+  sourceVideoId String?  @unique
+  path          String // /uploads/sounds/….m4a (AAC)
+  durationSec   Float
+  status        String   @default("active") // active | removed
+  createdById   String? // CEO tải lên
+  createdAt     DateTime @default(now())
+  videos        Video[]
+
+  @@index([status, kind])
 }
 
 model VideoProduct {

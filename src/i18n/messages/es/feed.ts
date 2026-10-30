@@ -25,6 +25,8 @@ export const feed: FeedMessages = {
   'feed.pinError': 'No se pudo fijar, inténtalo de nuevo.',
   'feed.cc': 'Subtítulos',
   'feed.stitch': 'Stitch',
+  'feed.useSound': 'Usar este sonido',
+  'feed.soundOriginal': 'Sonido original – @{name}',
   'feed.stitchWith': 'Stitch @{name}',
   'feed.close': 'Cerrar',
   'feed.unmute': 'Toca para activar el sonido',

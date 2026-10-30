@@ -682,6 +682,22 @@ export function VideoFeed({
                       ✨ {t('feed.aiLabel')}
                     </span>
                   ) : null}
+                  {camera && v.sound ? (
+                    <Link
+                      href={`/am-thanh/${v.sound.id}`}
+                      className="mt-1 flex w-fit max-w-full items-center gap-1 text-[12px] font-bold text-white/85 hover:underline"
+                      data-testid="feed-sound"
+                    >
+                      <span aria-hidden>♫</span>
+                      <span className="truncate">
+                        {v.sound.title
+                          ? v.sound.artist
+                            ? `${v.sound.title} – ${v.sound.artist}`
+                            : v.sound.title
+                          : t('feed.soundOriginal', { name: v.sound.authorName ?? '' })}
+                      </span>
+                    </Link>
+                  ) : null}
                   {v.caption ? (
                     <p className="mt-1 line-clamp-3 text-[14px] text-white/85">
                       {v.caption.split(/(#[\p{L}\p{N}_]+)/u).map((part, k) =>
@@ -986,6 +1002,15 @@ export function VideoFeed({
             data-testid="feed-stitch"
           >
             ✂️ {t('feed.stitch')}
+          </Link>
+        ) : null}
+        {camera && sheet?.video.sound ? (
+          <Link
+            href={`/video/dang?sound=${sheet.video.sound.id}`}
+            className="mb-2 flex items-center gap-2 border-b border-black/10 py-3 font-bold"
+            data-testid="feed-use-sound"
+          >
+            ♫ {t('feed.useSound')}
           </Link>
         ) : null}
         {REPORT_REASONS.map((reason) => (

@@ -25,6 +25,8 @@ export const feed: FeedMessages = {
   'feed.pinError': '置顶失败，请重试。',
   'feed.cc': '字幕',
   'feed.stitch': '拼接',
+  'feed.useSound': '使用此音频',
+  'feed.soundOriginal': '原声 – @{name}',
   'feed.stitchWith': '拼接 @{name}',
   'feed.close': '关闭',
   'feed.unmute': '点击开启声音',

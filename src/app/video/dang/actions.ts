@@ -25,6 +25,7 @@ export async function createVideoAction(input: {
   stitch?: { ofId: string; fromSec: number; toSec: number } | null; // Stitch (V5.5 mục 4), công tắc camera
   beauty?: number;
   editSpec?: unknown; // cắt, chữ, nhãn dán (V5.6 mục 1), công tắc camera; máy chủ kiểm bằng parseEditSpec
+  sound?: { id: string; startSec: number; volume: number; originalVolume: number } | null; // nhạc nền (V5.6 mục 2)
 }): Promise<{ error: string }> {
   const user = await requireUser();
   const autoCaptions = input.autoCaptions === true && (await isFeatureOn('auto_captions'));
@@ -34,6 +35,15 @@ export async function createVideoAction(input: {
         look: typeof input.look === 'string' ? input.look : null,
         beauty: Number(input.beauty) || 0,
         editSpec: input.editSpec,
+        sound:
+          input.sound && typeof input.sound.id === 'string'
+            ? {
+                id: input.sound.id,
+                startSec: Number(input.sound.startSec),
+                volume: Number(input.sound.volume),
+                originalVolume: Number(input.sound.originalVolume),
+              }
+            : null,
       }
     : {};
   // Tuỳ chọn khi đăng chỉ nhận khi công tắc post_options bật (SPEC-creator.md V5.3).

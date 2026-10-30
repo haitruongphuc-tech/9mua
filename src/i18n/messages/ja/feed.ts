@@ -25,6 +25,8 @@ export const feed: FeedMessages = {
   'feed.pinError': '固定できませんでした。もう一度お試しください。',
   'feed.cc': '字幕',
   'feed.stitch': 'つなぐ',
+  'feed.useSound': 'このサウンドを使う',
+  'feed.soundOriginal': 'オリジナル音源 – @{name}',
   'feed.stitchWith': '@{name} とつなぐ',
   'feed.close': '閉じる',
   'feed.unmute': 'タップで音声オン',

@@ -25,6 +25,8 @@ export const feed: FeedMessages = {
   'feed.pinError': "Couldn't pin, please try again.",
   'feed.cc': 'Captions',
   'feed.stitch': 'Stitch',
+  'feed.useSound': 'Use this sound',
+  'feed.soundOriginal': 'Original sound – @{name}',
   'feed.stitchWith': 'Stitch @{name}',
   'feed.close': 'Close',
   'feed.unmute': 'Tap to unmute',

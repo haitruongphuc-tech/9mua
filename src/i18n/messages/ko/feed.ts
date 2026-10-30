@@ -25,6 +25,8 @@ export const feed: FeedMessages = {
   'feed.pinError': '고정하지 못했어요. 다시 시도해 주세요.',
   'feed.cc': '자막',
   'feed.stitch': 'Stitch',
+  'feed.useSound': '이 사운드 사용',
+  'feed.soundOriginal': '오리지널 사운드 – @{name}',
   'feed.stitchWith': 'Stitch @{name}',
   'feed.close': '닫기',
   'feed.unmute': '탭해서 소리 켜기',

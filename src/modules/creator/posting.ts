@@ -33,6 +33,7 @@ export type PostOptions = VideoOptions & {
   look?: string | null; // bộ lọc màu (SPEC-creator.md V5.5)
   beauty?: number; // làm đẹp 0–3
   editSpec?: unknown; // chỉnh video (SPEC-creator.md V5.6 mục 1), kiểm bằng parseEditSpec
+  sound?: { id: string; startSec: number; volume: number; originalVolume: number } | null; // nhạc nền (V5.6 mục 2)
 };
 
 // Giờ hẹn hợp lệ: từ 15 phút tới 30 ngày sau.

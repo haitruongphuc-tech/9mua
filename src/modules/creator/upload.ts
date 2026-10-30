@@ -17,6 +17,7 @@ import { checkLongVideo, SHORT_MAX_SEC, videoLimits } from './limits';
 import { probe } from './transcode';
 import { isLook, MAX_BEAUTY } from './look';
 import { isEmptyEdit, parseEditSpec } from './edit-spec';
+import { selectableSound } from './sounds';
 
 export const MAX_VIDEO_BYTES = 100 * 1024 * 1024;
 export const MAX_VIDEOS_PER_DAY = 10;
@@ -114,7 +115,8 @@ export type CreateVideoResult =
         | 'ACCOUNT_TOO_NEW'
         | 'LONG_DAILY_LIMIT'
         | 'STITCH_INVALID'
-        | 'EDIT_INVALID';
+        | 'EDIT_INVALID'
+        | 'SOUND_INVALID';
     };
 
 // Tạo video từ file đã tải lên (SPEC-creator.md mục 1). Video ở trạng thái processing cho tới khi worker xong.
@@ -169,6 +171,26 @@ export async function createVideoUpload(
   // Chỉnh video: chỉ video thường; giá trị lạ thì từ chối cả lần đăng (không âm thầm bỏ qua).
   const editSpec = kind === 'video' ? parseEditSpec(meta.options?.editSpec) : parseEditSpec(undefined);
   if (!editSpec) return { ok: false, error: 'EDIT_INVALID' };
+  // Nhạc nền: âm thanh còn chọn được, giây bắt đầu nằm trong âm thanh, âm lượng 0–100. Không áp cho Story, Duet, Stitch.
+  const soundIn = kind === 'video' && !duetOfId && !stitch ? meta.options?.sound : null;
+  let sound: { id: string; startSec: number; volume: number; originalVolume: number } | null = null;
+  if (soundIn) {
+    const found = await selectableSound(String(soundIn.id));
+    const startSec = Number(soundIn.startSec);
+    const level = (x: unknown) =>
+      Number.isInteger(x) && Number(x) >= 0 && Number(x) <= 100 ? Number(x) : null;
+    const volume = level(soundIn.volume);
+    const originalVolume = level(soundIn.originalVolume);
+    if (
+      !found ||
+      !(startSec >= 0) ||
+      startSec > Math.max(0, found.durationSec - 1) ||
+      volume === null ||
+      originalVolume === null
+    )
+      return { ok: false, error: 'SOUND_INVALID' };
+    sound = { id: found.id, startSec, volume, originalVolume };
+  }
 
   // Duet chỉ với video công khai còn cho phép Duet/Stitch (SPEC-creator.md V5.3).
   if (
@@ -252,6 +274,10 @@ export async function createVideoUpload(
         sourceSec,
         wantCaptions: kind === 'video' && meta.options?.autoCaptions === true,
         editSpec: isEmptyEdit(editSpec) ? undefined : editSpec,
+        soundId: sound?.id ?? null,
+        soundStartSec: sound?.startSec ?? null,
+        soundVolume: sound?.volume ?? null,
+        originalVolume: sound?.originalVolume ?? null,
         look: isLook(meta.options?.look) && meta.options.look !== 'goc' ? meta.options.look : null,
         beauty:
           Number.isInteger(meta.options?.beauty) &&

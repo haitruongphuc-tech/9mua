@@ -116,3 +116,17 @@ export { LOOKS, CSS_LOOKS, cssBeauty, isLook, MAX_BEAUTY, type Look } from './lo
 export { assembleRecording, SPEEDS, MAX_SEGMENTS, type AssembleResult } from './recording';
 // Bổ sung 30/10/2026 (SPEC-creator.md V5.6 mục 1): chỉnh video.
 export { parseEditSpec } from './edit-spec';
+export {
+  listSounds,
+  selectableSound,
+  soundPage,
+  addLibrarySound,
+  setSoundStatus,
+  renameSound,
+  adminSounds,
+  MAX_LIBRARY_BYTES,
+  MAX_SOUND_SEC,
+  type SoundView,
+  type SoundPage,
+  type LibraryResult,
+} from './sounds';

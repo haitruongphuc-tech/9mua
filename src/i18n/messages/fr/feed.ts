@@ -25,6 +25,8 @@ export const feed: FeedMessages = {
   'feed.pinError': "Impossible d'épingler, réessayez.",
   'feed.cc': 'Sous-titres',
   'feed.stitch': 'Stitch',
+  'feed.useSound': 'Utiliser ce son',
+  'feed.soundOriginal': 'Son original – @{name}',
   'feed.stitchWith': 'Stitch @{name}',
   'feed.close': 'Fermer',
   'feed.unmute': 'Touchez pour le son',

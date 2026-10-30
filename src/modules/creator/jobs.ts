@@ -13,6 +13,7 @@ import { lookFilter } from './look';
 import { overlayFilter, parseEditSpec } from './edit-spec';
 import { runVideoReadyHooks } from './hooks';
 import { initialScore } from './score';
+import { createOriginalSound, mixSound } from './sounds';
 import { videoLimits } from './limits';
 import {
   hlsInitFile,
@@ -139,6 +140,24 @@ export async function processNextJob(): Promise<boolean> {
         ? { start: edit.trimStart, len: edit.trimEnd !== null ? edit.trimEnd - edit.trimStart : null }
         : null;
     const levels = hls ? hlsLevels(source!.video!, (await getSetting('video_enable_1080')) === 'true') : [];
+    // Nhạc nền (V5.6 mục 2): trộn vào file gốc trước khi chuyển mã, hình chép nguyên (giữ chiều xoay của MOV/MP4).
+    let src = job.sourcePath;
+    let srcAudio = source!.hasAudio;
+    const sound =
+      video.soundId && !originalPath ? await db.sound.findUnique({ where: { id: video.soundId } }) : null;
+    const soundPath = sound ? imageStore().localPath(sound.path) : null;
+    if (soundPath) {
+      src = path.join(work, /mov|mp4/.test(source!.formatName) ? 'mixed.mov' : 'mixed.mkv');
+      await mixSound(job.sourcePath, soundPath, src, {
+        hasAudio: source!.hasAudio,
+        durationSec: source!.durationSec,
+        soundStartSec: video.soundStartSec ?? 0,
+        trimStartSec: trim?.start ?? 0,
+        soundVolume: video.soundVolume ?? 100,
+        originalVolume: video.originalVolume ?? 100,
+      });
+      srcAudio = true;
+    }
     if (originalPath && video.stitchOfId) {
       const orig = await probe(originalPath);
       await composeStitch(originalPath, job.sourcePath, outMp4, outPoster, {
@@ -157,19 +176,10 @@ export async function processNextJob(): Promise<boolean> {
         origAudio: orig.hasAudio,
       });
     } else if (hls) {
-      await makeHls(
-        job.sourcePath,
-        hlsDir,
-        levels,
-        source!.hasAudio,
-        maxSec,
-        LONG_TRANSCODE_TIMEOUT_MS,
-        look,
-        trim,
-      );
-      await makePoster(job.sourcePath, outPoster, source!.durationSec);
+      await makeHls(src, hlsDir, levels, srcAudio, maxSec, LONG_TRANSCODE_TIMEOUT_MS, look, trim);
+      await makePoster(src, outPoster, source!.durationSec);
     } else
-      await transcode(job.sourcePath, outMp4, outPoster, source!.durationSec, {
+      await transcode(src, outMp4, outPoster, source!.durationSec, {
         maxSec,
         timeoutMs: long ? LONG_TRANSCODE_TIMEOUT_MS : undefined,
         look,
@@ -180,7 +190,7 @@ export async function processNextJob(): Promise<boolean> {
     const durationSec = hls
       ? Math.min(trim ? (trim.len ?? source!.durationSec - trim.start) : source!.durationSec, maxSec)
       : result.durationSec;
-    const playable = hls ? job.sourcePath : outMp4;
+    const playable = hls ? src : outMp4;
     const sdPath = path.join(work, 'video-sd.mp4');
     const sd =
       extras &&
@@ -197,9 +207,23 @@ export async function processNextJob(): Promise<boolean> {
     // Đọc lại vì người đăng có thể đổi nháp / giờ hẹn trong lúc chờ xử lý.
     const timing = await db.video.findUniqueOrThrow({
       where: { id: video.id },
-      select: { draft: true, publishAt: true },
+      select: { draft: true, publishAt: true, visibility: true, allowRemix: true },
     });
     Object.assign(video, timing);
+    // Âm thanh gốc (V5.6 mục 2): tách từ bản đã xử lý (đã cắt); video dài lấy từ file gốc theo đoạn cắt. Lỗi thì bỏ qua.
+    await createOriginalSound(
+      video,
+      hls
+        ? {
+            path: job.sourcePath,
+            hasAudio: source!.hasAudio,
+            startSec: trim?.start,
+            maxSec: trim?.len ?? undefined,
+          }
+        : { path: outMp4, hasAudio: result.hasAudio },
+    ).catch((e) =>
+      console.error(`[worker] âm thanh gốc video ${video.id} lỗi:`, e instanceof Error ? e.message : e),
+    );
     const scheduled = !video.draft && video.publishAt && video.publishAt > t;
     const finalStatus = video.draft ? 'draft' : scheduled ? 'scheduled' : 'ready';
     const key = `videos/${t.getUTCFullYear()}/${String(t.getUTCMonth() + 1).padStart(2, '0')}/${video.id}-${randomBytes(6).toString('hex')}`;

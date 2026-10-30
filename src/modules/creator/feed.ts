@@ -40,6 +40,8 @@ export type FeedVideo = {
   sdUrl: string | null; // MP4 480p cho mạng chậm / tiết kiệm dữ liệu (SPEC-creator.md V5.1)
   captionsUrl: string | null; // phụ đề tự động đã bật cho người xem (SPEC-creator.md V5.4)
   stitchOf: { id: string; authorName: string } | null; // "Stitch với @tên" (SPEC-creator.md V5.5 mục 4)
+  // ♫ âm thanh của video (SPEC-creator.md V5.6 mục 2, công tắc camera): âm thanh đã dùng, hoặc âm thanh gốc tách từ video.
+  sound: { id: string; title: string | null; artist: string | null; authorName: string | null } | null;
 };
 
 export const FEED_PAGE = 8;
@@ -207,6 +209,7 @@ export async function hydrateVideos(ids: string[], viewer: Viewer): Promise<Feed
     stitchSources.map((s) => [s.id, stitchAuthors.find((a) => a.id === s.authorId)?.displayName ?? '']),
   );
   const pinnedSet = new Set(pins);
+  const soundOf = await videoSounds(await isFeatureOn('camera'), videos);
   const authors = await db.user.findMany({
     where: { id: { in: videos.map((v) => v.authorId) } },
     select: { id: true, displayName: true, avatarUrl: true },
@@ -241,6 +244,7 @@ export async function hydrateVideos(ids: string[], viewer: Viewer): Promise<Feed
       mine: viewer.userId === v.authorId,
       sdUrl: v.renditions[0]?.path ?? null,
       stitchOf: v.stitchOfId ? { id: v.stitchOfId, authorName: stitchName.get(v.stitchOfId) ?? '' } : null,
+      sound: soundOf(v),
       captionsUrl:
         captionsOn && v.captions?.status === 'ready' && v.captions.published
           ? `/api/video/${v.id}/phu-de`
@@ -248,6 +252,37 @@ export async function hydrateVideos(ids: string[], viewer: Viewer): Promise<Feed
     });
   }
   return out;
+}
+
+// Âm thanh hiện dưới chú thích: âm thanh video đã dùng (kể cả đã gỡ: vẫn mở được trang), hoặc âm thanh gốc còn hoạt động.
+async function videoSounds(on: boolean, videos: { id: string; soundId: string | null }[]) {
+  const used = videos.map((v) => v.soundId).filter((x): x is string => Boolean(x));
+  const rows = on
+    ? await db.sound.findMany({
+        where: {
+          OR: [{ id: { in: used } }, { sourceVideoId: { in: videos.map((v) => v.id) }, status: 'active' }],
+        },
+        select: { id: true, title: true, artist: true, sourceVideoId: true },
+      })
+    : [];
+  const sources = rows.map((s) => s.sourceVideoId).filter((x): x is string => Boolean(x));
+  const srcVideos = sources.length
+    ? await db.video.findMany({ where: { id: { in: sources } }, select: { id: true, authorId: true } })
+    : [];
+  const users = srcVideos.length
+    ? await db.user.findMany({
+        where: { id: { in: srcVideos.map((v) => v.authorId) } },
+        select: { id: true, displayName: true },
+      })
+    : [];
+  const nameOf = (videoId: string | null) => {
+    const authorId = srcVideos.find((v) => v.id === videoId)?.authorId;
+    return users.find((u) => u.id === authorId)?.displayName ?? null;
+  };
+  return (v: { id: string; soundId: string | null }): FeedVideo['sound'] => {
+    const s = rows.find((x) => x.id === v.soundId) ?? rows.find((x) => x.sourceVideoId === v.id);
+    return s ? { id: s.id, title: s.title, artist: s.artist, authorName: nameOf(s.sourceVideoId) } : null;
+  };
 }
 
 export async function getVideo(videoId: string, viewer: Viewer): Promise<FeedVideo | null> {

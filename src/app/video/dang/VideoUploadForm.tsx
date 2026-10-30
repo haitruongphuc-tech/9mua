@@ -13,6 +13,8 @@ import { chunkedUpload, type UploadProgress } from './chunked-upload';
 import { CSS_LOOKS, cssBeauty, LOOKS, MAX_BEAUTY, type Look } from '@/lib/looks';
 import { MAX_CLIPS, type EditSpec } from '@/lib/edit-spec';
 import { EditOverlay, EditPanel, emptyEdit } from './VideoEditor';
+import { SoundPicker, type PickedSound } from './SoundPicker';
+import type { SoundItem } from '@/app/api/sounds/route';
 
 const MAX_CAPTION = 300;
 const STORY_SEC = 30;
@@ -94,6 +96,7 @@ export function VideoUploadForm({
   provinces,
   defaultProvince,
   limits,
+  initialSound,
 }: {
   remaining: Record<Mode, number>;
   initialMode: Mode;
@@ -103,6 +106,7 @@ export function VideoUploadForm({
   defaultProvince: string;
   // Giới hạn theo công tắc long_video (SPEC-creator.md V5.1). Bật thì tải từng phần 8MB, gửi tiếp được khi rớt mạng.
   limits: { long: boolean; maxBytes: number; maxSec: number };
+  initialSound: SoundItem | null; // "Dùng âm thanh này" (SPEC-creator.md V5.6 mục 2)
 }) {
   const maxSec = (m: Mode) => (m === 'story' ? STORY_SEC : limits.maxSec);
   const t = useT();
@@ -144,6 +148,9 @@ export function VideoUploadForm({
   const [shownClip, setShownClip] = useState(0);
   const clipKey = useRef(0);
   const [edit, setEdit] = useState<EditSpec>(emptyEdit);
+  const [sound, setSound] = useState<PickedSound | null>(
+    initialSound ? { sound: initialSound, startSec: 0, volume: 80, originalVolume: 100 } : null,
+  );
   const [time, setTime] = useState(0);
   const [look, setLook] = useState<Look>('goc');
   // Stitch: chọn đoạn 1–5 giây của video gốc (SPEC-creator.md V5.5 mục 4).
@@ -335,6 +342,15 @@ export function VideoUploadForm({
       look: cameraOn && mode === 'video' ? look : undefined,
       beauty: cameraOn && mode === 'video' ? beauty : undefined,
       editSpec: editing ? edit : undefined,
+      sound:
+        cameraOn && mode === 'video' && !duet && !stitch && sound
+          ? {
+              id: sound.sound.id,
+              startSec: sound.startSec,
+              volume: sound.volume,
+              originalVolume: sound.originalVolume,
+            }
+          : null,
     });
     setProgress(null);
     if (result?.error) setError(result.error);
@@ -653,6 +669,9 @@ export function VideoUploadForm({
           </label>
           <p className="text-[11px] text-white/50">{t('post.beautyHint')}</p>
         </fieldset>
+      ) : null}
+      {cameraOn && mode === 'video' && !duet && !stitch ? (
+        <SoundPicker value={sound} onChange={setSound} />
       ) : null}
       <label className="flex flex-col gap-1.5 text-[12px] font-bold text-white/70">
         {t('post.caption', { count: caption.length, max: MAX_CAPTION })}

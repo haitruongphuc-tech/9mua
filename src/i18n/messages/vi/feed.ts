@@ -24,6 +24,8 @@ export const feed = {
   'feed.pinError': 'Chưa ghim được, hãy thử lại.',
   'feed.cc': 'Phụ đề',
   'feed.stitch': 'Stitch',
+  'feed.useSound': 'Dùng âm thanh này',
+  'feed.soundOriginal': 'Âm thanh gốc – @{name}',
   'feed.stitchWith': 'Stitch @{name}',
   'feed.close': 'Đóng',
   'feed.unmute': 'Chạm để bật tiếng',

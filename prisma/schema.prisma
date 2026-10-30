@@ -569,40 +569,51 @@ model ProductReport {
 
 // ===== Creator video (SPEC-creator.md) =====
 model Video {
-  id             String         @id @default(cuid(2))
-  authorId       String
-  caption        String         @default("")
-  hashtags       String[]
-  status         String         @default("processing") // processing | ready | failed | hidden | removed | deleted
-  failReason     String?
-  moderationNote String? // lý do tự ẩn / CEO gỡ
-  durationSec    Float?
-  width          Int?
-  height         Int?
-  fileUrl        String?
-  posterUrl      String?
-  views          Int            @default(0)
-  qualifiedViews Int            @default(0) // xem ≥ 50% thời lượng
-  likes          Int            @default(0)
-  score          Float          @default(0)
-  readyAt        DateTime?
+  id              String         @id @default(cuid(2))
+  authorId        String
+  caption         String         @default("")
+  hashtags        String[]
+  status          String         @default("processing") // processing | ready | failed | hidden | removed | deleted
+  failReason      String?
+  moderationNote  String? // lý do tự ẩn / CEO gỡ
+  durationSec     Float?
+  width           Int?
+  height          Int?
+  fileUrl         String?
+  posterUrl       String?
+  views           Int            @default(0)
+  qualifiedViews  Int            @default(0) // xem ≥ 50% thời lượng
+  likes           Int            @default(0)
+  score           Float          @default(0)
+  readyAt         DateTime?
   // Story 24 giờ và Duet (SPEC-creator.md bổ sung 27/10). Video cũ: kind = video, không hết hạn, không Duet.
-  kind           String         @default("video") // video | story
-  expiresAt      DateTime?
-  duetOfId       String?
+  kind            String         @default("video") // video | story
+  expiresAt       DateTime?
+  duetOfId        String?
   // Quyền riêng tư từng video (SPEC-creator.md V5.3): public | followers | private. Video cũ là public.
-  visibility     String         @default("public")
-  allowComments  Boolean        @default(true)
-  allowRemix     Boolean        @default(true) // Duet, Stitch, dùng âm thanh
-  allowDownload  Boolean        @default(true)
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  products       VideoProduct[]
+  visibility      String         @default("public")
+  allowComments   Boolean        @default(true)
+  allowRemix      Boolean        @default(true) // Duet, Stitch, dùng âm thanh
+  allowDownload   Boolean        @default(true)
+  // Tuỳ chọn khi đăng và sau khi đăng (SPEC-creator.md V5.3). status thêm: draft (nháp) | scheduled (hẹn giờ).
+  draft           Boolean        @default(false) // người đăng bấm "Lưu nháp": xử lý xong thì thành draft
+  publishAt       DateTime? // giờ hẹn đăng
+  draftWarnedAt   DateTime? // đã báo "nháp sắp tự xoá"
+  province        String? // slug tỉnh/thành (34 tỉnh), không lưu toạ độ
+  placeName       String? // tên địa điểm tự gõ ≤ 60 ký tự
+  profilePinnedAt DateTime? // ghim lên đầu trang cá nhân (tối đa 3)
+  aiGenerated     Boolean        @default(false) // chip "Nội dung tạo bằng AI"
+  aiStudio        Boolean        @default(false) // làm từ AI Studio: nhãn AI không gỡ được
+  editedAt        DateTime? // sửa chữ, sản phẩm, địa điểm sau khi đăng → "Đã chỉnh sửa"
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  products        VideoProduct[]
 
   @@index([status, score])
   @@index([status, readyAt])
   @@index([authorId, createdAt])
   @@index([kind, status, expiresAt])
+  @@index([status, publishAt])
 }
 
 model VideoProduct {

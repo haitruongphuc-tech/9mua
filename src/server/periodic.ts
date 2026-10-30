@@ -1,4 +1,7 @@
+import { expireDrafts } from '@/modules/creator';
 import { assignMissingHandles } from '@/modules/identity';
+import { isFeatureOn } from '@/lib/features';
+import { publishScheduledVideos } from './creator';
 
 // Việc định kỳ của đợt nâng cấp (docs/nang-cap-mot-dot.md): cron gọi /api/internal/v5/tick mỗi 5 phút và
 // /api/internal/v5/daily mỗi ngày. Mỗi việc chạy riêng; một việc lỗi không chặn việc khác, kết quả ghi theo tên.
@@ -7,9 +10,21 @@ type Job = { name: string; run: () => Promise<number> };
 const TICK_JOBS: Job[] = [
   // @tên cho tài khoản cũ và tài khoản mới tạo (SPEC-identity.md V5.1), mỗi lần tối đa 500.
   { name: 'handles', run: () => assignMissingHandles(500) },
+  // Video hẹn giờ (SPEC-creator.md V5.3): worker chạy mỗi phút, cron này là dự phòng khi worker dừng.
+  { name: 'scheduled-videos', run: () => publishScheduledVideos() },
 ];
 
-const DAILY_JOBS: Job[] = [];
+const DAILY_JOBS: Job[] = [
+  // Nháp quá 90 ngày tự xoá, báo trước 7 ngày. Công tắc tắt thì người dùng không thấy tab Nháp nên không xoá.
+  {
+    name: 'drafts',
+    run: async () => {
+      if (!(await isFeatureOn('post_options'))) return 0;
+      const r = await expireDrafts();
+      return r.warned + r.deleted;
+    },
+  },
+];
 
 async function runJobs(jobs: Job[]): Promise<Record<string, number | string>> {
   const out: Record<string, number | string> = {};

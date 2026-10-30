@@ -42,6 +42,7 @@ export const profile: ProfileMessages = {
   'profile.creator': 'Creador en 9MUA',
   'profile.myVideos': 'Mis videos',
   'profile.noCreatorVideos': 'Aún no hay videos.',
+  'profile.pinned': '📌 Fijado',
   'profile.edit.button': 'Editar perfil',
   'profile.edit.title': 'Editar perfil',
   'profile.edit.back': '← Perfil',

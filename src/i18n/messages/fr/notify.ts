@@ -6,6 +6,10 @@ export const notify: NotifyMessages = {
   'notify.newReply': '{name} vous a répondu : {text}',
   'notify.voucherIssued': 'Vous avez reçu un bon pour un Kiot gratuit pendant 1 an !',
   'notify.videoReady': 'Votre vidéo est publiée',
+  'notify.videoDraftReady': 'Votre vidéo est prête et enregistrée dans les brouillons',
+  'notify.videoScheduled': "Votre vidéo est prête et sera publiée à l'heure prévue",
+  'notify.videoPublished': 'Votre vidéo programmée est en ligne',
+  'notify.draftExpiring': 'Un brouillon sera supprimé dans {days} jours',
   'notify.videoFailed': 'Votre vidéo n’a pas pu être publiée',
   'notify.videoRemoved': 'Votre vidéo a été retirée',
   'notify.profileCleared':

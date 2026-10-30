@@ -7,6 +7,7 @@ export type VideoThumb = {
   views: number;
   likes: number;
   authorName: string;
+  pinned?: boolean; // ghim lên đầu trang cá nhân (SPEC-creator.md V5.3)
 };
 
 export type CreatorProfile = {
@@ -40,7 +41,12 @@ export async function getCreatorProfile(
     viewerId === userId ? undefined : { in: follower ? ['public', 'followers'] : ['public'] };
   const where = { authorId: userId, status: 'ready', kind: 'video', visibility };
   const [videos, agg] = await Promise.all([
-    db.video.findMany({ where, orderBy: { readyAt: 'desc' }, take: 60 }),
+    // Video ghim (tối đa 3) đứng đầu lưới, ghim mới nhất trước.
+    db.video.findMany({
+      where,
+      orderBy: [{ profilePinnedAt: { sort: 'desc', nulls: 'last' } }, { readyAt: 'desc' }],
+      take: 60,
+    }),
     db.video.aggregate({ where, _count: true, _sum: { likes: true } }),
   ]);
   return {
@@ -58,6 +64,7 @@ export async function getCreatorProfile(
       views: v.views,
       likes: v.likes,
       authorName: user.displayName,
+      pinned: v.profilePinnedAt !== null,
     })),
   };
 }

@@ -41,6 +41,7 @@ export const profile: ProfileMessages = {
   'profile.creator': '9MUA创作者',
   'profile.myVideos': '我的视频',
   'profile.noCreatorVideos': '还没有视频。',
+  'profile.pinned': '📌 置顶',
   'profile.edit.button': '编辑资料',
   'profile.edit.title': '编辑资料',
   'profile.edit.back': '← 个人主页',

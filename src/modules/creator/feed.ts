@@ -7,6 +7,7 @@ import { kiotOrigin } from '@/lib/urls';
 import { getProductForCheckout, productPath } from '@/modules/kiot';
 import { feedScore } from './score';
 import { visibleToSql } from './visibility';
+import { placeLabel } from './posting';
 import { notInterestedSql } from './watching';
 
 export type Viewer = { userId?: string; anonId?: string };
@@ -29,6 +30,12 @@ export type FeedVideo = {
   pinned: boolean; // CEO ghim lên đầu "Dành cho bạn"
   duetOfId: string | null; // video Duet: link về video gốc
   products: FeedProduct[];
+  // SPEC-creator.md V5.3: chip "Nội dung tạo bằng AI", địa điểm, "Đã chỉnh sửa", ghim trên trang cá nhân.
+  aiGenerated: boolean;
+  place: string | null;
+  edited: boolean;
+  profilePinned: boolean;
+  mine: boolean; // người đang xem là người đăng: hiện nút Ghim / Sửa
 };
 
 export const FEED_PAGE = 8;
@@ -207,6 +214,11 @@ export async function hydrateVideos(ids: string[], viewer: Viewer): Promise<Feed
       pinned: pinnedSet.has(v.id),
       duetOfId: v.duetOfId,
       products: await feedProducts(v.products.map((p) => p.productId)),
+      aiGenerated: v.aiGenerated,
+      place: placeLabel(v),
+      edited: v.editedAt !== null,
+      profilePinned: v.profilePinnedAt !== null,
+      mine: viewer.userId === v.authorId,
     });
   }
   return out;

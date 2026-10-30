@@ -85,6 +85,15 @@ export async function processNextJob(): Promise<boolean> {
     const result = await probe(outMp4);
 
     const t = now();
+    // Nháp / hẹn giờ (SPEC-creator.md V5.3): xử lý xong vẫn chưa lên feed. Hẹn giờ đã qua lúc xử lý xong thì đăng luôn.
+    // Đọc lại vì người đăng có thể đổi nháp / giờ hẹn trong lúc chờ xử lý.
+    const timing = await db.video.findUniqueOrThrow({
+      where: { id: video.id },
+      select: { draft: true, publishAt: true },
+    });
+    Object.assign(video, timing);
+    const scheduled = !video.draft && video.publishAt && video.publishAt > t;
+    const finalStatus = video.draft ? 'draft' : scheduled ? 'scheduled' : 'ready';
     const key = `videos/${t.getUTCFullYear()}/${String(t.getUTCMonth() + 1).padStart(2, '0')}/${video.id}-${randomBytes(6).toString('hex')}`;
     const store = imageStore();
     const fileUrl = await store.saveFile(`${key}.mp4`, outMp4);
@@ -93,13 +102,13 @@ export async function processNextJob(): Promise<boolean> {
       db.video.update({
         where: { id: video.id },
         data: {
-          status: 'ready',
+          status: finalStatus,
           fileUrl,
           posterUrl,
           durationSec: result.durationSec,
           width: result.video?.width,
           height: result.video?.height,
-          readyAt: t,
+          readyAt: finalStatus === 'ready' ? t : null,
           score: initialScore(),
           // Story tự ẩn sau 24 giờ kể từ lúc lên.
           expiresAt: story ? new Date(t.getTime() + 24 * 3_600_000) : null,
@@ -108,6 +117,15 @@ export async function processNextJob(): Promise<boolean> {
       db.videoJob.update({ where: { id: job.id }, data: { status: 'done', error: null } }),
     ]);
     await unlink(job.sourcePath).catch(() => {});
+    if (finalStatus !== 'ready') {
+      await notifyKey(
+        video.authorId,
+        video.draft ? 'notify.videoDraftReady' : 'notify.videoScheduled',
+        { detail: video.caption.slice(0, 80) },
+        video.draft ? '/video/cua-toi?tab=nhap' : '/video/cua-toi',
+      );
+      return true;
+    }
     await notifyKey(
       video.authorId,
       'notify.videoReady',

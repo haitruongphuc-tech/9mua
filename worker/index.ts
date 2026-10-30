@@ -4,13 +4,14 @@ import { db } from '@/lib/db';
 import { cleanupAiFiles, processNextSlideshow } from '@/modules/ai';
 import { cleanupStaleUploads, expireStories, recomputeScores } from '@/modules/creator';
 import { cleanupLiveChat } from '@/modules/live';
-import { processNextJob } from '@/server/creator';
+import { processNextJob, publishScheduledVideos } from '@/server/creator';
 import { syncWithMediaServer } from '@/server/live';
 
 const IDLE_MS = 3_000;
 const CLEANUP_EVERY_MS = 3_600_000;
 const SCORES_EVERY_MS = 5 * 60_000;
 const LIVE_SYNC_MS = 5_000; // trạng thái buổi live theo MediaMTX (SPEC-live.md)
+const SCHEDULED_EVERY_MS = 60_000; // video hẹn giờ lên feed mỗi phút (SPEC-creator.md V5.3)
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 let stopping = false;
@@ -51,12 +52,20 @@ async function main() {
   console.info('[worker] đã dừng');
 }
 
-// Vòng riêng cho live: chuyển mã một video có thể mất vài phút, không được làm chậm việc bật/tắt buổi live.
+// Vòng riêng cho live và video hẹn giờ: chuyển mã một video có thể mất vài phút, không được làm chậm việc bật/tắt buổi
+// live hay video hẹn giờ lên feed.
 async function liveLoop() {
+  let lastScheduled = 0;
   while (!stopping) {
     await syncWithMediaServer().catch((e) =>
       console.error('[worker] đồng bộ live lỗi:', e instanceof Error ? e.message : e),
     );
+    if (Date.now() - lastScheduled > SCHEDULED_EVERY_MS) {
+      lastScheduled = Date.now();
+      await publishScheduledVideos().catch((e) =>
+        console.error('[worker] đăng video hẹn giờ lỗi:', e instanceof Error ? e.message : e),
+      );
+    }
     await sleep(LIVE_SYNC_MS);
   }
 }

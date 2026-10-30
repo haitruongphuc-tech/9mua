@@ -42,6 +42,7 @@ export const profile: ProfileMessages = {
   'profile.creator': '9MUAのクリエイター',
   'profile.myVideos': '自分の動画',
   'profile.noCreatorVideos': 'まだ動画がありません。',
+  'profile.pinned': '📌 固定',
   'profile.edit.button': 'プロフィールを編集',
   'profile.edit.title': 'プロフィールを編集',
   'profile.edit.back': '← プロフィール',

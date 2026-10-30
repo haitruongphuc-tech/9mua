@@ -1,6 +1,7 @@
 // Lớp ghép ở tầng ứng dụng: việc chạy khi video lên feed (social báo cho người follow — SPEC-social.md mục 1).
-// Worker và route xử lý video PHẢI import processNextJob từ đây.
-import { onVideoReady, processNextJob } from '@/modules/creator';
+// Worker và route xử lý video PHẢI import processNextJob từ đây; nháp / hẹn giờ lên feed cũng vậy (changePostTiming,
+// publishScheduledVideos) để người follow được báo.
+import { changePostTiming, onVideoReady, processNextJob, publishScheduledVideos } from '@/modules/creator';
 import { notifyFollowersOfVideo } from '@/modules/social';
 
 let registered = false;
@@ -15,4 +16,4 @@ function registerAll() {
 
 registerAll();
 
-export { processNextJob };
+export { processNextJob, changePostTiming, publishScheduledVideos };

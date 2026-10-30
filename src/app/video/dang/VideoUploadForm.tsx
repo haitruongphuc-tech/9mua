@@ -40,10 +40,14 @@ export function VideoUploadForm({
   remaining,
   initialMode,
   duet,
+  provinces,
+  defaultProvince,
 }: {
   remaining: Record<Mode, number>;
   initialMode: Mode;
   duet: { id: string; author: string; posterUrl: string | null } | null;
+  provinces: { slug: string; name: string }[];
+  defaultProvince: string;
 }) {
   const t = useT();
   // Duet luôn là video thường.
@@ -60,6 +64,11 @@ export function VideoUploadForm({
   const postOptions = useFeature('post_options');
   const [visibility, setVisibility] = useState<'public' | 'followers' | 'private'>('public');
   const [allow, setAllow] = useState({ allowComments: true, allowRemix: true, allowDownload: true });
+  // Địa điểm (mặc định tỉnh của Kiot), nhãn AI, hẹn giờ (giờ Việt Nam) — SPEC-creator.md V5.3.
+  const [province, setProvince] = useState(defaultProvince);
+  const [placeName, setPlaceName] = useState('');
+  const [aiUsed, setAiUsed] = useState(false);
+  const [scheduleAt, setScheduleAt] = useState('');
 
   useEffect(() => {
     const controller = new AbortController();
@@ -94,6 +103,7 @@ export function VideoUploadForm({
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!file || error) return;
+    const asDraft = (e.nativeEvent as SubmitEvent).submitter?.getAttribute('value') === 'draft';
     setProgress(0);
     const up = await putWithProgress(file, setProgress, {
       failed: t('post.err.upload'),
@@ -109,7 +119,18 @@ export function VideoUploadForm({
       productIds: picked.map((p) => p.id),
       kind: mode,
       duetOfId: duet?.id ?? null,
-      options: postOptions && mode === 'video' ? { visibility, ...allow } : undefined,
+      options:
+        postOptions && mode === 'video'
+          ? {
+              visibility,
+              ...allow,
+              province,
+              placeName,
+              aiGenerated: aiUsed,
+              draft: asDraft,
+              publishAt: !asDraft && scheduleAt ? `${scheduleAt}:00+07:00` : null,
+            }
+          : undefined,
     });
     setProgress(null);
     if (result?.error) setError(result.error);
@@ -127,7 +148,11 @@ export function VideoUploadForm({
   const field =
     'rounded-[14px] border border-white/15 bg-white/10 p-3 text-[14px] text-white outline-none placeholder:text-white/40 focus:border-brand';
   return (
-    <form onSubmit={submit} className="flex flex-col gap-4">
+    <form
+      onSubmit={submit}
+      // Ô nhập được cuộn tới phải nằm trên thanh nút dính ở đáy và menu dưới (không bị che trên điện thoại).
+      className="flex flex-col gap-4 [&_input]:scroll-mb-44 [&_select]:scroll-mb-44 [&_textarea]:scroll-mb-44"
+    >
       {duet ? (
         <div
           className="flex items-center gap-3 rounded-[16px] border border-brand/40 bg-white/5 p-3"
@@ -238,6 +263,56 @@ export function VideoUploadForm({
               {t(`post.${k}`)}
             </label>
           ))}
+          <label className="flex items-center gap-2 text-[13px]">
+            <input
+              type="checkbox"
+              checked={aiUsed}
+              onChange={(e) => setAiUsed(e.target.checked)}
+              className="h-4 w-4 accent-[#ff6b00]"
+              data-testid="video-ai"
+            />
+            {t('post.aiUsed')}
+          </label>
+          <div className="mt-2 grid grid-cols-[2fr_3fr] gap-2">
+            <label className="flex flex-col gap-1 text-[12px] font-bold text-white/70">
+              {t('post.province')}
+              <select
+                value={province}
+                onChange={(e) => setProvince(e.target.value)}
+                className={`${field} h-11 py-0 font-normal`}
+                data-testid="video-province"
+              >
+                <option value="">{t('post.noPlace')}</option>
+                {provinces.map((p) => (
+                  <option key={p.slug} value={p.slug}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1 text-[12px] font-bold text-white/70">
+              {t('post.placeName')}
+              <input
+                value={placeName}
+                onChange={(e) => setPlaceName(e.target.value)}
+                maxLength={60}
+                placeholder={t('post.placeNameHint')}
+                className={`${field} h-11 py-0 font-normal`}
+                data-testid="video-place"
+              />
+            </label>
+          </div>
+          <label className="mt-2 flex flex-col gap-1 text-[12px] font-bold text-white/70">
+            {t('post.schedule')}
+            <input
+              type="datetime-local"
+              value={scheduleAt}
+              onChange={(e) => setScheduleAt(e.target.value)}
+              className={`${field} h-11 py-0 font-normal`}
+              data-testid="video-schedule"
+            />
+            <span className="font-normal text-white/50">{t('post.scheduleHint')}</span>
+          </label>
         </fieldset>
       ) : null}
       <fieldset className="flex flex-col gap-2">
@@ -311,13 +386,32 @@ export function VideoUploadForm({
             </span>
           </div>
         ) : null}
-        <button
-          type="submit"
-          disabled={!file || Boolean(error) || progress !== null || remaining[mode] <= 0}
-          className="h-12 rounded-full bg-brand font-black text-white shadow-[0_0_20px_rgb(255_107_0/0.35)] disabled:opacity-50"
-        >
-          {t(mode === 'story' ? 'post.submitStory' : 'post.submit')}
-        </button>
+        <div className="flex gap-2">
+          {postOptions && mode === 'video' ? (
+            <button
+              type="submit"
+              value="draft"
+              disabled={!file || Boolean(error) || progress !== null || remaining[mode] <= 0}
+              className="h-12 shrink-0 rounded-full border border-white/20 px-5 font-black text-white disabled:opacity-50"
+              data-testid="video-save-draft"
+            >
+              {t('post.saveDraft')}
+            </button>
+          ) : null}
+          <button
+            type="submit"
+            disabled={!file || Boolean(error) || progress !== null || remaining[mode] <= 0}
+            className="h-12 flex-1 rounded-full bg-brand font-black text-white shadow-[0_0_20px_rgb(255_107_0/0.35)] disabled:opacity-50"
+          >
+            {t(
+              mode === 'story'
+                ? 'post.submitStory'
+                : postOptions && scheduleAt
+                  ? 'post.submitScheduled'
+                  : 'post.submit',
+            )}
+          </button>
+        </div>
         {/* Nút chưa bấm được thì nói lý do ngay dưới nút (lỗi video quá dài/quá nặng cũng hiện ở đây). */}
         <p className="text-center text-[12px] text-white/50" data-testid="video-submit-hint">
           {!file && remaining[mode] > 0

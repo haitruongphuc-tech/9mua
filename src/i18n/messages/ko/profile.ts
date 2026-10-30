@@ -41,6 +41,7 @@ export const profile: ProfileMessages = {
   'profile.creator': '9MUA 크리에이터',
   'profile.myVideos': '내 동영상',
   'profile.noCreatorVideos': '아직 동영상이 없어요.',
+  'profile.pinned': '📌 고정',
   'profile.edit.button': '프로필 편집',
   'profile.edit.title': '프로필 편집',
   'profile.edit.back': '← 프로필',

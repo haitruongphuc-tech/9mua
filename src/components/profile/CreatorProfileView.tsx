@@ -155,7 +155,10 @@ export async function CreatorProfileView({
             {p.videos.length === 0 ? (
               <p className="py-10 text-center text-[13px] text-white/60">{t('profile.noCreatorVideos')}</p>
             ) : (
-              <VideoGrid videos={p.videos} />
+              <VideoGrid
+                videos={p.videos}
+                pinnedLabel={(await isFeatureOn('post_options')) ? t('profile.pinned') : undefined}
+              />
             )}
           </div>
         </section>

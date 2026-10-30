@@ -13,7 +13,13 @@ export async function createVideoAction(input: {
   productIds: string[];
   kind?: 'video' | 'story';
   duetOfId?: string | null;
-  options?: VideoOptions;
+  options?: VideoOptions & {
+    province?: string;
+    placeName?: string;
+    aiGenerated?: boolean;
+    draft?: boolean;
+    publishAt?: string | null; // "2026-11-01T09:30:00+07:00" (giờ Việt Nam)
+  };
 }): Promise<{ error: string }> {
   const user = await requireUser();
   const result = await createVideoUpload(user.id, String(input.uploadId), {
@@ -29,9 +35,21 @@ export async function createVideoAction(input: {
             allowComments: input.options.allowComments !== false,
             allowRemix: input.options.allowRemix !== false,
             allowDownload: input.options.allowDownload !== false,
+            province: typeof input.options.province === 'string' ? input.options.province : null,
+            placeName: typeof input.options.placeName === 'string' ? input.options.placeName : null,
+            aiGenerated: input.options.aiGenerated === true,
+            draft: input.options.draft === true,
+            publishAt:
+              typeof input.options.publishAt === 'string' && input.options.publishAt
+                ? new Date(input.options.publishAt)
+                : null,
           }
         : undefined,
   });
   if (!result.ok) return { error: (await getT())(`post.err.${result.error}`) };
-  redirect(`/video/cua-toi?moi=${result.videoId}`);
+  redirect(
+    input.options?.draft
+      ? `/video/cua-toi?tab=nhap&moi=${result.videoId}`
+      : `/video/cua-toi?moi=${result.videoId}`,
+  );
 }

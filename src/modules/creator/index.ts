@@ -63,3 +63,25 @@ export {
   isHistoryOff,
   MAX_NOT_INTERESTED,
 } from './watching';
+// Bổ sung 30/10/2026 (SPEC-creator.md V5.3): nháp, hẹn giờ, địa điểm, ghim lên trang cá nhân, nhãn AI, sửa sau khi đăng.
+export {
+  changePostTiming,
+  publishScheduledVideos,
+  expireDrafts,
+  pinToProfile,
+  editVideo,
+  videoForEdit,
+  countDrafts,
+  placeLabel,
+  scheduleOk,
+  MAX_DRAFTS,
+  MAX_PROFILE_PINS,
+  MAX_PLACE_NAME,
+  MIN_SCHEDULE_MINUTES,
+  MAX_SCHEDULE_DAYS,
+  type PostOptions,
+  type EditVideoPatch,
+  type EditVideoResult,
+  type VideoForEdit,
+  type TimingResult,
+} from './posting';

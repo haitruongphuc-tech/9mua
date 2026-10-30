@@ -81,6 +81,7 @@ export function VideoFeed({
   const bars = useRef<(HTMLSpanElement | null)[]>([]);
   // Công cụ xem (SPEC-creator.md V5.2, công tắc feed_tools): thanh tua, tốc độ, tự cuộn — nhớ trong trình duyệt.
   const tools = useFeature('feed_tools');
+  const postOptions = useFeature('post_options');
   const seeks = useRef<(HTMLInputElement | null)[]>([]);
   const [speed, setSpeed] = useState(1);
   const [autoScroll, setAutoScroll] = useState(false);
@@ -118,6 +119,22 @@ export function VideoFeed({
     }).catch(() => null);
     setItems((list) => list.filter((x) => x.id !== videoId));
     show(t('feed.notInterestedDone'));
+  };
+  // Ghim video của mình lên đầu trang cá nhân (SPEC-creator.md V5.3, tối đa 3).
+  const pinProfile = async (video: SocialFeedVideo) => {
+    setSheet(null);
+    const on = !video.profilePinned;
+    const res = (await fetch('/api/video/pin-profile', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ videoId: video.id, on }),
+    })
+      .then((r) => r.json())
+      .catch(() => null)) as { ok: boolean; error?: string } | null;
+    if (res?.ok) {
+      patch(video.id, { profilePinned: on });
+      show(t(on ? 'feed.pinDone' : 'feed.unpinDone'));
+    } else show(t(res?.error === 'PIN_LIMIT' ? 'feed.pinLimit' : 'feed.pinError'));
   };
   const nextItem = (i: number) =>
     scroller.current?.querySelectorAll('[data-feed-item]')[i + 1]?.scrollIntoView({ behavior: 'smooth' });
@@ -580,6 +597,14 @@ export function VideoFeed({
                   <Link href={`/creator/${v.author.id}`} className="text-[16px] font-black hover:underline">
                     @{v.author.displayName}
                   </Link>
+                  {postOptions && v.aiGenerated ? (
+                    <span
+                      className="mt-1 w-fit rounded-full border border-white/25 bg-black/40 px-2 py-0.5 text-[11px] font-bold"
+                      data-testid="feed-ai-label"
+                    >
+                      ✨ {t('feed.aiLabel')}
+                    </span>
+                  ) : null}
                   {v.caption ? (
                     <p className="mt-1 line-clamp-3 text-[14px] text-white/85">
                       {v.caption.split(/(#[\p{L}\p{N}_]+)/u).map((part, k) =>
@@ -595,6 +620,13 @@ export function VideoFeed({
                           part
                         ),
                       )}
+                    </p>
+                  ) : null}
+                  {postOptions && (v.place || v.edited) ? (
+                    <p className="mt-1 text-[12px] text-white/70" data-testid="feed-place">
+                      {v.place ? `📍 ${v.place}` : null}
+                      {v.place && v.edited ? ' · ' : null}
+                      {v.edited ? t('feed.edited') : null}
                     </p>
                   ) : null}
                   {v.products.length > 0 ? (
@@ -822,6 +854,25 @@ export function VideoFeed({
               </button>
             ))}
           </div>
+        ) : null}
+        {postOptions && sheet?.video.mine ? (
+          <>
+            <button
+              type="button"
+              onClick={() => void pinProfile(sheet.video)}
+              className="mb-2 flex w-full items-center gap-2 border-b border-black/10 py-3 text-left font-bold"
+              data-testid="feed-pin-profile"
+            >
+              {t(sheet.video.profilePinned ? 'feed.unpinProfile' : 'feed.pinProfile')}
+            </button>
+            <Link
+              href={`/video/cua-toi/${sheet.video.id}/sua`}
+              className="mb-2 flex items-center gap-2 border-b border-black/10 py-3 font-bold"
+              data-testid="feed-edit-video"
+            >
+              {t('feed.editVideo')}
+            </Link>
+          </>
         ) : null}
         {tools && sheet ? (
           <button

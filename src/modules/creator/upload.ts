@@ -10,8 +10,9 @@ import { env } from '@/lib/env';
 import { resolveUploadPath } from '@/lib/media/image-store';
 import { getProductForCheckout } from '@/modules/kiot';
 import { extractHashtags } from './hashtags';
-import { isVisibility, type VideoOptions } from './visibility';
+import { isVisibility } from './visibility';
 import { hasCurrentCommitment } from '@/modules/identity';
+import { MAX_DRAFTS, normalizePlace, scheduleOk, type PostOptions } from './posting';
 
 export const MAX_VIDEO_BYTES = 100 * 1024 * 1024;
 export const MAX_VIDEOS_PER_DAY = 10;
@@ -88,7 +89,10 @@ export type CreateVideoResult =
         | 'PRODUCT_INVALID'
         | 'CAPTION_TOO_LONG'
         | 'DUET_INVALID'
-        | 'COMMITMENT_REQUIRED';
+        | 'COMMITMENT_REQUIRED'
+        | 'SCHEDULE_INVALID'
+        | 'PLACE_INVALID'
+        | 'DRAFT_LIMIT';
     };
 
 // Tạo video từ file đã tải lên (SPEC-creator.md mục 1). Video ở trạng thái processing cho tới khi worker xong.
@@ -100,7 +104,9 @@ export async function createVideoUpload(
     productIds: string[];
     kind?: 'video' | 'story';
     duetOfId?: string | null;
-    options?: VideoOptions; // quyền riêng tư, cho bình luận/Duet/tải về (SPEC-creator.md V5.3)
+    // Quyền riêng tư, cho bình luận/Duet/tải về, nháp, hẹn giờ, địa điểm, nhãn AI (SPEC-creator.md V5.3).
+    options?: PostOptions;
+    aiStudio?: boolean; // video làm từ AI Studio: luôn có nhãn AI, không gỡ được
   },
 ): Promise<CreateVideoResult> {
   // Phải đồng ý cam kết nội dung bản mới nhất (SPEC-identity.md V5.6).
@@ -119,6 +125,12 @@ export async function createVideoUpload(
   if (!(await looksLikeVideo(file))) return discard({ ok: false as const, error: 'BAD_FORMAT' as const });
   const caption = meta.caption.trim();
   if (caption.length > MAX_CAPTION) return { ok: false, error: 'CAPTION_TOO_LONG' };
+  // Nháp và hẹn giờ chỉ cho video thường (Story tự hết hạn sau 24 giờ).
+  const draft = kind === 'video' && meta.options?.draft === true;
+  const publishAt = kind === 'video' && !draft && meta.options?.publishAt ? meta.options.publishAt : null;
+  if (publishAt && !scheduleOk(publishAt)) return { ok: false, error: 'SCHEDULE_INVALID' };
+  const place = normalizePlace({ province: meta.options?.province, placeName: meta.options?.placeName });
+  if (!place) return { ok: false, error: 'PLACE_INVALID' };
 
   // Duet chỉ với video công khai còn cho phép Duet/Stitch (SPEC-creator.md V5.3).
   if (
@@ -144,6 +156,13 @@ export async function createVideoUpload(
       where: { authorId: userId, kind, createdAt: { gte: startOfVnDay() } },
     });
     if (today >= MAX_VIDEOS_PER_DAY) return discard({ ok: false as const, error: 'DAILY_LIMIT' as const });
+    if (
+      draft &&
+      (await tx.video.count({
+        where: { authorId: userId, draft: true, status: { in: ['processing', 'draft'] } },
+      })) >= MAX_DRAFTS
+    )
+      return { ok: false as const, error: 'DRAFT_LIMIT' as const };
     const video = await tx.video.create({
       data: {
         authorId: userId,
@@ -155,6 +174,12 @@ export async function createVideoUpload(
         allowComments: meta.options?.allowComments ?? true,
         allowRemix: meta.options?.allowRemix ?? true,
         allowDownload: meta.options?.allowDownload ?? true,
+        draft,
+        publishAt,
+        province: place.province ?? null,
+        placeName: place.placeName ?? null,
+        aiGenerated: meta.aiStudio === true || meta.options?.aiGenerated === true,
+        aiStudio: meta.aiStudio === true,
         createdAt: now(),
         products: { create: productIds.map((productId, position) => ({ productId, position })) },
       },

@@ -53,7 +53,7 @@ export async function reportVideo(
   return { ok: true, autoHidden: true };
 }
 
-async function removeFiles(v: { fileUrl: string | null; posterUrl: string | null }) {
+export async function removeVideoFiles(v: { fileUrl: string | null; posterUrl: string | null }) {
   const store = imageStore();
   await Promise.all([v.fileUrl && store.remove(v.fileUrl), v.posterUrl && store.remove(v.posterUrl)]);
 }
@@ -68,7 +68,7 @@ export async function deleteVideo(videoId: string, userId: string): Promise<Vide
     where: { id: videoId },
     data: { status: 'deleted', fileUrl: null, posterUrl: null },
   });
-  await removeFiles(video);
+  await removeVideoFiles(video);
   return { ok: true };
 }
 

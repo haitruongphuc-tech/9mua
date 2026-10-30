@@ -40,6 +40,7 @@ export const profile = {
   'profile.creator': 'Creator trên 9MUA',
   'profile.myVideos': 'Video của tôi',
   'profile.noCreatorVideos': 'Chưa có video.',
+  'profile.pinned': '📌 Ghim',
   'profile.edit.button': 'Sửa hồ sơ',
   'profile.edit.title': 'Sửa hồ sơ',
   'profile.edit.back': '← Trang cá nhân',

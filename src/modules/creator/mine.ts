@@ -18,6 +18,11 @@ export type MyVideo = {
   comments: number; // không tính bình luận đã bị ẩn
   saves: number;
   createdAt: Date;
+  // SPEC-creator.md V5.3
+  draft: boolean;
+  publishAt: Date | null;
+  profilePinned: boolean;
+  edited: boolean;
 };
 
 // Thống kê của tôi (SPEC-creator.md mục 8, bổ sung 30/10 A4). Đơn đếm theo OrderItem.sourceVideoId, cùng cách tính
@@ -65,5 +70,9 @@ export async function myVideoStats(userId: string): Promise<MyVideo[]> {
     comments: commentCount.get(v.id) ?? 0,
     saves: saveCount.get(v.id) ?? 0,
     createdAt: v.createdAt,
+    draft: v.draft,
+    publishAt: v.publishAt,
+    profilePinned: v.profilePinnedAt !== null,
+    edited: v.editedAt !== null,
   }));
 }

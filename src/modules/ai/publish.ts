@@ -76,6 +76,11 @@ async function postSlideshow(
   if (!file) return { ok: false, error: 'NOT_READY' };
   const upload = await saveUpload(userId, createReadStream(file));
   if (!upload.ok) return upload;
-  const created = await createVideoUpload(userId, upload.uploadId, { caption, productIds: [productId] });
+  // Video làm từ AI Studio luôn có nhãn "Nội dung tạo bằng AI", không gỡ được (SPEC-creator.md V5.3).
+  const created = await createVideoUpload(userId, upload.uploadId, {
+    caption,
+    productIds: [productId],
+    aiStudio: true,
+  });
   return created.ok ? { ok: true, videoId: created.videoId } : created;
 }

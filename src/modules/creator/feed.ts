@@ -6,6 +6,7 @@ import { activePinIds, addPin } from '@/lib/pins';
 import { kiotOrigin } from '@/lib/urls';
 import { getProductForCheckout, productPath } from '@/modules/kiot';
 import { feedScore } from './score';
+import { visibleToSql } from './visibility';
 
 export type Viewer = { userId?: string; anonId?: string };
 
@@ -35,6 +36,8 @@ const MAX_SERVED_IN_CURSOR = 300;
 
 // Video được lên feed: đã xử lý xong, không phải Story 24 giờ, và tài khoản người đăng không bị khoá.
 const VISIBLE = Prisma.sql`v.status = 'ready' AND v.kind = 'video' AND u."lockedAt" IS NULL`;
+// Feed Dành cho bạn, video ghim: chỉ video công khai (SPEC-creator.md V5.3).
+const PUBLIC = Prisma.sql`${VISIBLE} AND v.visibility = 'public'`;
 
 type Row = { id: string };
 
@@ -73,11 +76,11 @@ export async function getFeed(
   const [top, fresh] = await Promise.all([
     db.$queryRaw<Row[]>`
       SELECT v.id FROM "Video" v JOIN "User" u ON u.id = v."authorId"
-      WHERE ${VISIBLE} ${notServed} ${seenFilter} ${notBlocked}
+      WHERE ${PUBLIC} ${notServed} ${seenFilter} ${notBlocked}
       ORDER BY v.score DESC, v."readyAt" DESC LIMIT ${limit}`,
     db.$queryRaw<Row[]>`
       SELECT v.id FROM "Video" v JOIN "User" u ON u.id = v."authorId"
-      WHERE ${VISIBLE} ${notServed} ${seenFilter} ${notBlocked}
+      WHERE ${PUBLIC} ${notServed} ${seenFilter} ${notBlocked}
       ORDER BY v."readyAt" DESC LIMIT ${limit}`,
   ]);
 
@@ -104,7 +107,7 @@ export async function getFeed(
     const taken = ids.length ? Prisma.sql`AND NOT (v.id = ANY(${ids}))` : Prisma.empty;
     const seen = await db.$queryRaw<Row[]>`
       SELECT v.id FROM "Video" v JOIN "User" u ON u.id = v."authorId"
-      WHERE ${VISIBLE} ${notServed} ${taken} ${notBlocked}
+      WHERE ${PUBLIC} ${notServed} ${taken} ${notBlocked}
       ORDER BY v.score DESC, v."readyAt" DESC LIMIT ${limit - ids.length}`;
     ids.push(...seen.map((r) => r.id));
   }
@@ -115,7 +118,7 @@ export async function getFeed(
     if (pinned.length) {
       const ok = await db.$queryRaw<Row[]>`
         SELECT v.id FROM "Video" v JOIN "User" u ON u.id = v."authorId"
-        WHERE ${VISIBLE} AND v.id = ANY(${pinned}) ${notBlocked}`;
+        WHERE ${PUBLIC} AND v.id = ANY(${pinned}) ${notBlocked}`;
       const okSet = new Set(ok.map((r) => r.id));
       const head = pinned.filter((id) => okSet.has(id));
       for (let i = ids.length - 1; i >= 0; i--) if (head.includes(ids[i]!)) ids.splice(i, 1);
@@ -126,7 +129,7 @@ export async function getFeed(
   if (options.first && !served.length) {
     const first = await db.$queryRaw<Row[]>`
       SELECT v.id FROM "Video" v JOIN "User" u ON u.id = v."authorId"
-      WHERE ${VISIBLE} AND v.id = ${options.first} ${notBlocked}`;
+      WHERE ${VISIBLE} AND v.id = ${options.first} ${notBlocked} AND ${visibleToSql(viewer.userId)}`;
     if (first[0]) ids.unshift(first[0].id);
   }
 
@@ -208,7 +211,8 @@ export async function hydrateVideos(ids: string[], viewer: Viewer): Promise<Feed
 export async function getVideo(videoId: string, viewer: Viewer): Promise<FeedVideo | null> {
   const rows = await db.$queryRaw<Row[]>`
     SELECT v.id FROM "Video" v JOIN "User" u ON u.id = v."authorId"
-    WHERE ${VISIBLE} AND v.id = ${videoId} AND ${notBlockedWith(viewer.userId, Prisma.sql`v."authorId"`)}`;
+    WHERE ${VISIBLE} AND v.id = ${videoId} AND ${notBlockedWith(viewer.userId, Prisma.sql`v."authorId"`)}
+      AND ${visibleToSql(viewer.userId)}`;
   return rows[0] ? ((await hydrateVideos([rows[0].id], viewer))[0] ?? null) : null;
 }
 
@@ -241,7 +245,7 @@ export async function pinVideo(
   until: Date | null,
 ): Promise<{ ok: true } | { ok: false; error: 'NOT_FOUND' | 'FULL' | 'EXISTS' }> {
   const rows = await db.$queryRaw<Row[]>`
-    SELECT v.id FROM "Video" v JOIN "User" u ON u.id = v."authorId" WHERE ${VISIBLE} AND v.id = ${videoId}`;
+    SELECT v.id FROM "Video" v JOIN "User" u ON u.id = v."authorId" WHERE ${PUBLIC} AND v.id = ${videoId}`;
   if (!rows[0]) return { ok: false, error: 'NOT_FOUND' };
   return addPin('video', videoId, adminId, until);
 }

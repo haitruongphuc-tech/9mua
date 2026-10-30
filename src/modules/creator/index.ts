@@ -43,3 +43,13 @@ export {
 export { getCreatorProfile, getHotVideos, type CreatorProfile, type VideoThumb } from './profile';
 export { searchVideos } from './search';
 export { creatorStats, type CreatorStats } from './stats';
+// Bổ sung 30/10/2026 (SPEC-creator.md V5.3): quyền riêng tư từng video.
+export {
+  canViewVideo,
+  setVideoOptions,
+  visibleToSql,
+  VISIBILITIES,
+  isVisibility,
+  type Visibility,
+  type VideoOptions,
+} from './visibility';

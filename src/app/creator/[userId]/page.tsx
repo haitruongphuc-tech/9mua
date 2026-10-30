@@ -4,9 +4,9 @@ import { cache } from 'react';
 import { CreatorProfileView } from '@/components/profile/CreatorProfileView';
 import { isFeatureOn } from '@/lib/features';
 import { getCreatorProfile } from '@/modules/creator';
-import { ensureHandle } from '@/modules/identity';
+import { ensureHandle, getCurrentUser } from '@/modules/identity';
 
-const load = cache(getCreatorProfile);
+const load = cache(async (userId: string) => getCreatorProfile(userId, (await getCurrentUser())?.id));
 
 export async function generateMetadata({
   params,

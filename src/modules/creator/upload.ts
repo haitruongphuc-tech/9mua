@@ -10,6 +10,7 @@ import { env } from '@/lib/env';
 import { resolveUploadPath } from '@/lib/media/image-store';
 import { getProductForCheckout } from '@/modules/kiot';
 import { extractHashtags } from './hashtags';
+import { isVisibility, type VideoOptions } from './visibility';
 
 export const MAX_VIDEO_BYTES = 100 * 1024 * 1024;
 export const MAX_VIDEOS_PER_DAY = 10;
@@ -92,7 +93,13 @@ export type CreateVideoResult =
 export async function createVideoUpload(
   userId: string,
   uploadId: string,
-  meta: { caption: string; productIds: string[]; kind?: 'video' | 'story'; duetOfId?: string | null },
+  meta: {
+    caption: string;
+    productIds: string[];
+    kind?: 'video' | 'story';
+    duetOfId?: string | null;
+    options?: VideoOptions; // quyền riêng tư, cho bình luận/Duet/tải về (SPEC-creator.md V5.3)
+  },
 ): Promise<CreateVideoResult> {
   const kind = meta.kind === 'story' ? 'story' : 'video';
   // Duet chỉ với video thường đang trên feed (không Duet Story, không Duet chính Story).
@@ -109,7 +116,13 @@ export async function createVideoUpload(
   const caption = meta.caption.trim();
   if (caption.length > MAX_CAPTION) return { ok: false, error: 'CAPTION_TOO_LONG' };
 
-  if (duetOfId && !(await db.video.count({ where: { id: duetOfId, status: 'ready', kind: 'video' } })))
+  // Duet chỉ với video công khai còn cho phép Duet/Stitch (SPEC-creator.md V5.3).
+  if (
+    duetOfId &&
+    !(await db.video.count({
+      where: { id: duetOfId, status: 'ready', kind: 'video', visibility: 'public', allowRemix: true },
+    }))
+  )
     return { ok: false, error: 'DUET_INVALID' };
 
   const productIds = [...new Set(meta.productIds.filter(Boolean))];
@@ -134,6 +147,10 @@ export async function createVideoUpload(
         hashtags: extractHashtags(caption),
         kind,
         duetOfId,
+        visibility: isVisibility(meta.options?.visibility) ? meta.options.visibility : 'public',
+        allowComments: meta.options?.allowComments ?? true,
+        allowRemix: meta.options?.allowRemix ?? true,
+        allowDownload: meta.options?.allowDownload ?? true,
         createdAt: now(),
         products: { create: productIds.map((productId, position) => ({ productId, position })) },
       },

@@ -45,8 +45,10 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function SharedVideoPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  if (!(await loadVideo(id))) notFound();
   const user = await getCurrentUser();
+  // Video "người follow" / "chỉ mình tôi" chỉ mở cho người được xem (SPEC-creator.md V5.3); thẻ Open Graph chỉ có
+  // cho video công khai (loadVideo dùng người xem rỗng).
+  if (!(await getVideo(id, { userId: user?.id }))) notFound();
   const feed = await loadFeed({ userId: user?.id, anonId: await readAnonId() }, { first: id });
   return (
     <ClientMessages prefixes={['feed.']}>

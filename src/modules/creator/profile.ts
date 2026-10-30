@@ -21,23 +21,27 @@ export type CreatorProfile = {
 };
 
 // Trang creator (SPEC-creator.md mục 7). Tài khoản bị khoá thì không có trang.
-export async function getCreatorProfile(userId: string): Promise<CreatorProfile | null> {
+// viewerId: người đang xem — chủ trang thấy mọi video; người follow thấy thêm video "người follow"; người khác chỉ thấy
+// video công khai (SPEC-creator.md V5.3).
+export async function getCreatorProfile(
+  userId: string,
+  viewerId?: string | null,
+): Promise<CreatorProfile | null> {
   const user = await db.user.findUnique({
     where: { id: userId },
     select: { id: true, displayName: true, avatarUrl: true, coverUrl: true, bio: true, lockedAt: true },
   });
   if (!user || user.lockedAt) return null;
+  const follower =
+    viewerId && viewerId !== userId
+      ? (await db.follow.count({ where: { followerId: viewerId, followeeId: userId } })) > 0
+      : false;
+  const visibility =
+    viewerId === userId ? undefined : { in: follower ? ['public', 'followers'] : ['public'] };
+  const where = { authorId: userId, status: 'ready', kind: 'video', visibility };
   const [videos, agg] = await Promise.all([
-    db.video.findMany({
-      where: { authorId: userId, status: 'ready', kind: 'video' },
-      orderBy: { readyAt: 'desc' },
-      take: 60,
-    }),
-    db.video.aggregate({
-      where: { authorId: userId, status: 'ready', kind: 'video' },
-      _count: true,
-      _sum: { likes: true },
-    }),
+    db.video.findMany({ where, orderBy: { readyAt: 'desc' }, take: 60 }),
+    db.video.aggregate({ where, _count: true, _sum: { likes: true } }),
   ]);
   return {
     id: user.id,
@@ -61,7 +65,7 @@ export async function getCreatorProfile(userId: string): Promise<CreatorProfile 
 // Khối "Video hot" trên trang chủ: điểm feed cao nhất, chỉ video đang hiện của tài khoản không bị khoá.
 export async function getHotVideos(limit = 8): Promise<VideoThumb[]> {
   const rows = await db.video.findMany({
-    where: { status: 'ready', kind: 'video', fileUrl: { not: null } },
+    where: { status: 'ready', kind: 'video', visibility: 'public', fileUrl: { not: null } },
     orderBy: [{ score: 'desc' }, { readyAt: 'desc' }],
     take: limit * 3,
   });

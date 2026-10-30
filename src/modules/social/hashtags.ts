@@ -11,7 +11,7 @@ export async function hashtagVideos(tag: string, viewer: Viewer, take = 60): Pro
   const t = normalizeTag(tag);
   if (!t) return [];
   const rows = await db.video.findMany({
-    where: { status: 'ready', kind: 'video', hashtags: { has: t } },
+    where: { status: 'ready', kind: 'video', visibility: 'public', hashtags: { has: t } },
     orderBy: [{ score: 'desc' }, { readyAt: 'desc' }],
     take,
     select: { id: true },
@@ -26,7 +26,7 @@ export async function trendingHashtags(limit = 10): Promise<{ tag: string; video
   const since = new Date(now().getTime() - 7 * 86_400_000);
   const rows = await db.$queryRaw<{ tag: string; videos: number }[]>`
     SELECT tag, COUNT(*)::int AS videos FROM "Video" v, unnest(v.hashtags) AS tag
-    WHERE v.status = 'ready' AND v.kind = 'video' AND v."readyAt" >= ${since}
+    WHERE v.status = 'ready' AND v.kind = 'video' AND v.visibility = 'public' AND v."readyAt" >= ${since}
     GROUP BY tag ORDER BY videos DESC, tag ASC LIMIT ${limit}`;
   return rows;
 }
@@ -41,6 +41,7 @@ export async function searchHashtags(
   return db.$queryRaw<{ tag: string; videos: number }[]>`
     SELECT tag, COUNT(*)::int AS videos
     FROM "Video" v JOIN "User" u ON u.id = v."authorId", unnest(v.hashtags) AS tag
-    WHERE v.status = 'ready' AND v.kind = 'video' AND u."lockedAt" IS NULL AND tag LIKE ${`%${q}%`}
+    WHERE v.status = 'ready' AND v.kind = 'video' AND v.visibility = 'public' AND u."lockedAt" IS NULL
+      AND tag LIKE ${`%${q}%`}
     GROUP BY tag ORDER BY videos DESC, tag ASC LIMIT ${limit}`;
 }

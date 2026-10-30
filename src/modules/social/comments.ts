@@ -2,6 +2,7 @@ import { now } from '@/lib/clock';
 import { blockedEitherIds, isBlockedEither } from '@/lib/blocks';
 import { db } from '@/lib/db';
 import { notifyKey } from '@/lib/notifications';
+import { canViewVideo } from '@/modules/creator';
 import { hasLink } from './links';
 
 // Bình luận video (SPEC-social.md mục 3).
@@ -20,7 +21,8 @@ export type CommentView = {
   replies: Omit<CommentView, 'replies'>[];
 };
 
-type AddError = 'TOO_LONG' | 'EMPTY' | 'HAS_LINK' | 'RATE_LIMIT' | 'DAILY_LIMIT' | 'NOT_FOUND' | 'BLOCKED';
+type AddError =
+  'TOO_LONG' | 'EMPTY' | 'HAS_LINK' | 'RATE_LIMIT' | 'DAILY_LIMIT' | 'NOT_FOUND' | 'BLOCKED' | 'COMMENTS_OFF';
 
 export async function addComment(
   userId: string,
@@ -34,10 +36,13 @@ export async function addComment(
   if (hasLink(text)) return { ok: false, error: 'HAS_LINK' };
   const video = await db.video.findFirst({
     where: { id: videoId, status: 'ready' },
-    select: { id: true, authorId: true },
+    select: { id: true, authorId: true, allowComments: true },
   });
   if (!video) return { ok: false, error: 'NOT_FOUND' };
   if (await isBlockedEither(userId, video.authorId)) return { ok: false, error: 'BLOCKED' };
+  if (!(await canViewVideo(videoId, userId))) return { ok: false, error: 'NOT_FOUND' };
+  // Chủ video tắt bình luận (SPEC-creator.md V5.3).
+  if (!video.allowComments) return { ok: false, error: 'COMMENTS_OFF' };
   // Trả lời 1 cấp: trả lời một câu trả lời thì gắn vào bình luận gốc.
   let rootId: string | null = null;
   let parentAuthor: string | null = null;

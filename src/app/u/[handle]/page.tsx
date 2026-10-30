@@ -4,7 +4,7 @@ import { cache } from 'react';
 import { CreatorProfileView } from '@/components/profile/CreatorProfileView';
 import { isFeatureOn } from '@/lib/features';
 import { getCreatorProfile } from '@/modules/creator';
-import { resolveHandle } from '@/modules/identity';
+import { getCurrentUser, resolveHandle } from '@/modules/identity';
 
 // Trang cá nhân 9mua.com/@<tên> (SPEC-identity.md V5.1). Middleware viết lại /@<tên> thành /u/<tên> vì thư mục bắt đầu
 // bằng "@" trong app router là "slot", không dùng làm đường dẫn được.
@@ -13,7 +13,7 @@ const load = cache(async (raw: string) => {
   const found = await resolveHandle(raw);
   if (!found) return null;
   if ('redirectTo' in found) return found;
-  const profile = await getCreatorProfile(found.userId);
+  const profile = await getCreatorProfile(found.userId, (await getCurrentUser())?.id);
   return profile ? { profile } : null;
 });
 

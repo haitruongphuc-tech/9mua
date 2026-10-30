@@ -588,6 +588,11 @@ model Video {
   kind           String         @default("video") // video | story
   expiresAt      DateTime?
   duetOfId       String?
+  // Quyền riêng tư từng video (SPEC-creator.md V5.3): public | followers | private. Video cũ là public.
+  visibility     String         @default("public")
+  allowComments  Boolean        @default(true)
+  allowRemix     Boolean        @default(true) // Duet, Stitch, dùng âm thanh
+  allowDownload  Boolean        @default(true)
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
   products       VideoProduct[]

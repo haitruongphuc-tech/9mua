@@ -3,6 +3,7 @@
 import { Repeat2 } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
+import { useFeature } from '@/components/MeProvider';
 import { useT } from '@/i18n/client';
 import { formatVnd } from '@/lib/format';
 import type { PickableProduct } from '@/app/api/video/products/route';
@@ -55,6 +56,10 @@ export function VideoUploadForm({
   const [progress, setProgress] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const preview = useRef<HTMLVideoElement>(null);
+  // Quyền riêng tư và tuỳ chọn khi đăng (SPEC-creator.md V5.3, công tắc post_options).
+  const postOptions = useFeature('post_options');
+  const [visibility, setVisibility] = useState<'public' | 'followers' | 'private'>('public');
+  const [allow, setAllow] = useState({ allowComments: true, allowRemix: true, allowDownload: true });
 
   useEffect(() => {
     const controller = new AbortController();
@@ -104,6 +109,7 @@ export function VideoUploadForm({
       productIds: picked.map((p) => p.id),
       kind: mode,
       duetOfId: duet?.id ?? null,
+      options: postOptions && mode === 'video' ? { visibility, ...allow } : undefined,
     });
     setProgress(null);
     if (result?.error) setError(result.error);
@@ -200,6 +206,40 @@ export function VideoUploadForm({
           data-testid="video-caption"
         />
       </label>
+      {postOptions && mode === 'video' ? (
+        <fieldset className="flex flex-col gap-2" data-testid="video-privacy">
+          <legend className="mb-1 text-[12px] font-bold text-white/70">{t('post.privacy')}</legend>
+          <div className="flex flex-wrap gap-2" role="radiogroup">
+            {(['public', 'followers', 'private'] as const).map((v) => (
+              <button
+                key={v}
+                type="button"
+                role="radio"
+                aria-checked={visibility === v}
+                onClick={() => setVisibility(v)}
+                className={`h-9 rounded-full border px-4 text-[12px] font-bold ${
+                  visibility === v
+                    ? 'border-brand bg-brand text-white'
+                    : 'border-white/15 bg-white/5 text-white/70'
+                }`}
+              >
+                {t(`post.visibility.${v}`)}
+              </button>
+            ))}
+          </div>
+          {(['allowComments', 'allowRemix', 'allowDownload'] as const).map((k) => (
+            <label key={k} className="flex items-center gap-2 text-[13px]">
+              <input
+                type="checkbox"
+                checked={allow[k]}
+                onChange={(e) => setAllow((a) => ({ ...a, [k]: e.target.checked }))}
+                className="h-4 w-4 accent-[#ff6b00]"
+              />
+              {t(`post.${k}`)}
+            </label>
+          ))}
+        </fieldset>
+      ) : null}
       <fieldset className="flex flex-col gap-2">
         <legend className="mb-1 text-[12px] font-bold text-white/70">
           {t('post.products', { count: picked.length })}

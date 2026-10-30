@@ -24,7 +24,10 @@ export default async function NotificationsPage() {
     const detail = vars.detail ? String(vars.detail) : '';
     return {
       title: t(n.title.slice(1) as MessageKey, vars),
-      body: detail && n.title === '@notify.videoRemoved' ? t('notify.reason', { reason: detail }) : detail,
+      body:
+        detail && (n.title === '@notify.videoRemoved' || n.title === '@notify.profileCleared')
+          ? t('notify.reason', { reason: detail })
+          : detail,
     };
   };
   return (

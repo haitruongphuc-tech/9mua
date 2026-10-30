@@ -7,6 +7,7 @@ export const feed: FeedMessages = {
   'feed.emptyFollowing': '你还没有关注任何人',
   'feed.seeForYou': '看看推荐',
   'feed.post': '+ 发布视频',
+  'feed.postShort': "发布",
   'feed.close': '关闭',
   'feed.unmute': '点击开启声音',
   'feed.pinned': '📌 置顶',

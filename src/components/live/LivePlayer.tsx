@@ -257,6 +257,7 @@ export function LivePlayer({
 
   const visibleChat = chat.filter((c) => !hidden.includes(c.id));
   const initial = (view.host.kiot?.name ?? view.host.displayName).trim().charAt(0).toUpperCase();
+  const hostImage = view.host.kiot ? view.host.kiot.logoUrl : view.host.avatarUrl;
 
   return (
     <div className="relative h-full w-full overflow-hidden bg-black" data-testid="live-player">
@@ -279,9 +280,10 @@ export function LivePlayer({
           className="flex min-w-0 items-center gap-2 rounded-full bg-black/50 py-0.5 pl-0.5 pr-3"
         >
           <span className="relative grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full border-2 border-red-500 bg-brand font-black">
-            {view.host.kiot?.logoUrl ? (
+            {/* Người phát có Kiot thì hiện logo Kiot; không có Kiot thì ảnh đại diện (SPEC-social.md bổ sung 30/10, A2). */}
+            {hostImage ? (
               <Image
-                src={view.host.kiot.logoUrl}
+                src={hostImage}
                 alt=""
                 fill
                 sizes="36px"

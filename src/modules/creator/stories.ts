@@ -4,7 +4,10 @@ import { imageStore } from '@/lib/media/image-store';
 
 // Story 24 giờ (SPEC-creator.md bổ sung 27/10): mỗi người một vòng tròn, Story mới nhất trước.
 export type StoryItem = { id: string; fileUrl: string; posterUrl: string | null; caption: string };
-export type StoryGroup = { author: { id: string; displayName: string }; items: StoryItem[] };
+export type StoryGroup = {
+  author: { id: string; displayName: string; avatarUrl: string | null };
+  items: StoryItem[];
+};
 
 export async function listStories(limitAuthors = 30): Promise<StoryGroup[]> {
   const rows = await db.video.findMany({
@@ -15,7 +18,7 @@ export async function listStories(limitAuthors = 30): Promise<StoryGroup[]> {
   });
   const authors = await db.user.findMany({
     where: { id: { in: [...new Set(rows.map((r) => r.authorId))] }, lockedAt: null },
-    select: { id: true, displayName: true },
+    select: { id: true, displayName: true, avatarUrl: true },
   });
   const byId = new Map(authors.map((a) => [a.id, a]));
   const groups = new Map<string, StoryGroup & { latest: number }>();

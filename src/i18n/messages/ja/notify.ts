@@ -8,6 +8,7 @@ export const notify: NotifyMessages = {
   'notify.videoReady': '動画の投稿が完了しました',
   'notify.videoFailed': '動画を投稿できませんでした',
   'notify.videoRemoved': '動画が削除されました',
+  'notify.profileCleared': "規約違反のため、プロフィール写真・カバー写真・自己紹介が削除されました",
   'notify.reason': '理由：{reason}',
   'notify.title': 'お知らせ',
   'notify.empty': 'お知らせはまだありません。',

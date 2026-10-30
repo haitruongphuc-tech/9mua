@@ -49,9 +49,11 @@ export function Card({ title, id, children }: { title: string; id: string; child
   );
 }
 
-export function ProfileForm({ displayName }: { displayName: string }) {
+// Tên hiển thị + giới thiệu (trang Sửa hồ sơ, SPEC-social.md bổ sung 30/10, A2).
+export function ProfileForm({ displayName, bio }: { displayName: string; bio: string | null }) {
   const t = useT();
   const [state, action] = useActionState<FormState, FormData>(updateProfileAction, {});
+  const [text, setText] = useState(bio ?? '');
   useEffect(() => {
     if (state.ok) window.dispatchEvent(new Event(ME_CHANGED_EVENT));
   }, [state]);
@@ -67,6 +69,19 @@ export function ProfileForm({ displayName }: { displayName: string }) {
           defaultValue={displayName}
           required
         />
+        <label className="flex flex-col gap-1.5 text-[12px] font-bold text-white/70" htmlFor="profile-bio">
+          {t('profile.edit.bio', { count: [...text].length, max: 160 })}
+          <textarea
+            id="profile-bio"
+            name="bio"
+            rows={4}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder={t('profile.edit.bioPlaceholder')}
+            className="rounded-[14px] border border-white/15 bg-white/10 p-3 text-[14px] font-normal text-white outline-none placeholder:text-white/40 focus:border-brand"
+          />
+          <span className="font-normal text-white/50">{t('profile.edit.bioHint')}</span>
+        </label>
         <SubmitButton tone="v4" pendingText={t('me.settings.saving')}>
           {t('me.settings.save')}
         </SubmitButton>

@@ -40,12 +40,12 @@ export async function validateSessionToken(token: string): Promise<ValidatedSess
     await db.session.update({ where: { id: session.id }, data: { expiresAt } });
   }
 
-  const { id, displayName, role, phone, email, mustChangePassword } = session.user;
+  const { id, displayName, avatarUrl, role, phone, email, mustChangePassword } = session.user;
   return {
     sessionId: session.id,
     expiresAt,
     renewed,
-    user: { id, displayName, role, phone, email, mustChangePassword },
+    user: { id, displayName, avatarUrl, role, phone, email, mustChangePassword },
   };
 }
 

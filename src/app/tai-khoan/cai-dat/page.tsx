@@ -5,7 +5,7 @@ import { ClientMessages } from '@/i18n/ClientMessages';
 import { getT } from '@/i18n/server';
 import { requireUser } from '@/modules/identity';
 import { EmailOtpForm } from '@/components/auth/EmailOtpForm';
-import { Card, EmailForm, PasswordForm, ProfileForm, SetPasswordForm } from '../AccountForms';
+import { Card, EmailForm, PasswordForm, SetPasswordForm } from '../AccountForms';
 
 export const metadata: Metadata = { title: 'Cài đặt tài khoản', robots: { index: false } };
 
@@ -26,7 +26,16 @@ export default async function AccountSettingsPage({
           </Link>
           <h1 className="font-display text-[22px] font-black">{t('me.settings.title')}</h1>
           {user.mustChangePassword ? <PasswordForm forced /> : null}
-          <ProfileForm displayName={user.displayName} />
+          {/* Tên, ảnh, giới thiệu chuyển sang trang Sửa hồ sơ (SPEC-social.md bổ sung 30/10, A2). */}
+          <Card title={t('me.settings.info')} id="thong-tin">
+            <p className="text-[13px] text-white/60">{t('me.settings.profileHint')}</p>
+            <Link
+              href="/tai-khoan/ho-so"
+              className="h-11 rounded-full bg-white/10 text-center text-[14px] font-black leading-[44px]"
+            >
+              {t('profile.edit.button')} →
+            </Link>
+          </Card>
           {user.email ? (
             <EmailForm email={user.email} />
           ) : (

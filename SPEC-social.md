@@ -103,3 +103,137 @@ revokeVoucher(voucherId, adminId, reason): Promise<void>   // cho admin
 ## Bổ sung 29/10/2026
 
 - Tin nhắn riêng giữa người dùng: CEO đã duyệt, xem `SPEC-messages.md`. `social` thêm hàm `followRelation(a, b)` cho module đó.
+
+## Bổ sung 30/10/2026 — Đợt A: trang cá nhân, tìm kiếm, nút Đăng, thống kê creator
+
+> **Trạng thái: CEO duyệt qua chat 30/10/2026 ("duyet").** CEO đã chốt qua chat 30/10:
+> - làm theo đợt, bắt đầu Đợt A;
+> - **cho phép thêm 3 cột trống vào bảng `User`**;
+> - hàng "Creator nổi bật" để sau;
+> - hoa hồng creator là Đợt E, có spec tiền riêng.
+>
+> Các đợt sau: B (bài chữ + ảnh, cảm xúc, đăng lại), C (chỉnh video, nhạc nền), D (nhóm), E (hoa hồng).
+
+### A1. Nút "＋ Đăng" rõ ràng
+
+- Trên feed Trang chủ `/` và `/video`, nút tròn "＋" nhỏ ở góc trên phải đổi thành nút **"＋ Đăng"** có chữ, màu cam,
+  cao 36px, dẫn tới `/video/dang`.
+- Chưa đăng nhập: bấm vào thì tới trang đăng nhập, xong quay về `/video/dang` (như hiện nay).
+
+### A2. Trang cá nhân đầy đủ `/creator/<id>`
+
+Giữ nguyên đường dẫn để link đã chia sẻ không hỏng.
+
+- **Ảnh bìa** (tỉ lệ 3:1) và **ảnh đại diện** tròn. Chưa có ảnh đại diện thì hiện chữ cái đầu như nay; chưa có ảnh bìa
+  thì hiện nền màu.
+- **Giới thiệu** tối đa 160 ký tự, tối đa 4 dòng, **không cho link** (giống bình luận).
+- Giữ các phần đang có: số người theo dõi, đang theo dõi, video, lượt thích, nút Theo dõi, Nhắn tin, link mạng xã hội.
+- Bấm vào số **Người theo dõi** hoặc **Đang theo dõi** thì mở danh sách: ảnh, tên, bấm vào là tới trang cá nhân đó.
+  - Mới theo dõi hiện trước; mỗi trang 30 người.
+  - Không hiện tài khoản bị khoá.
+- Chủ trang thấy nút **"Sửa hồ sơ"**, mở trang `/tai-khoan/ho-so`. Ở đó sửa được:
+  - ảnh đại diện;
+  - ảnh bìa;
+  - tên hiển thị (cùng quy tắc tên hiện nay);
+  - giới thiệu.
+
+  Ảnh nào cũng xoá được.
+- **Xử lý ảnh** (giống ảnh sản phẩm):
+  - Nhận JPG, PNG, WebP tối đa 10MB, kiểm tra bằng nội dung file thật.
+  - Xoay đúng chiều và bỏ hết thông tin ẩn trong ảnh (vị trí GPS…).
+  - Ảnh đại diện cắt vuông ở giữa, lưu WebP 400×400. Ảnh bìa cắt 3:1, lưu WebP 1200×400.
+  - Đổi ảnh mới thì xoá file ảnh cũ.
+  - Mỗi người đổi ảnh tối đa 20 lần mỗi ngày.
+- **Nơi hiện ảnh đại diện:**
+  - trang cá nhân, nút tài khoản trên header, trang Tôi;
+  - tên người đăng trên video;
+  - bình luận;
+  - Hộp thư (danh sách và phòng chat);
+  - chủ phòng Live, hàng tròn Live/Story.
+
+  Kiot vẫn dùng logo/chữ của Kiot như cũ.
+- **CEO gỡ được** ảnh đại diện, ảnh bìa và giới thiệu vi phạm của một tài khoản:
+  - làm trong trang `/admin` tra cứu tài khoản, phải ghi lý do;
+  - có ghi audit log;
+  - người dùng nhận thông báo.
+
+### A3. Tìm kiếm `/tim-kiem?q=`
+
+- Ô tìm trên header (máy tính) và nút kính lúp (điện thoại) chuyển tới `/tim-kiem` thay cho `/cho`. Trang Chợ vẫn giữ
+  ô tìm sản phẩm riêng.
+- Các tab:
+  - **Tất cả:** 3 tài khoản, 6 video, 5 hashtag, 6 sản phẩm. Mỗi nhóm có nút "Xem thêm" mở tab của nhóm đó.
+  - **Tài khoản**, **Video**, **Hashtag:** mỗi tab hiện tối đa 30 kết quả.
+  - **Sản phẩm:** tối đa 30 kết quả, có thêm nút "Xem tất cả trong Chợ" (`/cho?q=`).
+- Tìm **không cần dấu, không phân biệt hoa thường**. Ví dụ "thanh long" tìm ra "Thanh Long".
+- Thứ tự kết quả:
+  - **Tài khoản:** theo tên hiển thị. Tên bắt đầu bằng từ khoá xếp trước, sau đó người có nhiều người theo dõi xếp
+    trước. Không hiện tài khoản bị khoá và tài khoản admin (CEO), để kẻ xấu không tìm ra tài khoản quản trị.
+  - **Video:** tìm theo chú thích và hashtag. Chỉ video đang được hiện trên feed (đã đăng, không phải Story, tài khoản
+    không bị khoá). Xếp theo điểm feed.
+  - **Hashtag:** tìm theo tên, kèm số video, nhiều video xếp trước.
+  - **Sản phẩm:** dùng đúng cách tìm của Chợ.
+- Ô tìm trống thì hiện gợi ý: 10 hashtag nổi bật (đã có).
+- Từ khoá tối đa 100 ký tự. Trang không bị Google lập chỉ mục (`noindex`).
+
+### A4. Thống kê cho creator (đầu trang `/video/cua-toi`)
+
+- Chọn **7 ngày** hoặc **30 ngày** (theo giờ Việt Nam). Tất cả là số thật, lấy từ dữ liệu đang có:
+  - **Lượt xem:** mỗi người xem tính 1 lần mỗi ngày.
+  - **Lượt thích mới.**
+  - **Bình luận mới:** không tính bình luận đã bị ẩn.
+  - **Người theo dõi mới:** số người đang theo dõi bắt đầu trong khoảng đó.
+  - **Đơn hàng từ video:** đếm các đơn đã thanh toán có món được thêm từ video của mình. Không tính đơn huỷ, đơn đang
+    hoàn tiền hoặc đã hoàn tiền.
+  - **Doanh số từ video:** tổng tiền các món đó (giá × số lượng, số nguyên VNĐ). Ghi rõ: "Tiền hàng thuộc về Kiot bán
+    hàng, không phải thu nhập của bạn."
+- Mỗi video trong danh sách hiện thêm: số bình luận, số lượt lưu, doanh số (đã có lượt xem, thích, số đơn).
+- Chỉ chủ video xem được số liệu của mình.
+
+### Hợp đồng mới (thêm vào, không đổi hàm cũ)
+
+- `identity`:
+  - `updateProfile(userId, { displayName?, bio? })`: thêm trường `bio`, lỗi `BIO_TOO_LONG | HAS_LINK`.
+  - `setProfileImage(userId, 'avatar' | 'cover', buffer)`.
+  - `removeProfileImage(userId, kind)`.
+  - `publicProfiles(ids)`: trả `{ id, displayName, avatarUrl }`, dùng khi hiện ảnh đại diện ở module khác.
+  - `getPublicProfile(userId)`: thêm `coverUrl`, `bio`; tài khoản khoá trả `null`.
+  - `searchPublicUsers(q, limit)`.
+  - `clearProfile(userId)`: trả bản trước khi gỡ.
+- `admin`: `clearUserProfile(adminId, userId, reason)` (ghi audit log, báo người dùng).
+- `social`:
+  - `followList(userId, 'followers' | 'following', page?)`.
+  - `searchHashtags(q, limit)`.
+- `creator`:
+  - `searchVideos(q, limit)`.
+  - `creatorStats(userId, days: 7 | 30)`.
+- `marketplace`: dùng lại `searchProducts`.
+
+### Dữ liệu
+
+- Bảng `User` thêm 3 cột, **có thể để trống**: `avatarUrl`, `coverUrl`, `bio`. Tài khoản cũ để trống, không đổi gì khác.
+  CEO đã cho phép.
+- Không thêm bảng mới. Không đụng tiền, đơn hàng hay đăng nhập.
+
+### Kiểm thử
+
+- **Unit test:**
+  - giới thiệu có link hoặc quá dài bị từ chối;
+  - ảnh giả (đổi đuôi) bị từ chối;
+  - ảnh mới thay ảnh cũ và xoá file cũ;
+  - tìm không dấu ra đúng kết quả, không lộ tài khoản bị khoá, không lộ video Story/chưa đăng;
+  - số thống kê đúng với đơn đã thanh toán, đơn huỷ/hoàn tiền không tính;
+  - danh sách theo dõi phân trang đúng.
+- **E2E (điện thoại + máy tính):**
+  - sửa hồ sơ (ảnh đại diện, bìa, giới thiệu) rồi thấy ảnh trên trang cá nhân và trên video;
+  - tìm tài khoản, video, hashtag từ header;
+  - xem thống kê 7/30 ngày;
+  - nút "＋ Đăng" trên Trang chủ.
+
+### Boundaries Đợt A
+
+- **Không bao giờ:**
+  - số liệu giả;
+  - cho link trong phần giới thiệu;
+  - hiện email hay số điện thoại trên trang cá nhân hoặc trong kết quả tìm kiếm;
+  - giữ thông tin vị trí trong ảnh.

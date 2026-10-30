@@ -27,6 +27,10 @@ model User {
   role               Role                 @default(user)
   mustChangePassword Boolean              @default(false)
   lockedAt           DateTime?
+  // Hồ sơ công khai (SPEC-social.md bổ sung 30/10, A2): để trống được, tài khoản cũ không đổi gì.
+  avatarUrl          String?
+  coverUrl           String?
+  bio                String?
   createdAt          DateTime             @default(now())
   updatedAt          DateTime             @updatedAt
   sessions           Session[]

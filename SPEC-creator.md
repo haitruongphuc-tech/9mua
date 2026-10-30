@@ -43,6 +43,8 @@ feed như TikTok, bấm sản phẩm trên video là mua được ngay. Mục ti
 7. **Trang creator `/creator/<userId>`**: tên, số video, tổng lượt thích, lưới video.
 8. **Thống kê của tôi `/video/cua-toi`**: mỗi video có lượt xem, lượt thích, **số đơn hoàn tất có nguồn
    từ video** (đếm `OrderItem.sourceVideoId`). Người đăng xoá được video của mình.
+   *(Từ 30/10, theo `SPEC-social.md` A4 đã duyệt: đếm đơn **đã thanh toán**, trừ đơn huỷ / đang hoàn tiền / đã hoàn
+   tiền, để số của từng video khớp với thống kê 7/30 ngày.)*
 9. **Kiểm duyệt**:
    - Nút "Báo cáo" (lý do: nội dung xấu, lừa đảo, bản quyền, khác).
    - **5 người khác nhau** báo cáo thì video tự ẩn, chờ CEO xem.
@@ -187,3 +189,8 @@ removeVideo(videoId, adminId, reason): Promise<void>     // cho admin
 3. **Menu Video `/video`**: chỉ video, cùng giao diện feed của trang chủ (có tab Đang Follow / Dành cho bạn, không che thanh
    dưới), không có hàng Story và không chèn live. Link chia sẻ `/v/<id>` giữ như cũ.
 4. **Menu Live `/live`**: chỉ các buổi đang phát và nút Phát live; bỏ hàng Story khỏi trang Live.
+
+## Bổ sung 30/10/2026 — Thống kê creator, tìm video, nút "＋ Đăng" (Đợt A)
+
+Xem `SPEC-social.md` mục "Bổ sung 30/10/2026 — Đợt A" (A1, A3, A4). Hoa hồng creator vẫn ở mục "Hỏi trước"
+(làm ở Đợt E, có spec riêng).

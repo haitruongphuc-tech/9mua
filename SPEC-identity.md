@@ -308,3 +308,8 @@ export async function register(raw: unknown): Promise<RegisterResult> {
   `openLinkTicket` (`linkGoogleWithTicket` giữ tên cũ, giờ dùng chung).
 - Giới hạn mã theo IP chỉ tính IP do Nginx gửi (`X-Real-IP`); không có IP thật thì chỉ áp giới hạn theo email.
 - Chính sách bảo mật: thêm dữ liệu nhận từ Zalo/Facebook (mã tài khoản, tên, email nếu có).
+
+## Bổ sung 30/10/2026 — Hồ sơ công khai (Đợt A)
+
+Bảng `User` thêm `avatarUrl`, `coverUrl`, `bio` (có thể để trống). Các hàm hồ sơ, ảnh đại diện và tìm tài khoản xem
+`SPEC-social.md` mục "Bổ sung 30/10/2026 — Đợt A" (A2, A3).

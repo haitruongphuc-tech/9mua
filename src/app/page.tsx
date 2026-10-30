@@ -56,7 +56,10 @@ export default async function HomePage() {
             <StoriesRow
               compact
               groups={stories}
-              lives={lives.map((l) => ({ id: l.id, host: { displayName: l.host.displayName } }))}
+              lives={lives.map((l) => ({
+                id: l.id,
+                host: { displayName: l.host.displayName, avatarUrl: l.host.avatarUrl },
+              }))}
             />
           }
         />

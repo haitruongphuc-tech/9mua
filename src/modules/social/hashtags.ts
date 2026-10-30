@@ -1,5 +1,6 @@
 import { now } from '@/lib/clock';
 import { db } from '@/lib/db';
+import { normalizeSearchText } from '@/lib/search-text';
 import { extractHashtags, hydrateVideos, type FeedVideo, type Viewer } from '@/modules/creator';
 
 // Chuẩn hoá giống lúc tách hashtag từ chú thích (bỏ dấu, chữ thường).
@@ -28,4 +29,15 @@ export async function trendingHashtags(limit = 10): Promise<{ tag: string; video
     WHERE v.status = 'ready' AND v.kind = 'video' AND v."readyAt" >= ${since}
     GROUP BY tag ORDER BY videos DESC, tag ASC LIMIT ${limit}`;
   return rows;
+}
+
+// Tìm hashtag theo tên (SPEC-social.md bổ sung 30/10, A3): kèm số video đang lên feed, nhiều video lên trước.
+export async function searchHashtags(query: string, limit: number): Promise<{ tag: string; videos: number }[]> {
+  const q = normalizeSearchText(query).replace(/ /g, '');
+  if (!q) return [];
+  return db.$queryRaw<{ tag: string; videos: number }[]>`
+    SELECT tag, COUNT(*)::int AS videos
+    FROM "Video" v JOIN "User" u ON u.id = v."authorId", unnest(v.hashtags) AS tag
+    WHERE v.status = 'ready' AND v.kind = 'video' AND u."lockedAt" IS NULL AND tag LIKE ${`%${q}%`}
+    GROUP BY tag ORDER BY videos DESC, tag ASC LIMIT ${limit}`;
 }

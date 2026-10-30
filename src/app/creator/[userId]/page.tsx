@@ -1,10 +1,12 @@
 import { MessageButton } from '@/components/inbox/MessageButton';
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { cache } from 'react';
 import { ProfileActions } from '@/components/profile/ProfileActions';
 import { SocialLinks } from '@/components/profile/SocialLinks';
+import { Avatar } from '@/components/ui/Avatar';
 import { VideoGrid } from '@/components/video/VideoGrid';
 import { ClientMessages } from '@/i18n/ClientMessages';
 import { getT } from '@/i18n/server';
@@ -43,8 +45,23 @@ export default async function CreatorPage({ params }: { params: Promise<{ userId
   return (
     <ClientMessages prefixes={['profile.', 'feed.share.']}>
       <div>
-        <section className="mx-auto max-w-[900px] px-4 py-6">
-          <header className="flex items-center gap-4">
+        {/* Ảnh bìa 3:1 (SPEC-social.md bổ sung 30/10, A2); chưa có thì nền màu. */}
+        <div className="relative mx-auto aspect-[3/1] max-h-[300px] w-full max-w-[900px] overflow-hidden bg-gradient-to-br from-brand/50 via-[#7c2d12] to-ink md:rounded-b-[18px]">
+          {p.coverUrl ? (
+            <Image
+              src={p.coverUrl}
+              alt=""
+              fill
+              sizes="(max-width: 900px) 100vw, 900px"
+              className="object-cover"
+              priority
+              unoptimized
+              data-testid="creator-cover"
+            />
+          ) : null}
+        </div>
+        <section className="mx-auto max-w-[900px] px-4 pb-6">
+          <header className="-mt-10 flex items-end gap-4">
             {/* Đang live: viền đỏ + nhãn LIVE, bấm vào là xem (SPEC-live.md mục 4). */}
             <a
               href={liveId ? `/live/${liveId}` : undefined}
@@ -52,9 +69,11 @@ export default async function CreatorPage({ params }: { params: Promise<{ userId
               data-testid={liveId ? 'creator-live-badge' : undefined}
             >
               <span
-                className={`grid h-20 w-20 place-items-center rounded-full border-4 bg-gradient-to-br from-brand to-[#c2410c] text-[30px] font-black shadow-[0_0_0_2px_rgb(255_107_0/0.5)] ${liveId ? 'border-red-500' : 'border-ink'}`}
+                className={`block rounded-full border-4 shadow-[0_0_0_2px_rgb(255_107_0/0.5)] ${liveId ? 'border-red-500' : 'border-ink'}`}
+                data-testid="creator-avatar"
+                data-url={p.avatarUrl ?? ''}
               >
-                {p.displayName.trim().charAt(0).toUpperCase()}
+                <Avatar name={p.displayName} url={p.avatarUrl} className="h-20 w-20 text-[30px]" />
               </span>
               {liveId ? (
                 <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded-full bg-red-600 px-2 py-0.5 text-[10px] font-black">
@@ -62,22 +81,27 @@ export default async function CreatorPage({ params }: { params: Promise<{ userId
                 </span>
               ) : null}
             </a>
-            <div className="min-w-0">
+            <div className="min-w-0 pb-1">
               <h1 className="font-display text-[22px] font-black leading-tight">{p.displayName}</h1>
               <p className="text-[13px] text-white/60">{t('profile.creator')}</p>
             </div>
           </header>
+          {p.bio ? (
+            <p className="mt-3 whitespace-pre-line text-[14px] text-white/85" data-testid="creator-bio">
+              {p.bio}
+            </p>
+          ) : null}
           <ProfileActions
             target={{ userId: p.id }}
             stats={[
-              { id: 'followers', value: follow.followers },
-              { id: 'following', value: follow.following },
+              { id: 'followers', value: follow.followers, href: `/creator/${p.id}/theo-doi` },
+              { id: 'following', value: follow.following, href: `/creator/${p.id}/theo-doi?dang=1` },
               { id: 'videos', value: p.videoCount },
               { id: 'likes', value: p.totalLikes },
             ]}
             initial={{ following: follow.isFollowing }}
             isSelf={isSelf}
-            selfLink={{ href: '/video/cua-toi', label: t('profile.myVideos') }}
+            selfLink={{ href: '/tai-khoan/ho-so', label: t('profile.edit.button') }}
             share={{
               url,
               title: p.displayName,

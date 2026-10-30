@@ -5,11 +5,11 @@ import { e2eDb } from './helpers/db';
 test('đăng ký bằng mã email → thấy tên → dùng chung trên Kiot → đăng xuất → đăng nhập lại bằng mã', async ({
   page,
 }) => {
-  // Đăng ký chỉ cần email: tên tạm không lộ email; trang Tôi nhắc đặt tên, đặt trong Cài đặt tài khoản.
+  // Đăng ký chỉ cần email: tên tạm không lộ email; trang Tôi nhắc đặt tên, đặt trong trang Sửa hồ sơ.
   const email = await signUpByEmail(page, { next: '/tai-khoan' });
   await expect(page.getByTestId('user-menu')).toHaveAccessibleName(/^Tôi \(Thành viên \d{4}\)$/);
   await page.getByTestId('me-set-name').click();
-  await page.waitForURL((u) => u.pathname === '/tai-khoan/cai-dat');
+  await page.waitForURL((u) => u.pathname === '/tai-khoan/ho-so');
   await page.fill('#profile-name', 'Khách E2E');
   await page.locator('#thong-tin button[type=submit]').click();
   await expect(page.getByTestId('user-menu')).toHaveAccessibleName('Tôi (Khách E2E)');

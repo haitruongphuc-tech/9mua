@@ -77,6 +77,7 @@ export async function listReportedConversations(): Promise<ReportedConversation[
         id: list[0]!.reportedUserId,
         displayName: '',
         kiotName: null,
+        avatarUrl: null,
       },
       reports: list.length,
       reasons: [...new Set(list.map((r) => r.reason))],
@@ -107,7 +108,7 @@ export async function reportedConversationDetail(conversationId: string): Promis
   const people = await peers([c.userAId, c.userBId]);
   return {
     conversationId,
-    users: [c.userAId, c.userBId].map((id) => people.get(id) ?? { id, displayName: '', kiotName: null }),
+    users: [c.userAId, c.userBId].map((id) => people.get(id) ?? { id, displayName: '', kiotName: null, avatarUrl: null }),
     reports: reports.map((r) => ({
       reporterId: r.reporterId,
       reason: r.reason,

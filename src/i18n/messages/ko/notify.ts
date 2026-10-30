@@ -8,6 +8,7 @@ export const notify: NotifyMessages = {
   'notify.videoReady': '동영상이 올라갔어요',
   'notify.videoFailed': '동영상을 올리지 못했어요',
   'notify.videoRemoved': '내 동영상이 삭제됐어요',
+  'notify.profileCleared': "규정 위반으로 프로필 사진, 커버 사진, 소개가 삭제되었습니다",
   'notify.reason': '사유: {reason}',
   'notify.title': '알림',
   'notify.empty': '아직 알림이 없어요.',

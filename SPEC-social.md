@@ -106,7 +106,7 @@ revokeVoucher(voucherId, adminId, reason): Promise<void>   // cho admin
 
 ## Bổ sung 30/10/2026 — Đợt A: trang cá nhân, tìm kiếm, nút Đăng, thống kê creator
 
-> **Trạng thái: chờ CEO duyệt.** CEO đã chốt qua chat 30/10:
+> **Trạng thái: CEO duyệt qua chat 30/10/2026 ("duyet").** CEO đã chốt qua chat 30/10:
 > - làm theo đợt, bắt đầu Đợt A;
 > - **cho phép thêm 3 cột trống vào bảng `User`**;
 > - hàng "Creator nổi bật" để sau;

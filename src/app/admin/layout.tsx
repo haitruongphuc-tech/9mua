@@ -26,6 +26,7 @@ const NAV = [
   ['/admin/xu', 'Xu'],
   ['/admin/ai', 'AI Studio'],
   ['/admin/voucher', 'Voucher'],
+  ['/admin/cong-tac', 'Công tắc'],
   ['/admin/cai-dat', 'Cài đặt'],
 ] as const;
 

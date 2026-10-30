@@ -682,7 +682,7 @@
 Nhánh `nang-cap-mot-dot`. Trừ App (C32–C36). Mỗi task: test trước → code → `sh scripts/check.sh` → 1 commit → push.
 
 ### Nền móng
-- [ ] **T79: Công tắc chức năng** + `/admin/cong-tac`.
+- [x] **T79: Công tắc chức năng** + `/admin/cong-tac`.
 - [ ] **T80: @tên người dùng** (C69).
 - [ ] **T81: Chặn toàn web** (C68).
 - [ ] **T82: Quyền riêng tư video + `canViewVideo`** (C50).

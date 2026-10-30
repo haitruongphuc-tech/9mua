@@ -106,6 +106,7 @@ test('CEO: mọi trang hàng chờ mở được, không lỗi', async ({ browse
     ['/admin/ai', 'AI Studio'],
     ['/admin/voucher', 'Voucher mở Kiot'],
     ['/admin/tin-nhan', 'Tin nhắn bị báo cáo'],
+    ['/admin/cong-tac', 'Công tắc chức năng'],
   ] as const) {
     const res = await ceo.goto(path);
     expect(res?.status(), path).toBe(200);

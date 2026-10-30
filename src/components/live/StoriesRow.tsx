@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useT } from '@/i18n/client';
 import type { StoryGroup } from '@/modules/creator';
+import { Avatar } from '@/components/ui/Avatar';
 
 const SEEN_KEY = 'nm_story_seen';
 
@@ -17,7 +18,7 @@ function readSeen(): Set<string> {
   }
 }
 
-export type StoryLive = { id: string; host: { displayName: string } };
+export type StoryLive = { id: string; host: { displayName: string; avatarUrl: string | null } };
 
 // Hàng tròn ở đầu trang chủ (V4; SPEC-creator.md bổ sung 29/10): người đang live trước (viền đỏ, nhãn LIVE, bấm vào
 // xem live), rồi Story 24 giờ: vòng cam = có Story chưa xem, xám = đã xem (nhớ trên máy người xem). Bấm Story thì xem
@@ -79,8 +80,8 @@ export function StoriesRow({
           data-testid="story-live"
         >
           <span className={`relative grid ${ring} place-items-center rounded-full bg-red-500 p-[3px]`}>
-            <span className="grid h-full w-full place-items-center rounded-full border-2 border-ink bg-gradient-to-br from-brand to-red-500 text-[18px] font-black">
-              {l.host.displayName.trim().charAt(0).toUpperCase() || '9'}
+            <span className="block h-full w-full rounded-full border-2 border-ink">
+              <Avatar name={l.host.displayName} url={l.host.avatarUrl} className="h-full w-full text-[18px]" />
             </span>
             <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded bg-red-600 px-1 text-[9px] font-black leading-[14px]">
               LIVE
@@ -121,8 +122,8 @@ export function StoriesRow({
                 unseen ? 'bg-gradient-to-tr from-brand via-orange-400 to-yellow-300' : 'bg-white/20'
               }`}
             >
-              <span className="grid h-full w-full place-items-center rounded-full border-2 border-ink bg-gradient-to-br from-brand to-red-500 text-[20px] font-black">
-                {g.author.displayName.trim().charAt(0).toUpperCase() || '9'}
+              <span className="block h-full w-full rounded-full border-2 border-ink">
+                <Avatar name={g.author.displayName} url={g.author.avatarUrl} className="h-full w-full text-[20px]" />
               </span>
             </span>
             <span className="w-full truncate text-center text-[11px] font-bold">{g.author.displayName}</span>

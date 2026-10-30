@@ -12,6 +12,9 @@ export type VideoThumb = {
 export type CreatorProfile = {
   id: string;
   displayName: string;
+  avatarUrl: string | null;
+  coverUrl: string | null;
+  bio: string | null;
   videoCount: number;
   totalLikes: number;
   videos: VideoThumb[];
@@ -21,7 +24,7 @@ export type CreatorProfile = {
 export async function getCreatorProfile(userId: string): Promise<CreatorProfile | null> {
   const user = await db.user.findUnique({
     where: { id: userId },
-    select: { id: true, displayName: true, lockedAt: true },
+    select: { id: true, displayName: true, avatarUrl: true, coverUrl: true, bio: true, lockedAt: true },
   });
   if (!user || user.lockedAt) return null;
   const [videos, agg] = await Promise.all([
@@ -39,6 +42,9 @@ export async function getCreatorProfile(userId: string): Promise<CreatorProfile 
   return {
     id: user.id,
     displayName: user.displayName,
+    avatarUrl: user.avatarUrl,
+    coverUrl: user.coverUrl,
+    bio: user.bio,
     videoCount: agg._count,
     totalLikes: agg._sum.likes ?? 0,
     videos: videos.map((v) => ({

@@ -21,13 +21,17 @@ test('cài đặt tài khoản: đổi tên, thêm email, đổi mật khẩu', 
   // Trang Tôi V4 có lối vào Cài đặt tài khoản (T65).
   await expect(page.getByTestId('me-badge')).toHaveText('TÀI KHOẢN FREE');
   await expect(page.getByTestId('me-free')).toContainText('Đang dùng Free • 0/50 tim/follow hôm nay');
-  await page.getByRole('link', { name: /Cài đặt tài khoản/ }).click();
-  await page.waitForURL((u) => u.pathname === '/tai-khoan/cai-dat');
-
+  // Tên hiển thị sửa ở trang Sửa hồ sơ (SPEC-social.md bổ sung 30/10, A2).
+  await page.getByTestId('me-edit-profile').click();
+  await page.waitForURL((u) => u.pathname === '/tai-khoan/ho-so');
   await page.fill('#profile-name', 'Tên Mới E2E');
   await page.locator('#thong-tin button[type=submit]').click();
   await expect(page.getByTestId('profile-ok')).toBeVisible();
   await expect(page.getByTestId('user-menu')).toHaveAccessibleName('Tôi (Tên Mới E2E)');
+
+  await page.goto('/tai-khoan');
+  await page.getByRole('link', { name: /Cài đặt tài khoản/ }).click();
+  await page.waitForURL((u) => u.pathname === '/tai-khoan/cai-dat');
 
   // Tài khoản chưa có email: thêm email bằng mã gửi về email đó (không cần mật khẩu).
   await page.getByTestId('otp-email').fill(`acc-${stamp}@9mua.test`);

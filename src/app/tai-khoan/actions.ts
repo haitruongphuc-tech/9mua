@@ -15,13 +15,21 @@ import {
 
 export type FormState = { ok?: string; error?: string; email?: string };
 
+// Trang Sửa hồ sơ: tên hiển thị + giới thiệu (SPEC-social.md bổ sung 30/10, A2).
 export async function updateProfileAction(_p: FormState, form: FormData): Promise<FormState> {
   const user = await requireUser();
   const t = await getT();
-  const result = await updateProfile(user.id, { displayName: String(form.get('displayName') ?? '') });
-  if (!result.ok) return { error: t('auth.err.displayName') };
+  const result = await updateProfile(user.id, {
+    displayName: String(form.get('displayName') ?? ''),
+    bio: String(form.get('bio') ?? ''),
+  });
+  if (!result.ok)
+    return {
+      error: result.error === 'INVALID_INPUT' ? t('auth.err.displayName') : t(`profile.edit.err.${result.error}`),
+    };
   revalidatePath('/tai-khoan', 'layout');
-  return { ok: t('me.settings.nameSaved') };
+  revalidatePath(`/creator/${user.id}`);
+  return { ok: t('profile.edit.saved') };
 }
 
 export async function changeEmailAction(_p: FormState, form: FormData): Promise<FormState> {

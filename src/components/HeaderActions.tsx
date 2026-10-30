@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useT } from '@/i18n/client';
 import { sloganKey } from '@/lib/slogans';
+import { Avatar } from '@/components/ui/Avatar';
 import { useMe } from './MeProvider';
 
 // Slogan của trang (giữa header, chữ nghiêng xám — V4).
@@ -60,7 +61,11 @@ export function HeaderActions({ base }: { base: string }) {
         className="relative grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-to-br from-brand to-red-500 text-[15px] font-black"
         data-testid="user-menu"
       >
-        {me ? me.displayName.trim().charAt(0).toUpperCase() || '9' : <User className="h-4 w-4" aria-hidden />}
+        {me ? (
+          <Avatar name={me.displayName} url={me.avatarUrl} className="h-10 w-10 text-[15px]" />
+        ) : (
+          <User className="h-4 w-4" aria-hidden />
+        )}
         {notifications > 0 ? (
           <span
             className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-danger px-1 text-[10px] font-black"

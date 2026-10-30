@@ -7,6 +7,9 @@ export {
   followingFeed,
   notifyFollowersOfVideo,
   followRelation,
+  followList,
+  FOLLOW_PAGE,
+  type FollowPerson,
 } from './follow';
 export {
   addComment,

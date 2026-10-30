@@ -1,8 +1,10 @@
 'use client';
 
 import { Send } from 'lucide-react';
+import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { useMe } from '@/components/MeProvider';
+import { Avatar } from '@/components/ui/Avatar';
 import { useT } from '@/i18n/client';
 import { Sheet } from './Sheet';
 
@@ -10,7 +12,7 @@ type C = {
   id: string;
   text: string;
   pinned: boolean;
-  author: { id: string; displayName: string };
+  author: { id: string; displayName: string; avatarUrl: string | null };
   byVideoAuthor: boolean;
 };
 type Root = C & { replies: C[] };
@@ -99,40 +101,45 @@ export function CommentsSheet({
   const owner = Boolean(myId && videoAuthorId && myId === videoAuthorId);
   const line = (c: C, isRoot: boolean) => (
     <div
-      className={`rounded-[14px] px-3 py-2 ${c.pinned ? 'border border-brand/30 bg-brand-cream' : 'bg-zinc-50'}`}
+      className={`flex gap-2 rounded-[14px] px-3 py-2 ${c.pinned ? 'border border-brand/30 bg-brand-cream' : 'bg-zinc-50'}`}
       data-testid="comment"
     >
-      <p className="text-[12px] font-bold">
-        {c.author.displayName}
-        {c.byVideoAuthor ? (
-          <span className="ml-1 rounded-full bg-brand px-1.5 py-0.5 text-[9px] text-white">
-            {t('feed.comments.author')}
-          </span>
-        ) : null}
-        {c.pinned ? <span className="ml-1 text-[10px] text-brand">{t('feed.comments.pinned')}</span> : null}
-      </p>
-      <p className="whitespace-pre-line text-[13px]">{c.text}</p>
-      <div className="mt-1 flex gap-3 text-[11px] text-zinc-500">
-        {isRoot ? (
-          <button type="button" onClick={() => setReplyTo(c)}>
-            {t('feed.comments.reply')}
-          </button>
-        ) : null}
-        {owner && isRoot ? (
-          <button type="button" onClick={() => act(c.id, 'pin')}>
-            {c.pinned ? t('feed.comments.unpin') : t('feed.comments.pin')}
-          </button>
-        ) : null}
-        {owner ? (
-          <button type="button" onClick={() => act(c.id, 'hide')}>
-            {t('feed.comments.hide')}
-          </button>
-        ) : null}
-        {myId && myId !== c.author.id ? (
-          <button type="button" onClick={() => act(c.id, 'report')}>
-            {t('feed.comments.reportAction')}
-          </button>
-        ) : null}
+      <Link href={`/creator/${c.author.id}`} aria-label={c.author.displayName} className="shrink-0">
+        <Avatar name={c.author.displayName} url={c.author.avatarUrl} className="h-8 w-8 text-[12px]" />
+      </Link>
+      <div className="min-w-0 flex-1">
+        <p className="text-[12px] font-bold">
+          {c.author.displayName}
+          {c.byVideoAuthor ? (
+            <span className="ml-1 rounded-full bg-brand px-1.5 py-0.5 text-[9px] text-white">
+              {t('feed.comments.author')}
+            </span>
+          ) : null}
+          {c.pinned ? <span className="ml-1 text-[10px] text-brand">{t('feed.comments.pinned')}</span> : null}
+        </p>
+        <p className="whitespace-pre-line text-[13px]">{c.text}</p>
+        <div className="mt-1 flex gap-3 text-[11px] text-zinc-500">
+          {isRoot ? (
+            <button type="button" onClick={() => setReplyTo(c)}>
+              {t('feed.comments.reply')}
+            </button>
+          ) : null}
+          {owner && isRoot ? (
+            <button type="button" onClick={() => act(c.id, 'pin')}>
+              {c.pinned ? t('feed.comments.unpin') : t('feed.comments.pin')}
+            </button>
+          ) : null}
+          {owner ? (
+            <button type="button" onClick={() => act(c.id, 'hide')}>
+              {t('feed.comments.hide')}
+            </button>
+          ) : null}
+          {myId && myId !== c.author.id ? (
+            <button type="button" onClick={() => act(c.id, 'report')}>
+              {t('feed.comments.reportAction')}
+            </button>
+          ) : null}
+        </div>
       </div>
     </div>
   );

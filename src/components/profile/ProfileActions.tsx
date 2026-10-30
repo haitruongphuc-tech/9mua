@@ -12,6 +12,7 @@ import { useLang, useT } from '@/i18n/client';
 type Stat = {
   id: 'followers' | 'hearts' | 'following' | 'products' | 'sold' | 'videos' | 'likes';
   value: number;
+  href?: string; // bấm vào số để mở danh sách (Người theo dõi / Đang theo dõi)
 };
 
 // Hàng số liệu + hàng nút của trang Kiot / trang creator kiểu V4. Số Followers và Tim đổi ngay khi bấm;
@@ -100,14 +101,25 @@ export function ProfileActions({
   return (
     <>
       <dl className="mt-4 flex gap-6 text-center" data-testid="profile-stats">
-        {stats.map((s) => (
-          <div key={s.id} className="flex flex-col-reverse">
-            <dt className="text-[11px] text-white/50">{t(`profile.stat.${s.id}`)}</dt>
-            <dd className="text-[17px] font-black" data-testid={`stat-${s.id}`}>
-              {fmt.format(values[s.id] ?? 0)}
-            </dd>
-          </div>
-        ))}
+        {stats.map((s) => {
+          const cell = (
+            <>
+              <dt className="text-[11px] text-white/50">{t(`profile.stat.${s.id}`)}</dt>
+              <dd className="text-[17px] font-black" data-testid={`stat-${s.id}`}>
+                {fmt.format(values[s.id] ?? 0)}
+              </dd>
+            </>
+          );
+          return s.href ? (
+            <Link key={s.id} href={s.href} className="flex flex-col-reverse" data-testid={`stat-link-${s.id}`}>
+              {cell}
+            </Link>
+          ) : (
+            <div key={s.id} className="flex flex-col-reverse">
+              {cell}
+            </div>
+          );
+        })}
       </dl>
       {children}
       <div className="mt-4 flex gap-2">

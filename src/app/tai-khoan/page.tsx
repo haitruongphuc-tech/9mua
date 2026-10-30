@@ -23,6 +23,7 @@ import { logoutAction } from '@/app/(auth)/actions';
 import { getT } from '@/i18n/server';
 import { isTemporaryName, requireUser } from '@/modules/identity';
 import { loadMePage } from '@/server/me-page';
+import { Avatar } from '@/components/ui/Avatar';
 
 export const metadata: Metadata = { title: 'Tài khoản', robots: { index: false } };
 
@@ -84,15 +85,32 @@ export default async function MePage() {
     <div>
       <div className="mx-auto max-w-[760px] px-4 py-6">
         <div className="text-center">
-          <span className="mx-auto grid h-24 w-24 place-items-center rounded-full bg-gradient-to-br from-brand to-red-500 text-[36px] font-black">
-            {user.displayName.trim().charAt(0).toUpperCase()}
-          </span>
+          <Link href={`/creator/${user.id}`} className="mx-auto inline-block" aria-label={t('me.viewProfile')}>
+            <Avatar name={user.displayName} url={user.avatarUrl} className="h-24 w-24 text-[36px]" />
+          </Link>
           <h1 className="mt-3 font-display text-[22px] font-black">{user.displayName}</h1>
           <p className="text-[12px] text-white/50">{user.phone ?? user.email}</p>
-          {isTemporaryName(user.displayName) ? (
-            // Đăng ký chỉ bằng email nên đang dùng tên tạm (CEO chốt 29/10): nhắc đặt tên trong Cài đặt.
+          {/* Trang cá nhân công khai + Sửa hồ sơ (SPEC-social.md bổ sung 30/10, A2). */}
+          <div className="mt-3 flex justify-center gap-2 text-[13px] font-bold">
             <Link
-              href="/tai-khoan/cai-dat#thong-tin"
+              href={`/creator/${user.id}`}
+              className="h-9 rounded-full border border-white/20 px-4 leading-9"
+              data-testid="me-view-profile"
+            >
+              {t('me.viewProfile')}
+            </Link>
+            <Link
+              href="/tai-khoan/ho-so"
+              className="h-9 rounded-full bg-white/10 px-4 leading-9"
+              data-testid="me-edit-profile"
+            >
+              {t('profile.edit.button')}
+            </Link>
+          </div>
+          {isTemporaryName(user.displayName) ? (
+            // Đăng ký chỉ bằng email nên đang dùng tên tạm (CEO chốt 29/10): nhắc đặt tên trong trang Sửa hồ sơ.
+            <Link
+              href="/tai-khoan/ho-so#thong-tin"
               className="mx-auto mt-3 flex max-w-sm items-center justify-between gap-3 rounded-[14px] border border-brand/40 bg-brand/10 px-4 py-3 text-left text-[13px]"
               data-testid="me-set-name"
             >

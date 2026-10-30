@@ -103,3 +103,28 @@ export async function notifyFollowersOfVideo(video: { id: string; authorId: stri
       `/video?v=${video.id}`,
     );
 }
+
+export const FOLLOW_PAGE = 30;
+export type FollowPerson = { id: string; displayName: string; avatarUrl: string | null };
+
+// Danh sách Người theo dõi / Đang theo dõi trên trang cá nhân (SPEC-social.md bổ sung 30/10, A2): mới theo dõi hiện
+// trước, 30 người mỗi trang, bỏ tài khoản bị khoá. Chỉ có tên và ảnh đại diện.
+export async function followList(
+  userId: string,
+  kind: 'followers' | 'following',
+  page = 1,
+): Promise<{ items: FollowPerson[]; hasMore: boolean }> {
+  const skip = (Math.max(1, Math.floor(page)) - 1) * FOLLOW_PAGE;
+  // Bảng Follow không khai báo quan hệ Prisma (thêm vào sẽ sinh khoá ngoại trên bảng đang có dữ liệu) nên nối bằng SQL.
+  const [mine, other] =
+    kind === 'followers'
+      ? [Prisma.sql`f."followeeId"`, Prisma.sql`f."followerId"`]
+      : [Prisma.sql`f."followerId"`, Prisma.sql`f."followeeId"`];
+  const rows = await db.$queryRaw<FollowPerson[]>`
+    SELECT u.id, u."displayName", u."avatarUrl"
+    FROM "Follow" f JOIN "User" u ON u.id = ${other}
+    WHERE ${mine} = ${userId} AND u."lockedAt" IS NULL
+    ORDER BY f."createdAt" DESC, u.id
+    LIMIT ${FOLLOW_PAGE + 1} OFFSET ${skip}`;
+  return { items: rows.slice(0, FOLLOW_PAGE), hasMore: rows.length > FOLLOW_PAGE };
+}

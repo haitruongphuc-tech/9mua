@@ -3,6 +3,7 @@
 import { parseVndInput } from '@/lib/format';
 import {
   adjustKiotBalance,
+  clearUserProfile,
   grantKiotYear,
   issueTempPassword,
   lockKiotAccount,
@@ -30,6 +31,12 @@ export async function lockUserAction(userId: string, q: string, form: FormData):
 export async function unlockUserAction(userId: string, q: string): Promise<void> {
   const admin = await requireAdminVerified();
   done(q, await unlockUserAccount(admin.id, userId));
+}
+
+// Gỡ ảnh đại diện, ảnh bìa, giới thiệu vi phạm (SPEC-social.md bổ sung 30/10, A2).
+export async function clearProfileAction(userId: string, q: string, form: FormData): Promise<void> {
+  const admin = await requireAdminVerified();
+  done(q, await clearUserProfile(admin.id, userId, reason(form)));
 }
 
 export async function sendResetLinkAction(userId: string, q: string): Promise<void> {

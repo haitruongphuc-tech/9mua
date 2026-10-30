@@ -6,6 +6,7 @@ import { formatDate } from '@/lib/format';
 import { getCurrentUser } from '@/modules/identity';
 import { listBlocked, listConversations } from '@/modules/messages';
 import { unblockAction } from './actions';
+import { Avatar } from '@/components/ui/Avatar';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Hộp thư', robots: { index: false } };
@@ -83,9 +84,7 @@ export default async function InboxPage({
                   className="flex items-center gap-3 px-4 py-3 hover:bg-white/5"
                   data-testid="inbox-item"
                 >
-                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-gradient-to-br from-brand to-red-500 text-[16px] font-black">
-                    {name.trim().charAt(0).toUpperCase() || '9'}
-                  </span>
+                  <Avatar name={name} url={c.other.avatarUrl} className="h-11 w-11 text-[16px]" />
                   <span className="min-w-0 flex-1">
                     <span className="flex items-baseline justify-between gap-2">
                       <span className={`truncate text-[14px] ${c.unread ? 'font-black' : 'font-bold'}`}>

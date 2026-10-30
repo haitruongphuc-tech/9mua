@@ -7,11 +7,14 @@ import { Avatar } from '@/components/ui/Avatar';
 import { VideoGrid } from '@/components/video/VideoGrid';
 import { ClientMessages } from '@/i18n/ClientMessages';
 import { getT } from '@/i18n/server';
+import { isBlockedEither } from '@/lib/blocks';
 import { env } from '@/lib/env';
+import { isFeatureOn } from '@/lib/features';
+import { BlockButton } from '@/components/social/BlockButton';
 import type { CreatorProfile } from '@/modules/creator';
 import { liveIdOfHost } from '@/modules/live';
 import { getCurrentUser } from '@/modules/identity';
-import { followStats, getSocialLinks } from '@/modules/social';
+import { followStats, getSocialLinks, listBlockedUsers } from '@/modules/social';
 
 // Trang creator kiểu V4 (SPEC-creator.md mục 7, SPEC-social.md mục 1): số liệu thật, Follow, link mạng xã hội.
 export async function CreatorProfileView({
@@ -22,11 +25,32 @@ export async function CreatorProfileView({
   handle: string | null;
 }) {
   const viewer = await getCurrentUser();
-  const [follow, links, t, liveId] = await Promise.all([
+  // Chặn nhau (SPEC-social.md V5.3): chỉ hiện "Không xem được trang này"; người chặn được bỏ chặn ngay tại đây.
+  if (viewer && (await isBlockedEither(viewer.id, p.id))) {
+    const t = await getT();
+    const iBlocked = (await listBlockedUsers(viewer.id)).some((u) => u.id === p.id);
+    return (
+      <section className="mx-auto flex max-w-md flex-col items-center gap-4 px-4 py-16 text-center">
+        <p className="text-[15px] font-bold" data-testid="profile-blocked">
+          {t('common.block.hidden')}
+        </p>
+        {iBlocked ? (
+          <BlockButton
+            userId={p.id}
+            name={p.displayName}
+            unblock
+            className="h-10 rounded-full bg-white/10 px-5 text-[13px] font-black"
+          />
+        ) : null}
+      </section>
+    );
+  }
+  const [follow, links, t, liveId, canBlock] = await Promise.all([
     followStats(p.id, viewer?.id),
     getSocialLinks(p.id),
     getT(),
     liveIdOfHost(p.id),
+    isFeatureOn('social_more'),
   ]);
   const isSelf = viewer?.id === p.id;
   // Có @tên thì link chia sẻ là 9mua.com/@<tên> (SPEC-identity.md V5.1).
@@ -107,6 +131,13 @@ export async function CreatorProfileView({
                 <MessageButton toUserId={p.id} loginHref={`/dang-nhap?next=${encodeURIComponent(path)}`} />
               )}
               <SocialLinks links={links} />
+              {!isSelf && viewer && canBlock ? (
+                <BlockButton
+                  userId={p.id}
+                  name={p.displayName}
+                  className="rounded-full border border-white/20 px-3 py-1.5 text-[12px] font-bold text-white/70"
+                />
+              ) : null}
               {isSelf ? (
                 <Link
                   href="/ket-noi"

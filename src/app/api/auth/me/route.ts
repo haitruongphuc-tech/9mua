@@ -1,5 +1,6 @@
 import { db } from '@/lib/db';
 import { unreadCount } from '@/lib/notifications';
+import { featureStates } from '@/lib/features';
 import { cached } from '@/lib/ttl-cache';
 import { getCurrentUser } from '@/modules/identity';
 import { anyLiveNow } from '@/modules/live';
@@ -11,11 +12,12 @@ export const dynamic = 'force-dynamic';
 // dưới khi có ít nhất 1 buổi đang live (SPEC-live.md mục 4). inbox: số tin nhắn chưa đọc (SPEC-messages.md mục 1).
 export async function GET() {
   const user = await getCurrentUser();
-  const [cartCount, notifications, liveNow, inbox] = await Promise.all([
+  const [cartCount, notifications, liveNow, inbox, features] = await Promise.all([
     user ? db.cartItem.count({ where: { userId: user.id } }) : 0,
     user ? unreadCount(user.id) : 0,
     cached('live-now', 10, anyLiveNow),
     user ? inboxUnread(user.id) : 0,
+    cached('feature-states', 10, featureStates),
   ]);
   return Response.json(
     {
@@ -24,6 +26,7 @@ export async function GET() {
       notifications,
       liveNow,
       inbox,
+      features: Object.fromEntries(features.map((f) => [f.name, f.on])),
     },
     { headers: { 'Cache-Control': 'private, no-store' } },
   );

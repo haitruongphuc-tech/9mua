@@ -5,7 +5,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
 import { addLiveToCartAction } from '@/app/live/actions';
-import { ME_CHANGED_EVENT } from '@/components/MeProvider';
+import { ME_CHANGED_EVENT, useFeature } from '@/components/MeProvider';
+import { BlockButton } from '@/components/social/BlockButton';
 import { OPEN_SIGNUP_EVENT } from '@/components/SignupPopup';
 import { toast } from '@/components/ui/Toast';
 import { useT } from '@/i18n/client';
@@ -34,6 +35,7 @@ export function LivePlayer({
   belowTabs?: boolean; // nằm trong feed trang chủ: chừa chỗ cho tab và nút ＋ ở mép trên
 }) {
   const t = useT();
+  const canBlock = useFeature('social_more');
   const videoRef = useRef<HTMLVideoElement>(null);
   const [muted, setMuted] = useState(true);
   const [phase, setPhase] = useState<'connecting' | 'waiting' | 'playing' | 'ended' | 'full'>('connecting');
@@ -458,6 +460,15 @@ export function LivePlayer({
                   {t(`live.report.${r}` as MessageKey)}
                 </button>
               ))}
+              {/* Chặn người phát (SPEC-social.md V5.3): xong thì rời buổi live. */}
+              {loggedIn && canBlock && !view.isHost ? (
+                <BlockButton
+                  userId={view.host.id}
+                  name={view.host.displayName}
+                  className="h-11 rounded-full border border-danger/60 text-[13px] font-bold text-red-300"
+                  onDone={() => window.location.assign('/live')}
+                />
+              ) : null}
             </div>
           </div>
         </div>

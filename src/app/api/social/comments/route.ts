@@ -7,7 +7,8 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: Request) {
   const videoId = new URL(request.url).searchParams.get('videoId');
   if (!videoId) return Response.json({ items: [], total: 0 }, { status: 400 });
-  const [user, list] = await Promise.all([getCurrentUser(), listComments(videoId)]);
+  const user = await getCurrentUser();
+  const list = await listComments(videoId, user?.id);
   return Response.json({ ...list, me: user?.id ?? null }, { headers: { 'Cache-Control': 'no-store' } });
 }
 

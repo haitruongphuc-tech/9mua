@@ -45,3 +45,6 @@ export {
 export { decorateFeed, type SocialFeedVideo } from './decorate';
 export { hasLink } from './links';
 export { vnDay } from './day';
+// Bổ sung 30/10/2026 (SPEC-social.md V5.3): chặn trên toàn web.
+export { blockUser, unblockUser, listBlockedUsers, MAX_BLOCKS } from './blocks';
+export { isBlockedEither } from '@/lib/blocks';

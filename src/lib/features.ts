@@ -1,4 +1,5 @@
 import { db } from './db';
+import { invalidateCached } from './ttl-cache';
 
 // Công tắc chức năng của đợt nâng cấp (docs/nang-cap-mot-dot.md mục 3, SPEC-admin.md V5.0). Lưu ở bảng Setting với khoá
 // "feature.<tên>" = "on" | "off". Tắt thì nút, trang và API của nhóm đó ẩn hẳn (API trả 404); dữ liệu đã có giữ nguyên.
@@ -278,6 +279,7 @@ export async function saveFeature(name: FeatureName, on: boolean, actorId: strin
     create: { key, value, updatedById: actorId },
     update: { value, updatedById: actorId },
   });
+  invalidateCached('feature-states'); // /api/auth/me giữ trạng thái 10 giây
 }
 
 // Dùng ở route API: công tắc tắt thì trả 404 như route không tồn tại.

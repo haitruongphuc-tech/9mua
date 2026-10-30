@@ -1,4 +1,5 @@
 import { now } from '@/lib/clock';
+import { isBlockedEither } from '@/lib/blocks';
 import { db } from '@/lib/db';
 import { getKiotByOwner, isKiotActive } from '@/modules/kiot';
 
@@ -16,8 +17,10 @@ export async function activeBan(userId: string): Promise<boolean> {
   return (await db.messageBan.count({ where: { userId, OR: [{ until: null }, { until: { gt: at } }] } })) > 0;
 }
 
-// Chặn theo cả hai chiều: người bị chặn không gửi được, người chặn cũng không gửi cho người mình đã chặn.
+// Chặn theo cả hai chiều: người bị chặn không gửi được, người chặn cũng không gửi cho người mình đã chặn. Chặn trên toàn
+// web (SPEC-social.md V5.3) cũng chặn nhắn tin.
 export async function isBlocked(a: string, b: string): Promise<boolean> {
+  if (await isBlockedEither(a, b)) return true;
   return (
     (await db.messageBlock.count({
       where: {

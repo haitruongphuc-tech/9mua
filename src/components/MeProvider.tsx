@@ -13,6 +13,8 @@ type MeState = {
   notifications: number;
   liveNow: boolean;
   inbox: number;
+  // Công tắc chức năng đang bật (src/lib/features.ts) để ẩn nút của nhóm đang tắt.
+  features: Record<string, boolean>;
 };
 
 const MeContext = createContext<MeState>({
@@ -21,6 +23,7 @@ const MeContext = createContext<MeState>({
   notifications: 0,
   liveNow: false,
   inbox: 0,
+  features: {},
 });
 
 // Một lần gọi /api/auth/me cho cả header, thanh dưới và popup (undefined = đang tải). hasSession do layout tính từ
@@ -33,6 +36,7 @@ export function MeProvider({ children, hasSession }: { children: React.ReactNode
     notifications: 0,
     liveNow: false,
     inbox: 0,
+    features: {},
   });
 
   useEffect(() => {
@@ -47,6 +51,7 @@ export function MeProvider({ children, hasSession }: { children: React.ReactNode
             notifications?: number;
             liveNow?: boolean;
             inbox?: number;
+            features?: Record<string, boolean>;
           }) => {
             if (alive)
               setState({
@@ -55,11 +60,14 @@ export function MeProvider({ children, hasSession }: { children: React.ReactNode
                 notifications: d.notifications ?? 0,
                 liveNow: Boolean(d.liveNow),
                 inbox: d.inbox ?? 0,
+                features: d.features ?? {},
               });
           },
         )
         .catch(
-          () => alive && setState({ me: null, cartCount: 0, notifications: 0, liveNow: false, inbox: 0 }),
+          () =>
+            alive &&
+            setState({ me: null, cartCount: 0, notifications: 0, liveNow: false, inbox: 0, features: {} }),
         );
     load();
     window.addEventListener(ME_CHANGED_EVENT, load);
@@ -73,3 +81,4 @@ export function MeProvider({ children, hasSession }: { children: React.ReactNode
 }
 
 export const useMe = () => useContext(MeContext);
+export const useFeature = (name: string) => Boolean(useContext(MeContext).features[name]);

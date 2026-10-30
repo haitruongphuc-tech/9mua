@@ -1,3 +1,4 @@
+import { isBlockedEither } from '@/lib/blocks';
 import { db } from '@/lib/db';
 import { getIntSetting } from '@/lib/settings';
 import { kiotOrigin } from '@/lib/urls';
@@ -170,6 +171,8 @@ export type LiveView =
 export async function getLiveForViewer(liveId: string, viewer: Viewer): Promise<LiveView | null> {
   const live = await getLive(liveId);
   if (!live) return null;
+  // Người chặn nhau với chủ phòng không vào xem được (SPEC-social.md V5.3).
+  if (viewer.userId && (await isBlockedEither(viewer.userId, live.hostUserId))) return null;
   const host = (await hostsOf([live])).get(live.hostUserId)!;
   if (live.status === 'ended' || live.status === 'stopped')
     return { kind: 'ended', id: live.id, title: live.title, host };

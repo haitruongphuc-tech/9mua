@@ -3,7 +3,8 @@
 import { Send } from 'lucide-react';
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
-import { useMe } from '@/components/MeProvider';
+import { useFeature, useMe } from '@/components/MeProvider';
+import { BlockButton } from '@/components/social/BlockButton';
 import { Avatar } from '@/components/ui/Avatar';
 import { useT } from '@/i18n/client';
 import { Sheet } from './Sheet';
@@ -33,6 +34,7 @@ export function CommentsSheet({
 }) {
   const t = useT();
   const { me } = useMe();
+  const canBlock = useFeature('social_more');
   const [items, setItems] = useState<Root[]>([]);
   const [total, setTotal] = useState(0);
   const [myId, setMyId] = useState<string | null>(null);
@@ -138,6 +140,14 @@ export function CommentsSheet({
             <button type="button" onClick={() => act(c.id, 'report')}>
               {t('feed.comments.reportAction')}
             </button>
+          ) : null}
+          {myId && myId !== c.author.id && canBlock ? (
+            <BlockButton
+              userId={c.author.id}
+              name={c.author.displayName}
+              className=""
+              onDone={() => void load()}
+            />
           ) : null}
         </div>
       </div>

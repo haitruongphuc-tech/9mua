@@ -1,4 +1,5 @@
 import { now } from '@/lib/clock';
+import { isBlockedEither } from '@/lib/blocks';
 import { db } from '@/lib/db';
 import { getLive, pinnable } from './session';
 
@@ -29,6 +30,7 @@ export async function sendChat(liveId: string, userId: string, raw: string): Pro
   if (!live || live.status !== 'live') return { ok: false, error: 'NOT_LIVE' };
   if (await db.liveChatBan.findUnique({ where: { liveId_userId: { liveId, userId } } }))
     return { ok: false, error: 'BANNED' };
+  if (await isBlockedEither(userId, live.hostUserId)) return { ok: false, error: 'BANNED' };
   return db.$transaction(async (tx) => {
     // Khoá theo người gửi: 1 tin mỗi 3 giây kể cả khi bấm gửi liên tục.
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`chat:${userId}`}))`;

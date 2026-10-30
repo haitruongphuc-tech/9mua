@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client';
+import { isBlockedEither } from '@/lib/blocks';
 import { db } from '@/lib/db';
 import { notifyKey } from '@/lib/notifications';
 import { hydrateVideos, type FeedVideo, type Viewer } from '@/modules/creator';
@@ -23,11 +24,13 @@ export async function toggleFollow(
   followeeId: string,
 ): Promise<
   | { ok: true; following: boolean; followers: number }
-  | { ok: false; error: 'SELF' | 'FREE_LIMIT' | 'NOT_FOUND' }
+  | { ok: false; error: 'SELF' | 'FREE_LIMIT' | 'NOT_FOUND' | 'BLOCKED' }
 > {
   if (followerId === followeeId) return { ok: false, error: 'SELF' };
   const target = await db.user.findUnique({ where: { id: followeeId }, select: { lockedAt: true } });
   if (!target || target.lockedAt) return { ok: false, error: 'NOT_FOUND' };
+  // Chặn nhau (SPEC-social.md V5.3) thì không follow được, kể cả bỏ follow đã bị gỡ sẵn khi chặn.
+  if (await isBlockedEither(followerId, followeeId)) return { ok: false, error: 'BLOCKED' };
   const removed = await db.follow.deleteMany({ where: { followerId, followeeId } });
   let following = false;
   if (removed.count === 0) {

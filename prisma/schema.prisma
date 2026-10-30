@@ -1066,6 +1066,16 @@ model MessageImage {
   @@index([ownerId, createdAt])
 }
 
+// Chặn trên toàn web (SPEC-social.md V5.3): một chiều là đủ để cả hai không thấy nhau. Chặn ở Hộp thư cũng ghi vào đây.
+model UserBlock {
+  blockerId String
+  blockedId String
+  createdAt DateTime @default(now())
+
+  @@id([blockerId, blockedId])
+  @@index([blockedId])
+}
+
 model MessageBlock {
   blockerId String
   blockedId String

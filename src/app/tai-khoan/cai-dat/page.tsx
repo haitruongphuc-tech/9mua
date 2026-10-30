@@ -4,6 +4,9 @@ import { logoutAction, logoutOtherDevicesAction } from '@/app/(auth)/actions';
 import { ClientMessages } from '@/i18n/ClientMessages';
 import { getT } from '@/i18n/server';
 import { handleInfo, requireUser } from '@/modules/identity';
+import { listBlockedUsers } from '@/modules/social';
+import { Avatar } from '@/components/ui/Avatar';
+import { BlockButton } from '@/components/social/BlockButton';
 import { isFeatureOn } from '@/lib/features';
 import { formatDate } from '@/lib/format';
 import { EmailOtpForm } from '@/components/auth/EmailOtpForm';
@@ -18,7 +21,13 @@ export default async function AccountSettingsPage({
   searchParams: Promise<{ 'da-dang-xuat-thiet-bi-khac'?: string }>;
 }) {
   const user = await requireUser();
-  const [params, t, handleOn] = await Promise.all([searchParams, getT(), isFeatureOn('account_more')]);
+  const [params, t, handleOn, blockOn] = await Promise.all([
+    searchParams,
+    getT(),
+    isFeatureOn('account_more'),
+    isFeatureOn('social_more'),
+  ]);
+  const blocked = blockOn ? await listBlockedUsers(user.id) : [];
   const handle = handleOn ? await handleInfo(user.id) : null;
   return (
     <ClientMessages prefixes={['me.settings.', 'auth.otp.', 'auth.addEmail.']}>
@@ -56,6 +65,30 @@ export default async function AccountSettingsPage({
           )}
           {user.mustChangePassword ? null : <PasswordForm forced={false} />}
           <SetPasswordForm email={user.email} />
+
+          {blockOn ? (
+            // Danh sách chặn trên toàn web, gộp cả chặn ở Hộp thư (SPEC-social.md V5.3).
+            <Card title={t('common.block.list')} id="da-chan">
+              {blocked.length === 0 ? (
+                <p className="text-[13px] text-white/60">{t('common.block.empty')}</p>
+              ) : (
+                <ul className="flex flex-col divide-y divide-white/10" data-testid="blocked-list">
+                  {blocked.map((u) => (
+                    <li key={u.id} className="flex items-center gap-3 py-2">
+                      <Avatar name={u.displayName} url={u.avatarUrl} className="h-9 w-9 text-[14px]" />
+                      <span className="min-w-0 flex-1 truncate font-bold">{u.displayName}</span>
+                      <BlockButton
+                        userId={u.id}
+                        name={u.displayName}
+                        unblock
+                        className="h-8 rounded-full bg-white/10 px-3 text-[12px] font-black"
+                      />
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Card>
+          ) : null}
 
           <Card title={t('me.settings.devices')} id="thiet-bi">
             {params['da-dang-xuat-thiet-bi-khac'] ? (

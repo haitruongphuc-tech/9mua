@@ -1,4 +1,5 @@
 import { now } from '@/lib/clock';
+import { blockedEitherIds, isBlockedEither } from '@/lib/blocks';
 import { db } from '@/lib/db';
 import { notifyKey } from '@/lib/notifications';
 import { hasLink } from './links';
@@ -19,7 +20,7 @@ export type CommentView = {
   replies: Omit<CommentView, 'replies'>[];
 };
 
-type AddError = 'TOO_LONG' | 'EMPTY' | 'HAS_LINK' | 'RATE_LIMIT' | 'DAILY_LIMIT' | 'NOT_FOUND';
+type AddError = 'TOO_LONG' | 'EMPTY' | 'HAS_LINK' | 'RATE_LIMIT' | 'DAILY_LIMIT' | 'NOT_FOUND' | 'BLOCKED';
 
 export async function addComment(
   userId: string,
@@ -36,6 +37,7 @@ export async function addComment(
     select: { id: true, authorId: true },
   });
   if (!video) return { ok: false, error: 'NOT_FOUND' };
+  if (await isBlockedEither(userId, video.authorId)) return { ok: false, error: 'BLOCKED' };
   // Trả lời 1 cấp: trả lời một câu trả lời thì gắn vào bình luận gốc.
   let rootId: string | null = null;
   let parentAuthor: string | null = null;
@@ -44,6 +46,7 @@ export async function addComment(
     if (!parent) return { ok: false, error: 'NOT_FOUND' };
     rootId = parent.parentId ?? parent.id;
     parentAuthor = parent.userId;
+    if (await isBlockedEither(userId, parent.userId)) return { ok: false, error: 'BLOCKED' };
   }
   const t = now();
   const [last, today] = await Promise.all([
@@ -64,14 +67,22 @@ export async function addComment(
   return { ok: true, id: c.id };
 }
 
-export async function listComments(videoId: string): Promise<{ items: CommentView[]; total: number }> {
+// viewerId: người đang xem — không thấy bình luận của người chặn nhau với mình (SPEC-social.md V5.3).
+export async function listComments(
+  videoId: string,
+  viewerId?: string | null,
+): Promise<{ items: CommentView[]; total: number }> {
   const video = await db.video.findUnique({ where: { id: videoId }, select: { authorId: true } });
   if (!video) return { items: [], total: 0 };
-  const rows = await db.comment.findMany({
-    where: { videoId, hiddenAt: null },
-    orderBy: { createdAt: 'asc' },
-    take: 500,
-  });
+  const blocked = await blockedEitherIds(viewerId);
+  if (blocked.has(video.authorId)) return { items: [], total: 0 };
+  const rows = (
+    await db.comment.findMany({
+      where: { videoId, hiddenAt: null },
+      orderBy: { createdAt: 'asc' },
+      take: 500,
+    })
+  ).filter((r) => !blocked.has(r.userId));
   const users = await db.user.findMany({
     where: { id: { in: [...new Set(rows.map((r) => r.userId))] } },
     select: { id: true, displayName: true, avatarUrl: true },

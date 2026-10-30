@@ -684,7 +684,7 @@ Nhánh `nang-cap-mot-dot`. Trừ App (C32–C36). Mỗi task: test trước → 
 ### Nền móng
 - [x] **T79: Công tắc chức năng** + `/admin/cong-tac`.
 - [x] **T80: @tên người dùng** (C69).
-- [ ] **T81: Chặn toàn web** (C68).
+- [x] **T81: Chặn toàn web** (C68).
 - [ ] **T82: Quyền riêng tư video + `canViewVideo`** (C50).
 - [ ] **T83: Cam kết nội dung** (C10, C11).
 

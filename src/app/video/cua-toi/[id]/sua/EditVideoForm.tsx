@@ -99,8 +99,8 @@ export function EditVideoForm({
   return (
     <form
       onSubmit={submit}
-      // Ô nhập và nút được cuộn tới phải nằm trên thanh nút dính ở đáy và menu dưới.
-      className="flex flex-col gap-4 [&_button]:scroll-mb-44 [&_input]:scroll-mb-44 [&_select]:scroll-mb-44 [&_textarea]:scroll-mb-44"
+      // Ô nhập và nút trong các nhóm (không phải nút đăng ở thanh dính) được cuộn tới phải nằm trên thanh nút dính ở đáy và menu dưới.
+      className="flex flex-col gap-4 [&_fieldset]:min-w-0 [&_fieldset_button]:scroll-mb-44 [&_input]:scroll-mb-44 [&_select]:scroll-mb-44 [&_textarea]:scroll-mb-44"
       data-testid="edit-video-form"
     >
       <fieldset className="flex flex-col gap-2" data-testid="edit-cover">
@@ -203,13 +203,13 @@ export function EditVideoForm({
           {video.aiStudio ? <span className="text-white/50">· {t('post.aiStudioLocked')}</span> : null}
         </label>
       </fieldset>
-      <div className="grid grid-cols-[2fr_3fr] gap-2">
+      <div className="grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-2">
         <label className="flex flex-col gap-1 text-[12px] font-bold text-white/70">
           {t('post.province')}
           <select
             value={province}
             onChange={(e) => setProvince(e.target.value)}
-            className={`${field} h-11 py-0 font-normal`}
+            className={`${field} h-11 w-full min-w-0 py-0 font-normal`}
             data-testid="edit-province"
           >
             <option value="">{t('post.noPlace')}</option>
@@ -227,7 +227,7 @@ export function EditVideoForm({
             onChange={(e) => setPlaceName(e.target.value)}
             maxLength={60}
             placeholder={t('post.placeNameHint')}
-            className={`${field} h-11 py-0 font-normal`}
+            className={`${field} h-11 w-full min-w-0 py-0 font-normal`}
             data-testid="edit-place"
           />
         </label>

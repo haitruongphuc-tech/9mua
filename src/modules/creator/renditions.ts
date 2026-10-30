@@ -27,9 +27,10 @@ export function hlsArgs(
   levels: number[],
   hasAudio: boolean,
   maxSec: number,
+  look: string | null = null,
 ): string[] {
   const filter =
-    `[0:v]split=${levels.length}${levels.map((_, i) => `[s${i}]`).join('')};` +
+    `[0:v]${look ? `${look},` : ''}split=${levels.length}${levels.map((_, i) => `[s${i}]`).join('')};` +
     levels.map((h, i) => `[s${i}]${scaleShort(h)}[v${i}]`).join(';');
   const args = [...BASE, '-i', src, '-filter_complex', filter];
   levels.forEach((h, i) => {
@@ -96,8 +97,9 @@ export async function makeHls(
   hasAudio: boolean,
   maxSec: number,
   timeoutMs: number,
+  look: string | null = null,
 ): Promise<void> {
-  await run('ffmpeg', hlsArgs(src, outDir, levels, hasAudio, maxSec), timeoutMs);
+  await run('ffmpeg', hlsArgs(src, outDir, levels, hasAudio, maxSec, look), timeoutMs);
 }
 
 // Tên file init của một mức: 1 mức thì "init.mp4", nhiều mức thì "init_<thứ tự>.mp4" — đọc từ dòng EXT-X-MAP.

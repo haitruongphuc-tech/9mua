@@ -111,3 +111,6 @@ export {
   MAX_CAPTION_SECONDS,
   type CaptionsForEdit,
 } from './captions';
+// Bổ sung 30/10/2026 (SPEC-creator.md V5.5): quay trong app, bộ lọc màu, làm đẹp.
+export { LOOKS, CSS_LOOKS, cssBeauty, isLook, MAX_BEAUTY, type Look } from './look';
+export { assembleRecording, SPEEDS, MAX_SEGMENTS, type AssembleResult } from './recording';

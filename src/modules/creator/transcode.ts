@@ -60,7 +60,7 @@ export async function transcode(
   outMp4: string,
   outPoster: string,
   durationSec: number,
-  opts: { maxSec?: number; timeoutMs?: number } = {},
+  opts: { maxSec?: number; timeoutMs?: number; look?: string | null } = {},
 ) {
   await run(
     'ffmpeg',
@@ -77,7 +77,7 @@ export async function transcode(
       '-map',
       '0:a:0?',
       '-vf',
-      "scale=w='min(720,iw)':h='min(1280,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2,format=yuv420p",
+      `scale=w='min(720,iw)':h='min(1280,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2,${opts.look ? `${opts.look},` : ''}format=yuv420p`,
       '-c:v',
       'libx264',
       '-preset',

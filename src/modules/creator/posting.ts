@@ -30,6 +30,8 @@ export type PostOptions = VideoOptions & {
   placeName?: string | null;
   aiGenerated?: boolean;
   autoCaptions?: boolean; // phụ đề tự động (SPEC-creator.md V5.4)
+  look?: string | null; // bộ lọc màu (SPEC-creator.md V5.5)
+  beauty?: number; // làm đẹp 0–3
 };
 
 // Giờ hẹn hợp lệ: từ 15 phút tới 30 ngày sau.

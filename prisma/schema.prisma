@@ -611,6 +611,9 @@ model Video {
   previewUrl      String?
   // Phụ đề tự động (SPEC-creator.md V5.4): người đăng bật khi đăng.
   wantCaptions    Boolean          @default(false)
+  // Bộ lọc màu và làm đẹp 0–3 (SPEC-creator.md V5.5), máy chủ áp khi xử lý.
+  look            String?
+  beauty          Int              @default(0)
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   products        VideoProduct[]

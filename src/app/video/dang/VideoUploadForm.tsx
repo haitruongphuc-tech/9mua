@@ -8,7 +8,9 @@ import { useT } from '@/i18n/client';
 import { formatVnd } from '@/lib/format';
 import type { PickableProduct } from '@/app/api/video/products/route';
 import { createVideoAction } from './actions';
+import { CameraRecorder, type RecordedSegment } from './CameraRecorder';
 import { chunkedUpload, type UploadProgress } from './chunked-upload';
+import { CSS_LOOKS, cssBeauty, LOOKS, MAX_BEAUTY, type Look } from '@/lib/looks';
 
 const MAX_CAPTION = 300;
 const STORY_SEC = 30;
@@ -19,6 +21,33 @@ const clockText = (sec: number) =>
   sec >= 3600
     ? `${Math.floor(sec / 3600)}:${String(Math.floor((sec % 3600) / 60)).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`
     : `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
+
+// Gửi các đoạn quay trong app (SPEC-creator.md V5.5) để máy chủ ghép, có thanh tiến trình.
+function postRecording(
+  segments: RecordedSegment[],
+  onProgress: (pct: number) => void,
+  messages: { failed: string; offline: string },
+): Promise<{ ok: boolean; uploadId?: string; message?: string }> {
+  const form = new FormData();
+  form.set('speeds', JSON.stringify(segments.map((s) => s.speed)));
+  segments.forEach((s, i) =>
+    form.set(`s${i}`, s.blob, `s${i}.${s.blob.type.includes('mp4') ? 'mp4' : 'webm'}`),
+  );
+  return new Promise((resolve) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/video/recording');
+    xhr.upload.onprogress = (e) => e.lengthComputable && onProgress(Math.round((e.loaded / e.total) * 100));
+    xhr.onload = () => {
+      try {
+        resolve(JSON.parse(xhr.responseText));
+      } catch {
+        resolve({ ok: false, message: messages.failed });
+      }
+    };
+    xhr.onerror = () => resolve({ ok: false, message: messages.offline });
+    xhr.send(form);
+  });
+}
 
 function putWithProgress(
   file: File,
@@ -84,6 +113,23 @@ export function VideoUploadForm({
   // Phụ đề tự động (SPEC-creator.md V5.4, công tắc auto_captions).
   const captionsOn = useFeature('auto_captions');
   const [autoCaptions, setAutoCaptions] = useState(false);
+  // Quay trong app, bộ lọc màu, làm đẹp (SPEC-creator.md V5.5, công tắc camera). Trình duyệt không cho camera thì chỉ
+  // còn nút chọn file.
+  const cameraOn = useFeature('camera');
+  const [canRecord, setCanRecord] = useState(false);
+  useEffect(
+    () => setCanRecord(Boolean(navigator.mediaDevices?.getUserMedia) && typeof MediaRecorder !== 'undefined'),
+    [],
+  );
+  const [recorderOpen, setRecorderOpen] = useState(false);
+  const [recorded, setRecorded] = useState<RecordedSegment[] | null>(null);
+  const [look, setLook] = useState<Look>('goc');
+  const [beauty, setBeauty] = useState(0);
+  const lookCss =
+    [CSS_LOOKS[look] === 'none' ? '' : CSS_LOOKS[look], cssBeauty(beauty)].filter(Boolean).join(' ') ||
+    'none';
+  const recordedSec = recorded?.reduce((sum, s) => sum + s.seconds / s.speed, 0) ?? 0;
+  const ready = Boolean(file || recorded?.length);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -102,6 +148,7 @@ export function VideoUploadForm({
   function choose(f: File | undefined) {
     setError(null);
     if (!f) return;
+    setRecorded(null);
     setDurationSec(null);
     if (f.size > limits.maxBytes)
       return setError(
@@ -124,21 +171,25 @@ export function VideoUploadForm({
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!file || error) return;
+    if (!ready || error) return;
     const asDraft = (e.nativeEvent as SubmitEvent).submitter?.getAttribute('value') === 'draft';
     setProgress(0);
     const messages = { failed: t('post.err.upload'), offline: t('post.err.offline') };
-    const up = limits.long
-      ? await chunkedUpload(
-          file,
-          durationSec,
-          (p) => {
-            setProgress(p.pct);
-            setDetail(p);
-          },
-          messages,
-        )
-      : await putWithProgress(file, setProgress, messages);
+    const up = recorded?.length
+      ? await postRecording(recorded, setProgress, messages)
+      : !file
+        ? { ok: false, message: messages.failed }
+        : limits.long
+          ? await chunkedUpload(
+              file,
+              durationSec,
+              (p) => {
+                setProgress(p.pct);
+                setDetail(p);
+              },
+              messages,
+            )
+          : await putWithProgress(file, setProgress, messages);
     setDetail(null);
     if (!up.ok || !up.uploadId) {
       setProgress(null);
@@ -163,6 +214,8 @@ export function VideoUploadForm({
             }
           : undefined,
       autoCaptions: captionsOn && mode === 'video' && autoCaptions,
+      look: cameraOn && mode === 'video' ? look : undefined,
+      beauty: cameraOn && mode === 'video' ? beauty : undefined,
     });
     setProgress(null);
     if (result?.error) setError(result.error);
@@ -182,8 +235,8 @@ export function VideoUploadForm({
   return (
     <form
       onSubmit={submit}
-      // Ô nhập và nút được cuộn tới phải nằm trên thanh nút dính ở đáy và menu dưới (không bị che trên điện thoại).
-      className="flex flex-col gap-4 [&_button]:scroll-mb-44 [&_input]:scroll-mb-44 [&_select]:scroll-mb-44 [&_textarea]:scroll-mb-44"
+      // Ô nhập và nút trong các nhóm (không phải nút đăng ở thanh dính) được cuộn tới phải nằm trên thanh nút dính ở đáy và menu dưới (không bị che trên điện thoại).
+      className="flex flex-col gap-4 [&_fieldset]:min-w-0 [&_fieldset_button]:scroll-mb-44 [&_input]:scroll-mb-44 [&_select]:scroll-mb-44 [&_textarea]:scroll-mb-44"
     >
       {duet ? (
         <div
@@ -231,6 +284,37 @@ export function VideoUploadForm({
           {error}
         </p>
       ) : null}
+      {recorderOpen ? (
+        <CameraRecorder
+          maxSec={maxSec('video')}
+          filter={lookCss}
+          onClose={() => setRecorderOpen(false)}
+          onDone={(segments) => {
+            setRecorderOpen(false);
+            setFile(null);
+            setError(null);
+            setRecorded(segments);
+          }}
+        />
+      ) : null}
+      {cameraOn && canRecord && mode === 'video' && !duet ? (
+        <button
+          type="button"
+          onClick={() => setRecorderOpen(true)}
+          className="flex h-12 items-center justify-center gap-2 rounded-[18px] bg-white/10 font-black"
+          data-testid="camera-open"
+        >
+          📷 {recorded?.length ? t('post.camera.again') : t('post.camera.open')}
+        </button>
+      ) : null}
+      {recorded?.length ? (
+        <p
+          className="rounded-[14px] bg-white/5 px-4 py-3 text-center text-[13px] font-bold"
+          data-testid="recorded-info"
+        >
+          {t('post.camera.recorded', { count: recorded.length, sec: recordedSec.toFixed(1) })}
+        </p>
+      ) : null}
       <label className="flex cursor-pointer flex-col items-center gap-2 rounded-[18px] border-2 border-dashed border-brand/60 bg-white/5 p-6 text-center font-bold">
         <span aria-hidden className="text-3xl">
           🎬
@@ -251,11 +335,46 @@ export function VideoUploadForm({
       <video
         ref={preview}
         className="mx-auto max-h-64 rounded-[14px]"
+        style={{ filter: lookCss }}
         muted
         playsInline
         controls
         hidden={!file}
       />
+      {cameraOn && mode === 'video' ? (
+        <fieldset className="flex min-w-0 flex-col gap-2" data-testid="video-looks">
+          <legend className="mb-1 text-[12px] font-bold text-white/70">{t('post.look.title')}</legend>
+          <div className="flex gap-2 overflow-x-auto pb-1" role="radiogroup">
+            {LOOKS.map((l) => (
+              <button
+                key={l}
+                type="button"
+                role="radio"
+                aria-checked={look === l}
+                onClick={() => setLook(l)}
+                data-testid={`look-${l}`}
+                className={`h-9 shrink-0 rounded-full border px-3 text-[12px] font-bold ${look === l ? 'border-brand bg-brand text-white' : 'border-white/15 bg-white/5 text-white/70'}`}
+              >
+                {t(`post.look.${l}`)}
+              </button>
+            ))}
+          </div>
+          <label className="flex items-center gap-3 text-[12px] font-bold text-white/70">
+            {t('post.beauty', { level: beauty })}
+            <input
+              type="range"
+              min={0}
+              max={MAX_BEAUTY}
+              step={1}
+              value={beauty}
+              onChange={(e) => setBeauty(Number(e.target.value))}
+              className="flex-1 accent-[#ff6b00]"
+              data-testid="video-beauty"
+            />
+          </label>
+          <p className="text-[11px] text-white/50">{t('post.beautyHint')}</p>
+        </fieldset>
+      ) : null}
       <label className="flex flex-col gap-1.5 text-[12px] font-bold text-white/70">
         {t('post.caption', { count: caption.length, max: MAX_CAPTION })}
         <textarea
@@ -309,13 +428,13 @@ export function VideoUploadForm({
             />
             {t('post.aiUsed')}
           </label>
-          <div className="mt-2 grid grid-cols-[2fr_3fr] gap-2">
+          <div className="mt-2 grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-2">
             <label className="flex flex-col gap-1 text-[12px] font-bold text-white/70">
               {t('post.province')}
               <select
                 value={province}
                 onChange={(e) => setProvince(e.target.value)}
-                className={`${field} h-11 py-0 font-normal`}
+                className={`${field} h-11 w-full min-w-0 py-0 font-normal`}
                 data-testid="video-province"
               >
                 <option value="">{t('post.noPlace')}</option>
@@ -333,7 +452,7 @@ export function VideoUploadForm({
                 onChange={(e) => setPlaceName(e.target.value)}
                 maxLength={60}
                 placeholder={t('post.placeNameHint')}
-                className={`${field} h-11 py-0 font-normal`}
+                className={`${field} h-11 w-full min-w-0 py-0 font-normal`}
                 data-testid="video-place"
               />
             </label>
@@ -344,7 +463,7 @@ export function VideoUploadForm({
               type="datetime-local"
               value={scheduleAt}
               onChange={(e) => setScheduleAt(e.target.value)}
-              className={`${field} h-11 py-0 font-normal`}
+              className={`${field} h-11 w-full min-w-0 py-0 font-normal`}
               data-testid="video-schedule"
             />
             <span className="font-normal text-white/50">{t('post.scheduleHint')}</span>
@@ -450,7 +569,7 @@ export function VideoUploadForm({
             <button
               type="submit"
               value="draft"
-              disabled={!file || Boolean(error) || progress !== null || remaining[mode] <= 0}
+              disabled={!ready || Boolean(error) || progress !== null || remaining[mode] <= 0}
               className="h-12 shrink-0 rounded-full border border-white/20 px-5 font-black text-white disabled:opacity-50"
               data-testid="video-save-draft"
             >
@@ -459,7 +578,7 @@ export function VideoUploadForm({
           ) : null}
           <button
             type="submit"
-            disabled={!file || Boolean(error) || progress !== null || remaining[mode] <= 0}
+            disabled={!ready || Boolean(error) || progress !== null || remaining[mode] <= 0}
             className="h-12 flex-1 rounded-full bg-brand font-black text-white shadow-[0_0_20px_rgb(255_107_0/0.35)] disabled:opacity-50"
           >
             {t(
@@ -473,7 +592,7 @@ export function VideoUploadForm({
         </div>
         {/* Nút chưa bấm được thì nói lý do ngay dưới nút (lỗi video quá dài/quá nặng cũng hiện ở đây). */}
         <p className="text-center text-[12px] text-white/50" data-testid="video-submit-hint">
-          {!file && remaining[mode] > 0
+          {!ready && remaining[mode] > 0
             ? t('post.pickFirst')
             : error && progress === null
               ? error

@@ -15,6 +15,7 @@ import { hasCurrentCommitment } from '@/modules/identity';
 import { MAX_DRAFTS, normalizePlace, scheduleOk, type PostOptions } from './posting';
 import { checkLongVideo, SHORT_MAX_SEC, videoLimits } from './limits';
 import { probe } from './transcode';
+import { isLook, MAX_BEAUTY } from './look';
 
 export const MAX_VIDEO_BYTES = 100 * 1024 * 1024;
 export const MAX_VIDEOS_PER_DAY = 10;
@@ -219,6 +220,13 @@ export async function createVideoUpload(
         aiStudio: meta.aiStudio === true,
         sourceSec,
         wantCaptions: kind === 'video' && meta.options?.autoCaptions === true,
+        look: isLook(meta.options?.look) && meta.options.look !== 'goc' ? meta.options.look : null,
+        beauty:
+          Number.isInteger(meta.options?.beauty) &&
+          meta.options!.beauty! > 0 &&
+          meta.options!.beauty! <= MAX_BEAUTY
+            ? meta.options!.beauty!
+            : 0,
         createdAt: now(),
         products: { create: productIds.map((productId, position) => ({ productId, position })) },
       },

@@ -21,9 +21,15 @@ export async function createVideoAction(input: {
     publishAt?: string | null; // "2026-11-01T09:30:00+07:00" (giờ Việt Nam)
   };
   autoCaptions?: boolean; // phụ đề tự động (SPEC-creator.md V5.4), riêng công tắc auto_captions
+  look?: string; // bộ lọc màu, làm đẹp (SPEC-creator.md V5.5), công tắc camera
+  beauty?: number;
 }): Promise<{ error: string }> {
   const user = await requireUser();
   const autoCaptions = input.autoCaptions === true && (await isFeatureOn('auto_captions'));
+  const camera = await isFeatureOn('camera');
+  const looks = camera
+    ? { look: typeof input.look === 'string' ? input.look : null, beauty: Number(input.beauty) || 0 }
+    : {};
   // Tuỳ chọn khi đăng chỉ nhận khi công tắc post_options bật (SPEC-creator.md V5.3).
   const postOptions =
     input.options && (await isFeatureOn('post_options'))
@@ -47,7 +53,7 @@ export async function createVideoAction(input: {
     productIds: Array.isArray(input.productIds) ? input.productIds.map(String).slice(0, 10) : [],
     kind: input.kind === 'story' ? 'story' : 'video',
     duetOfId: typeof input.duetOfId === 'string' ? input.duetOfId : null,
-    options: autoCaptions ? { ...postOptions, autoCaptions } : postOptions,
+    options: { ...postOptions, ...looks, ...(autoCaptions ? { autoCaptions } : {}) },
   });
   if (!result.ok) return { error: (await getT())(`post.err.${result.error}`) };
   redirect(

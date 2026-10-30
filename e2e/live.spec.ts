@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { E2E_CRON_TOKEN } from '../playwright.config';
+import { fakeCamera } from './helpers/camera';
 import { activateKiot, e2eDb } from './helpers/db';
 import { signUpBuyer } from './helpers/orders';
 import { createProductViaUi } from './helpers/products';
@@ -15,28 +16,6 @@ test.beforeAll(async () => {
     data: { status: 'ended', endedAt: new Date(), endReason: 'e2e_cleanup' },
   });
 });
-
-// Trình duyệt chỉ mở camera trên trang https; máy test chạy http://9mua.test nên thay camera bằng hình vẽ canvas
-// (chỉ trong E2E). RTCPeerConnection vẫn chạy thật.
-async function fakeCamera(target: import('@playwright/test').Page) {
-  await target.addInitScript(() => {
-    if (typeof navigator.mediaDevices?.getUserMedia === 'function') return;
-    const getUserMedia = async () => {
-      const canvas = Object.assign(document.createElement('canvas'), { width: 360, height: 640 });
-      const ctx = canvas.getContext('2d')!;
-      let n = 0;
-      setInterval(() => {
-        ctx.fillStyle = `hsl(${(n += 7) % 360} 80% 50%)`;
-        ctx.fillRect(0, 0, 360, 640);
-      }, 100);
-      const stream = canvas.captureStream(15);
-      const audio = new AudioContext().createMediaStreamDestination();
-      audio.stream.getAudioTracks().forEach((t) => stream.addTrack(t));
-      return stream;
-    };
-    Object.defineProperty(navigator, 'mediaDevices', { value: { getUserMedia }, configurable: true });
-  });
-}
 
 async function syncMedia(request: import('@playwright/test').APIRequestContext) {
   const res = await request.get('http://localhost:3100/api/internal/live/sync', {

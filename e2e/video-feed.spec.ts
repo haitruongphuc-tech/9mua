@@ -68,6 +68,16 @@ test('đăng video gắn sản phẩm → feed → vuốt → thẻ sản phẩm
   const video = await e2eDb.video.findFirstOrThrow({ where: { caption: `Mật ong ngon ${stamp} #matong` } });
   expect(video.status).toBe('ready');
 
+  // Nút "＋ Đăng" có chữ ở góc trái trên Trang chủ (SPEC-social.md bổ sung 30/10, A1), không đè lên tab Đang Follow/Dành
+  // cho bạn, kể cả màn 360px.
+  await creator.goto('/');
+  const post = creator.getByTestId('feed-post');
+  await expect(post).toHaveText('Đăng');
+  const [postBox, tabsBox] = await Promise.all([post.boundingBox(), creator.getByRole('tablist').boundingBox()]);
+  expect(postBox!.x + postBox!.width).toBeLessThanOrEqual(tabsBox!.x);
+  await post.click();
+  await creator.waitForURL((u) => u.pathname === '/video/dang');
+
   await creator.goto(`/v/${video.id}`);
   const items = creator.getByTestId('feed-item');
   await expect(items.first()).toContainText(`Mật ong ngon ${stamp}`);

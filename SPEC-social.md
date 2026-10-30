@@ -106,7 +106,7 @@ revokeVoucher(voucherId, adminId, reason): Promise<void>   // cho admin
 
 ## Bổ sung 30/10/2026 — Đợt A: trang cá nhân, tìm kiếm, nút Đăng, thống kê creator
 
-> **Trạng thái: chờ CEO duyệt.** CEO đã chốt qua chat 30/10:
+> **Trạng thái: CEO duyệt qua chat 30/10/2026 ("duyet").** CEO đã chốt qua chat 30/10:
 > - làm theo đợt, bắt đầu Đợt A;
 > - **cho phép thêm 3 cột trống vào bảng `User`**;
 > - hàng "Creator nổi bật" để sau;
@@ -172,7 +172,7 @@ Giữ nguyên đường dẫn để link đã chia sẻ không hỏng.
 - Tìm **không cần dấu, không phân biệt hoa thường**. Ví dụ "thanh long" tìm ra "Thanh Long".
 - Thứ tự kết quả:
   - **Tài khoản:** theo tên hiển thị. Tên bắt đầu bằng từ khoá xếp trước, sau đó người có nhiều người theo dõi xếp
-    trước. Không hiện tài khoản bị khoá.
+    trước. Không hiện tài khoản bị khoá và tài khoản admin (CEO), để kẻ xấu không tìm ra tài khoản quản trị.
   - **Video:** tìm theo chú thích và hashtag. Chỉ video đang được hiện trên feed (đã đăng, không phải Story, tài khoản
     không bị khoá). Xếp theo điểm feed.
   - **Hashtag:** tìm theo tên, kèm số video, nhiều video xếp trước.
@@ -201,10 +201,12 @@ Giữ nguyên đường dẫn để link đã chia sẻ không hỏng.
   - `setProfileImage(userId, 'avatar' | 'cover', buffer)`.
   - `removeProfileImage(userId, kind)`.
   - `publicProfiles(ids)`: trả `{ id, displayName, avatarUrl }`, dùng khi hiện ảnh đại diện ở module khác.
-  - `searchUsers(q, limit)`.
-  - `clearProfileByAdmin(adminId, userId, reason)`.
+  - `getPublicProfile(userId)`: thêm `coverUrl`, `bio`; tài khoản khoá trả `null`.
+  - `searchPublicUsers(q, limit)`.
+  - `clearProfile(userId)`: trả bản trước khi gỡ.
+- `admin`: `clearUserProfile(adminId, userId, reason)` (ghi audit log, báo người dùng).
 - `social`:
-  - `followList(userId, 'followers' | 'following', cursor?)`.
+  - `followList(userId, 'followers' | 'following', page?)`.
   - `searchHashtags(q, limit)`.
 - `creator`:
   - `searchVideos(q, limit)`.

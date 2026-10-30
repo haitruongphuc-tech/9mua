@@ -1,7 +1,8 @@
 import { audit } from '@/lib/audit';
 import { db } from '@/lib/db';
 import { getKiotFee, grantYear, setKiotFee, setKiotFeeUsd } from '@/modules/billing';
-import { lockUser, requestPasswordReset, resetPassword, unlockUser } from '@/modules/identity';
+import { notifyKey } from '@/lib/notifications';
+import { clearProfile, lockUser, requestPasswordReset, resetPassword, unlockUser } from '@/modules/identity';
 import { lockKiot, unlockKiot } from '@/modules/kiot';
 import { adjustBalance, availableBalance } from '@/modules/payouts';
 import { getSetting, setSetting, SETTING_DEFAULTS, type SettingKey } from '@/lib/settings';
@@ -48,6 +49,25 @@ export async function unlockUserAccount(adminId: string, userId: string): Promis
     after: await userSnap(userId),
   });
   return { ok: true, message: 'Đã mở khoá tài khoản.' };
+}
+
+// Gỡ ảnh đại diện, ảnh bìa và giới thiệu vi phạm (SPEC-social.md bổ sung 30/10, A2); người dùng được báo kèm lý do.
+export async function clearUserProfile(adminId: string, userId: string, reason: string): Promise<AdminResult> {
+  const missing = needReason(reason);
+  if (missing) return missing;
+  const before = await clearProfile(userId);
+  if (!before) return { ok: false, error: 'Không tìm thấy người dùng.' };
+  await audit({
+    adminId,
+    action: 'user.clear_profile',
+    targetType: 'user',
+    targetId: userId,
+    reason,
+    before,
+    after: { avatarUrl: null, coverUrl: null, bio: null },
+  });
+  await notifyKey(userId, 'notify.profileCleared', { detail: reason.trim() }, `/creator/${userId}`);
+  return { ok: true, message: 'Đã gỡ ảnh đại diện, ảnh bìa và giới thiệu.' };
 }
 
 export async function sendResetLink(adminId: string, userId: string): Promise<AdminResult> {

@@ -10,6 +10,7 @@ import { activeViewers, viewerKey, viewToken, type Viewer } from './viewers';
 export type LiveHost = {
   id: string;
   displayName: string;
+  avatarUrl: string | null;
   href: string; // Kiot của người phát (nếu có), không thì trang creator
   kiot: { slug: string; name: string; logoUrl: string | null } | null;
 };
@@ -30,7 +31,7 @@ async function hostsOf(
   const [users, kiots] = await Promise.all([
     db.user.findMany({
       where: { id: { in: lives.map((l) => l.hostUserId) } },
-      select: { id: true, displayName: true },
+      select: { id: true, displayName: true, avatarUrl: true },
     }),
     kiotBasics(lives.map((l) => l.kiotId).filter((k): k is string => Boolean(k))),
   ]);
@@ -41,6 +42,7 @@ async function hostsOf(
     map.set(l.hostUserId, {
       id: l.hostUserId,
       displayName: u?.displayName ?? '',
+      avatarUrl: u?.avatarUrl ?? null,
       href: k ? kiotOrigin(k.slug) : `/creator/${l.hostUserId}`,
       kiot: k ? { slug: k.slug, name: k.name, logoUrl: k.logoUrl } : null,
     });

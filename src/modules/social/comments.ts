@@ -14,7 +14,7 @@ export type CommentView = {
   text: string;
   createdAt: Date;
   pinned: boolean;
-  author: { id: string; displayName: string };
+  author: { id: string; displayName: string; avatarUrl: string | null };
   byVideoAuthor: boolean;
   replies: Omit<CommentView, 'replies'>[];
 };
@@ -74,7 +74,7 @@ export async function listComments(videoId: string): Promise<{ items: CommentVie
   });
   const users = await db.user.findMany({
     where: { id: { in: [...new Set(rows.map((r) => r.userId))] } },
-    select: { id: true, displayName: true },
+    select: { id: true, displayName: true, avatarUrl: true },
   });
   const name = new Map(users.map((u) => [u.id, u]));
   const view = (r: (typeof rows)[number]) => ({
@@ -82,7 +82,7 @@ export async function listComments(videoId: string): Promise<{ items: CommentVie
     text: r.text,
     createdAt: r.createdAt,
     pinned: Boolean(r.pinnedAt),
-    author: name.get(r.userId) ?? { id: r.userId, displayName: '9MUA' },
+    author: name.get(r.userId) ?? { id: r.userId, displayName: '9MUA', avatarUrl: null },
     byVideoAuthor: r.userId === video.authorId,
   });
   const roots = rows.filter((r) => !r.parentId);

@@ -40,6 +40,7 @@ export {
 export {
   lockUserAccount,
   unlockUserAccount,
+  clearUserProfile,
   sendResetLink,
   issueTempPassword,
   lockKiotAccount,

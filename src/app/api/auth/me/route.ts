@@ -19,7 +19,7 @@ export async function GET() {
   ]);
   return Response.json(
     {
-      user: user ? { displayName: user.displayName, role: user.role } : null,
+      user: user ? { displayName: user.displayName, avatarUrl: user.avatarUrl, role: user.role } : null,
       cartCount,
       notifications,
       liveNow,

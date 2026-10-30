@@ -19,7 +19,7 @@ export type FeedVideo = {
   width: number | null;
   height: number | null;
   durationSec: number | null;
-  author: { id: string; displayName: string };
+  author: { id: string; displayName: string; avatarUrl: string | null };
   likes: number;
   views: number;
   liked: boolean;
@@ -170,7 +170,7 @@ export async function hydrateVideos(ids: string[], viewer: Viewer): Promise<Feed
   const pinnedSet = new Set(pins);
   const authors = await db.user.findMany({
     where: { id: { in: videos.map((v) => v.authorId) } },
-    select: { id: true, displayName: true },
+    select: { id: true, displayName: true, avatarUrl: true },
   });
   const authorById = new Map(authors.map((a) => [a.id, a]));
   const liked = new Set(likes.map((l) => l.videoId));
@@ -188,7 +188,7 @@ export async function hydrateVideos(ids: string[], viewer: Viewer): Promise<Feed
       width: v.width,
       height: v.height,
       durationSec: v.durationSec,
-      author: authorById.get(v.authorId) ?? { id: v.authorId, displayName: 'Creator' },
+      author: authorById.get(v.authorId) ?? { id: v.authorId, displayName: 'Creator', avatarUrl: null },
       likes: v.likes,
       views: v.views,
       liked: liked.has(v.id),

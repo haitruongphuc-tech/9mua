@@ -7,6 +7,7 @@ export const feed: FeedMessages = {
   'feed.emptyFollowing': '아직 아무도 팔로우하지 않았어요',
   'feed.seeForYou': '추천 보기',
   'feed.post': '+ 동영상 올리기',
+  'feed.postShort': "올리기",
   'feed.close': '닫기',
   'feed.unmute': '탭해서 소리 켜기',
   'feed.pinned': '📌 고정',

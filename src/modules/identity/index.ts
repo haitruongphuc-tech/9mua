@@ -69,3 +69,16 @@ export {
   type OauthLoginResult,
 } from './oauth';
 export { linkWithTicket, openLinkTicket, type LinkProvider } from './link';
+// Bổ sung 30/10/2026 (SPEC-social.md Đợt A): hồ sơ công khai.
+export {
+  setProfileImage,
+  removeProfileImage,
+  publicProfiles,
+  getPublicProfile,
+  clearProfile,
+  MAX_BIO,
+  type ProfileImageKind,
+  type PublicProfile,
+  type FullPublicProfile,
+} from './profile';
+export { searchPublicUsers, type UserSearchHit } from './search';

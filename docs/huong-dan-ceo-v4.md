@@ -123,3 +123,26 @@ Các bước:
    sudo nginx -t && sudo systemctl reload nginx
    ```
 4. Thử: đăng ký bằng email (nhận mã trong hộp thư), nhắn "Hỏi Kiot" từ một trang sản phẩm, xem chủ Kiot nhận được.
+
+## Đợt A 30/10: trang cá nhân, tìm kiếm, nút Đăng, thống kê creator
+
+Bản này có (spec: `SPEC-social.md` mục "Bổ sung 30/10/2026 — Đợt A"):
+
+- **Nút "＋ Đăng"** có chữ ở góc trái trên Trang chủ và menu Video. Trang đăng video: nút "Đăng video" luôn nằm ngay trên
+  thanh menu dưới, chưa bấm được thì ghi lý do ngay dưới nút.
+- **Trang cá nhân** (`/creator/<id>`): ảnh bìa, ảnh đại diện, giới thiệu; bấm số Người theo dõi / Đang theo dõi để xem
+  danh sách. Sửa ở **Tôi → Sửa hồ sơ** (`/tai-khoan/ho-so`). Tên hiển thị cũng sửa ở đây (không còn trong Cài đặt).
+- **Ảnh đại diện** hiện trên video, bình luận, Hộp thư, Live, hàng Story và góc phải header.
+- **Tìm kiếm** (`/tim-kiem`): ô tìm trên header tìm cả tài khoản, video, hashtag, sản phẩm; gõ không dấu cũng ra.
+  Tài khoản admin không hiện trong kết quả.
+- **Thống kê** đầu trang Video của tôi: 7 / 30 ngày — lượt xem, thích, bình luận, người theo dõi mới, đơn và doanh số từ
+  video. Số đơn của từng video giờ tính **đơn đã thanh toán** (trừ huỷ / hoàn tiền), trước đây chỉ tính đơn hoàn tất.
+- **CEO:** `/admin/tra-cuu` → tìm tài khoản → **"Gỡ hồ sơ"** (ghi lý do) để gỡ ảnh/giới thiệu vi phạm; người dùng nhận
+  thông báo kèm lý do, có ghi nhật ký.
+
+Các bước:
+
+1. Cập nhật: `cd /opt/9mua && sh scripts/deploy.sh`. Database thêm 1 lần nâng cấp: **3 cột để trống** trong bảng tài
+   khoản (ảnh đại diện, ảnh bìa, giới thiệu) — anh đã cho phép 30/10, tài khoản cũ không đổi gì.
+2. Script sẽ nhắc file Nginx đã đổi (thêm giới hạn tải ảnh hồ sơ). Chép lại như đợt 29/10 (3 lệnh ở trên).
+3. Thử trên điện thoại: Tôi → Sửa hồ sơ → đổi ảnh đại diện; gõ một tên vào ô tìm; mở Video của tôi xem thống kê.

@@ -1,17 +1,34 @@
 import { createHash } from 'node:crypto';
 import { Prisma } from '@prisma/client';
 import { db } from '@/lib/db';
+import { hasLink } from '@/lib/links';
 import { normalizeIdentifier } from './identifier';
 import { hashPassword, verifyPassword } from './password';
+import { MAX_BIO, MAX_BIO_LINES } from './profile';
 import { registerInput } from './register';
 
+// Đổi tên hiển thị và/hoặc giới thiệu (SPEC-social.md bổ sung 30/10, A2). Trường nào không gửi thì giữ nguyên.
 export async function updateProfile(
   userId: string,
-  input: { displayName: string },
-): Promise<{ ok: true } | { ok: false; error: 'INVALID_INPUT'; message: string }> {
-  const parsed = registerInput.shape.displayName.safeParse(input.displayName);
-  if (!parsed.success) return { ok: false, error: 'INVALID_INPUT', message: parsed.error.issues[0]!.message };
-  await db.user.update({ where: { id: userId }, data: { displayName: parsed.data } });
+  input: { displayName?: string; bio?: string },
+): Promise<
+  | { ok: true }
+  | { ok: false; error: 'INVALID_INPUT'; message: string }
+  | { ok: false; error: 'BIO_TOO_LONG' | 'HAS_LINK' }
+> {
+  const data: { displayName?: string; bio?: string | null } = {};
+  if (input.displayName !== undefined) {
+    const parsed = registerInput.shape.displayName.safeParse(input.displayName);
+    if (!parsed.success) return { ok: false, error: 'INVALID_INPUT', message: parsed.error.issues[0]!.message };
+    data.displayName = parsed.data;
+  }
+  if (input.bio !== undefined) {
+    const bio = input.bio.replace(/\r\n?/g, '\n').trim();
+    if ([...bio].length > MAX_BIO || bio.split('\n').length > MAX_BIO_LINES) return { ok: false, error: 'BIO_TOO_LONG' };
+    if (hasLink(bio)) return { ok: false, error: 'HAS_LINK' };
+    data.bio = bio || null;
+  }
+  await db.user.update({ where: { id: userId }, data });
   return { ok: true };
 }
 

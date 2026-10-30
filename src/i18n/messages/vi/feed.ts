@@ -6,6 +6,7 @@ export const feed = {
   'feed.emptyFollowing': 'Bạn chưa follow ai',
   'feed.seeForYou': 'Xem Dành cho bạn',
   'feed.post': '+ Đăng video',
+  'feed.postShort': "Đăng",
   'feed.close': 'Đóng',
   'feed.unmute': 'Chạm để bật tiếng',
   'feed.pinned': '📌 GHIM',

@@ -12,7 +12,8 @@ export type MessageView = {
   createdAt: string;
   hidden: boolean;
 };
-export type ConversationPeer = { id: string; displayName: string; kiotName: string | null };
+// avatarUrl: logo Kiot nếu người đó có Kiot (tên hiện là tên Kiot), không thì ảnh đại diện (SPEC-social.md bổ sung 30/10).
+export type ConversationPeer = { id: string; displayName: string; kiotName: string | null; avatarUrl: string | null };
 
 type Row = {
   id: string;
@@ -73,10 +74,21 @@ export async function toViews(rows: Row[], reveal = false): Promise<MessageView[
 export async function peers(ids: string[]): Promise<Map<string, ConversationPeer>> {
   const users = await db.user.findMany({
     where: { id: { in: [...new Set(ids)] } },
-    select: { id: true, displayName: true },
+    select: { id: true, displayName: true, avatarUrl: true },
   });
   const kiots = await Promise.all(users.map((u) => getKiotByOwner(u.id)));
   return new Map(
-    users.map((u, i) => [u.id, { id: u.id, displayName: u.displayName, kiotName: kiots[i]?.name ?? null }]),
+    users.map((u, i) => {
+      const kiot = kiots[i];
+      return [
+        u.id,
+        {
+          id: u.id,
+          displayName: u.displayName,
+          kiotName: kiot?.name ?? null,
+          avatarUrl: kiot ? kiot.logoUrl : u.avatarUrl,
+        },
+      ];
+    }),
   );
 }

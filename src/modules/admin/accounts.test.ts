@@ -2,9 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { db } from '@/lib/db';
 import { getIntSetting } from '@/lib/settings';
 import { getBalance } from '@/modules/payouts';
-import { createPaidOrder, createSeller, createUser } from '../../../tests/helpers/factories';
+import { createPaidOrder, createSeller, createUser, sampleImage } from '../../../tests/helpers/factories';
+import { setProfileImage, updateProfile } from '@/modules/identity';
 import {
   adjustKiotBalance,
+  clearUserProfile,
   grantKiotYear,
   lockKiotAccount,
   lockUserAccount,
@@ -132,5 +134,33 @@ describe('xuất CSV', () => {
     const out = (await outgoingCsv(from, to)).split('\r\n');
     expect(out[0]).toContain('Thời gian,Loại,Mã,Kiot,Số tiền,Phí chi hộ,Số tiền chuyển');
     expect(out[1]).toContain(`Hoàn người mua,${o.order.code}`);
+  });
+});
+
+describe('gỡ hồ sơ vi phạm (SPEC-social.md bổ sung 30/10, A2)', () => {
+  it('phải có lý do; gỡ ảnh + giới thiệu, ghi nhật ký trước/sau, báo người dùng kèm lý do', async () => {
+    const admin = await createUser();
+    const u = await createUser();
+    await updateProfile(u.id, { bio: 'Giới thiệu xấu' });
+    const av = await setProfileImage(u.id, 'avatar', await sampleImage());
+    if (!av.ok) throw new Error(av.error);
+    expect(await clearUserProfile(admin.id, u.id, ' ')).toEqual({ ok: false, error: 'Hãy ghi lý do.' });
+    expect(await clearUserProfile(admin.id, 'khong-co', 'Ảnh phản cảm')).toEqual({
+      ok: false,
+      error: 'Không tìm thấy người dùng.',
+    });
+    expect(await clearUserProfile(admin.id, u.id, 'Ảnh phản cảm')).toMatchObject({ ok: true });
+    expect(await db.user.findUniqueOrThrow({ where: { id: u.id } })).toMatchObject({ avatarUrl: null, bio: null });
+    expect(await db.adminAuditLog.findFirst({ where: { action: 'user.clear_profile' } })).toMatchObject({
+      adminId: admin.id,
+      targetId: u.id,
+      reason: 'Ảnh phản cảm',
+      before: { avatarUrl: av.url, coverUrl: null, bio: 'Giới thiệu xấu' },
+      after: { avatarUrl: null, coverUrl: null, bio: null },
+    });
+    expect(await db.notification.findFirst({ where: { userId: u.id } })).toMatchObject({
+      title: '@notify.profileCleared',
+      body: JSON.stringify({ detail: 'Ảnh phản cảm' }),
+    });
   });
 });

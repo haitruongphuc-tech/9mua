@@ -26,6 +26,29 @@ test('creator: thông báo khi video xong, trang creator, báo cáo, xoá video'
   await expect(creator.getByTestId('notifications')).toContainText('Video đã đăng xong');
 
   const video = await e2eDb.video.findFirstOrThrow({ where: { caption: `Clip trang creator ${stamp}` } });
+
+  // Thống kê 7/30 ngày đầu trang Video của tôi (SPEC-social.md bổ sung 30/10, A4): số thật, mặc định 7 ngày.
+  await e2eDb.videoView.create({
+    data: {
+      videoId: video.id,
+      viewerKey: `a:${stamp}`,
+      day: new Date(Date.now() + 7 * 3_600_000).toISOString().slice(0, 10),
+    },
+  });
+  await creator.goto('/video/cua-toi');
+  const stats = creator.getByTestId('creator-stats');
+  await expect(stats.getByRole('link', { name: '7 ngày' })).toHaveAttribute('aria-current', 'page');
+  await expect(stats.getByTestId('stat-views')).toHaveText('1');
+  await expect(stats.getByTestId('stat-orders')).toHaveText('0');
+  await expect(stats.getByTestId('stat-revenue')).toHaveText('0đ');
+  await stats.getByRole('link', { name: '30 ngày' }).click();
+  await creator.waitForURL((u) => u.searchParams.get('ngay') === '30');
+  await expect(creator.getByTestId('creator-stats').getByRole('link', { name: '30 ngày' })).toHaveAttribute(
+    'aria-current',
+    'page',
+  );
+  await expect(creator.getByTestId('my-video').first()).toContainText('0 bình luận · 0 lượt lưu');
+
   await creator.goto(`/creator/${video.authorId}`);
   await expect(creator.getByTestId('stat-videos')).toHaveText('1');
   await expect(creator.getByTestId('stat-likes')).toHaveText('0');

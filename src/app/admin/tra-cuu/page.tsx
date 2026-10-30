@@ -79,7 +79,10 @@ export default async function LookupPage({ searchParams }: { searchParams: Flash
             ) : (
               'Chưa có Kiot'
             )}{' '}
-            · {u.orders} đơn mua · {u.videos} video
+            · {u.orders} đơn mua · {u.videos} video ·{' '}
+            <Link href={`/creator/${u.id}`} className="underline">
+              trang cá nhân
+            </Link>
           </p>
           <div className="flex flex-wrap gap-2">
             {u.lockedAt ? (
@@ -103,6 +106,12 @@ export default async function LookupPage({ searchParams }: { searchParams: Flash
             </form>
             <TempPassword userId={u.id} />
           </div>
+          <form action={act.clearProfileAction.bind(null, u.id, qs)} className="flex min-w-0 gap-2">
+            <input name="reason" required placeholder="Lý do gỡ ảnh / giới thiệu" className={input} />
+            <ConfirmSubmit confirm="Gỡ ảnh đại diện, ảnh bìa và giới thiệu của tài khoản này?" tone="danger">
+              Gỡ hồ sơ
+            </ConfirmSubmit>
+          </form>
         </article>
       ))}
 

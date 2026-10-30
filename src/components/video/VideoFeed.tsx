@@ -6,11 +6,13 @@ import {
   Heart,
   MessageCircle,
   MoreHorizontal,
+  Plus,
   Repeat2,
   Share2,
   ShoppingBag,
 } from 'lucide-react';
 import Image from 'next/image';
+import { Avatar } from '@/components/ui/Avatar';
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
@@ -291,11 +293,9 @@ export function VideoFeed({
     setItems((list) => list.map((x) => (x.id === id ? { ...x, comments: count } : x)));
   }, []);
 
-  const tabs = home ? (
-    <div
-      className="absolute left-1/2 top-3 z-20 flex -translate-x-1/2 gap-4 whitespace-nowrap text-[14px] font-bold"
-      role="tablist"
-    >
+  // Tab Đang Follow / Dành cho bạn. Ở feed, tab nằm cùng hàng với nút "＋ Đăng" để màn 360px không bị đè lên nhau.
+  const tabList = (className: string) => (
+    <div className={`flex gap-4 whitespace-nowrap text-[14px] font-bold ${className}`} role="tablist">
       {(['following', 'for-you'] as const).map((id) => (
         <button
           key={id}
@@ -309,7 +309,19 @@ export function VideoFeed({
         </button>
       ))}
     </div>
-  ) : null;
+  );
+
+  const postButton = (
+    <Link
+      href="/video/dang"
+      aria-label={t('feed.post')}
+      className="flex h-9 shrink-0 items-center gap-1 rounded-full bg-brand pl-2.5 pr-3.5 text-[13px] font-black text-white shadow-[0_0_16px_rgb(255_107_0/0.4)]"
+      data-testid="feed-post"
+    >
+      <Plus className="h-4 w-4" strokeWidth={3} aria-hidden />
+      {t('feed.postShort')}
+    </Link>
+  );
 
   const frame = `fixed bg-ink text-white ${
     home ? 'inset-x-0 bottom-[calc(4rem+1px+env(safe-area-inset-bottom))] top-16 z-30' : 'inset-0 z-50'
@@ -320,7 +332,7 @@ export function VideoFeed({
       <div className={`${frame} flex flex-col`}>
         {header}
         <div className="relative grid min-h-0 flex-1 place-items-center p-6 text-center">
-          {tabs}
+          {home ? tabList('absolute left-1/2 top-3 z-20 -translate-x-1/2') : null}
           <div className="flex flex-col items-center gap-4">
             <p className="font-display text-[18px] font-bold">
               {tab === 'following' ? t('feed.emptyFollowing') : t('feed.empty')}
@@ -346,7 +358,8 @@ export function VideoFeed({
       </div>
     );
 
-  const action = 'grid h-12 w-12 place-items-center rounded-full border transition';
+  const action =
+    'grid h-12 w-12 place-items-center rounded-full border transition [@media(max-height:760px)]:h-11 [@media(max-height:760px)]:w-11';
   const idle = 'border-white/20 bg-white/15 hover:bg-white/25';
   const on = 'border-brand bg-brand shadow-[0_0_16px_#ff6b00]';
 
@@ -354,7 +367,6 @@ export function VideoFeed({
     <div className={`${frame} flex flex-col`}>
       {header}
       <div className="relative min-h-0 flex-1">
-        {tabs}
         <div
           ref={scroller}
           className="no-scrollbar h-full snap-y snap-mandatory overflow-y-scroll overscroll-y-contain"
@@ -531,14 +543,20 @@ export function VideoFeed({
                   </div>
                 </div>
 
-                <div className="absolute bottom-6 right-2 flex w-[72px] flex-col items-center gap-4">
-                  <div className="relative mb-2">
+                {/* Màn thấp (iPhone có thanh Safari ~664px): khít khoảng cách để ảnh người đăng ở đầu cột không bị cắt. */}
+                <div className="absolute bottom-6 right-2 flex w-[72px] flex-col items-center gap-4 [@media(max-height:760px)]:bottom-3 [@media(max-height:760px)]:gap-2.5">
+                  <div className="relative mb-2 [@media(max-height:760px)]:mb-1">
                     <Link
                       href={`/creator/${v.author.id}`}
-                      className="grid h-12 w-12 place-items-center overflow-hidden rounded-full border-2 border-white bg-gradient-to-br from-brand to-red-500 text-[18px] font-black"
+                      className="block rounded-full border-2 border-white"
                       aria-label={v.author.displayName}
+                      data-testid="feed-author-avatar"
                     >
-                      {v.author.displayName.trim().charAt(0).toUpperCase() || '9'}
+                      <Avatar
+                        name={v.author.displayName}
+                        url={v.author.avatarUrl}
+                        className="h-12 w-12 text-[18px] [@media(max-height:760px)]:h-11 [@media(max-height:760px)]:w-11"
+                      />
                     </Link>
                     <button
                       type="button"
@@ -623,26 +641,27 @@ export function VideoFeed({
             );
           })}
         </div>
-        <div
-          className={`absolute left-0 right-0 top-0 z-10 flex items-center p-3 ${home ? 'justify-end' : 'justify-between'}`}
-        >
-          {home ? null : (
-            <Link
-              href="/"
-              aria-label={t('feed.close')}
-              className="grid h-10 w-10 place-items-center rounded-full bg-black/40 text-xl"
-            >
-              ✕
-            </Link>
+        {/* Hàng trên (SPEC-social.md bổ sung 30/10, A1): nút "＋ Đăng" có chữ. Ở feed nút nằm góc trái vì cột Thích/Bình
+            luận bên phải lên sát mép trên khi màn thấp; tab ở giữa, hai ô hai bên co giãn nên tab không đè lên nút. */}
+        <div className="absolute left-0 right-0 top-0 z-20 flex items-center gap-2 p-3">
+          {home ? (
+            <>
+              <div className="flex flex-1 justify-start">{postButton}</div>
+              {tabList('')}
+              <span className="flex-1" />
+            </>
+          ) : (
+            <>
+              <Link
+                href="/"
+                aria-label={t('feed.close')}
+                className="grid h-10 w-10 place-items-center rounded-full bg-black/40 text-xl"
+              >
+                ✕
+              </Link>
+              <div className="flex flex-1 justify-end">{postButton}</div>
+            </>
           )}
-          {/* Góc trên phải: nút tròn "＋" đăng video (CEO chốt §7 mục 11), không đè lên tab. */}
-          <Link
-            href="/video/dang"
-            aria-label={t('feed.post')}
-            className="grid h-9 w-9 place-items-center rounded-full bg-brand text-[20px] font-black leading-none text-white shadow-[0_0_16px_rgb(255_107_0/0.4)]"
-          >
-            +
-          </Link>
         </div>
       </div>
 

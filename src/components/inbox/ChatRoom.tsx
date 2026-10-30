@@ -16,6 +16,7 @@ import { toast } from '@/components/ui/Toast';
 import { useT } from '@/i18n/client';
 import { formatVnd } from '@/lib/format';
 import type { ConversationDetail, MessageView, ProductCard } from '@/modules/messages';
+import { Avatar } from '@/components/ui/Avatar';
 
 const REASONS = ['lua_dao', 'quay_roi', 'spam', 'khac'] as const;
 const POLL_MS = 5_000;
@@ -152,9 +153,7 @@ export function ChatRoom({
         >
           <ArrowLeft className="h-5 w-5" aria-hidden />
         </Link>
-        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-brand to-red-500 font-black">
-          {name.trim().charAt(0).toUpperCase() || '9'}
-        </span>
+        <Avatar name={name} url={conversation.other.avatarUrl} className="h-9 w-9 text-[14px]" />
         <h1 className="min-w-0 flex-1 truncate text-[15px] font-black">{name}</h1>
         <button
           type="button"

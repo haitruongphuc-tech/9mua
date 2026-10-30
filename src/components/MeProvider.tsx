@@ -6,7 +6,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 // Phát sự kiện này sau khi đổi tên/đăng nhập/thêm giỏ để header và thanh dưới cập nhật mà không cần tải lại trang.
 export const ME_CHANGED_EVENT = 'nm:me-changed';
 
-export type Me = { displayName: string; role: 'user' | 'admin' } | null;
+export type Me = { displayName: string; avatarUrl: string | null; role: 'user' | 'admin' } | null;
 type MeState = {
   me: Me | undefined;
   cartCount: number;

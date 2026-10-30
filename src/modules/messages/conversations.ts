@@ -143,7 +143,7 @@ export async function listConversations(
       });
       return {
         id: c.id,
-        other: people.get(otherOf(c, userId)) ?? { id: otherOf(c, userId), displayName: '', kiotName: null },
+        other: people.get(otherOf(c, userId)) ?? { id: otherOf(c, userId), displayName: '', kiotName: null, avatarUrl: null },
         status: c.status as 'request' | 'active',
         requestedByMe: c.requestedById === userId,
         last: {
@@ -181,7 +181,7 @@ export async function getConversation(
   ]);
   return {
     id: c.id,
-    other: people.get(otherId) ?? { id: otherId, displayName: '', kiotName: null },
+    other: people.get(otherId) ?? { id: otherId, displayName: '', kiotName: null, avatarUrl: null },
     status: c.status as 'request' | 'active',
     requestedByMe: c.requestedById === userId,
     otherReadAt: otherMember?.lastReadAt?.toISOString() ?? null,

@@ -175,3 +175,90 @@ Hai người mua cùng lúc món cuối cùng thì chỉ một người thành c
 - **Không** hiện số follower hay "giá trị tài khoản" của các mạng đó: kết nối thật cần từng mạng duyệt ứng dụng (nhiều
   tuần), làm sau nếu CEO muốn (hỏi trước).
 - Dữ liệu: bảng mới `SocialLink`: (userId, platform) khoá chính, url, createdAt.
+
+## Bổ sung 30/10/2026 — Nâng cấp một đợt (V5)
+
+> **Trạng thái: chờ CEO duyệt.** Quyết định, công tắc, thư viện, dữ liệu: `docs/nang-cap-mot-dot.md`. Hình: M7, M8.
+
+### V5.1 Vị trí Kiot (dùng cho C13, C14)
+
+1. Cột mới `Kiot.lat`, `Kiot.lng`, `Kiot.geoSource` (`pin` | `province`), `Kiot.showExactLocation` (mặc định tắt).
+2. Trong `/kiot-cua-toi/cai-dat`, chủ Kiot đặt ghim trên bản đồ (khi `feature.map` bật) hoặc bấm "Dùng vị trí hiện tại".
+3. Chưa đặt ghim: dùng tâm tỉnh của địa chỉ lấy hàng (`geoSource = 'province'`). Kiot cũ tự có giá trị này khi đưa lên web.
+4. Toạ độ chính xác chỉ chủ Kiot và admin thấy. Nơi công khai chỉ hiện khoảng cách, hoặc điểm làm tròn khoảng 500m, trừ khi
+   chủ Kiot bật "Hiện vị trí cửa hàng chính xác".
+
+### V5.2 Hồ sơ nguồn gốc và huy hiệu (C16, C17, C42, M8) — công tắc `feature.origin`
+
+1. Trang mới `/kiot-cua-toi/nguon-goc`. Hồ sơ gồm:
+   - ít nhất 1 **hoá đơn gốc** hoặc **giấy chứng nhận xuất xứ** (ảnh JPG/PNG/WebP hoặc PDF ≤ 10MB);
+   - ít nhất 3 **ảnh hàng thật** (tối đa 6);
+   - **video quay hàng** ≤ 60 giây (không bắt buộc, đi qua bộ xử lý video);
+   - tick 2 cam kết: "Hàng có nguồn gốc xuất xứ, không giả mạo, không lừa dối" và "Đồng ý hoàn tiền cho khách nếu 9MUA xác
+     định là hàng giả".
+2. File lưu ở thư mục riêng tư `PRIVATE_DIR` như ảnh CCCD; chỉ admin xem qua route có kiểm quyền. Không phục vụ công khai.
+3. Trạng thái: `pending` → `approved` / `rejected` (kèm lý do, nộp lại được) → `revoked` (CEO thu hồi, kèm lý do).
+   Hồ sơ có hạn **12 tháng**; nhắc gia hạn trước 30 ngày; hết hạn thì mất huy hiệu nguồn gốc.
+4. **Huy hiệu** (hiện ở đầu trang Kiot, trang sản phẩm, thẻ Kiot ở Chợ và tìm kiếm):
+   - "Đã xác thực nguồn gốc": hồ sơ `approved` còn hạn.
+   - "Đã xác thực ngân hàng": KYC `approved` và tên tài khoản nhận tiền khớp tên CCCD (dữ liệu đang có ở `payouts`).
+   - "Đã xác thực video": hồ sơ `approved` có video.
+   - Mức màu theo số huy hiệu: 1 = **Xanh**, 2 = **Vàng**, 3 = **Tím**. CEO đổi tên và màu trong `/admin/noi-dung`.
+5. Bảng `OriginDossier` (kiotId, status, commitAt, reviewedBy, reviewedAt, reason, expiresAt) và `OriginFile` (dossierId,
+   kind `invoice | certificate | photo | video`, path, bytes).
+
+### V5.3 Giao diện Kiot kéo thả, 50 mẫu (C27) — công tắc `feature.kiot_builder`
+
+1. Trang `/kiot-cua-toi/giao-dien`. **50 mẫu = 10 bố cục × 5 bảng màu** có sẵn (bảng màu đều đạt độ tương phản chữ của
+   `docs/BRAND.md`).
+2. Khối có thể bật/tắt và kéo đổi thứ tự: Ảnh bìa, Giới thiệu, Sản phẩm nổi bật (chọn ≤ 8), Lưới sản phẩm, Video, Live,
+   Đánh giá, Sự kiện, Liên hệ, Bản đồ, Mạng xã hội.
+3. Kéo bằng chuột hoặc chạm giữ trên điện thoại; mỗi khối cũng có nút lên/xuống.
+4. Xem trước khung điện thoại và máy tính; bấm "Lưu" mới áp dụng. Lưu vào `Kiot.layout` (JSON, kiểm tra cấu trúc ở máy chủ).
+5. Kiot chưa từng chỉnh giữ đúng giao diện trang Kiot hiện nay.
+
+### V5.4 Nhập Page từ mạng xã hội (C28) — công tắc `feature.page_import`
+
+1. Ở `/ket-noi`, mỗi mạng (Facebook, Instagram, TikTok, YouTube, Zalo OA, Shopee) có nút "Kết nối" khi đã có khoá của mạng đó.
+2. Kết nối xong thì kéo danh sách Page/kênh người dùng quản lý; tick chọn từng cái hoặc "Chọn tất cả"; bấm "Nhập".
+3. Chỉ nhập: tên, ảnh đại diện, link, số người theo dõi (cập nhật mỗi ngày). **Không** kéo bài đăng hay video.
+4. Page đã nhập hiện ở khối "Mạng xã hội" trên trang Kiot và trang cá nhân. Tài khoản chưa có Kiot nhập tối đa 1 Page.
+5. Token lưu mã hoá; "Ngắt kết nối" xoá token và Page đã nhập. Mạng chưa có khoá: giữ cách gắn link tay như hiện nay.
+6. Bảng `PageImport` (userId, network, externalId, name, avatarPath, url, followers, tokenEnc, updatedAt).
+
+### V5.5 Bảo hành (C29) — công tắc `feature.kiot_builder`
+
+- Cột `Product.warranty` (≤ 60 ký tự, ví dụ "Bảo hành 12 tháng tại Kiot") và `Kiot.warrantyDefault` điền sẵn cho sản phẩm mới.
+- Hiện dưới giá trên trang sản phẩm (M7). Để trống thì không hiện.
+
+### V5.6 Biến thể sản phẩm (C83) — công tắc `feature.variants`
+
+1. Tối đa 2 nhóm tuỳ chọn (ví dụ Màu, Size), tối đa 50 biến thể mỗi sản phẩm.
+2. Mỗi biến thể có giá, giá gốc (tuỳ chọn), tồn kho, ảnh (chọn từ ảnh sản phẩm), ẩn/hiện.
+3. Sản phẩm có biến thể: giá hiện dạng thấp nhất – cao nhất; người mua phải chọn biến thể trước khi thêm vào giỏ.
+4. Sản phẩm không có biến thể chạy y như hiện nay.
+5. Giỏ và đơn: `CartItem.variantId` (khoá duy nhất thành userId, productId, variantId); `OrderItem.variantId` và
+   `OrderItem.variantLabel` chụp lại lúc đặt. Giữ hàng và hoàn hàng theo từng biến thể, cùng cách khoá chống bán quá tồn kho.
+6. Tắt công tắc: ẩn chỗ tạo biến thể mới; sản phẩm đã có biến thể vẫn bán bình thường.
+7. Bảng `ProductVariant` (productId, option1, option2, price, compareAtPrice, stock, imageId, position, hidden).
+
+### Hợp đồng mới của `kiot` (chỉ thêm)
+
+```ts
+setKiotLocation(kiotId, ownerId, { lat; lng } | 'province', showExact): Promise<Result>
+kiotGeo(kiotIds): Promise<Map<kiotId, { lat; lng; approx: boolean }>>   // đã làm tròn khi cần
+submitOriginDossier / reviewOriginDossier(adminId, dossierId, decision, reason) / revokeOrigin(adminId, kiotId, reason)
+kiotBadges(kiotIds): Promise<Map<kiotId, Badge[]>>
+saveKiotLayout(kiotId, ownerId, layout): Promise<Result>; kiotLayout(kiotId)
+connectNetwork / listRemotePages / importPages / disconnectNetwork
+upsertVariants(productId, ownerId, variants[]): Promise<Result>
+decrementStock / tryDecrementStock / restoreStock nhận thêm variantId (tuỳ chọn) trong từng dòng
+```
+
+### Kiểm thử V5 (riêng `kiot`)
+
+- File hồ sơ không mở được bằng đường công khai; admin mở được qua route có kiểm quyền.
+- Huy hiệu đúng theo 3 điều kiện; hồ sơ hết hạn thì mất huy hiệu nguồn gốc.
+- `layout` sai cấu trúc bị từ chối; Kiot chưa chỉnh hiện như cũ.
+- Biến thể: 2 người cùng mua biến thể cuối cùng, 1 người thành công; mua biến thể A không trừ tồn kho biến thể B.
+- Toạ độ chính xác không có trong HTML công khai khi chủ Kiot chưa bật hiện chính xác.

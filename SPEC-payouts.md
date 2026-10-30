@@ -182,3 +182,46 @@ Chưa có kênh chi thì hệ thống tự chạy chế độ duyệt tay.
 2. Hạn mức tự động 5 triệu/lần, 10 triệu/Kiot/ngày, 50 triệu/toàn sàn/ngày, lần rút đầu duyệt tay.
 3. **Phí chi hộ PayOS do người bán chịu**, trừ vào số tiền nhận, hiển thị trước khi xác nhận.
 4. Cam kết xử lý yêu cầu duyệt tay: trong 2 ngày làm việc.
+
+## Bổ sung 30/10/2026 — Nâng cấp một đợt (V5)
+
+> **Trạng thái: chờ CEO duyệt.** Quyết định, công tắc, dữ liệu: `docs/nang-cap-mot-dot.md`. Mọi phần dưới đây đụng tiền và
+> **tắt sẵn**. Sổ chỉ thêm, khoá duy nhất `(type, refId)` như hiện nay.
+
+### V5.1 Cộng số dư khi có giảm giá, giao qua hãng, COD (C31, C84, C85)
+
+1. Công thức cộng cho người bán khi đơn `completed` (thay công thức cũ, cho kết quả **y hệt** với đơn không giảm giá, không giao
+   qua hãng, không COD; có test so sánh):
+   - `tiền hàng sau giảm = subtotal − discountVnd`
+   - `phí sàn = round(tiền hàng sau giảm × platformFeeRate / 10000)`
+   - `ship cho người bán = shippingPaidBy = 'kiot' ? shippingFee : 0`
+   - `phí thu hộ = paymentMethod = 'cod' && người chịu phí COD là người bán ? codFeeVnd : 0`
+   - `số tiền cộng = tiền hàng sau giảm − phí sàn + ship cho người bán − phí thu hộ`
+2. **Đối soát COD:** bảng chỉ thêm `CodRemittance` (carrier, statementRef, orderId, codAmount, feeVnd, receivedAt).
+   - Nhập bằng API đối soát của hãng (việc chạy hằng ngày) hoặc CEO tải file đối soát lên `/admin/doi-soat-cod`.
+   - Khớp theo mã vận đơn và số tiền. Lệch thì vào "Lệch tiền" (trang đang có) và đơn chưa được `completed`.
+3. `PlatformRevenue` ghi phí sàn sau giảm; phí ship hãng thu ghi vào chi phí (`SPEC-admin.md` V5.6), không trừ người bán.
+
+### V5.2 Ví thu nhập: hoa hồng creator (C92) và tiền thưởng (C30)
+
+1. **Hoa hồng creator** (công tắc `feature.commission`):
+   - Chủ Kiot đặt % hoa hồng cho từng sản phẩm (0–30%, cột `Product.commissionRate` theo basis point, mặc định 0).
+   - Món trong đơn có `sourceVideoId` của video do **người khác chủ Kiot** đăng, và sản phẩm có hoa hồng > 0: khi đơn
+     `completed`, tính `hoa hồng = round(tiền hàng sau giảm của món đó × commissionRate / 10000)`.
+   - Trong cùng transaction: trừ người bán bằng `BalanceEntry(type = 'commission_debit', refId = orderItemId)` và cộng creator
+     bằng `EarningEntry(type = 'commission', refId = orderItemId)`. Phí sàn không đổi.
+   - Đơn bị hoàn tiền sau khi đã `completed` (V5.2 của `SPEC-orders`) thì ghi dòng bù ngược cho cả hai bên.
+2. **Ví thu nhập** của người dùng (không cần có Kiot): sổ chỉ thêm `EarningEntry` (userId, type `commission | prize |
+   reversal | payout_reserve | payout_reversal`, amount, refId), khoá duy nhất `(type, refId)`.
+   - Trang `/tai-khoan/thu-nhap`: số dư, lịch sử, nút "Rút tiền".
+   - Rút tiền dùng lại đúng luật hiện nay: KYC (`KycSubmission` gắn theo người dùng khi không có Kiot), tối thiểu 50.000đ,
+     tài khoản nhận đổi quá 24 giờ, khoá chống bấm 2 lần, chi qua PayOS chi hộ. **CEO duyệt tay mọi lần rút** của ví thu nhập
+     (không có luật tự động).
+3. Tiền thưởng trò chơi (`SPEC-play.md`) cộng vào cùng ví bằng `EarningEntry(type = 'prize')`.
+
+### Kiểm thử V5 (riêng `payouts`)
+
+- Công thức mới cho kết quả bằng công thức cũ với mọi đơn mẫu không giảm giá, không qua hãng, không COD.
+- Đơn COD chỉ cộng số dư sau khi có dòng đối soát khớp; đối soát lệch không cộng.
+- Hoa hồng không tính khi creator là chủ Kiot; hoàn tiền tạo đúng dòng bù; chạy lại hook không tính 2 lần.
+- Ví thu nhập không rút quá số dư, kể cả 2 yêu cầu cùng lúc.

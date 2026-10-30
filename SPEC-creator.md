@@ -192,3 +192,218 @@ removeVideo(videoId, adminId, reason): Promise<void>     // cho admin
 
 Xem `SPEC-social.md` mục "Bổ sung 30/10/2026 — Đợt A" (A1, A3, A4). Hoa hồng creator vẫn ở mục "Hỏi trước"
 (làm ở Đợt E, có spec riêng).
+
+## Bổ sung 30/10/2026 — Nâng cấp một đợt (V5)
+
+> **Trạng thái: chờ CEO duyệt.** Quyết định, công tắc, dịch vụ ngoài, thư viện mới: `docs/nang-cap-mot-dot.md`.
+> Mã C.. và hình M.. theo tài liệu "Đề xuất nâng cấp 9MUA". Mỗi mục dưới đây ẩn hẳn khi công tắc của nó tắt.
+
+### V5.1 Video dài, nhiều mức chất lượng, ảnh bìa (C06, C07) — công tắc `feature.long_video`
+
+1. **Giới hạn** (CEO chỉnh trong `/admin/cai-dat`):
+   - Công tắc tắt: giữ như hiện nay, ≤ 60 giây, ≤ 100MB.
+   - Công tắc bật: ≤ `video.long_max_seconds` (mặc định 3.600 giây) và ≤ `video.max_bytes` (mặc định 2GB).
+   - Video dài hơn 60 giây chỉ cho tài khoản tạo từ **3 ngày** trở lên, không bị cấm đăng.
+   - Story giữ ≤ 30 giây.
+   - Mỗi ngày tối đa 10 video và **tổng 120 phút** video dài hơn 60 giây mỗi tài khoản.
+2. **Định dạng nhận:** MP4, MOV, WebM, **AVI**. Kiểm tra bằng nội dung file (`ffprobe`), không tin đuôi file.
+3. **Tải lên từng phần** (tự viết, không thêm thư viện):
+   - `POST /api/uploads/video` mở phiên tải (tên, dung lượng, thời lượng đo ở trình duyệt). Trả mã phiên và kích thước phần
+     **8MB**.
+   - `PUT /api/uploads/video/<phiên>/parts/<n>` gửi từng phần. Gửi lại phần đã có thì bỏ qua, không lỗi.
+   - `GET /api/uploads/video/<phiên>` trả danh sách phần đã nhận. Rớt mạng hoặc tải lại trang: trình duyệt hỏi danh sách rồi
+     gửi tiếp phần còn thiếu (nhận ra cùng file nhờ tên + dung lượng + ngày sửa lưu trong `localStorage`).
+   - Đủ phần thì máy chủ ghép, kiểm tra, xếp vào hàng chờ xử lý. Có thanh %, tốc độ và thời gian còn lại.
+   - Phiên hết hạn sau 24 giờ, file tạm bị xoá. Mỗi người tối đa 3 phiên đang mở.
+   - Nginx: giới hạn thân request 10MB cho đường tải phần (không mở 2GB cho một request).
+   - Ổ đĩa VPS còn dưới 15% và chưa bật kho ngoài: từ chối mở phiên video dài, báo "Kho video tạm đầy, thử lại sau" và báo CEO.
+4. **Hàng chờ xử lý:** `VideoJob` thêm cột `lane` (`short` | `long`). Worker luôn lấy việc `short` trước; việc `long` chạy khi
+   không còn việc `short`, mỗi lúc 1 việc. Video dài xử lý quá 3 giờ thì `failed` kèm lý do.
+5. **Bản lưu:**
+   - Video ≤ 60 giây: như cũ (MP4 720p) **và thêm bản MP4 480p**.
+   - Video > 60 giây: **HLS** (đoạn 6 giây), các mức 360p, 480p, 720p; thêm 1080p khi video gốc ≥ 1080p và CEO bật
+     `video.enable_1080`. Tiếng AAC 128 kbps. File gốc xoá sau khi xử lý xong như hiện nay.
+   - Bảng mới `VideoRendition`: videoId, kind (`mp4` | `hls`), height, path, bytes.
+6. **Ảnh bìa:** máy chủ tạo 3 ảnh gợi ý ở 10%, 50%, 90% thời lượng. Người đăng chọn 1, hoặc tải ảnh riêng (JPG, PNG, WebP
+   ≤ 10MB, cắt 9:16, bỏ thông tin ẩn như ảnh sản phẩm). Đổi ảnh bìa được sau khi đăng (V5.3).
+7. **Ảnh xem trước động:** WebP động 3 giây, rộng 240px, lấy ở giữa video. Hiện khi di chuột hoặc giữ ngón tay trên ô video ở
+   lưới (trang cá nhân, hashtag, tìm kiếm, Watch).
+8. **Phát:** HLS phát sẵn trên Safari; Chrome/Android dùng `hls.js` (chỉ tải khi gặp video HLS). Video MP4 ≤ 60 giây: chọn bản
+   480p khi trình duyệt báo mạng chậm hoặc bật tiết kiệm dữ liệu, còn lại 720p.
+9. **Kho video ngoài** (`feature.external_storage`): `MediaStore` thêm driver `s3`. Bật thì file **mới** ghi lên kho ngoài và
+   phát từ `STORAGE_PUBLIC_URL`; file cũ giữ trên VPS. Có lệnh `npm run media:migrate` để CEO chuyển dần file cũ, chạy lại được,
+   không xoá bản trên VPS cho tới khi bản trên kho ngoài đọc lại khớp dung lượng.
+10. **Trang CEO "Dung lượng"** (`/admin/dung-luong`): tổng GB video theo nơi lưu, ổ đĩa VPS còn trống, số video dài, ước tính GB
+    tháng tới theo tốc độ 30 ngày qua.
+
+### V5.2 Công cụ xem video (C57–C61, C63) — công tắc `feature.feed_tools`
+
+1. **Thanh tua (C57):** mọi video có thanh tiến độ kéo được ở đáy video. Đang kéo thì hiện `phút:giây / tổng`. Thả tay thì phát
+   tiếp từ đó. Chạm nhẹ vào thanh cũng tua tới chỗ chạm.
+2. **Tốc độ phát (C58):** 0,5x · 1x · 1,5x · 2x, chọn trong nút ⋯. Nhớ lựa chọn trong `localStorage`. Live không có tốc độ.
+3. **Xoay ngang (C59):** video quay ngang (rộng > cao) có nút "Toàn màn hình". Bấm thì mở toàn màn hình và xin xoay ngang;
+   trình duyệt không cho xoay thì phóng video vừa màn hình ngang.
+4. **Không quan tâm (C60):** trong nút ⋯. Bấm thì ẩn video đó ngay và sang video kế.
+   - Bảng `VideoNotInterested` (người xem, videoId, ngày). Người chưa đăng nhập dùng mã ẩn danh như lượt xem.
+   - Trong **30 ngày**, điểm feed của các video cùng người đăng với người xem đó nhân **0,2**.
+   - Mỗi người giữ tối đa 500 dòng, dòng cũ nhất tự xoá.
+5. **Lịch sử đã xem (C61):** trang `/tai-khoan/lich-su-xem`.
+   - Video đã xem ≥ 3 giây trong 90 ngày, mới nhất trước, mỗi trang 30.
+   - Xoá từng video hoặc xoá hết; tắt được việc ghi lịch sử.
+   - Bảng `ViewHistory` (userId, videoId, lastViewedAt), khoá duy nhất (userId, videoId). Bảng `VideoView` dùng để đếm lượt
+     xem giữ nguyên; xoá lịch sử không đổi số lượt xem.
+6. **Tự cuộn (C63):** công tắc "Tự cuộn" cạnh thanh tua. Bật thì xem hết tự sang video kế; tắt thì lặp lại như hiện nay.
+   Mặc định tắt, nhớ trong `localStorage`.
+
+### V5.3 Tuỳ chọn khi đăng và sau khi đăng (C48–C50, C53–C56) — công tắc `feature.post_options`
+
+1. **Nháp (C48):** nút "Lưu nháp" khi đăng. Video vẫn được xử lý nhưng ở trạng thái `draft`, không ai khác thấy.
+   - Xem ở tab "Nháp" của `/video/cua-toi`. Mở lại để sửa và đăng.
+   - Tối đa 20 nháp mỗi người. Nháp giữ 90 ngày rồi tự xoá; báo trước 7 ngày.
+2. **Hẹn giờ đăng (C49):** chọn ngày giờ từ 15 phút tới 30 ngày sau (giờ Việt Nam). Trạng thái `scheduled`, cột `publishAt`.
+   - Việc chạy mỗi phút đổi các video tới giờ sang `ready`. Khi đó mới gửi thông báo cho người follow.
+   - Sửa giờ hoặc huỷ hẹn trước giờ đăng. Feed và trang cá nhân xếp theo `publishAt`.
+3. **Quyền riêng tư từng video (C50):**
+   - `visibility`: `public` (mọi người, mặc định) | `followers` (người đang follow) | `private` (chỉ mình tôi). Tài khoản riêng
+     tư (`SPEC-identity` V5.2) mặc định `followers`.
+   - `allowComments`, `allowRemix` (Duet và Stitch), `allowDownload`: mặc định bật.
+   - Video không `public`: không vào feed Dành cho bạn, hashtag, tìm kiếm, khối Video hot, sitemap, mã nhúng; không Duet,
+     Stitch, tải về. Link `/v/<id>` trả trang 404 cho người không được xem.
+   - Hàm `canViewVideo(videoId, viewerId)` dùng chung cho mọi nơi hiện video, có test cho từng nơi.
+4. **Địa điểm (C53):** chọn tỉnh/thành (34 tỉnh, mặc định tỉnh của Kiot nếu có) + tên địa điểm tự gõ ≤ 60 ký tự. Không lưu
+   toạ độ GPS. Hiện dưới chú thích; dùng cho tìm kiếm video "Gần tôi" theo tỉnh (`SPEC-marketplace` V5.2).
+5. **Ghim lên trang cá nhân (C54):** video của mình, nút ⋯ → "Ghim". Tối đa 3; ghim thứ 4 thì báo bỏ ghim một video trước.
+   Video ghim đứng đầu lưới, có nhãn "Ghim".
+6. **Nhãn AI (C55):** video làm từ AI Studio tự có `aiGenerated = true` và không gỡ được. Người đăng tự tick "Có dùng AI"
+   cho video khác. Hiện chip "Nội dung tạo bằng AI" dưới tên người đăng.
+7. **Sửa sau khi đăng (C56):** sửa chú thích, hashtag, sản phẩm gắn, quyền riêng tư, địa điểm, ảnh bìa, cho/không cho bình
+   luận, Duet/Stitch, tải về. Không sửa file video. Video đã sửa hiện "Đã chỉnh sửa". Hashtag tính lại; chỉ người mới được
+   nhắc tên mới nhận thông báo.
+
+### V5.4 Phụ đề tự động (C51) — công tắc `feature.auto_captions`
+
+1. Người đăng bật "Phụ đề tự động" khi đăng. Sau khi xử lý video, driver nghe giọng nói (`STT_PROVIDER`) tạo phụ đề WebVTT.
+2. Người đăng xem và sửa chữ phụ đề ở `/video/cua-toi` trước khi bật cho người xem.
+3. Người xem có nút "CC" bật/tắt phụ đề, nhớ lựa chọn.
+4. Chỉ video ≤ 10 phút. Ngân sách tháng `stt.monthly_budget_vnd`; hết ngân sách thì bỏ qua, báo người đăng và CEO.
+5. Driver `fake` trả phụ đề mẫu cho dev/test. Chưa có khoá thì không bật được công tắc.
+
+### V5.5 Quay trong app, hiệu ứng, làm đẹp, Stitch (C08, C09) — công tắc `feature.camera`
+
+1. **Quay (C08)** ở `/video/dang`, dùng camera của trình duyệt (MediaRecorder):
+   - Đổi camera trước/sau; đèn flash (chỉ hiện trên máy hỗ trợ); hẹn giờ 3 hoặc 10 giây.
+   - Giữ nút để quay, thả để dừng; quay nhiều đoạn, xoá đoạn cuối; tổng độ dài theo giới hạn V5.1.
+   - Tốc độ 0,5x · 1x · 2x · 3x áp cho đoạn đang quay; máy chủ đổi tốc độ khi xử lý (tiếng đổi theo, giữ cao độ).
+   - Trình duyệt không cho dùng camera: chỉ còn nút chọn file như hiện nay.
+2. **Hiệu ứng màu (C09):** 8 bộ lọc: Gốc, Sáng, Ấm, Lạnh, Cổ điển, Đen trắng, Rực, Mềm. Xem trước bằng bộ lọc của trình duyệt;
+   máy chủ áp bộ lọc tương ứng của ffmpeg khi xử lý.
+3. **Làm đẹp (C09):** mức 0–3: làm mịn da và sáng nhẹ toàn khung (ffmpeg). Không nhận diện hay chỉnh khuôn mặt. Đơn giản hơn
+   TikTok; ghi rõ trong spec để không hứa quá.
+4. **Stitch (C09):** trên video cho phép (`allowRemix`), nút ⋯ → "Stitch".
+   - Chọn đoạn 1–5 giây của video gốc, rồi quay hoặc chọn video của mình.
+   - Máy chủ ghép đoạn gốc + video mới thành một video 720×1280, ghi "Stitch với @tên" và link về video gốc.
+   - Cột `stitchOfId`, `stitchFromSec`, `stitchToSec`. Video gốc bị gỡ hoặc tắt Stitch thì không Stitch được nữa; video đã
+     Stitch vẫn giữ.
+
+### V5.6 Chỉnh video và âm thanh (C89, C90) — công tắc `feature.camera`
+
+1. **Chỉnh video (C89)** trước khi đăng, xem trước trên trình duyệt:
+   - Cắt đầu, cắt cuối trên thanh thời gian.
+   - Ghép tối đa 10 đoạn (quay hoặc chọn file), kéo để đổi thứ tự; tổng độ dài theo giới hạn V5.1.
+   - Chữ trên video: tối đa 5 dòng, mỗi dòng ≤ 60 ký tự, 6 màu, kéo để đặt vị trí, chọn giây hiện và giây ẩn.
+     Máy chủ vẽ bằng font Be Vietnam Pro.
+   - Nhãn dán: 24 nhãn dán của 9MUA (Mua ngay, Giảm giá, Mới, Freeship, Hàng thật…), vị trí và thời gian như chữ.
+   - Mọi chỉnh sửa lưu thành `editSpec` (JSON) trên `Video`; máy chủ dựng một lần khi xử lý.
+2. **Âm thanh (C90):**
+   - Thư viện nhạc của 9MUA: CEO tải lên ở `/admin/am-thanh` (tên, nguồn/ca sĩ, file MP3 hoặc M4A ≤ 10MB, ≤ 5 phút) và gỡ
+     được. Người dùng không tải nhạc lên.
+   - Khi đăng: chọn nhạc, chọn đoạn bắt đầu, chỉnh âm lượng tiếng gốc và nhạc (0–100%).
+   - "Dùng âm thanh này": trên video cho phép `allowRemix`, lấy tiếng của video đó làm âm thanh cho video mới.
+   - Trang `/am-thanh/<id>`: tên âm thanh, số video dùng, lưới video.
+   - Bảng `Sound`: kind (`library` | `original`), title, artist, sourceVideoId, path, durationSec, status (`active` | `removed`).
+     Cột `Video.soundId`. Âm thanh bị gỡ thì video đã đăng vẫn phát; không chọn mới được.
+
+### V5.7 Chia sẻ thêm (C03–C05) — công tắc `feature.share_more`
+
+1. **Tải về (C03):** video `public` và `allowDownload`, dài ≤ 10 phút.
+   - Lần tải đầu tạo bản MP4 720p có logo 9MUA và @tên ở góc dưới (việc nền, hàng chờ `short`). Bản này giữ 7 ngày.
+   - Mỗi người tối đa 20 lượt tải mỗi ngày. Chưa đăng nhập thì phải đăng nhập.
+2. **Nhúng (C04):** trang `/nhung/<id>` chỉ có video, @tên và nút "Xem trên 9MUA". Chỉ video `public`.
+   - Bảng chia sẻ có ô mã `<iframe>` và nút "Sao chép mã nhúng".
+   - Riêng đường `/nhung/*` cho phép web khác nhúng (`frame-ancestors *`); mọi trang khác giữ chặn như cũ.
+3. **TikTok, Instagram (C05):** hai nút sao chép link video rồi mở app đó trên điện thoại (máy tính mở trang web của mạng đó),
+   kèm báo "Đã chép link, dán vào TikTok/Instagram". Thay quyết định cũ "không hiện nút của mạng không cho chia sẻ link".
+4. Gửi qua Hộp thư (C65): `SPEC-messages.md` V5.1.
+
+### V5.8 Trả lời bình luận bằng video (C64) — công tắc `feature.social_more`
+
+1. Người đăng video có nút "Trả lời bằng video" dưới bình luận trên video của mình.
+2. Mở trang đăng video với thẻ bình luận (ảnh, tên, nội dung) dán lên video, kéo để đặt vị trí.
+3. Video mới có `replyToCommentId`. Dưới bình luận gốc hiện "Đã trả lời bằng video", bấm để mở. Người bình luận nhận thông báo.
+4. Bình luận gốc bị ẩn hoặc xoá thì thẻ trên video ghi "Bình luận không còn".
+
+### V5.9 Watch: phim ngắn nhiều tập (C02, M9) — công tắc `feature.watch`
+
+1. **Tạo phim** ở `/video/cua-toi` → "Phim của tôi": tên ≤ 80 ký tự, mô tả ≤ 500, ảnh bìa 2:3, thể loại (Tình cảm, Hài, Gia đình,
+   Hành động, Khác), trạng thái "Đang ra" hoặc "Đã đủ tập".
+2. **Tập:** video thường gắn `seriesId` và `episodeNo` (1–200, không trùng). Gắn khi đăng hoặc sau khi đăng. Mỗi tập theo giới hạn
+   độ dài V5.1.
+3. **Trang `/watch`:** 3 hàng: Mới cập nhật, Xem nhiều 7 ngày, Phim đang theo dõi. Tab "Watch" trên feed trang chủ dẫn tới đây.
+4. **Trang phim `/watch/<id>`:** trình phát, danh sách tập, đánh dấu tập đã xem (xem ≥ 90%).
+   - Tự phát tập tiếp, mặc định bật, tắt được.
+   - Nhớ tập và giây đang xem: đã đăng nhập lưu máy chủ, chưa đăng nhập lưu `localStorage`.
+   - "Lưu phim": bảng `SeriesFollow`; có tập mới thì nhận thông báo. "Theo dõi" = follow người đăng.
+   - Sản phẩm gắn trên tập hiện và mua như video thường.
+5. **Bình luận theo phút:** bình luận gửi khi đang xem một tập lưu `atSecond`. Hiện nhãn `mm:ss`, bấm để tua tới đó.
+6. Tập vẫn lên feed như video thường, trừ khi người đăng chọn "Chỉ hiện trong Watch".
+7. Không có tặng quà.
+8. Bảng `Series`: id, ownerId, title, description, coverPath, genre, status, episodeCount, createdAt, updatedAt.
+
+### V5.10 Bài đăng ảnh + chữ (C86) — công tắc `feature.posts`
+
+1. **Đăng bài** ở `/video/dang`, chế độ thứ ba "Bài viết":
+   - 1–10 ảnh (JPG, PNG, WebP ≤ 10MB mỗi ảnh, xử lý như ảnh sản phẩm) và chữ ≤ 2.000 ký tự.
+   - Không cho link trong chữ (giống bình luận). Gắn ≤ 3 sản phẩm; nhạc nền tuỳ chọn (V5.6); quyền riêng tư như video (V5.3).
+   - Bài chỉ có chữ (≤ 300 ký tự): chọn 1 trong 6 nền màu, chữ to ở giữa.
+2. **Hiện ở:** feed trang chủ (chèn như video, ảnh vuốt ngang), tab "Bài viết" trên trang cá nhân, trang hashtag.
+3. Thả cảm xúc, bình luận, lưu, chia sẻ, báo cáo, ghim như video. Mỗi người tối đa 20 bài mỗi ngày.
+4. Bảng `Post` (id, authorId, text, bgColor, visibility, allowComments, soundId, status, createdAt) và `PostImage`. Bảng
+   `Comment`, `SavedVideo`, báo cáo thêm cột `postId` (trống), mỗi dòng có đúng một trong `videoId` hoặc `postId`.
+
+### Hợp đồng mới của `creator` (chỉ thêm)
+
+```ts
+openUploadSession(userId, { name, bytes, seconds, kind }): Promise<{ ok: true; sessionId; partSize } | { ok: false; error: 'TOO_LARGE' | 'TOO_LONG' | 'ACCOUNT_TOO_NEW' | 'DAILY_LIMIT' | 'STORAGE_FULL' | 'TOO_MANY_SESSIONS' }>
+putUploadPart(sessionId, userId, index, bytes): Promise<Result>
+uploadStatus(sessionId, userId): Promise<{ received: number[]; total: number }>
+finalizeUpload(sessionId, userId, meta: PostMeta): Promise<{ ok: true; videoId } | { ok: false; error }>
+updateVideoMeta(userId, videoId, patch: Partial<PostMeta>): Promise<Result>
+schedulePublish(userId, videoId, at: Date | null): Promise<Result>
+publishDueScheduled(now): Promise<number>
+canViewVideo(videoId, viewerId | null): Promise<boolean>
+pinOnProfile(userId, videoId, pinned: boolean): Promise<Result>
+markNotInterested(viewerKey, videoId): Promise<void>
+viewHistory(userId, cursor?): Promise<Page<VideoThumb>>; clearViewHistory(userId, videoId?): Promise<void>
+requestDownload(userId, videoId): Promise<{ ok: true; url } | { ok: true; pending: true } | { ok: false; error }>
+listSounds(q?): Promise<SoundView[]>; soundPage(soundId, cursor?): Promise<SoundPage>
+createSeries / updateSeries / setEpisode / seriesPage / saveWatchProgress / toggleSeriesFollow
+createPost(userId, input): Promise<Result>; updatePost; deletePost; canViewPost
+```
+
+### Kiểm thử V5 (riêng `creator`)
+
+- Tải lên từng phần: mất phần giữa chừng rồi gửi tiếp vẫn ra file đúng; gửi trùng phần không hỏng file; phiên quá 24 giờ bị xoá;
+  tài khoản dưới 3 ngày bị từ chối video > 60 giây; vượt 2GB hoặc 60 phút bị từ chối; ổ đầy thì từ chối.
+- Hàng chờ: có việc `short` thì việc `long` không được lấy trước.
+- Video > 60 giây ra HLS đủ các mức theo độ phân giải gốc; video ≤ 60 giây ra MP4 720p và 480p; 3 ảnh bìa đúng vị trí.
+- `canViewVideo` đúng cho cả 3 mức riêng tư ở feed, hashtag, tìm kiếm, trang cá nhân, `/v/<id>`, nhúng, tải về, Duet, Stitch.
+- Hẹn giờ: tới giờ mới lên feed và mới gửi thông báo; huỷ hẹn thì không đăng.
+- Không quan tâm làm giảm điểm feed đúng 30 ngày; lịch sử xem xoá được mà lượt xem không đổi.
+- Stitch ra 720×1280, có đoạn gốc đúng giây đã chọn; Watch đánh dấu tập đã xem ở 90%; bình luận theo phút tua đúng.
+- Bài viết: không cho link; 11 ảnh bị từ chối; bài `private` không lên feed.
+
+### Boundaries V5
+
+- **Không bao giờ:** phát file chưa qua xử lý; cho xem video không `public` qua bất kỳ đường nào khi không đủ quyền; xoá bản trên
+  VPS trước khi bản trên kho ngoài đọc lại khớp; để người dùng tải nhạc vào thư viện.
+- **Hỏi trước:** bật 1080p; tăng giới hạn tổng phút mỗi ngày; cho Story dài hơn 30 giây.

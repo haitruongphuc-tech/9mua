@@ -114,3 +114,35 @@ Cần thêm ở `social` (chỉ thêm): `followRelation(a, b): Promise<boolean>`
   sẵn thẻ sản phẩm vào ô nhắn). Nút nằm ở tên miền phụ của Kiot vẫn đưa về `9mua.com/hop-thu`.
 - SSE `/api/hop-thu/events` đọc DB mỗi 1,5 giây (giống chat live), tự đóng sau 5 phút; Nginx tắt gom dữ liệu cho đường này.
 - Ảnh tin nhắn lưu trong thư mục riêng tư (như ảnh CCCD), xem qua `/api/hop-thu/anh/<id>` có kiểm quyền.
+
+## Bổ sung 30/10/2026 — Nâng cấp một đợt (V5)
+
+> **Trạng thái: chờ CEO duyệt.** Quyết định, công tắc, dữ liệu: `docs/nang-cap-mot-dot.md`.
+
+### V5.1 Gửi video qua Hộp thư (C65, M2) — công tắc `feature.share_more`
+
+- Bảng chia sẻ có hàng 8 cuộc trò chuyện gần nhất và nút tìm. Chạm một người là gửi tin dạng thẻ video (ảnh bìa, chú thích,
+  @tên). Gửi tin nhắn đi kèm (tuỳ chọn).
+- Chỉ gửi video người gửi được xem. Người nhận không được xem thì thẻ ghi "Video không còn xem được".
+- Tính vào giới hạn gửi tin như tin thường; không gửi cho người đã chặn nhau.
+
+### V5.2 Nhắn nhóm (C80) — công tắc `feature.messages_more`
+
+- `Conversation` thêm cột `kind` (`direct` mặc định, `group`), `title`, `avatarPath`.
+- Nhóm 3–100 người. Người tạo là quản trị: thêm, mời ra, đổi tên, đổi ảnh. Thành viên tự rời nhóm được.
+- Chỉ thêm được người follow lẫn nhau với mình, hoặc người đã nhắn 1-1 với mình. Tài khoản tạo dưới 1 ngày không tạo nhóm.
+- Luật tin nhắn như 1-1 (không link, chống gửi nhanh). Báo cáo nhóm; CEO xem cuộc trò chuyện nhóm bị báo cáo như 1-1.
+
+### V5.3 Tin nhắn thoại, video, thu hồi (C81) — công tắc `feature.messages_more`
+
+- **Tin thoại** ≤ 60 giây, ghi bằng trình duyệt; máy chủ chuyển sang AAC để iPhone phát được.
+- **Tin video** ≤ 60 giây, đi qua bộ xử lý video (hàng chờ `short`), không bao giờ hiện công khai.
+- **Thu hồi** trong 10 phút: mọi người thấy "Tin nhắn đã thu hồi"; nội dung bị xoá. Tin đã bị báo cáo trước khi thu hồi thì CEO
+  vẫn xem bản đã chụp lúc báo cáo.
+- Bảng `MessageMedia` (messageId, kind `voice | video`, path, durationSec).
+
+### Kiểm thử V5 (riêng `messages`)
+
+- Thẻ video riêng tư không lộ nội dung cho người không đủ quyền.
+- Không thêm được người lạ vào nhóm; người bị mời ra không đọc được tin mới.
+- Thu hồi sau 10 phút bị từ chối; tin bị báo cáo rồi thu hồi vẫn có bản chụp cho CEO.

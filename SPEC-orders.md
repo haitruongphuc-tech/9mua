@@ -161,3 +161,112 @@ listRefundsPending(), listDisputes()          // cho admin
 2. Phí ship: người bán đặt một mức cố định cho mỗi đơn, kèm ngưỡng miễn phí ship.
 3. Các mốc: 48 giờ xác nhận, 10 ngày tự động "đã nhận", 7 ngày khiếu nại.
 4. Không có COD trong MVP. Hoàn tiền do CEO chuyển tay.
+
+## Bổ sung 30/10/2026 — Nâng cấp một đợt (V5)
+
+> **Trạng thái: chờ CEO duyệt.** Quyết định, công tắc, dịch vụ ngoài, dữ liệu: `docs/nang-cap-mot-dot.md`. Hình: M7.
+> Phần đụng tiền (V5.2 hoàn tiền, V5.3, V5.4, V5.5) **tắt sẵn** khi đưa lên web. Mọi chuyển trạng thái mới vẫn đi qua
+> `transition()`, ghi `OrderEvent`, chỉ **thêm** cặp chuyển mới vào bảng, không sửa cặp cũ.
+
+### V5.1 Đánh giá sản phẩm, sao Kiot (C15, C82) — công tắc `feature.reviews`
+
+1. Ai được đánh giá: người mua có `OrderItem` thuộc đơn `delivered` hoặc `completed`, trong **30 ngày** từ `deliveredAt`.
+   Mỗi `OrderItem` một đánh giá. Đơn đã hoàn tiền thì không đánh giá được; đánh giá có trước khi hoàn tiền vẫn giữ.
+2. Nội dung: **1–5 sao** (bắt buộc), chữ ≤ 1.000 ký tự (không cho link), tối đa 5 ảnh, tối đa 1 video ≤ 30 giây.
+   Sửa được 1 lần trong 7 ngày.
+3. Nhắc đánh giá: thông báo 3 ngày sau `delivered`.
+4. Chủ Kiot trả lời mỗi đánh giá 1 lần (≤ 500 ký tự). Chủ Kiot **không** xoá hay ẩn được đánh giá.
+5. Báo cáo đánh giá (lý do như báo cáo khác, `SPEC-admin.md` V5.2): 5 người khác nhau báo cáo thì tự ẩn chờ CEO; CEO ẩn kèm lý do.
+6. Hiện trên trang sản phẩm: trung bình, tổng số, phân bố 5→1 sao, lọc "Có ảnh/video" và theo số sao; mỗi đánh giá ghi
+   "Đã mua · <biến thể>".
+7. **Sao Kiot** = trung bình mọi đánh giá đang hiện của sản phẩm Kiot đó. Chỉ hiện khi có **từ 3 đánh giá** (giữ quy tắc cũ
+   "không hiện điểm khi chưa có đánh giá thật").
+8. Cột `Product.ratingAvg`, `Product.ratingCount` cập nhật trong cùng transaction với đánh giá. Bảng `ProductReview`
+   (orderItemId duy nhất, productId, kiotId, buyerId, stars, text, editedAt, reply, repliedAt, hiddenAt, hiddenBy),
+   `ReviewMedia`, `ReviewReport`.
+
+### V5.2 Tố cáo hàng giả, xử lý 24 giờ (C18) — công tắc `feature.fake_report`, hoàn tiền `feature.fake_report_refund`
+
+1. Nút "Tố cáo hàng giả" trên trang sản phẩm, tách khỏi nút "Báo cáo" chung. Phải đăng nhập.
+2. Form: lý do (Hàng giả/nhái, Sai nguồn gốc), mô tả 20–2.000 ký tự, tối đa 5 ảnh, chọn đơn đã mua sản phẩm này (nếu có).
+3. Bảng `FakeReport`: status `open` → `investigating` → `confirmed` | `rejected`; `deadlineAt = createdAt + 24 giờ`.
+   Người tố cáo thấy "9MUA xử lý trước HH:mm ngày dd/mm".
+4. Chủ Kiot nhận thông báo và gửi giải trình kèm giấy tờ trong 12 giờ.
+5. Hàng chờ CEO `/admin/hang-gia` xếp theo hạn; quá hạn thì báo CEO (như cảnh báo đang có).
+6. CEO **xác nhận là hàng giả** thì làm trong một transaction, mỗi việc ghi nhật ký CEO:
+   - gỡ sản phẩm; thu hồi huy hiệu nguồn gốc (`SPEC-kiot.md` V5.2); ghi 1 vi phạm (`SPEC-admin.md` V5.3);
+   - nếu công tắc hoàn tiền bật và tố cáo gắn với đơn của người tố cáo:
+     - đơn chưa `completed` (`delivered` hoặc `disputed`): chuyển `refund_pending` qua luồng hoàn tiền đang có;
+     - đơn đã `completed` (người bán đã được cộng số dư): thêm cặp chuyển mới `completed → refund_pending`
+       (hành động `fake_refund`, chỉ admin), và ghi dòng `BalanceEntry(type = 'adjustment', amount = −số đã cộng cho người bán,
+       refId = fakeReportId)`. Số dư có thể âm; Kiot số dư âm không rút được và CEO thấy cảnh báo.
+   - Tiền hoàn cho người mua đi đúng đường hoàn tiền hiện nay (người mua nhập tài khoản, CEO chuyển, bấm "Đã hoàn").
+     Hoàn tối đa bằng tổng đơn.
+7. CEO **bác** thì báo người tố cáo kèm lý do; tố cáo sai nhiều lần (3 lần bị bác trong 90 ngày) thì 30 ngày không tố cáo được.
+
+### V5.3 Mã giảm giá, giảm giá theo giờ (C84) — công tắc `feature.coupons`
+
+1. **Mã giảm giá của Kiot** (`/kiot-cua-toi/khuyen-mai`):
+   - Mã 4–16 ký tự (chữ in hoa, số) hoặc "tự áp" (không cần nhập).
+   - Giảm số tiền (≥ 1.000đ) hoặc giảm % (1–50%, có mức giảm tối đa).
+   - Đơn tối thiểu, thời gian bắt đầu/kết thúc, tổng lượt dùng, mỗi người dùng 1 lần, áp cho cả Kiot hoặc danh sách sản phẩm.
+   - **Kiot chịu toàn bộ tiền giảm**; 9MUA không bù.
+2. **Khi đặt hàng:** mỗi đơn (mỗi Kiot) dùng tối đa 1 mã. Máy chủ kiểm tra lại mã trong transaction đặt hàng.
+   - `Order.discountVnd`, `Order.couponId`. `total = subtotal − discountVnd + shippingFee`.
+   - **Phí sàn tính trên tiền hàng sau giảm:** `round((subtotal − discountVnd) × platformFeeRate / 10000)`.
+3. **Giảm giá theo giờ:** Kiot đặt giá giảm cho sản phẩm (hoặc biến thể) trong một khung ≤ 24 giờ, giới hạn số suất.
+   - Trang sản phẩm hiện đồng hồ đếm ngược và "còn N suất". Giá tính lại lúc đặt hàng; hết suất hoặc hết giờ thì về giá thường.
+   - Dùng chung được với mã giảm giá, trừ khi Kiot tick "Không dùng chung".
+4. Chợ có nhãn "Giảm giá" và bộ lọc "Đang giảm giá".
+5. Sổ chỉ thêm `CouponRedemption` (couponId, orderId, buyerId, amount, kind `use | release`). Đơn huỷ trước khi trả tiền thì
+   ghi dòng `release` để trả lượt.
+6. Bảng `Coupon`, `FlashSale` (productId, variantId, salePrice, startAt, endAt, quota, sold).
+
+### V5.4 Giao hàng qua GHN/GHTK (C31) — công tắc `feature.carriers`
+
+1. Dùng **tài khoản doanh nghiệp của 9MUA** với từng hãng (khoá ở `.env`). Kiot tự chọn "Giao qua hãng" và hãng mặc định trong
+   cài đặt; sản phẩm có khối lượng và kích thước (cột mới `Product.weightGram`, `lengthCm`, `widthCm`, `heightCm`).
+2. **Phí ship:** đơn của Kiot giao qua hãng dùng phí hãng báo theo địa chỉ người mua và khối lượng, thay cho phí cố định.
+   Người mua thấy trước khi trả. `Order.shippingPaidBy = 'platform'`.
+3. Người bán xác nhận đơn rồi bấm "Tạo đơn giao hàng": gọi API hãng, nhận mã vận đơn và nhãn in.
+4. Webhook của hãng (kiểm chữ ký) đổi trạng thái: lấy hàng → `shipping`; giao xong → `delivered`; hoàn hàng → `disputed`
+   để CEO xử lý (đơn trả trước) hoặc theo V5.5 (đơn COD). Người mua thấy hành trình đơn.
+5. Bảng `Shipment` (orderId, carrier, code, fee, status, labelUrl) và sổ chỉ thêm `ShipmentEvent`.
+6. Tiền ship hãng thu được trả từ tài khoản 9MUA; phần này **không** cộng cho người bán (`SPEC-payouts.md` V5.1).
+
+### V5.5 Thanh toán khi nhận hàng (COD) (C85) — công tắc `feature.cod`
+
+1. Chỉ có khi: công tắc bật, Kiot bật COD, Kiot giao qua hãng (V5.4). Người mua chọn "Trả khi nhận hàng" cho từng đơn.
+2. Giới hạn (CEO chỉnh): tổng đơn COD ≤ 5.000.000đ; tài khoản người mua tạo từ 3 ngày; tối đa 3 đơn COD đang chạy;
+   từ chối nhận 2 đơn COD trong 90 ngày thì người đó không dùng COD nữa.
+3. **Trạng thái mới** `cod_pending` (chờ người bán xác nhận). Thêm cặp chuyển: `cod_pending → confirmed` (người bán),
+   `cod_pending → cancelled` (người mua huỷ, người bán từ chối, hoặc quá 48 giờ). Sau đó `confirmed → shipping → delivered`
+   như đơn thường; `delivered` của đơn COD do webhook hãng báo "đã thu tiền".
+4. Giỏ nhiều Kiot: đơn COD không vào QR; QR chỉ gồm các đơn trả trước.
+5. **Tiền:** hãng thu tiền người mua rồi chuyển về tài khoản 9MUA theo đợt đối soát. Đơn COD chỉ được `completed` khi đã có dòng
+   đối soát khớp (`SPEC-payouts.md` V5.1) **và** đủ 7 ngày sau `delivered`.
+6. **Người mua từ chối nhận:** hãng báo hoàn → đơn `cancelled`, hoàn tồn kho; phí ship đi và về trừ vào số dư người bán bằng dòng
+   `adjustment` (CEO đổi được người chịu phí trong cài đặt).
+
+### Hợp đồng mới của `orders` (chỉ thêm)
+
+```ts
+createReview / editReview / replyReview / reportReview / productRatings(productId, filter) / kiotRating(kiotIds)
+fileFakeReport / explainFakeReport / decideFakeReport(adminId, id, 'confirmed' | 'rejected', options)
+upsertCoupon / validateCoupon(buyerId, kiotId, code, lines) / upsertFlashSale
+quoteShipping(kiotId, address, lines) / createShipment(orderId, sellerId) / handleCarrierWebhook(carrier, payload, signature)
+placeOrder(userId, input: { ...cũ; coupons?: Record<kiotId, string>; paymentMethod?: Record<kiotId, 'prepaid' | 'cod'> })
+```
+
+`CompletedOrder` thêm `discountVnd`, `shippingPaidBy`, `paymentMethod`, `codFeeVnd` để `payouts` tính đúng.
+
+### Kiểm thử V5 (riêng `orders`)
+
+- Đánh giá: không mua thì không đánh giá được; quá 30 ngày bị từ chối; sao Kiot ẩn khi dưới 3 đánh giá; chủ Kiot không xoá được.
+- Tố cáo: xác nhận hàng giả với đơn đã `completed` tạo đúng 1 dòng `adjustment` âm bằng số đã cộng; bấm 2 lần không tạo 2 dòng;
+  công tắc hoàn tiền tắt thì không chuyển trạng thái tiền.
+- Mã giảm giá: 2 người dùng lượt cuối cùng lúc, 1 người được; đơn huỷ trả lượt; phí sàn tính trên tiền sau giảm.
+- Giảm giá theo giờ: hết suất giữa lúc thanh toán thì đơn dùng giá thường và báo người mua trước khi trả.
+- Giao hàng: webhook sai chữ ký bị từ chối; webhook gửi trùng không đổi trạng thái 2 lần.
+- COD: giỏ có cả đơn COD và đơn trả trước thì QR chỉ gồm đơn trả trước; đơn COD không `completed` khi chưa đối soát; từ chối nhận
+  thì hoàn tồn kho và trừ phí đúng.

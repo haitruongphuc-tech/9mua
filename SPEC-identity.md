@@ -313,3 +313,80 @@ export async function register(raw: unknown): Promise<RegisterResult> {
 
 Bảng `User` thêm `avatarUrl`, `coverUrl`, `bio` (có thể để trống). Các hàm hồ sơ, ảnh đại diện và tìm tài khoản xem
 `SPEC-social.md` mục "Bổ sung 30/10/2026 — Đợt A" (A2, A3).
+
+## Bổ sung 30/10/2026 — Nâng cấp một đợt (V5)
+
+> **Trạng thái: chờ CEO duyệt.** Quyết định, công tắc, dữ liệu: `docs/nang-cap-mot-dot.md`.
+
+### V5.1 Tên người dùng @tên (C69, M10) — công tắc `feature.account_more`
+
+1. Cột mới `User.handle`, duy nhất, chữ thường: 3–24 ký tự `a-z`, `0-9`, `.`, `_`; không bắt đầu hay kết thúc bằng dấu chấm,
+   không có 2 dấu chấm liền nhau; không trùng danh sách từ dành riêng (admin, 9mua, ceo, live, video, cho, kiot, api, watch,
+   nhom, su-kien, tim-kiem…, danh sách nằm trong code và có test).
+2. Tài khoản cũ được tự đặt khi đưa lên web: tên hiển thị bỏ dấu, viết liền; trùng thì thêm 4 số. Đây là ghi vào cột mới, không
+   sửa cột cũ.
+3. Đổi @tên trong Cài đặt, **30 ngày một lần**. @tên cũ được giữ 30 ngày và tự chuyển hướng sang @tên mới.
+4. Trang cá nhân ở `9mua.com/@<tên>`. Link `/creator/<id>` chuyển hướng 301. Tìm tài khoản theo @tên và tên hiển thị.
+
+### V5.2 Tài khoản riêng tư (C70)
+
+1. Công tắc "Tài khoản riêng tư" trong Cài đặt (cột `User.isPrivate`, mặc định tắt).
+2. Khi bật:
+   - Follow mới thành **yêu cầu**; chủ tài khoản chấp nhận hoặc từ chối. Bảng `Follow` thêm cột `status` (`active` mặc định,
+     `pending`). Follow cũ giữ nguyên.
+   - Người chưa follow chỉ thấy tên, ảnh, @tên, số follow; không thấy video, bài viết, tab Đã thích.
+   - Video và bài `public` cũ được **hiển thị như** `followers`; dữ liệu không đổi, tắt riêng tư thì trở lại như cũ.
+   - Không Duet, Stitch, tải về, nhúng; không vào feed Dành cho bạn.
+3. Chủ Kiot đang hoạt động không bật được (Kiot phải công khai để bán hàng); báo rõ lý do.
+
+### V5.3 Tự xoá tài khoản (C71)
+
+1. Cài đặt → "Xoá tài khoản". Xác nhận bằng mật khẩu, hoặc mã email nếu tài khoản không có mật khẩu.
+2. Từ chối, kèm lý do, khi còn: số dư Kiot > 0, đơn mua hoặc đơn bán chưa xong, yêu cầu rút tiền đang chờ, khiếu nại đang mở.
+   Tài khoản admin không tự xoá được.
+3. Sau khi yêu cầu: đăng xuất mọi thiết bị, trang cá nhân ẩn ngay. **30 ngày chờ**: đăng nhập lại trong 30 ngày là huỷ xoá.
+4. Hết 30 ngày (việc chạy hằng ngày): tên thành "Tài khoản đã xoá"; xoá email, SĐT, ảnh, giới thiệu, @tên, liên kết đăng nhập;
+   gỡ và xoá file video, bài viết, bình luận, Story. **Giữ** sổ tiền, đơn hàng, nhật ký CEO (đã ẩn danh) theo quy tắc sổ chỉ thêm.
+5. Cột `User.deleteRequestedAt`, `User.deletedAt`.
+
+### V5.4 Đăng nhập bằng Apple (C72) — công tắc `feature.apple_login`
+
+- Thêm nhà cung cấp `apple` giống Google, Zalo, Facebook (bảng `AuthIdentity`). Nhận cả email ẩn của Apple.
+- Chưa có khoá thì nút tự ẩn. Tài khoản admin không đăng nhập bằng Apple.
+
+### V5.5 Nhiều tài khoản trên một máy (C73)
+
+1. Lưu tối đa **3 tài khoản** trên cùng trình duyệt. Menu ảnh đại diện → "Chuyển tài khoản", "Thêm tài khoản".
+2. Mỗi tài khoản giữ phiên riêng (cookie httpOnly riêng cho từng phiên, hạn 30 ngày như hiện nay). Chuyển không cần nhập lại
+   mật khẩu khi phiên còn hạn.
+3. Đăng xuất một tài khoản hoặc tất cả. Tài khoản admin không được thêm vào danh sách này; vào admin phải đăng nhập riêng.
+
+### V5.6 Cam kết nội dung (C10, C11, M5) — công tắc `feature.commitment`
+
+1. Bảng `CommitmentVersion` (version, 4 dòng cam kết, publishedAt, publishedBy). Bản đầu là 4 dòng trong M5. CEO sửa chữ trong
+   `/admin/noi-dung` thì tạo bản mới.
+2. Sổ chỉ thêm `Commitment` (userId, version, acceptedAt, ip, userAgent).
+3. **Phải đồng ý bản mới nhất** trước khi: đăng ký (ô tick trên form; đăng nhập bằng Zalo/Google/Facebook/Apple lần đầu thì
+   hiện bảng M5 trước khi vào web), tạo Kiot, phát live, đăng sản phẩm, đăng video, Story, bài viết.
+4. Chưa đồng ý thì hiện bảng M5; tick đủ 4 ô mới bấm được "Tôi cam kết". Máy chủ cũng kiểm tra: thao tác bị chặn trả lỗi
+   `COMMITMENT_REQUIRED`.
+5. Tài khoản cũ được hỏi ở lần đầu làm một trong các việc trên. CEO đổi chữ cam kết thì mọi người được hỏi lại.
+6. Trang công khai `/cam-ket` hiện bản mới nhất. IP và giờ đồng ý chỉ admin xem (trang tra cứu người dùng).
+
+### Hợp đồng mới của `identity` (chỉ thêm)
+
+```ts
+setHandle(userId, handle): Promise<{ ok: true } | { ok: false; error: 'INVALID' | 'TAKEN' | 'RESERVED' | 'TOO_SOON' }>
+resolveHandle(handle): Promise<{ userId } | { redirectTo: string } | null>
+setPrivate(userId, on): Promise<Result>   // từ chối khi là chủ Kiot đang hoạt động
+requestAccountDeletion(userId, proof); cancelAccountDeletion(userId); runAccountDeletions(now)
+hasCurrentCommitment(userId): Promise<boolean>; acceptCommitment(userId, version, ip, ua): Promise<Result>
+```
+
+### Kiểm thử V5 (riêng `identity`)
+
+- @tên: đủ các luật hợp lệ, trùng, từ dành riêng, đổi trước 30 ngày bị từ chối, @tên cũ chuyển hướng 30 ngày.
+- Riêng tư: người lạ không thấy video; yêu cầu follow chờ duyệt; chủ Kiot đang hoạt động không bật được.
+- Xoá tài khoản: bị chặn khi còn số dư/đơn; đăng nhập lại trong 30 ngày thì huỷ; sau 30 ngày thông tin cá nhân hết, sổ tiền còn.
+- Cam kết: mọi thao tác được liệt kê đều bị chặn khi chưa đồng ý (gọi thẳng API cũng bị chặn); đổi bản thì hỏi lại.
+- Nhiều tài khoản: chuyển đúng phiên; đăng xuất một tài khoản không làm mất phiên khác; tài khoản admin không thêm được.

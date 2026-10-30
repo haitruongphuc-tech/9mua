@@ -264,3 +264,53 @@ monthlyXuUsage(month): Promise<{ used: number; budget: number }>
 - Thanh dưới có chấm đỏ ở nút Live khi có người đang live (`/api/auth/me` trả `liveNow`, lưu tạm 10 giây).
 - Hợp đồng thêm: `orders.addToCart` nhận tham số nguồn `{ videoId?, liveId? }` (vẫn nhận chuỗi videoId như cũ);
   `kiot.kiotBasics`. Module mới `live`, `xu`; app nối "kết thúc live → thưởng xu" ở `src/server/live.ts`.
+
+## Bổ sung 30/10/2026 — Nâng cấp một đợt (V5)
+
+> **Trạng thái: chờ CEO duyệt.** Quyết định, công tắc, dữ liệu: `docs/nang-cap-mot-dot.md`. Hình: M13.
+
+### V5.1 Giới hạn chỉnh được (C75)
+
+- `live.max_concurrent` (mặc định 2), `live.max_viewers` (50), `live.max_hours` (2) chỉnh trong `/admin/cai-dat`.
+- Trần cứng để tránh gõ nhầm: 20 buổi, 1.000 người, 4 giờ.
+- Màn chỉnh hiện ước tính băng thông lúc cao điểm (buổi × người × 1,5 Mbps) và GB mỗi giờ. Nâng máy phát là việc CEO làm
+  trước khi tăng số.
+
+### V5.2 Xem lại buổi live (C76) — công tắc `feature.live_recording`
+
+- Khi bắt đầu, người phát chọn "Lưu để xem lại" (mặc định bật khi công tắc bật).
+- MediaMTX ghi hình; hết buổi, worker chuyển thành video HLS (hàng chờ `long`) và gắn `LiveSession.recordingVideoId`.
+- Tab "Xem lại" ở `/live`. Sản phẩm đã ghim hiện kèm. Bản xem lại giữ **30 ngày** (CEO chỉnh) rồi tự xoá, trừ khi người phát
+  bấm "Giữ lâu dài" (thành video thường, theo giới hạn của `SPEC-creator.md` V5.1).
+- Buổi có khách (V5.4) chỉ ghi hình người phát.
+
+### V5.3 Hẹn lịch live (C77) — công tắc `feature.live_more`
+
+- `/live/phat` → "Hẹn lịch": tiêu đề, giờ bắt đầu (từ 30 phút tới 14 ngày sau), ghim tối đa 3 sản phẩm. Mỗi người tối đa 5 lịch
+  sắp tới. Sự kiện hình thức Live (`SPEC-social.md` V5.7) tự tạo lịch này.
+- Tab "Sắp phát": người xem bấm "Nhắc tôi". 15 phút trước giờ và lúc người phát bắt đầu: thông báo cho người bấm nhắc và người
+  follow.
+- Quá 30 phút sau giờ hẹn mà chưa phát thì lịch hết hạn và báo người bấm nhắc.
+- Bảng `LiveSchedule`, `LiveReminder`.
+
+### V5.4 Mời khách cùng live (C78) — công tắc `feature.live_guest`
+
+- Đang live, người phát mời 1 người (theo @tên). Khách chấp nhận thì phát hình của mình vào cùng buổi; người xem thấy màn hình
+  chia đôi, nghe cả hai.
+- Khách phải đủ điều kiện phát live (tài khoản từ 3 ngày, không bị cấm, đã cam kết nội dung). Người phát mời khách ra bất cứ lúc
+  nào. Mỗi buổi 1 khách cùng lúc.
+- Một buổi có khách vẫn tính 1 buổi, nhưng mỗi người xem tải 2 luồng hình: tính vào ước tính băng thông V5.1.
+
+### V5.5 Người quản lý chat (C79) — công tắc `feature.live_more`
+
+- Người phát chọn tối đa 3 người quản lý (giữ cho mọi buổi sau). Người quản lý ẩn tin và cấm chat trong buổi như người phát.
+- Tên người quản lý có nhãn "Quản lý" trong chat. Mỗi thao tác ghi người làm.
+- Bảng `LiveModerator` (hostId, userId).
+
+### Kiểm thử V5 (riêng `live`)
+
+- Đổi giới hạn trong Admin có hiệu lực cho buổi mới; vượt trần cứng bị từ chối.
+- Bản xem lại xuất hiện sau khi xử lý xong và tự xoá sau 30 ngày.
+- Lịch hẹn gửi nhắc đúng 15 phút trước và đúng 1 lần; quá 30 phút thì hết hạn.
+- Khách không đủ điều kiện không vào được; người phát mời khách ra thì luồng khách dừng.
+- Người quản lý cấm chat được; người thường không.

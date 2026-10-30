@@ -20,6 +20,9 @@ trên Chợ chung. Creator đăng video dọc 9:16 có gắn sản phẩm. CEO q
 | `social` | Follow, bình luận, lưu, hashtag, tab Đang Follow, tim Kiot, giới hạn tài khoản Free, voucher mở Kiot (`SPEC-social.md`) | `identity`, `kiot`, `billing`, `creator` |
 | `ai` | AI Studio cho chủ Kiot: viết mô tả, vẽ ảnh, ghép video, đăng bán (`SPEC-ai.md`) | `identity`, `kiot`, `creator` |
 | `messages` | Hộp thư: nhắn tin 1-1, tin nhắn chờ của người lạ, chặn, báo cáo, CEO xem cuộc trò chuyện bị báo cáo (`SPEC-messages.md`) | `identity`, `kiot`, `social` |
+| `play` | Vui chơi có thưởng: quay số, bắn tim, bảng xếp hạng tuần; tiền thưởng vào ví thu nhập, tắt sẵn (`SPEC-play.md`, chờ CEO duyệt) | `identity`, `social`, `payouts` |
+
+Nâng cấp một đợt (30/10/2026, chờ CEO duyệt): mọi module thêm mục "Bổ sung 30/10/2026 — Nâng cấp một đợt (V5)" trong spec của mình; tổng quan, công tắc, dịch vụ ngoài ở `docs/nang-cap-mot-dot.md`.
 
 Thứ tự xây:
 `identity` → `kiot` → `payments` → `billing` → `orders` → `payouts` → `marketplace`, `creator` (song song) → `admin`

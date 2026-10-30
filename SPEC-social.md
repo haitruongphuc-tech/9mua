@@ -113,6 +113,10 @@ revokeVoucher(voucherId, adminId, reason): Promise<void>   // cho admin
 > - hoa hồng creator là Đợt E, có spec tiền riêng.
 >
 > Các đợt sau: B (bài chữ + ảnh, cảm xúc, đăng lại), C (chỉnh video, nhạc nền), D (nhóm), E (hoa hồng).
+>
+> **Cập nhật 30/10/2026:** CEO chốt làm hết trong một đợt (`docs/nang-cap-mot-dot.md`). Đợt A gộp vào đợt đó (mã C93).
+> Đường dẫn trang cá nhân đổi theo C69: chính là `9mua.com/@<tên>`, link `/creator/<id>` chuyển hướng 301 sang đó.
+> Trang Tìm kiếm thêm tab Kiot và tìm theo vị trí (`SPEC-marketplace.md` V5).
 
 ### A1. Nút "＋ Đăng" rõ ràng
 
@@ -235,3 +239,139 @@ Giữ nguyên đường dẫn để link đã chia sẻ không hỏng.
   - cho link trong phần giới thiệu;
   - hiện email hay số điện thoại trên trang cá nhân hoặc trong kết quả tìm kiếm;
   - giữ thông tin vị trí trong ảnh.
+
+## Bổ sung 30/10/2026 — Nâng cấp một đợt (V5)
+
+> **Trạng thái: chờ CEO duyệt.** Quyết định, công tắc, thư viện, dữ liệu: `docs/nang-cap-mot-dot.md`.
+
+### V5.1 Bạn chung, gợi ý follow (C23, C24, M10) — công tắc `feature.social_more`
+
+1. **Bạn chung (C23):** trên trang cá nhân của người khác: số người **mình đang follow** mà cũng follow trang này, 3 ảnh đại
+   diện và 2 tên đầu. Bấm vào mở danh sách. Không tính tài khoản bị khoá hoặc đã chặn nhau.
+2. **Gợi ý follow (C24):** tài khoản được những người mình follow đang follow, mà mình chưa follow.
+   - Xếp theo số bạn chung, rồi số người theo dõi. Mình follow dưới 3 người thì lấy creator có nhiều lượt thích nhất 30 ngày.
+   - Không gợi ý: chính mình, tài khoản bị khoá, đã chặn nhau, đã bấm "Ẩn" trong 30 ngày.
+   - Hiện ở: cuối trang cá nhân, trang Tôi, và một hàng thẻ trong feed sau mỗi 15 video (chỉ khi đã đăng nhập).
+   - Tính lại tối đa 1 lần mỗi giờ cho mỗi người.
+
+### V5.2 Tab "Đã thích" (C62)
+
+- Trang cá nhân có tab "Đã thích": video mình đã thả tim, mới nhất trước.
+- Chủ trang luôn thấy. Người khác chỉ thấy khi chủ trang bật "Công khai video đã thích" (cột `User.showLikedVideos`,
+  mặc định **tắt**).
+- Chỉ hiện video người xem được phép xem (`canViewVideo`).
+
+### V5.3 Chặn trên toàn web (C68)
+
+1. Nút ⋯ trên trang cá nhân, bình luận, tin nhắn, buổi live → "Chặn". Bảng mới `UserBlock` (blockerId, blockedId, createdAt),
+   khoá duy nhất. Chặn ở Hộp thư (`MessageBlock` đang có) cũng ghi vào `UserBlock`; khi đưa lên web, chép các dòng `MessageBlock`
+   cũ sang `UserBlock` (chỉ thêm dòng).
+2. Khi hai người chặn nhau (một chiều là đủ), **cả hai chiều**:
+   - không thấy video, bài viết, bình luận, buổi live của nhau; trang cá nhân hiện "Không xem được trang này";
+   - follow cũ giữa hai người bị gỡ; không follow lại được;
+   - không bình luận, nhắc tên, nhắn tin, Duet, Stitch, dùng âm thanh của nhau;
+   - người bị chặn vào buổi live của người chặn thì bị từ chối.
+3. Chặn **không** chặn việc mua bán: đơn đang có vẫn xử lý và khiếu nại bình thường.
+4. Danh sách chặn ở `/tai-khoan/cai-dat` (gộp danh sách chặn của Hộp thư), bỏ chặn được. Tối đa 1.000 người.
+
+### V5.4 Bình luận: tim, nhắc tên, từ cấm (C25, C52, C67, M11)
+
+1. **Tim bình luận (C25):** bấm tim, bấm lần nữa để bỏ. Bảng `CommentLike` (commentId, userId) khoá duy nhất; cột
+   `Comment.likeCount`. Không tính vào giới hạn 50 tim/follow của tài khoản Free. Tối đa 60 lần mỗi phút.
+   Thứ tự bình luận: ghim → từ 3 tim trở lên, nhiều tim trước → mới nhất.
+2. **Nhắc tên @ (C52):** trong bình luận, chú thích video, chữ bài viết.
+   - Gõ `@` hiện danh sách gợi ý (người mình follow trước, rồi tìm theo @tên và tên hiển thị).
+   - `@tên` (C69) hiện thành link tới trang cá nhân. Tối đa 10 lần nhắc mỗi nội dung.
+   - Bảng `Mention` (sourceType, sourceId, userId, createdAt). Người được nhắc nhận thông báo.
+   - Cài đặt "Ai được nhắc tên tôi": Mọi người (mặc định) / Người tôi follow / Không ai. Không nhắc được người đã chặn nhau.
+3. **Từ cấm (C67):** mỗi người lưu tối đa 50 từ, mỗi từ ≤ 30 ký tự (bảng `MutedKeyword`).
+   - Bình luận trên video/bài của mình có từ đó (không phân biệt dấu, hoa thường, khớp nguyên từ) tự ẩn, `hiddenBy = 'keyword'`.
+     Người viết vẫn thấy bình luận của mình.
+   - Đầu bảng bình luận, chủ video thấy "Đã ẩn N bình luận chứa từ bạn chặn · Sửa từ cấm", mở ra xem và "Hiện lại" được.
+
+### V5.5 Thông báo mới (C66)
+
+- Loại mới: có người follow mình; có người thả tim/cảm xúc video hoặc bài; được nhắc tên; được trả lời bằng video; yêu cầu
+  follow (tài khoản riêng tư); sự kiện sắp diễn ra; phim đã lưu có tập mới; bài được đăng lại.
+- **Gộp:** follow mới và lượt thích của cùng một video gộp theo giờ: "Như Huỳnh và 4 người khác đã follow bạn".
+  Mỗi video tối đa 1 thông báo thích mỗi giờ.
+- Trang `/tai-khoan/cai-dat` mục "Thông báo": bật/tắt từng loại. Mặc định bật hết.
+
+### V5.6 Điểm thưởng (C01, M1) — công tắc `feature.points`
+
+1. **Chỉ để hiển thị.** Không đổi ra xu, tiền, voucher hay quà. CEO đổi ý thì phải có spec mới.
+2. Luật mặc định (CEO chỉnh trong `/admin/cai-dat`):
+   - +5 khi thả tim một video lần đầu (không tính video của mình).
+   - +10 khi follow một người lần đầu.
+   - +20 cho **cả hai** khi hai người follow nhau lần đầu.
+   - Chuỗi ngày: ngày nào cũng thả tim ít nhất 1 video, từ ngày thứ 3 liên tiếp trở đi thì điểm tim của ngày đó nhân đôi.
+3. Chống cày: tài khoản dưới 3 ngày không có điểm; tối đa 200 điểm mỗi ngày; bỏ tim hay bỏ follow rồi làm lại không có điểm
+   lần nữa; điểm từ tài khoản bị khoá bị thu hồi bằng dòng trừ.
+4. Sổ chỉ thêm `PointEntry` (userId, kind, points, refType, refId, vnDay, createdAt), khoá duy nhất (userId, kind, refId).
+5. Hiển thị: hiệu ứng "+5 · chuỗi x2" bay lên cạnh nút tim (M1), "+10"/"+20" khi follow; tổng điểm trên trang Tôi.
+
+### V5.7 Sự kiện và Kỷ niệm (C26) — công tắc `feature.events`
+
+1. **Sự kiện:** chủ Kiot hoặc creator tạo ở `/su-kien/tao`.
+   - Tên ≤ 80 ký tự, ảnh bìa, giờ bắt đầu và kết thúc, hình thức (Live trên 9MUA / Tại địa điểm), tỉnh + địa chỉ ≤ 120 ký tự,
+     mô tả ≤ 1.000, gắn ≤ 6 sản phẩm.
+   - Hình thức Live tự tạo kèm lịch live (`SPEC-live.md` V5.3).
+   - Người xem bấm "Quan tâm": nhận thông báo 1 giờ trước giờ bắt đầu.
+   - Trang `/su-kien` (sắp diễn ra, lọc theo tỉnh) và `/su-kien/<id>`; trang Kiot và trang cá nhân có khối Sự kiện.
+   - Mỗi người tối đa 10 sự kiện sắp diễn ra. Báo cáo và CEO gỡ như video.
+   - Bảng `Event`, `EventInterest`.
+2. **Kỷ niệm "Ngày này năm trước":** trang Tôi hiện video hoặc bài của chính mình đăng cùng ngày tháng ở các năm trước.
+   Chỉ chủ tài khoản thấy. Nút "Đăng lại" (V5.9). Tắt được trong Cài đặt.
+
+### V5.8 Cảm xúc (C87) — công tắc `feature.posts`
+
+- Chạm 2 lần vẫn là Thích như hiện nay. Giữ lâu nút tim mở 6 cảm xúc: Thích, Thương, Haha, Wow, Buồn, Giận.
+- Mỗi người một cảm xúc cho mỗi video hoặc bài, đổi được. Số trên nút = tổng cảm xúc; bấm số xem từng loại.
+- Dữ liệu: `VideoLike` thêm cột `reaction` (mặc định `like`, dòng cũ giữ `like`); bài viết dùng bảng `Reaction`.
+- Giới hạn Free, voucher 100 tim, điểm thưởng tính mọi cảm xúc như một lượt tim.
+
+### V5.9 Đăng lại (C88) — công tắc `feature.posts`
+
+- Nút "Đăng lại" trong bảng chia sẻ của video hoặc bài `public` của người khác. Mỗi người đăng lại một nội dung tối đa 1 lần,
+  bỏ đăng lại được.
+- Nội dung đăng lại hiện trong tab Đang Follow của người follow mình, ghi "@tên đã đăng lại", và trong tab "Đăng lại" trên
+  trang cá nhân. Chủ nội dung nhận thông báo.
+- Bảng `Repost` (userId, videoId hoặc postId, createdAt).
+
+### V5.10 Nhóm (C91) — công tắc `feature.groups`
+
+1. Tạo nhóm ở `/nhom/tao`: tên ≤ 60 ký tự, ảnh, mô tả ≤ 500, loại **Công khai** hoặc **Riêng tư** (phải được duyệt mới vào,
+   bài chỉ thành viên thấy). Tài khoản tạo từ 7 ngày mới được tạo nhóm; mỗi người tạo tối đa 5 nhóm.
+2. Người tạo là quản trị; thêm tối đa 3 quản trị viên. Quản trị duyệt người vào (nhóm riêng tư), bật/tắt duyệt bài, xoá bài,
+   cấm thành viên.
+3. Thành viên đăng bài viết (V5.10 của `SPEC-creator`) hoặc video vào nhóm; thả cảm xúc, bình luận như thường.
+4. Trang `/nhom` (nhóm của tôi, gợi ý nhóm công khai) và `/nhom/<id>`. Nhóm tối đa 10.000 thành viên.
+5. Báo cáo nhóm hoặc bài trong nhóm vào hàng chờ CEO; CEO khoá nhóm kèm lý do.
+6. Bảng `CommunityGroup`, `CommunityMember` (role, status), `CommunityPost` (groupId, videoId hoặc postId, status).
+
+### Hợp đồng mới của `social` (chỉ thêm)
+
+```ts
+mutualFollowers(viewerId, profileId, limit): Promise<{ count; sample: PublicProfile[] }>
+suggestedAccounts(viewerId, limit): Promise<PublicProfile[]>; hideSuggestion(viewerId, userId)
+likedVideos(ownerId, viewerId, cursor?): Promise<Page<VideoThumb>>
+blockUser(blockerId, blockedId); unblockUser; isBlockedEither(a, b): Promise<boolean>; listBlocked(userId)
+toggleCommentLike(userId, commentId); parseMentions(text): string[]; recordMentions(source, text, authorId)
+mutedKeywords(userId); setMutedKeywords(userId, words[]); applyKeywordFilter(commentId)
+awardPoints(event); pointsTotal(userId)
+createEvent / updateEvent / toggleEventInterest / upcomingEvents
+setReaction(userId, target, reaction | null); reactionSummary(target)
+toggleRepost(userId, target); repostsOf(userId, cursor?)
+createGroup / joinGroup / approveMember / postToGroup / groupFeed / moderateGroupPost
+```
+
+`messages` đọc `isBlockedEither` thay cho bảng riêng; `creator`, `live` dùng nó để ẩn nội dung và từ chối thao tác.
+
+### Kiểm thử V5 (riêng `social`)
+
+- Bạn chung đúng giao của hai tập, bỏ tài khoản bị khoá; gợi ý không có người đã follow, đã chặn, đã ẩn.
+- Chặn một chiều làm ẩn cả hai chiều ở feed, bình luận, live, nhắn tin, nhắc tên; đơn hàng cũ vẫn xử lý được.
+- Từ cấm khớp không dấu và nguyên từ ("hàng" không khớp "hànghoá"); "Hiện lại" đưa bình luận về.
+- Điểm: bỏ tim rồi tim lại không có điểm; tài khoản 2 ngày tuổi không có điểm; vượt 200 điểm/ngày bị chặn; chuỗi ngày thứ 3 nhân đôi.
+- Gộp thông báo theo giờ đúng số người; tắt loại thông báo thì không gửi.
+- Nhóm riêng tư: người ngoài không thấy bài; thành viên bị cấm không đăng được.

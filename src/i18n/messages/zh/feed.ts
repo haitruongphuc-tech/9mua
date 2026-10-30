@@ -12,6 +12,8 @@ export const feed: FeedMessages = {
   'feed.tools.speed': '播放速度',
   'feed.tools.autoscroll': '自动下一条',
   'feed.tools.fullscreen': '全屏',
+  'feed.notInterested': '不感兴趣',
+  'feed.notInterestedDone': '已隐藏视频。你会更少看到此创作者的视频。',
   'feed.close': '关闭',
   'feed.unmute': '点击开启声音',
   'feed.pinned': '📌 置顶',

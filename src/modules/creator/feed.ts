@@ -7,6 +7,7 @@ import { kiotOrigin } from '@/lib/urls';
 import { getProductForCheckout, productPath } from '@/modules/kiot';
 import { feedScore } from './score';
 import { visibleToSql } from './visibility';
+import { notInterestedSql } from './watching';
 
 export type Viewer = { userId?: string; anonId?: string };
 
@@ -71,16 +72,19 @@ export async function getFeed(
   const notServed = exclude.length ? Prisma.sql`AND NOT (v.id = ANY(${exclude}))` : Prisma.empty;
   // Không hiện video của người chặn nhau với người xem (SPEC-social.md V5.3).
   const notBlocked = Prisma.sql`AND ${notBlockedWith(viewer.userId, Prisma.sql`v."authorId"`)}`;
+  // "Không quan tâm" (SPEC-creator.md V5.2): bỏ video đã bấm, hạ điểm video cùng người đăng trong 30 ngày.
+  const ni = notInterestedSql(viewer);
+  const filters = Prisma.sql`${notBlocked} ${ni.exclude}`;
 
   const freshCount = Math.max(1, Math.round(limit * FRESH_SHARE));
   const [top, fresh] = await Promise.all([
     db.$queryRaw<Row[]>`
       SELECT v.id FROM "Video" v JOIN "User" u ON u.id = v."authorId"
-      WHERE ${PUBLIC} ${notServed} ${seenFilter} ${notBlocked}
-      ORDER BY v.score DESC, v."readyAt" DESC LIMIT ${limit}`,
+      WHERE ${PUBLIC} ${notServed} ${seenFilter} ${filters}
+      ORDER BY ${ni.score} DESC, v."readyAt" DESC LIMIT ${limit}`,
     db.$queryRaw<Row[]>`
       SELECT v.id FROM "Video" v JOIN "User" u ON u.id = v."authorId"
-      WHERE ${PUBLIC} ${notServed} ${seenFilter} ${notBlocked}
+      WHERE ${PUBLIC} ${notServed} ${seenFilter} ${filters}
       ORDER BY v."readyAt" DESC LIMIT ${limit}`,
   ]);
 
@@ -107,8 +111,8 @@ export async function getFeed(
     const taken = ids.length ? Prisma.sql`AND NOT (v.id = ANY(${ids}))` : Prisma.empty;
     const seen = await db.$queryRaw<Row[]>`
       SELECT v.id FROM "Video" v JOIN "User" u ON u.id = v."authorId"
-      WHERE ${PUBLIC} ${notServed} ${taken} ${notBlocked}
-      ORDER BY v.score DESC, v."readyAt" DESC LIMIT ${limit - ids.length}`;
+      WHERE ${PUBLIC} ${notServed} ${taken} ${filters}
+      ORDER BY ${ni.score} DESC, v."readyAt" DESC LIMIT ${limit - ids.length}`;
     ids.push(...seen.map((r) => r.id));
   }
 

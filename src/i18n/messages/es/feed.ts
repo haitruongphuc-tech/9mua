@@ -12,6 +12,8 @@ export const feed: FeedMessages = {
   'feed.tools.speed': 'Velocidad',
   'feed.tools.autoscroll': 'Desplazamiento automático',
   'feed.tools.fullscreen': 'Pantalla completa',
+  'feed.notInterested': 'No me interesa',
+  'feed.notInterestedDone': 'Video oculto. Verás menos videos de este creador.',
   'feed.close': 'Cerrar',
   'feed.unmute': 'Toca para activar el sonido',
   'feed.pinned': '📌 FIJADO',

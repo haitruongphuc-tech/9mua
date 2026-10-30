@@ -12,6 +12,8 @@ export const feed: FeedMessages = {
   'feed.tools.speed': 'Vitesse de lecture',
   'feed.tools.autoscroll': 'Défilement auto',
   'feed.tools.fullscreen': 'Plein écran',
+  'feed.notInterested': 'Pas intéressé',
+  'feed.notInterestedDone': 'Vidéo masquée. Vous verrez moins de vidéos de ce créateur.',
   'feed.close': 'Fermer',
   'feed.unmute': 'Touchez pour le son',
   'feed.pinned': '📌 ÉPINGLÉ',

@@ -46,4 +46,28 @@ test('có thanh tua, chọn tốc độ 1,5x và nhớ lại, bật tự cuộn 
   await expect(first.locator('video')).not.toHaveAttribute('loop', '');
   // Video ngang có nút Toàn màn hình.
   await expect(first.getByTestId('feed-fullscreen')).toBeVisible();
+
+  // Lịch sử đã xem (SPEC-creator.md V5.2): gửi lượt xem 5 giây thay cho phát thật rồi mở trang lịch sử.
+  const status = await page.evaluate(
+    async (id) =>
+      (
+        await fetch('/api/video/views', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify([{ videoId: id, watchedSeconds: 5 }]),
+        })
+      ).status,
+    video.id,
+  );
+  expect(status).toBeLessThan(300);
+  await page.goto('/tai-khoan/lich-su-xem');
+  await expect(page.getByTestId('history-list').getByRole('link')).toHaveCount(1);
+  await page.getByTestId('history-clear').click();
+  await expect(page.getByTestId('history-list')).toHaveCount(0);
+
+  // Không quan tâm: video biến mất khỏi feed ngay.
+  await page.goto(`/v/${video.id}`);
+  await page.getByTestId('feed-item').first().getByTestId('feed-report').click();
+  await page.getByTestId('feed-not-interested').click();
+  await expect(page.getByTestId('feed-item').filter({ hasText: `Công cụ xem ${stamp}` })).toHaveCount(0);
 });

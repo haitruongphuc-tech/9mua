@@ -11,6 +11,8 @@ export const feed = {
   'feed.tools.speed': 'Tốc độ phát',
   'feed.tools.autoscroll': 'Tự cuộn',
   'feed.tools.fullscreen': 'Toàn màn hình',
+  'feed.notInterested': 'Không quan tâm',
+  'feed.notInterestedDone': 'Đã ẩn video. Bạn sẽ ít thấy video của người này hơn.',
   'feed.close': 'Đóng',
   'feed.unmute': 'Chạm để bật tiếng',
   'feed.pinned': '📌 GHIM',

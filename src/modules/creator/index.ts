@@ -53,3 +53,13 @@ export {
   type Visibility,
   type VideoOptions,
 } from './visibility';
+// Bổ sung 30/10/2026 (SPEC-creator.md V5.2): Không quan tâm, lịch sử đã xem.
+export {
+  markNotInterested,
+  viewHistory,
+  removeFromHistory,
+  clearViewHistory,
+  setHistoryOff,
+  isHistoryOff,
+  MAX_NOT_INTERESTED,
+} from './watching';

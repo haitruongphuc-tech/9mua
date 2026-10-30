@@ -12,6 +12,8 @@ export const feed: FeedMessages = {
   'feed.tools.speed': '再生速度',
   'feed.tools.autoscroll': '自動スクロール',
   'feed.tools.fullscreen': '全画面',
+  'feed.notInterested': '興味なし',
+  'feed.notInterestedDone': '動画を非表示にしました。この投稿者の動画は表示されにくくなります。',
   'feed.close': '閉じる',
   'feed.unmute': 'タップで音声オン',
   'feed.pinned': '📌 固定',

@@ -108,6 +108,17 @@ export function VideoFeed({
       } catch {}
       return !on;
     });
+  // "Không quan tâm" (SPEC-creator.md V5.2): ẩn video ngay, máy chủ hạ điểm video cùng người đăng 30 ngày.
+  const notInterested = async (videoId: string) => {
+    setSheet(null);
+    await fetch('/api/video/not-interested', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ videoId }),
+    }).catch(() => null);
+    setItems((list) => list.filter((x) => x.id !== videoId));
+    show(t('feed.notInterestedDone'));
+  };
   const nextItem = (i: number) =>
     scroller.current?.querySelectorAll('[data-feed-item]')[i + 1]?.scrollIntoView({ behavior: 'smooth' });
   const fullscreen = (i: number) => {
@@ -811,6 +822,16 @@ export function VideoFeed({
               </button>
             ))}
           </div>
+        ) : null}
+        {tools && sheet ? (
+          <button
+            type="button"
+            onClick={() => void notInterested(sheet.video.id)}
+            className="mb-2 flex w-full items-center gap-2 border-b border-black/10 py-3 text-left font-bold"
+            data-testid="feed-not-interested"
+          >
+            🚫 {t('feed.notInterested')}
+          </button>
         ) : null}
         <Link
           href={`/video/dang?duet=${sheet?.video.id ?? ''}`}

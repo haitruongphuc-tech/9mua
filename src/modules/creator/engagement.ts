@@ -2,6 +2,7 @@ import { Prisma } from '@prisma/client';
 import { now } from '@/lib/clock';
 import { db } from '@/lib/db';
 import type { Viewer } from './feed';
+import { rememberViewed } from './watching';
 
 export const MIN_VIEW_SECONDS = 3;
 
@@ -32,6 +33,12 @@ export async function recordViews(
     select: { id: true, durationSec: true },
   });
   if (videos.length === 0) return 0;
+  // Lịch sử đã xem (SPEC-creator.md V5.2): ghi mỗi lần xem ≥ 3 giây, không chỉ lần đầu trong ngày.
+  if (viewer.userId)
+    await rememberViewed(
+      viewer.userId,
+      videos.map((v) => v.id),
+    );
   const day = vnDay(now());
   const at = now();
   const rows = videos.map((v) => ({

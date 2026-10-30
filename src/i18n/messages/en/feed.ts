@@ -12,6 +12,8 @@ export const feed: FeedMessages = {
   'feed.tools.speed': 'Playback speed',
   'feed.tools.autoscroll': 'Auto-scroll',
   'feed.tools.fullscreen': 'Full screen',
+  'feed.notInterested': 'Not interested',
+  'feed.notInterestedDone': 'Video hidden. You’ll see fewer videos from this creator.',
   'feed.close': 'Close',
   'feed.unmute': 'Tap to unmute',
   'feed.pinned': '📌 PINNED',

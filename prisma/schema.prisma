@@ -36,6 +36,8 @@ model User {
   handleChangedAt     DateTime?
   previousHandle      String?              @unique
   previousHandleUntil DateTime?
+  // Lịch sử đã xem (SPEC-creator.md V5.2): người dùng tắt được việc ghi lịch sử.
+  historyOff          Boolean              @default(false)
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
   sessions            Session[]
@@ -1101,6 +1103,28 @@ model Commitment {
 
   @@unique([userId, version])
   @@index([userId])
+}
+
+// "Không quan tâm" (SPEC-creator.md V5.2): ẩn video, 30 ngày hạ điểm video cùng người đăng với người xem đó. Mỗi người
+// tối đa 500 dòng (dòng cũ nhất tự xoá). viewerKey giống lượt xem: "u:<userId>" hoặc "a:<mã ẩn danh>".
+model VideoNotInterested {
+  viewerKey String
+  videoId   String
+  authorId  String
+  createdAt DateTime @default(now())
+
+  @@id([viewerKey, videoId])
+  @@index([viewerKey, authorId, createdAt])
+}
+
+// Lịch sử đã xem (SPEC-creator.md V5.2): video xem ≥ 3 giây, giữ 90 ngày. Xoá lịch sử không đổi số lượt xem.
+model ViewHistory {
+  userId       String
+  videoId      String
+  lastViewedAt DateTime
+
+  @@id([userId, videoId])
+  @@index([userId, lastViewedAt])
 }
 
 model MessageBlock {

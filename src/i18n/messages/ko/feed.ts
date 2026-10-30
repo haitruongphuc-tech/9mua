@@ -12,6 +12,8 @@ export const feed: FeedMessages = {
   'feed.tools.speed': '재생 속도',
   'feed.tools.autoscroll': '자동 넘김',
   'feed.tools.fullscreen': '전체 화면',
+  'feed.notInterested': '관심 없음',
+  'feed.notInterestedDone': '동영상을 숨겼어요. 이 크리에이터의 동영상이 덜 보여요.',
   'feed.close': '닫기',
   'feed.unmute': '탭해서 소리 켜기',
   'feed.pinned': '📌 고정',

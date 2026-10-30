@@ -1,7 +1,8 @@
 // Header bảo mật cho mọi trang (T36). CSP dùng nonce + 'strict-dynamic': chỉ script do chính Next.js chèn
 // (mang nonce của request) mới chạy; script lạ chèn vào HTML (XSS) bị trình duyệt chặn.
 // mediaUrl: kho video ngoài (STORAGE_PUBLIC_URL, SPEC-creator.md V5.1 mục 9) — cho phép ảnh, video và hls.js tải đoạn.
-export function buildCsp(nonce: string, appUrl: string, mediaUrl?: string): string {
+// embed: trang /nhung/<id> (SPEC-creator.md V5.7 mục 2) cho mọi web nhúng; mọi trang khác vẫn chặn nhúng.
+export function buildCsp(nonce: string, appUrl: string, mediaUrl?: string, embed = false): string {
   const app = new URL(appUrl);
   const sub = `${app.protocol}//*.${app.host}`;
   const media = mediaUrl ? ` ${new URL(mediaUrl).origin}` : '';
@@ -18,7 +19,7 @@ export function buildCsp(nonce: string, appUrl: string, mediaUrl?: string): stri
     "object-src 'none'",
     "base-uri 'self'",
     `form-action 'self' ${app.origin} ${sub}`,
-    "frame-ancestors 'none'",
+    embed ? 'frame-ancestors *' : "frame-ancestors 'none'",
     ...(app.protocol === 'https:' ? ['upgrade-insecure-requests'] : []),
   ].join('; ');
 }

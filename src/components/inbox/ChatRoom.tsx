@@ -237,6 +237,38 @@ export function ChatRoom({
                         </span>
                       </a>
                     ) : null}
+                    {m.video ? (
+                      m.video.available ? (
+                        <a
+                          href={`/v/${m.video.id}`}
+                          className="mb-1 flex w-56 max-w-full gap-2 rounded-[12px] bg-black/30 p-2"
+                          data-testid="chat-video"
+                        >
+                          <span className="relative h-20 w-12 shrink-0 overflow-hidden rounded-[8px] bg-black">
+                            {m.video.posterUrl ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                src={m.video.posterUrl}
+                                alt=""
+                                className="h-full w-full object-cover"
+                                loading="lazy"
+                              />
+                            ) : null}
+                          </span>
+                          <span className="min-w-0 text-[12px]">
+                            <span className="block font-black">▶ @{m.video.authorName}</span>
+                            <span className="line-clamp-3 opacity-80">{m.video.caption}</span>
+                          </span>
+                        </a>
+                      ) : (
+                        <p
+                          className="mb-1 rounded-[12px] bg-black/20 px-3 py-2 text-[12px] italic"
+                          data-testid="chat-video-gone"
+                        >
+                          {t('inbox.videoUnavailable')}
+                        </p>
+                      )
+                    ) : null}
                     {m.text ? <p className="whitespace-pre-wrap break-words">{m.text}</p> : null}
                   </>
                 )}

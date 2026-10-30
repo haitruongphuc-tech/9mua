@@ -49,6 +49,9 @@ export const inbox: InboxMessages = {
   'inbox.err.BANNED': '이 계정은 메시지 보내기가 금지되었습니다.',
   'inbox.err.NOT_MEMBER': '대화를 찾을 수 없습니다.',
   'inbox.err.IMAGE_INVALID': '사진이 올바르지 않습니다. 다시 선택해 주세요.',
+  'inbox.err.VIDEO_INVALID': '이 영상은 보낼 수 없어요 (볼 수 없거나 영상이 없어요).',
+  'inbox.video': '영상을 보냈어요',
+  'inbox.videoUnavailable': '더 이상 볼 수 없는 영상이에요',
   'inbox.err.SELF': '자신에게는 메시지를 보낼 수 없습니다.',
   'inbox.err.NOT_FOUND': '사람을 찾을 수 없습니다.',
   'inbox.err.FREE_LIMIT':

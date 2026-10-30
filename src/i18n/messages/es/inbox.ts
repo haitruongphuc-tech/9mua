@@ -49,6 +49,9 @@ export const inbox: InboxMessages = {
   'inbox.err.BANNED': 'Esta cuenta tiene prohibido enviar mensajes.',
   'inbox.err.NOT_MEMBER': 'No se encontró la conversación.',
   'inbox.err.IMAGE_INVALID': 'Foto no válida, elige otra.',
+  'inbox.err.VIDEO_INVALID': 'No se puede enviar este video (no puedes verlo o ya no existe).',
+  'inbox.video': 'Envió un video',
+  'inbox.videoUnavailable': 'Este video ya no está disponible',
   'inbox.err.SELF': 'No puedes enviarte mensajes a ti mismo.',
   'inbox.err.NOT_FOUND': 'No se encontró a esta persona.',
   'inbox.err.FREE_LIMIT':

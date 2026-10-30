@@ -1,4 +1,4 @@
-import { cleanupUploadSessions, expireDrafts } from '@/modules/creator';
+import { cleanupUploadSessions, expireDownloads, expireDrafts } from '@/modules/creator';
 import { assignMissingHandles } from '@/modules/identity';
 import { isFeatureOn } from '@/lib/features';
 import { publishScheduledVideos } from './creator';
@@ -17,6 +17,8 @@ const TICK_JOBS: Job[] = [
 ];
 
 const DAILY_JOBS: Job[] = [
+  // Bản tải về có logo quá 7 ngày: xoá file (SPEC-creator.md V5.7 mục 1). Chạy cả khi công tắc tắt để dọn ổ.
+  { name: 'downloads', run: () => expireDownloads() },
   // Nháp quá 90 ngày tự xoá, báo trước 7 ngày. Công tắc tắt thì người dùng không thấy tab Nháp nên không xoá.
   {
     name: 'drafts',

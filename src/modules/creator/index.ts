@@ -117,6 +117,15 @@ export { assembleRecording, SPEEDS, MAX_SEGMENTS, type AssembleResult } from './
 // Bổ sung 30/10/2026 (SPEC-creator.md V5.6 mục 1): chỉnh video.
 export { parseEditSpec } from './edit-spec';
 export {
+  requestDownload,
+  processNextDownload,
+  expireDownloads,
+  DOWNLOADS_PER_DAY,
+  MAX_DOWNLOAD_SEC,
+  type DownloadResult,
+} from './downloads';
+export { embedVideo } from './embed';
+export {
   listSounds,
   selectableSound,
   soundPage,

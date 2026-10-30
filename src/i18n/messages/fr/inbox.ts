@@ -51,6 +51,10 @@ export const inbox: InboxMessages = {
   'inbox.err.BANNED': 'Ce compte est interdit de messagerie.',
   'inbox.err.NOT_MEMBER': 'Conversation introuvable.',
   'inbox.err.IMAGE_INVALID': 'Photo non valide, veuillez en choisir une autre.',
+  'inbox.err.VIDEO_INVALID':
+    "Impossible d'envoyer cette vidéo (vous ne pouvez pas la voir ou elle a disparu).",
+  'inbox.video': 'A envoyé une vidéo',
+  'inbox.videoUnavailable': "Cette vidéo n'est plus disponible",
   'inbox.err.SELF': 'Vous ne pouvez pas vous écrire à vous-même.',
   'inbox.err.NOT_FOUND': 'Personne introuvable.',
   'inbox.err.FREE_LIMIT':

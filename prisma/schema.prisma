@@ -640,6 +640,32 @@ model Video {
   @@index([soundId, status, readyAt])
 }
 
+// Bản tải về có logo 9MUA và @tên (SPEC-creator.md V5.7 mục 1): tạo ở lần tải đầu (việc nền), giữ 7 ngày rồi xoá file.
+model VideoDownload {
+  id        String    @id @default(cuid(2))
+  videoId   String    @unique
+  status    String    @default("queued") // queued | processing | ready | failed | expired
+  path      String? // /uploads/downloads/….mp4
+  attempts  Int       @default(0)
+  error     String?
+  lockedAt  DateTime?
+  createdAt DateTime  @default(now())
+  readyAt   DateTime?
+  expiresAt DateTime?
+
+  @@index([status, createdAt])
+}
+
+// Mỗi lượt tải về (tối đa 20 lượt mỗi người mỗi ngày).
+model VideoDownloadLog {
+  id        String   @id @default(cuid(2))
+  userId    String
+  videoId   String
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
 // Âm thanh (SPEC-creator.md V5.6 mục 2): library = CEO tải lên ở /admin/am-thanh; original = tự tách từ video công khai
 // cho phép dùng lại. Gỡ (removed) thì không chọn mới được; video đã dùng vẫn phát vì tiếng đã trộn vào file.
 model Sound {
@@ -1170,6 +1196,7 @@ model Message {
   text           String?
   imageId        String?
   productId      String?
+  videoId        String? // thẻ video gửi từ bảng chia sẻ (SPEC-messages.md V5.1)
   createdAt      DateTime
   hiddenAt       DateTime? // CEO ẩn tin vi phạm
   hiddenReason   String?

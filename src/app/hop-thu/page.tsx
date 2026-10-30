@@ -76,7 +76,9 @@ export default async function InboxPage({
                   ? t('inbox.image')
                   : c.last.kind === 'product'
                     ? t('inbox.product')
-                    : (c.last.text ?? '');
+                    : c.last.kind === 'video'
+                      ? t('inbox.video')
+                      : (c.last.text ?? '');
             return (
               <li key={c.id}>
                 <Link

@@ -84,7 +84,7 @@ export type ConversationView = {
   other: ConversationPeer;
   status: 'request' | 'active';
   requestedByMe: boolean;
-  last: { text: string | null; kind: 'text' | 'image' | 'product' | 'hidden'; fromMe: boolean };
+  last: { text: string | null; kind: 'text' | 'image' | 'product' | 'video' | 'hidden'; fromMe: boolean };
   lastMessageAt: string;
   unread: number;
 };
@@ -94,6 +94,7 @@ type LastRow = {
   senderId: string;
   text: string | null;
   imageId: string | null;
+  videoId: string | null;
   hiddenAt: Date | null;
 };
 
@@ -124,7 +125,7 @@ export async function listConversations(
   if (convs.length === 0) return [];
   const ids = convs.map((c) => c.id);
   const lastRows = await db.$queryRaw<LastRow[]>`
-    SELECT DISTINCT ON ("conversationId") "conversationId", "senderId", "text", "imageId", "hiddenAt"
+    SELECT DISTINCT ON ("conversationId") "conversationId", "senderId", "text", "imageId", "videoId", "hiddenAt"
     FROM "Message" WHERE "conversationId" = ANY(${ids}) ORDER BY "conversationId", "createdAt" DESC`;
   const last = new Map(lastRows.map((r) => [r.conversationId, r]));
   const withMessages = convs.filter((c) => last.has(c.id)).slice(0, 50);
@@ -153,7 +154,15 @@ export async function listConversations(
         requestedByMe: c.requestedById === userId,
         last: {
           text: l.hiddenAt ? null : l.text,
-          kind: l.hiddenAt ? 'hidden' : l.text ? 'text' : l.imageId ? 'image' : 'product',
+          kind: l.hiddenAt
+            ? 'hidden'
+            : l.text
+              ? 'text'
+              : l.imageId
+                ? 'image'
+                : l.videoId
+                  ? 'video'
+                  : 'product',
           fromMe: l.senderId === userId,
         },
         lastMessageAt: c.lastMessageAt.toISOString(),
@@ -211,14 +220,14 @@ export async function getMessages(
       orderBy: { createdAt: 'asc' },
       take: 100,
     });
-    return toViews(rows);
+    return toViews(rows, false, userId);
   }
   const rows = await db.message.findMany({
     where: { conversationId },
     orderBy: { createdAt: 'desc' },
     take: 50,
   });
-  return toViews(rows.reverse());
+  return toViews(rows.reverse(), false, userId);
 }
 
 export async function markRead(userId: string, conversationId: string): Promise<void> {

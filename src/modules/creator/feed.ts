@@ -10,6 +10,7 @@ import { feedScore } from './score';
 import { visibleToSql } from './visibility';
 import { placeLabel } from './posting';
 import { notInterestedSql } from './watching';
+import { MAX_DOWNLOAD_SEC } from './downloads';
 
 export type Viewer = { userId?: string; anonId?: string };
 
@@ -42,6 +43,9 @@ export type FeedVideo = {
   stitchOf: { id: string; authorName: string } | null; // "Stitch với @tên" (SPEC-creator.md V5.5 mục 4)
   // ♫ âm thanh của video (SPEC-creator.md V5.6 mục 2, công tắc camera): âm thanh đã dùng, hoặc âm thanh gốc tách từ video.
   sound: { id: string; title: string | null; artist: string | null; authorName: string | null } | null;
+  // Bảng chia sẻ (SPEC-creator.md V5.7): mã nhúng chỉ cho video công khai; tải về khi công khai, cho tải, ≤ 10 phút.
+  isPublic: boolean;
+  canDownload: boolean;
 };
 
 export const FEED_PAGE = 8;
@@ -245,6 +249,9 @@ export async function hydrateVideos(ids: string[], viewer: Viewer): Promise<Feed
       sdUrl: v.renditions[0]?.path ?? null,
       stitchOf: v.stitchOfId ? { id: v.stitchOfId, authorName: stitchName.get(v.stitchOfId) ?? '' } : null,
       sound: soundOf(v),
+      isPublic: v.visibility === 'public',
+      canDownload:
+        v.visibility === 'public' && v.allowDownload && (v.durationSec ?? 0) <= MAX_DOWNLOAD_SEC + 0.5,
       captionsUrl:
         captionsOn && v.captions?.status === 'ready' && v.captions.published
           ? `/api/video/${v.id}/phu-de`

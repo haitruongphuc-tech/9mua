@@ -2,12 +2,12 @@
 
 import { Link2, MessageCircle, Share2 } from 'lucide-react';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useT } from '@/i18n/client';
 import { Sheet } from './Sheet';
 
 // Chia sẻ kiểu V4 (SPEC-creator.md bổ sung 27/10): Facebook, Messenger (điện thoại), sao chép link, chia sẻ của
-// điện thoại (gồm Zalo), và mã QR. Không có nút của mạng không cho chia sẻ link.
+// điện thoại (gồm Zalo), và mã QR. Video có thêm TikTok/Instagram, tải về, nhúng, gửi qua Hộp thư (V5.7).
 export function ShareSheet({
   url,
   title,
@@ -15,6 +15,7 @@ export function ShareSheet({
   qrHint,
   onClose,
   onCopied,
+  extra,
 }: {
   url: string | null;
   title: string;
@@ -22,6 +23,7 @@ export function ShareSheet({
   qrHint?: string;
   onClose: () => void;
   onCopied: () => void;
+  extra?: ReactNode; // video: TikTok/Instagram, tải về, nhúng, gửi qua Hộp thư (ShareMore, SPEC-creator.md V5.7)
 }) {
   const t = useT();
   const [mobile, setMobile] = useState(false);
@@ -86,6 +88,7 @@ export function ShareSheet({
           </button>
         ) : null}
       </div>
+      {extra}
       <div className="mt-4 flex items-center gap-3 rounded-[14px] bg-zinc-50 p-3">
         <Image
           src={`/api/qr?u=${enc}`}

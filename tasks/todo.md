@@ -700,7 +700,7 @@ Nhánh `nang-cap-mot-dot`. Trừ App (C32–C36). Mỗi task: test trước → 
 - [x] **T92: Stitch** (C09).
 - [x] **T93: Chỉnh video: cắt, ghép, chữ, nhãn dán** (C89).
 - [x] **T94: Âm thanh từ video người dùng + thịnh hành** (C90).
-- [ ] **T95: Tải về, nhúng, TikTok/Instagram, gửi qua Hộp thư** (C03–C05, C65).
+- [x] **T95: Tải về, nhúng, TikTok/Instagram, gửi qua Hộp thư** (C03–C05, C65).
 - [ ] **T96: Watch — phim ngắn nhiều tập** (C02).
 - [ ] **T97: Bài đăng ảnh + chữ** (C86).
 

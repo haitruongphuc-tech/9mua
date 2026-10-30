@@ -48,6 +48,9 @@ export const inbox = {
   'inbox.err.BANNED': 'Tài khoản đang bị cấm nhắn tin.',
   'inbox.err.NOT_MEMBER': 'Không tìm thấy cuộc trò chuyện.',
   'inbox.err.IMAGE_INVALID': 'Ảnh không hợp lệ, vui lòng chọn lại.',
+  'inbox.err.VIDEO_INVALID': 'Không gửi được video này (bạn không xem được hoặc video không còn).',
+  'inbox.video': 'Đã gửi một video',
+  'inbox.videoUnavailable': 'Video không còn xem được',
   'inbox.err.SELF': 'Bạn không thể nhắn cho chính mình.',
   'inbox.err.NOT_FOUND': 'Không tìm thấy người này.',
   'inbox.err.FREE_LIMIT':

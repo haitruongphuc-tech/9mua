@@ -13,15 +13,23 @@ export function middleware(request: NextRequest) {
   headers.delete('x-kiot-host'); // không tin header này nếu client tự gửi
 
   // CSP theo nonce chỉ bật ở bản build production (next dev cần eval cho tải lại nóng).
+  // Trang nhúng /nhung/<id> (SPEC-creator.md V5.7 mục 2): web khác được nhúng, không gửi X-Frame-Options.
+  const embed = pathname.startsWith('/nhung/');
   const csp =
     process.env.NODE_ENV === 'production'
-      ? buildCsp(crypto.randomUUID().replace(/-/g, ''), appUrl, process.env.STORAGE_PUBLIC_URL || undefined)
+      ? buildCsp(
+          crypto.randomUUID().replace(/-/g, ''),
+          appUrl,
+          process.env.STORAGE_PUBLIC_URL || undefined,
+          embed,
+        )
       : null;
   if (csp) headers.set('content-security-policy', csp); // Next.js đọc nonce từ đây để gắn vào script của nó
 
   const secure = (res: NextResponse) => {
     if (csp) res.headers.set('Content-Security-Policy', csp);
-    for (const [k, v] of Object.entries(STATIC_SECURITY_HEADERS)) res.headers.set(k, v);
+    for (const [k, v] of Object.entries(STATIC_SECURITY_HEADERS))
+      if (!(embed && k === 'X-Frame-Options')) res.headers.set(k, v);
     return res;
   };
 

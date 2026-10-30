@@ -26,6 +26,7 @@ import type { SocialFeedVideo } from '@/modules/social';
 import { CommentsSheet } from './CommentsSheet';
 import { attachHls, isHls, prefersLowData } from './hls';
 import { interleaveLives } from './interleave';
+import { ShareMore } from './ShareMore';
 import { ShareSheet } from './ShareSheet';
 import { Sheet } from './Sheet';
 
@@ -931,6 +932,19 @@ export function VideoFeed({
           title={sheet.video.caption || '9MUA'}
           onClose={() => setSheet(null)}
           onCopied={() => show(t('feed.share.copied'))}
+          extra={
+            <ShareMore
+              video={{
+                id: sheet.video.id,
+                isPublic: sheet.video.isPublic,
+                canDownload: sheet.video.canDownload,
+              }}
+              url={`${appUrl}/v/${sheet.video.id}`}
+              appUrl={appUrl}
+              loggedIn={Boolean(me)}
+              onToast={(text) => show(text)}
+            />
+          }
         />
       ) : null}
       <Sheet

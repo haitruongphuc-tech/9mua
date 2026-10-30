@@ -2,7 +2,13 @@
 // không bị chậm.
 import { db } from '@/lib/db';
 import { cleanupAiFiles, processNextSlideshow } from '@/modules/ai';
-import { cleanupStaleUploads, expireStories, processNextCaption, recomputeScores } from '@/modules/creator';
+import {
+  cleanupStaleUploads,
+  expireStories,
+  processNextCaption,
+  processNextDownload,
+  recomputeScores,
+} from '@/modules/creator';
 import { cleanupLiveChat } from '@/modules/live';
 import { processNextJob, publishScheduledVideos } from '@/server/creator';
 import { syncWithMediaServer } from '@/server/live';
@@ -29,8 +35,12 @@ async function main() {
     try {
       // Video AI ghép trước (chủ Kiot đang chờ xem thử), rồi tới video người dùng tải lên.
       // Phụ đề tự động (SPEC-creator.md V5.4) làm sau cùng: video chờ đăng quan trọng hơn.
+      // Bản tải về có logo (SPEC-creator.md V5.7) sau video chờ đăng: người tải đang chờ nhưng chỉ vài chục giây.
       const worked =
-        (await processNextSlideshow()) || (await processNextJob()) || (await processNextCaption());
+        (await processNextSlideshow()) ||
+        (await processNextJob()) ||
+        (await processNextDownload()) ||
+        (await processNextCaption());
       if (Date.now() - lastCleanup > CLEANUP_EVERY_MS) {
         const removed = await cleanupStaleUploads();
         if (removed) console.info(`[worker] dọn ${removed} file tải lên bị bỏ dở`);

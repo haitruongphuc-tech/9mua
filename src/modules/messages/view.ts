@@ -1,14 +1,24 @@
 import { db } from '@/lib/db';
 import { kiotOrigin } from '@/lib/urls';
+import { getVideo } from '@/modules/creator';
 import { getKiotByOwner, getProductForCheckout, kiotBasics, productPath } from '@/modules/kiot';
 
 export type ProductCard = { id: string; name: string; price: number; imageUrl: string | null; url: string };
+// Thẻ video (SPEC-messages.md V5.1): người xem tin không được xem video thì available = false ("Video không còn xem được").
+export type VideoCard = {
+  id: string;
+  available: boolean;
+  posterUrl: string | null;
+  caption: string;
+  authorName: string;
+};
 export type MessageView = {
   id: string;
   senderId: string;
   text: string | null;
   imageUrl: string | null;
   product: ProductCard | null;
+  video: VideoCard | null;
   createdAt: string;
   hidden: boolean;
 };
@@ -26,6 +36,7 @@ type Row = {
   text: string | null;
   imageId: string | null;
   productId: string | null;
+  videoId?: string | null;
   createdAt: Date;
   hiddenAt: Date | null;
 };
@@ -58,9 +69,34 @@ export async function productCardOf(productId: string): Promise<ProductCard | nu
   return (await productCards([productId])).get(productId) ?? null;
 }
 
-// reveal: CEO xem cuộc trò chuyện bị báo cáo thì thấy cả tin đã ẩn.
-export async function toViews(rows: Row[], reveal = false): Promise<MessageView[]> {
+// Thẻ video theo quyền xem của người đang xem tin (video riêng tư, bị chặn, bị gỡ thì không hiện nội dung).
+async function videoCards(ids: string[], viewerId: string | undefined): Promise<Map<string, VideoCard>> {
+  const map = new Map<string, VideoCard>();
+  for (const id of new Set(ids)) {
+    const v = await getVideo(id, { userId: viewerId });
+    map.set(
+      id,
+      v
+        ? {
+            id,
+            available: true,
+            posterUrl: v.posterUrl,
+            caption: v.caption,
+            authorName: v.author.displayName,
+          }
+        : { id, available: false, posterUrl: null, caption: '', authorName: '' },
+    );
+  }
+  return map;
+}
+
+// reveal: CEO xem cuộc trò chuyện bị báo cáo thì thấy cả tin đã ẩn. viewerId: người đang xem (quyền xem thẻ video).
+export async function toViews(rows: Row[], reveal = false, viewerId?: string): Promise<MessageView[]> {
   const cards = await productCards(rows.map((r) => r.productId).filter((x): x is string => Boolean(x)));
+  const videos = await videoCards(
+    rows.map((r) => r.videoId).filter((x): x is string => Boolean(x)),
+    viewerId,
+  );
   return rows.map((r) => {
     const hidden = Boolean(r.hiddenAt);
     const show = reveal || !hidden;
@@ -70,6 +106,7 @@ export async function toViews(rows: Row[], reveal = false): Promise<MessageView[
       text: show ? r.text : null,
       imageUrl: show && r.imageId ? imageUrl(r.imageId) : null,
       product: show && r.productId ? (cards.get(r.productId) ?? null) : null,
+      video: show && r.videoId ? (videos.get(r.videoId) ?? null) : null,
       createdAt: r.createdAt.toISOString(),
       hidden,
     };

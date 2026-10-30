@@ -1,5 +1,6 @@
 import { now } from '@/lib/clock';
 import { db } from '@/lib/db';
+import { canViewVideo } from '@/modules/creator';
 import { hasLink } from '@/modules/social';
 import { activeBan, isBlocked, isMember, otherOf } from './access';
 import { MAX_TEXT, MIN_GAP_MS } from './rules';
@@ -14,14 +15,20 @@ export type SendError =
   | 'BLOCKED'
   | 'BANNED'
   | 'NOT_MEMBER'
-  | 'IMAGE_INVALID';
+  | 'IMAGE_INVALID'
+  | 'VIDEO_INVALID';
 
 // Gửi tin (SPEC-messages.md mục 3–5): chữ ≤ 1.000 ký tự, không link, 1 tin mỗi giây; người lạ chỉ gửi 1 tin tới khi
 // được chấp nhận; người nhận trả lời thì coi như chấp nhận. Tin mới làm hiện lại cuộc trò chuyện đã xoá phía mình.
 export async function sendMessage(
   userId: string,
   conversationId: string,
-  input: { text?: string | null; imageId?: string | null; productId?: string | null },
+  input: {
+    text?: string | null;
+    imageId?: string | null;
+    productId?: string | null;
+    videoId?: string | null;
+  },
 ): Promise<{ ok: true; message: MessageView } | { ok: false; error: SendError }> {
   const c = await db.conversation.findUnique({ where: { id: conversationId } });
   if (!c || !isMember(c, userId)) return { ok: false, error: 'NOT_MEMBER' };
@@ -40,7 +47,13 @@ export async function sendMessage(
   }
   const productId =
     input.productId && (await productCards([input.productId])).has(input.productId) ? input.productId : null;
-  if (!text && !imageId && !productId) return { ok: false, error: 'EMPTY' };
+  // Thẻ video (SPEC-messages.md V5.1): chỉ gửi video người gửi được xem.
+  let videoId: string | null = null;
+  if (input.videoId) {
+    if (!(await canViewVideo(input.videoId, userId))) return { ok: false, error: 'VIDEO_INVALID' };
+    videoId = input.videoId;
+  }
+  if (!text && !imageId && !productId && !videoId) return { ok: false, error: 'EMPTY' };
 
   const at = now();
   const last = await db.message.findFirst({
@@ -60,7 +73,7 @@ export async function sendMessage(
 
   const row = await db.$transaction(async (tx) => {
     const m = await tx.message.create({
-      data: { conversationId, senderId: userId, text, imageId, productId, createdAt: at },
+      data: { conversationId, senderId: userId, text, imageId, productId, videoId, createdAt: at },
     });
     await tx.conversation.update({
       where: { id: conversationId },
@@ -71,6 +84,6 @@ export async function sendMessage(
     await tx.conversationMember.updateMany({ where: { conversationId, userId }, data: { lastReadAt: at } });
     return m;
   });
-  const [message] = await toViews([row]);
+  const [message] = await toViews([row], false, userId);
   return { ok: true, message: message! };
 }

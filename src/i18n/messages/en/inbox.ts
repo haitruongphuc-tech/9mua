@@ -49,6 +49,9 @@ export const inbox: InboxMessages = {
   'inbox.err.BANNED': 'This account is banned from messaging.',
   'inbox.err.NOT_MEMBER': 'Conversation not found.',
   'inbox.err.IMAGE_INVALID': 'Invalid photo, please choose another.',
+  'inbox.err.VIDEO_INVALID': "Can't send this video (you can't view it or it's gone).",
+  'inbox.video': 'Sent a video',
+  'inbox.videoUnavailable': 'This video is no longer available',
   'inbox.err.SELF': "You can't message yourself.",
   'inbox.err.NOT_FOUND': 'Person not found.',
   'inbox.err.FREE_LIMIT':

@@ -1,7 +1,7 @@
 import { env } from '@/lib/env';
 import { isInternalRequest, notFoundResponse } from '@/lib/internal-route';
 import { processNextSlideshow } from '@/modules/ai';
-import { processNextCaption } from '@/modules/creator';
+import { processNextCaption, processNextDownload } from '@/modules/creator';
 import { processNextJob } from '@/server/creator';
 
 export const dynamic = 'force-dynamic';
@@ -13,7 +13,10 @@ export async function GET(request: Request) {
   let processed = 0;
   while (
     processed < 10 &&
-    ((await processNextSlideshow()) || (await processNextJob()) || (await processNextCaption()))
+    ((await processNextSlideshow()) ||
+      (await processNextJob()) ||
+      (await processNextDownload()) ||
+      (await processNextCaption()))
   )
     processed += 1;
   return Response.json({ processed });

@@ -97,6 +97,7 @@ export function VideoUploadForm({
   defaultProvince,
   limits,
   initialSound,
+  series,
 }: {
   remaining: Record<Mode, number>;
   initialMode: Mode;
@@ -107,6 +108,7 @@ export function VideoUploadForm({
   // Giới hạn theo công tắc long_video (SPEC-creator.md V5.1). Bật thì tải từng phần 8MB, gửi tiếp được khi rớt mạng.
   limits: { long: boolean; maxBytes: number; maxSec: number };
   initialSound: SoundItem | null; // "Dùng âm thanh này" (SPEC-creator.md V5.6 mục 2)
+  series: { id: string; title: string; next: number }[]; // Phim của tôi (V5.9): gắn tập ngay khi đăng
 }) {
   const maxSec = (m: Mode) => (m === 'story' ? STORY_SEC : limits.maxSec);
   const t = useT();
@@ -148,6 +150,9 @@ export function VideoUploadForm({
   const [shownClip, setShownClip] = useState(0);
   const clipKey = useRef(0);
   const [edit, setEdit] = useState<EditSpec>(emptyEdit);
+  const [seriesId, setSeriesId] = useState('');
+  const [episodeNo, setEpisodeNo] = useState(1);
+  const [watchOnly, setWatchOnly] = useState(false);
   const [sound, setSound] = useState<PickedSound | null>(
     initialSound ? { sound: initialSound, startSec: 0, volume: 80, originalVolume: 100 } : null,
   );
@@ -342,6 +347,8 @@ export function VideoUploadForm({
       look: cameraOn && mode === 'video' ? look : undefined,
       beauty: cameraOn && mode === 'video' ? beauty : undefined,
       editSpec: editing ? edit : undefined,
+      series:
+        seriesId && mode === 'video' && !duet && !stitch ? { id: seriesId, episodeNo, watchOnly } : null,
       sound:
         cameraOn && mode === 'video' && !duet && !stitch && sound
           ? {
@@ -672,6 +679,53 @@ export function VideoUploadForm({
       ) : null}
       {cameraOn && mode === 'video' && !duet && !stitch ? (
         <SoundPicker value={sound} onChange={setSound} />
+      ) : null}
+      {series.length && mode === 'video' && !duet && !stitch ? (
+        <fieldset className="flex flex-col gap-2" data-testid="video-series">
+          <legend className="mb-1 text-[12px] font-bold text-white/70">🎬 {t('post.series.pick')}</legend>
+          <div className="grid grid-cols-[minmax(0,1fr)_6rem] gap-2">
+            <select
+              value={seriesId}
+              onChange={(e) => {
+                setSeriesId(e.target.value);
+                setEpisodeNo(series.find((s) => s.id === e.target.value)?.next ?? 1);
+              }}
+              className={`${field} h-11 w-full min-w-0 py-0 font-normal`}
+              aria-label={t('post.series.pick')}
+              data-testid="video-series-select"
+            >
+              <option value="">{t('post.series.none')}</option>
+              {series.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.title}
+                </option>
+              ))}
+            </select>
+            <input
+              type="number"
+              min={1}
+              max={200}
+              value={episodeNo}
+              onChange={(e) => setEpisodeNo(Number(e.target.value))}
+              disabled={!seriesId}
+              aria-label={t('post.series.episodeNo')}
+              className={`${field} h-11 w-full min-w-0 py-0 font-normal disabled:opacity-40`}
+              data-testid="video-series-episode"
+            />
+          </div>
+          {seriesId ? (
+            <label className="flex items-center gap-2 text-[13px]">
+              <input
+                type="checkbox"
+                checked={watchOnly}
+                onChange={(e) => setWatchOnly(e.target.checked)}
+                className="h-4 w-4 accent-[#ff6b00]"
+                data-testid="video-series-watch-only"
+              />
+              {t('post.series.watchOnly')}
+            </label>
+          ) : null}
+        </fieldset>
       ) : null}
       <label className="flex flex-col gap-1.5 text-[12px] font-bold text-white/70">
         {t('post.caption', { count: caption.length, max: MAX_CAPTION })}

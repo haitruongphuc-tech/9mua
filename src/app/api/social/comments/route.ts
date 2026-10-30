@@ -19,9 +19,11 @@ export async function POST(request: Request) {
     videoId?: unknown;
     text?: unknown;
     parentId?: unknown;
+    atSecond?: unknown;
   };
   if (typeof body.videoId !== 'string' || typeof body.text !== 'string')
     return Response.json({ ok: false }, { status: 400 });
   const parentId = typeof body.parentId === 'string' ? body.parentId : null;
-  return Response.json(await addComment(user.id, body.videoId, body.text, parentId));
+  const atSecond = typeof body.atSecond === 'number' ? Math.floor(body.atSecond) : null;
+  return Response.json(await addComment(user.id, body.videoId, body.text, parentId, atSecond));
 }

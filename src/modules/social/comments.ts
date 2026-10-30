@@ -16,6 +16,7 @@ export type CommentView = {
   text: string;
   createdAt: Date;
   pinned: boolean;
+  atSecond: number | null; // bình luận theo phút khi xem tập phim (SPEC-creator.md V5.9 mục 5)
   author: { id: string; displayName: string; avatarUrl: string | null };
   byVideoAuthor: boolean;
   replies: Omit<CommentView, 'replies'>[];
@@ -29,6 +30,7 @@ export async function addComment(
   videoId: string,
   rawText: string,
   parentId?: string | null,
+  atSecond?: number | null,
 ): Promise<{ ok: true; id: string } | { ok: false; error: AddError }> {
   const text = rawText.trim();
   if (!text) return { ok: false, error: 'EMPTY' };
@@ -62,7 +64,11 @@ export async function addComment(
     return { ok: false, error: 'RATE_LIMIT' };
   if (today >= COMMENTS_PER_DAY) return { ok: false, error: 'DAILY_LIMIT' };
 
-  const c = await db.comment.create({ data: { videoId, userId, parentId: rootId, text, createdAt: t } });
+  const at =
+    !rootId && Number.isInteger(atSecond) && atSecond! >= 0 && atSecond! <= 24 * 3600 ? atSecond! : null;
+  const c = await db.comment.create({
+    data: { videoId, userId, parentId: rootId, text, atSecond: at, createdAt: t },
+  });
   const me = await db.user.findUnique({ where: { id: userId }, select: { displayName: true } });
   const vars = { name: me?.displayName ?? '9MUA', text: text.slice(0, 60) };
   if (video.authorId !== userId)
@@ -98,6 +104,7 @@ export async function listComments(
     text: r.text,
     createdAt: r.createdAt,
     pinned: Boolean(r.pinnedAt),
+    atSecond: r.atSecond,
     author: name.get(r.userId) ?? { id: r.userId, displayName: '9MUA', avatarUrl: null },
     byVideoAuthor: r.userId === video.authorId,
   });

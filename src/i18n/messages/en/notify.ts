@@ -6,6 +6,7 @@ export const notify: NotifyMessages = {
   'notify.newReply': '{name} replied to you: {text}',
   'notify.voucherIssued': 'You got a voucher for a free 1-year Kiot!',
   'notify.videoReady': 'Your video is published',
+  'notify.newEpisode': 'A series you saved has a new episode',
   'notify.videoDraftReady': 'Your video is processed and saved in Drafts',
   'notify.videoScheduled': 'Your video is processed and will go live at the scheduled time',
   'notify.videoPublished': 'Your scheduled video is now live',

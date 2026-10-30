@@ -33,12 +33,13 @@ export default async function MyVideosPage({
   const user = await requireUser();
   const params = await searchParams;
   const days = params.ngay === '30' ? 30 : 7;
-  const [all, stats, t, postOptions, captionsOn] = await Promise.all([
+  const [all, stats, t, postOptions, captionsOn, watchOn] = await Promise.all([
     myVideoStats(user.id),
     creatorStats(user.id, days),
     getT(),
     isFeatureOn('post_options'),
     isFeatureOn('auto_captions'),
+    isFeatureOn('watch'),
   ]);
   // Tab Nháp (SPEC-creator.md V5.3): nháp đã xử lý xong hoặc đang xử lý. Video hẹn giờ nằm ở danh sách chính.
   const isDraft = (v: MyVideo) => v.status === 'draft' || (v.status === 'processing' && v.draft);
@@ -118,6 +119,15 @@ export default async function MyVideosPage({
             </Link>
           ))}
         </nav>
+      ) : null}
+      {watchOn ? (
+        <Link
+          href="/video/cua-toi/phim"
+          className="flex h-11 items-center justify-between rounded-[14px] bg-white/5 px-4 text-[13px] font-bold"
+          data-testid="my-series-link"
+        >
+          🎬 {t('post.series.mine')} <span aria-hidden>›</span>
+        </Link>
       ) : null}
       {error ? (
         <p role="alert" className="rounded-[14px] bg-red-500/15 px-4 py-3 text-[13px] font-bold text-red-300">

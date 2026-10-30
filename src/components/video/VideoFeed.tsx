@@ -85,6 +85,7 @@ export function VideoFeed({
   const tools = useFeature('feed_tools');
   const postOptions = useFeature('post_options');
   const camera = useFeature('camera');
+  const watchOn = useFeature('watch');
   const seeks = useRef<(HTMLInputElement | null)[]>([]);
   const [speed, setSpeed] = useState(1);
   const [autoScroll, setAutoScroll] = useState(false);
@@ -441,6 +442,11 @@ export function VideoFeed({
           {t(id === 'following' ? 'feed.tab.following' : 'feed.tab.forYou')}
         </button>
       ))}
+      {watchOn ? (
+        <Link href="/watch" className="text-white/60 hover:text-white" data-testid="feed-tab-watch">
+          {t('feed.watch.tab')}
+        </Link>
+      ) : null}
     </div>
   );
 

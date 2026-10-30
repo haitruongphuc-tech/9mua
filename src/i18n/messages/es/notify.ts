@@ -6,6 +6,7 @@ export const notify: NotifyMessages = {
   'notify.newReply': '{name} te respondió: {text}',
   'notify.voucherIssued': '¡Recibiste un cupón para un Kiot gratis por 1 año!',
   'notify.videoReady': 'Tu video ya está publicado',
+  'notify.newEpisode': 'Una serie que guardaste tiene un episodio nuevo',
   'notify.videoDraftReady': 'Tu video está listo y guardado en Borradores',
   'notify.videoScheduled': 'Tu video está listo y se publicará a la hora programada',
   'notify.videoPublished': 'Tu video programado ya está publicado',

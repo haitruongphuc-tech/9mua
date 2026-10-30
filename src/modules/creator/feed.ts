@@ -91,7 +91,8 @@ export async function getFeed(
   const notBlocked = Prisma.sql`AND ${notBlockedWith(viewer.userId, Prisma.sql`v."authorId"`)}`;
   // "Không quan tâm" (SPEC-creator.md V5.2): bỏ video đã bấm, hạ điểm video cùng người đăng trong 30 ngày.
   const ni = notInterestedSql(viewer);
-  const filters = Prisma.sql`${notBlocked} ${ni.exclude}`;
+  // Tập phim chọn "Chỉ hiện trong Watch" không lên feed (SPEC-creator.md V5.9 mục 6); /v/<id> vẫn mở được.
+  const filters = Prisma.sql`${notBlocked} ${ni.exclude} AND v."watchOnly" = false`;
 
   const freshCount = Math.max(1, Math.round(limit * FRESH_SHARE));
   const [top, fresh] = await Promise.all([

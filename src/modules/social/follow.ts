@@ -79,7 +79,8 @@ export async function followingFeed(
     SELECT v.id, v."readyAt" FROM "Video" v
     JOIN "User" u ON u.id = v."authorId"
     JOIN "Follow" f ON f."followeeId" = v."authorId" AND f."followerId" = ${viewer.userId}
-    WHERE v.status = 'ready' AND v.kind = 'video' AND v.visibility <> 'private' AND u."lockedAt" IS NULL ${after}
+    WHERE v.status = 'ready' AND v.kind = 'video' AND v.visibility <> 'private' AND u."lockedAt" IS NULL
+      AND v."watchOnly" = false ${after}
     ORDER BY v."readyAt" DESC, v.id DESC LIMIT ${PAGE + 1}`;
   const page = rows.slice(0, PAGE);
   const last = page.at(-1);

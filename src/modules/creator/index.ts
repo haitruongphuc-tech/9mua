@@ -126,6 +126,25 @@ export {
 } from './downloads';
 export { embedVideo } from './embed';
 export {
+  createSeries,
+  updateSeries,
+  setEpisode,
+  seriesPage,
+  watchHome,
+  saveWatchProgress,
+  toggleSeriesFollow,
+  notifyNewEpisode,
+  mySeries,
+  setSeriesCover,
+  episodeCandidates,
+  SERIES_GENRES,
+  MAX_EPISODE,
+  type SeriesCard,
+  type SeriesPage,
+  type SeriesInput,
+  type SeriesGenre,
+} from './series';
+export {
   listSounds,
   selectableSound,
   soundPage,

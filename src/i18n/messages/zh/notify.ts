@@ -6,6 +6,7 @@ export const notify: NotifyMessages = {
   'notify.newReply': '{name}回复了你：{text}',
   'notify.voucherIssued': '你获得了一张免费开Kiot一年的券！',
   'notify.videoReady': '视频已发布',
+  'notify.newEpisode': '你收藏的短剧更新了',
   'notify.videoDraftReady': '视频已处理完毕，保存在草稿中',
   'notify.videoScheduled': '视频已处理完毕，将在预定时间发布',
   'notify.videoPublished': '你的定时视频已发布',

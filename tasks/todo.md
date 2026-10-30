@@ -701,7 +701,7 @@ Nhánh `nang-cap-mot-dot`. Trừ App (C32–C36). Mỗi task: test trước → 
 - [x] **T93: Chỉnh video: cắt, ghép, chữ, nhãn dán** (C89).
 - [x] **T94: Âm thanh từ video người dùng + thịnh hành** (C90).
 - [x] **T95: Tải về, nhúng, TikTok/Instagram, gửi qua Hộp thư** (C03–C05, C65).
-- [ ] **T96: Watch — phim ngắn nhiều tập** (C02).
+- [x] **T96: Watch — phim ngắn nhiều tập** (C02).
 - [ ] **T97: Bài đăng ảnh + chữ** (C86).
 
 ### Mạng xã hội

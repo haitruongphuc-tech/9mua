@@ -1,7 +1,14 @@
 import type { Metadata } from 'next';
 import { ClientMessages } from '@/i18n/ClientMessages';
 import { getT } from '@/i18n/server';
-import { getVideo, MAX_VIDEOS_PER_DAY, selectableSound, videoLimits, videosToday } from '@/modules/creator';
+import {
+  getVideo,
+  MAX_VIDEOS_PER_DAY,
+  mySeries,
+  selectableSound,
+  videoLimits,
+  videosToday,
+} from '@/modules/creator';
 import { getKiotByOwner, PROVINCES } from '@/modules/kiot';
 import { requireUser } from '@/modules/identity';
 import { isFeatureOn } from '@/lib/features';
@@ -25,7 +32,8 @@ export default async function UploadVideoPage({
     `/video/dang${params.story ? '?story=1' : params.duet ? `?duet=${params.duet}` : params.stitch ? `?stitch=${params.stitch}` : ''}`,
   );
   // Stitch (SPEC-creator.md V5.5 mục 4): chỉ video công khai còn cho Duet/Stitch, là MP4 (máy chủ kiểm lại khi đăng).
-  const camera = await isFeatureOn('camera');
+  const [camera, watchOn] = await Promise.all([isFeatureOn('camera'), isFeatureOn('watch')]);
+  const series = watchOn ? await mySeries(user.id) : [];
   const [t, videos, stories, duet, kiot, limits, stitch, sound] = await Promise.all([
     getT(),
     videosToday(user.id),
@@ -63,6 +71,7 @@ export default async function UploadVideoPage({
           defaultProvince={kiot?.province ?? ''}
           limits={{ long: limits.long, maxBytes: limits.maxBytes, maxSec: limits.maxSec }}
           initialSound={sound}
+          series={series.map((s) => ({ id: s.id, title: s.title, next: s.episodeCount + 1 }))}
         />
       </ClientMessages>
     </div>

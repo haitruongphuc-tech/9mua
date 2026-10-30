@@ -626,6 +626,10 @@ model Video {
   soundStartSec   Float?
   soundVolume     Int?
   originalVolume  Int?
+  // Watch (SPEC-creator.md V5.9): tập số episodeNo (1–200) của phim seriesId; watchOnly = "Chỉ hiện trong Watch".
+  seriesId        String?
+  episodeNo       Int?
+  watchOnly       Boolean          @default(false)
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   products        VideoProduct[]
@@ -638,6 +642,54 @@ model Video {
   @@index([kind, status, expiresAt])
   @@index([status, publishAt])
   @@index([soundId, status, readyAt])
+  @@index([seriesId, episodeNo])
+}
+
+// Phim ngắn nhiều tập (SPEC-creator.md V5.9). Thể loại: tinh-cam | hai | gia-dinh | hanh-dong | khac.
+model Series {
+  id           String   @id @default(cuid(2))
+  ownerId      String
+  title        String
+  description  String   @default("")
+  coverPath    String? // ảnh bìa 2:3
+  genre        String
+  status       String   @default("ongoing") // ongoing (Đang ra) | complete (Đã đủ tập)
+  episodeCount Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now())
+
+  @@index([ownerId, updatedAt])
+  @@index([updatedAt])
+}
+
+// "Lưu phim": có tập mới thì nhận thông báo.
+model SeriesFollow {
+  userId    String
+  seriesId  String
+  createdAt DateTime @default(now())
+
+  @@id([userId, seriesId])
+  @@index([seriesId])
+}
+
+// Tập và giây đang xem của người đã đăng nhập (khách lưu trong trình duyệt).
+model SeriesProgress {
+  userId    String
+  seriesId  String
+  videoId   String
+  second    Int
+  updatedAt DateTime @default(now())
+
+  @@id([userId, seriesId])
+}
+
+// Tập đã xem (xem ≥ 90%).
+model EpisodeWatched {
+  userId    String
+  videoId   String
+  createdAt DateTime @default(now())
+
+  @@id([userId, videoId])
 }
 
 // Bản tải về có logo 9MUA và @tên (SPEC-creator.md V5.7 mục 1): tạo ở lần tải đầu (việc nền), giữ 7 ngày rồi xoá file.
@@ -927,6 +979,7 @@ model Comment {
   hiddenAt    DateTime?
   hiddenById  String?
   reportCount Int       @default(0)
+  atSecond    Int? // bình luận theo phút khi xem tập phim (SPEC-creator.md V5.9 mục 5)
   createdAt   DateTime  @default(now())
 
   @@index([videoId, createdAt])

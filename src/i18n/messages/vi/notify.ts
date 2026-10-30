@@ -5,6 +5,7 @@ export const notify = {
   'notify.newReply': '{name} trả lời bạn: {text}',
   'notify.voucherIssued': 'Bạn được tặng voucher mở Kiot miễn phí 1 năm!',
   'notify.videoReady': 'Video đã đăng xong',
+  'notify.newEpisode': 'Phim bạn đã lưu có tập mới',
   'notify.videoDraftReady': 'Video đã xử lý xong và nằm trong Nháp',
   'notify.videoScheduled': 'Video đã xử lý xong, sẽ lên đúng giờ hẹn',
   'notify.videoPublished': 'Video hẹn giờ của bạn đã lên',

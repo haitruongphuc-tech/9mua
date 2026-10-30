@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation';
 import { getT } from '@/i18n/server';
 import { isFeatureOn } from '@/lib/features';
-import { createVideoUpload, isVisibility, type VideoOptions } from '@/modules/creator';
+import { createVideoUpload, isVisibility, setEpisode, type VideoOptions } from '@/modules/creator';
 import { requireUser } from '@/modules/identity';
 
 // Bước 2: tạo video / Story / Duet từ file đã tải lên; worker sẽ chuyển mã rồi đưa lên feed.
@@ -26,6 +26,7 @@ export async function createVideoAction(input: {
   beauty?: number;
   editSpec?: unknown; // cắt, chữ, nhãn dán (V5.6 mục 1), công tắc camera; máy chủ kiểm bằng parseEditSpec
   sound?: { id: string; startSec: number; volume: number; originalVolume: number } | null; // nhạc nền (V5.6 mục 2)
+  series?: { id: string; episodeNo: number; watchOnly: boolean } | null; // tập phim (V5.9 mục 2), công tắc watch
 }): Promise<{ error: string }> {
   const user = await requireUser();
   const autoCaptions = input.autoCaptions === true && (await isFeatureOn('auto_captions'));
@@ -80,6 +81,15 @@ export async function createVideoAction(input: {
     options: { ...postOptions, ...looks, ...(autoCaptions ? { autoCaptions } : {}) },
   });
   if (!result.ok) return { error: (await getT())(`post.err.${result.error}`) };
+  // Gắn tập phim ngay khi đăng; số tập trùng / sai thì mở trang phim để sửa (video vẫn đăng như thường).
+  if (input.series && typeof input.series.id === 'string' && (await isFeatureOn('watch'))) {
+    const ep = await setEpisode(user.id, result.videoId, {
+      seriesId: input.series.id,
+      episodeNo: Number(input.series.episodeNo),
+      watchOnly: input.series.watchOnly === true,
+    });
+    if (!ep.ok) redirect(`/video/cua-toi/phim/${encodeURIComponent(input.series.id)}?loi=${ep.error}`);
+  }
   redirect(
     input.options?.draft
       ? `/video/cua-toi?tab=nhap&moi=${result.videoId}`

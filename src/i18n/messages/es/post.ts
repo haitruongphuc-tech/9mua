@@ -121,6 +121,10 @@ export const post: PostMessages = {
     'Los clips se unen en este orden, máximo {sec} segundos en total. Toca un clip para verlo.',
   'post.edit.tooManyClips': 'Máximo {max} clips.',
   'post.err.SOUND_INVALID': 'Este sonido ya no se puede usar, o el segundo de inicio / volumen no es válido.',
+  'post.err.REPLY_INVALID':
+    'No puedes responder a este comentario (oculto, ya respondido o no está en tu video).',
+  'post.reply.title': 'Respuesta al comentario de {name}',
+  'post.reply.hint': 'Elige un video y arrastra la tarjeta del comentario en la vista previa.',
   'post.sound.original': 'Sonido original – @{name}',
   'post.sound.title': 'Sonido',
   'post.sound.add': 'Añadir sonido',

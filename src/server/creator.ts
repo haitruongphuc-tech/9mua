@@ -8,7 +8,7 @@ import {
   processNextJob,
   publishScheduledVideos,
 } from '@/modules/creator';
-import { notifyFollowersOfVideo, recordMentions } from '@/modules/social';
+import { notifyFollowersOfVideo, notifyVideoReply, recordMentions } from '@/modules/social';
 
 let registered = false;
 
@@ -19,6 +19,8 @@ function registerAll() {
     if (video.kind === 'video') await notifyFollowersOfVideo(video);
     // Tập phim mới (SPEC-creator.md V5.9): báo người đã "Lưu phim".
     if (video.kind === 'video') await notifyNewEpisode(video.id);
+    // Trả lời bình luận bằng video (SPEC-creator.md V5.8): báo người bình luận.
+    if (video.kind === 'video') await notifyVideoReply(video.id);
     // Nhắc tên @ trong chú thích (SPEC-social.md V5.4 mục 2).
     await recordMentions(
       { type: 'video', id: video.id, url: `/v/${video.id}` },

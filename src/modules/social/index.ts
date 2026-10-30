@@ -22,6 +22,8 @@ export {
   type CommentView,
   toggleCommentLike,
   unhideMutedComment,
+  notifyVideoReply,
+  replyCardFor,
 } from './comments';
 export { toggleSave, savedVideos, savedSet } from './saves';
 export { hashtagVideos, trendingHashtags, normalizeTag, searchHashtags } from './hashtags';

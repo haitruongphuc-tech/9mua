@@ -4,6 +4,7 @@ export const notify: NotifyMessages = {
   'notify.followNewVideo': '{name} just posted a new video',
   'notify.newComment': '{name} commented: {text}',
   'notify.mentioned': '{name} mentioned you',
+  'notify.videoReply': '{name} replied to your comment with a video',
   'notify.newReply': '{name} replied to you: {text}',
   'notify.voucherIssued': 'You got a voucher for a free 1-year Kiot!',
   'notify.videoReady': 'Your video is published',

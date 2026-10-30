@@ -6,6 +6,7 @@ import { getT } from '@/i18n/server';
 import { isFeatureOn } from '@/lib/features';
 import { editVideo, isVisibility, MAX_CAPTION, MAX_PRODUCTS_PER_VIDEO } from '@/modules/creator';
 import { requireUser } from '@/modules/identity';
+import { recordMentions } from '@/modules/social';
 
 export async function editVideoAction(input: {
   videoId: string;
@@ -42,6 +43,11 @@ export async function editVideoAction(input: {
     return {
       error: t(result.error === 'NOT_FOUND' ? 'post.mine.err.NOT_FOUND' : `post.err.${result.error}`),
     };
+  await recordMentions(
+    { type: 'video', id: String(input.videoId), url: `/v/${String(input.videoId)}` },
+    user.id,
+    String(input.caption ?? ''),
+  );
   revalidatePath('/video/cua-toi');
   redirect('/video/cua-toi?sua=1');
 }

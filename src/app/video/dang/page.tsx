@@ -15,6 +15,7 @@ import { isFeatureOn } from '@/lib/features';
 import { PostComposer } from './PostComposer';
 import { VideoUploadForm } from './VideoUploadForm';
 import { requireCommitment } from '@/server/commitment';
+import { replyCardFor } from '@/modules/social';
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getT())('post.title'), robots: { index: false } };
@@ -24,7 +25,14 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function UploadVideoPage({
   searchParams,
 }: {
-  searchParams: Promise<{ duet?: string; story?: string; stitch?: string; sound?: string; bai?: string }>;
+  searchParams: Promise<{
+    duet?: string;
+    story?: string;
+    stitch?: string;
+    sound?: string;
+    bai?: string;
+    'tra-loi'?: string;
+  }>;
 }) {
   const user = await requireUser();
   const params = await searchParams;
@@ -50,6 +58,11 @@ export default async function UploadVideoPage({
       </div>
     );
   const series = watchOn ? await mySeries(user.id) : [];
+  // Trả lời bình luận bằng video (SPEC-creator.md V5.8), công tắc social_more.
+  const replyTo =
+    params['tra-loi'] && (await isFeatureOn('social_more'))
+      ? await replyCardFor(user.id, params['tra-loi'])
+      : null;
   const [t, videos, stories, duet, kiot, limits, stitch, sound] = await Promise.all([
     getT(),
     videosToday(user.id),
@@ -88,6 +101,7 @@ export default async function UploadVideoPage({
           limits={{ long: limits.long, maxBytes: limits.maxBytes, maxSec: limits.maxSec }}
           initialSound={sound}
           series={series.map((s) => ({ id: s.id, title: s.title, next: s.episodeCount + 1 }))}
+          replyTo={replyTo}
         />
       </ClientMessages>
     </div>

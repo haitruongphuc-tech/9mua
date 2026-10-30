@@ -669,6 +669,18 @@ export function VideoFeed({
                   🔇 {t('feed.unmute')}
                 </button>
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
+                {v.replyTo ? (
+                  <div
+                    className="pointer-events-none absolute z-10 max-w-[70%] -translate-x-1/2 -translate-y-1/2 rounded-[12px] bg-white px-3 py-2 text-[12px] text-black shadow-lg"
+                    style={{ left: `${v.replyTo.x * 100}%`, top: `${v.replyTo.y * 100}%` }}
+                    data-testid="feed-reply-card"
+                  >
+                    <b className="block truncate text-[11px] text-zinc-500">
+                      {t('feed.replyCard.label', { name: v.replyTo.authorName })}
+                    </b>
+                    <span className="line-clamp-3">{v.replyTo.text ?? t('feed.replyCard.gone')}</span>
+                  </div>
+                ) : null}
 
                 <div className="absolute bottom-0 left-0 right-[76px] flex flex-col p-4 pb-6">
                   <div className="mb-2 flex flex-wrap items-center gap-2">

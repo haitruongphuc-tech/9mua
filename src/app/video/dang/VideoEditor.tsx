@@ -14,6 +14,8 @@ import {
 // Chỉnh video trước khi đăng (SPEC-creator.md V5.6 mục 1): cắt đầu/cuối, chữ (≤ 5 dòng, ≤ 60 ký tự, 6 màu, kéo để đặt),
 // nhãn dán của 9MUA. Xem trước trên trình duyệt; máy chủ dựng một lần khi xử lý (editSpec).
 type Kind = 'texts' | 'stickers';
+type OverlayKind = Kind | 'card'; // card: thẻ bình luận khi trả lời bằng video
+export type ReplyCard = { text: string; authorName: string; x: number; y: number };
 
 export const emptyEdit = (): EditSpec => ({ trimStart: 0, trimEnd: null, texts: [], stickers: [] });
 
@@ -25,11 +27,13 @@ export function EditOverlay({
   spec,
   time,
   onMove,
+  card,
   children,
 }: {
   spec: EditSpec;
   time: number;
-  onMove: (kind: Kind, index: number, x: number, y: number) => void;
+  onMove: (kind: OverlayKind, index: number, x: number, y: number) => void;
+  card?: ReplyCard | null; // trả lời bình luận bằng video (SPEC-creator.md V5.8)
   children: ReactNode;
 }) {
   const box = useRef<HTMLDivElement>(null);
@@ -41,7 +45,7 @@ export function EditOverlay({
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
-  const drag = (kind: Kind, index: number) => (e: ReactPointerEvent<HTMLSpanElement>) => {
+  const drag = (kind: OverlayKind, index: number) => (e: ReactPointerEvent<HTMLSpanElement>) => {
     e.preventDefault();
     const el = box.current;
     if (!el) return;
@@ -80,6 +84,17 @@ export function EditOverlay({
           </span>
         ) : null,
       )}
+      {card ? (
+        <span
+          onPointerDown={drag('card', 0)}
+          className="absolute max-w-[80%] -translate-x-1/2 -translate-y-1/2 cursor-move touch-none rounded-[10px] bg-white px-2 py-1 text-[11px] text-black shadow"
+          style={{ left: `${card.x * 100}%`, top: `${card.y * 100}%` }}
+          data-testid="overlay-reply-card"
+        >
+          <b className="block truncate">{card.authorName}</b>
+          <span className="line-clamp-2">{card.text}</span>
+        </span>
+      ) : null}
       {spec.stickers.map((s, i) =>
         shown(s.fromSec, s.toSec) ? (
           <span

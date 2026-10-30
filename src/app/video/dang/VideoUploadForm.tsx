@@ -99,6 +99,7 @@ export function VideoUploadForm({
   limits,
   initialSound,
   series,
+  replyTo,
 }: {
   remaining: Record<Mode, number>;
   initialMode: Mode;
@@ -110,6 +111,7 @@ export function VideoUploadForm({
   limits: { long: boolean; maxBytes: number; maxSec: number };
   initialSound: SoundItem | null; // "Dùng âm thanh này" (SPEC-creator.md V5.6 mục 2)
   series: { id: string; title: string; next: number }[]; // Phim của tôi (V5.9): gắn tập ngay khi đăng
+  replyTo: { commentId: string; text: string; authorName: string } | null; // trả lời bình luận bằng video (V5.8)
 }) {
   const maxSec = (m: Mode) => (m === 'story' ? STORY_SEC : limits.maxSec);
   const t = useT();
@@ -152,6 +154,7 @@ export function VideoUploadForm({
   const [shownClip, setShownClip] = useState(0);
   const clipKey = useRef(0);
   const [edit, setEdit] = useState<EditSpec>(emptyEdit);
+  const [cardPos, setCardPos] = useState({ x: 0.5, y: 0.2 });
   const [seriesId, setSeriesId] = useState('');
   const [episodeNo, setEpisodeNo] = useState(1);
   const [watchOnly, setWatchOnly] = useState(false);
@@ -349,6 +352,7 @@ export function VideoUploadForm({
       look: cameraOn && mode === 'video' ? look : undefined,
       beauty: cameraOn && mode === 'video' ? beauty : undefined,
       editSpec: editing ? edit : undefined,
+      replyTo: replyTo && mode === 'video' ? { commentId: replyTo.commentId, ...cardPos } : null,
       series:
         seriesId && mode === 'video' && !duet && !stitch ? { id: seriesId, episodeNo, watchOnly } : null,
       sound:
@@ -622,8 +626,15 @@ export function VideoUploadForm({
       <EditOverlay
         spec={editing ? edit : emptyEdit()}
         time={time}
+        card={
+          replyTo && mode === 'video'
+            ? { text: replyTo.text, authorName: replyTo.authorName, ...cardPos }
+            : null
+        }
         onMove={(kind, index, x, y) =>
-          setEdit((e) => ({ ...e, [kind]: e[kind].map((it, i) => (i === index ? { ...it, x, y } : it)) }))
+          kind === 'card'
+            ? setCardPos({ x, y })
+            : setEdit((e) => ({ ...e, [kind]: e[kind].map((it, i) => (i === index ? { ...it, x, y } : it)) }))
         }
       >
         <video

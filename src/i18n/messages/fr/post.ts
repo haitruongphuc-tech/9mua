@@ -123,6 +123,10 @@ export const post: PostMessages = {
   'post.edit.tooManyClips': '{max} extraits maximum.',
   'post.err.SOUND_INVALID':
     "Ce son n'est plus disponible, ou la seconde de début / le volume n'est pas valide.",
+  'post.err.REPLY_INVALID':
+    'Impossible de répondre à ce commentaire (masqué, déjà répondu ou pas sur votre vidéo).',
+  'post.reply.title': 'Réponse au commentaire de {name}',
+  'post.reply.hint': "Choisissez une vidéo, puis faites glisser la carte du commentaire sur l'aperçu.",
   'post.sound.original': 'Son original – @{name}',
   'post.sound.title': 'Son',
   'post.sound.add': 'Ajouter un son',

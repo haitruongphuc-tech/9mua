@@ -115,6 +115,10 @@ export const post = {
   'post.edit.joinHint': 'Các đoạn nối theo thứ tự trên, tổng không quá {sec} giây. Bấm vào một đoạn để xem.',
   'post.edit.tooManyClips': 'Tối đa {max} đoạn ghép.',
   'post.err.SOUND_INVALID': 'Âm thanh này không dùng được nữa, hoặc giây bắt đầu / âm lượng không hợp lệ.',
+  'post.err.REPLY_INVALID':
+    'Không trả lời được bình luận này (bình luận đã ẩn, đã có video trả lời, hoặc không phải video của bạn).',
+  'post.reply.title': 'Trả lời bình luận của {name}',
+  'post.reply.hint': 'Chọn video rồi kéo thẻ bình luận trên khung xem trước để đặt vị trí.',
   'post.sound.original': 'Âm thanh gốc – @{name}',
   'post.sound.title': 'Âm thanh',
   'post.sound.add': 'Thêm âm thanh',

@@ -116,6 +116,10 @@ export const post: PostMessages = {
   'post.edit.joinHint': 'クリップは上の順につながります。合計 {sec} 秒まで。タップでプレビュー。',
   'post.edit.tooManyClips': 'クリップは {max} 個までです。',
   'post.err.SOUND_INVALID': 'このサウンドは使えなくなったか、開始秒数・音量が正しくありません。',
+  'post.err.REPLY_INVALID':
+    'このコメントには返信できません（非表示、返信済み、またはあなたの動画ではない）。',
+  'post.reply.title': '{name} さんのコメントに返信',
+  'post.reply.hint': '動画を選んでから、プレビュー上でコメントカードをドラッグして配置します。',
   'post.sound.original': 'オリジナル音源 – @{name}',
   'post.sound.title': 'サウンド',
   'post.sound.add': 'サウンドを追加',

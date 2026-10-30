@@ -116,7 +116,8 @@ export type CreateVideoResult =
         | 'LONG_DAILY_LIMIT'
         | 'STITCH_INVALID'
         | 'EDIT_INVALID'
-        | 'SOUND_INVALID';
+        | 'SOUND_INVALID'
+        | 'REPLY_INVALID';
     };
 
 // Tạo video từ file đã tải lên (SPEC-creator.md mục 1). Video ở trạng thái processing cho tới khi worker xong.
@@ -171,6 +172,23 @@ export async function createVideoUpload(
   // Chỉnh video: chỉ video thường; giá trị lạ thì từ chối cả lần đăng (không âm thầm bỏ qua).
   const editSpec = kind === 'video' ? parseEditSpec(meta.options?.editSpec) : parseEditSpec(undefined);
   if (!editSpec) return { ok: false, error: 'EDIT_INVALID' };
+  // Trả lời bình luận bằng video (V5.8): chỉ người đăng video có bình luận đó; bình luận gốc còn hiện, chưa được trả lời.
+  const replyIn = kind === 'video' && !duetOfId && !stitch ? meta.options?.replyTo : null;
+  let replyTo: { commentId: string; x: number; y: number } | null = null;
+  if (replyIn) {
+    const comment = await db.comment.findFirst({
+      where: { id: String(replyIn.commentId), hiddenAt: null, replyVideoId: null },
+      select: { id: true, videoId: true },
+    });
+    const parent = comment
+      ? await db.video.findUnique({ where: { id: comment.videoId }, select: { authorId: true } })
+      : null;
+    const x = Number(replyIn.x);
+    const y = Number(replyIn.y);
+    if (!comment || parent?.authorId !== userId || !(x >= 0 && x <= 1) || !(y >= 0 && y <= 1))
+      return { ok: false, error: 'REPLY_INVALID' };
+    replyTo = { commentId: comment.id, x, y };
+  }
   // Nhạc nền: âm thanh còn chọn được, giây bắt đầu nằm trong âm thanh, âm lượng 0–100. Không áp cho Story, Duet, Stitch.
   const soundIn = kind === 'video' && !duetOfId && !stitch ? meta.options?.sound : null;
   let sound: { id: string; startSec: number; volume: number; originalVolume: number } | null = null;
@@ -274,6 +292,9 @@ export async function createVideoUpload(
         sourceSec,
         wantCaptions: kind === 'video' && meta.options?.autoCaptions === true,
         editSpec: isEmptyEdit(editSpec) ? undefined : editSpec,
+        replyToCommentId: replyTo?.commentId ?? null,
+        replyCardX: replyTo?.x ?? null,
+        replyCardY: replyTo?.y ?? null,
         soundId: sound?.id ?? null,
         soundStartSec: sound?.startSec ?? null,
         soundVolume: sound?.volume ?? null,
@@ -290,6 +311,8 @@ export async function createVideoUpload(
       },
     });
     await tx.videoJob.create({ data: { videoId: video.id, sourcePath: file, lane, createdAt: now() } });
+    if (replyTo)
+      await tx.comment.update({ where: { id: replyTo.commentId }, data: { replyVideoId: video.id } });
     return { ok: true, videoId: video.id };
   });
 }

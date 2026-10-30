@@ -27,6 +27,7 @@ export async function createVideoAction(input: {
   editSpec?: unknown; // cắt, chữ, nhãn dán (V5.6 mục 1), công tắc camera; máy chủ kiểm bằng parseEditSpec
   sound?: { id: string; startSec: number; volume: number; originalVolume: number } | null; // nhạc nền (V5.6 mục 2)
   series?: { id: string; episodeNo: number; watchOnly: boolean } | null; // tập phim (V5.9 mục 2), công tắc watch
+  replyTo?: { commentId: string; x: number; y: number } | null; // trả lời bình luận bằng video (V5.8), social_more
 }): Promise<{ error: string }> {
   const user = await requireUser();
   const autoCaptions = input.autoCaptions === true && (await isFeatureOn('auto_captions'));
@@ -65,6 +66,16 @@ export async function createVideoAction(input: {
               : null,
         }
       : undefined;
+  const reply =
+    input.replyTo && typeof input.replyTo.commentId === 'string' && (await isFeatureOn('social_more'))
+      ? {
+          replyTo: {
+            commentId: input.replyTo.commentId,
+            x: Number(input.replyTo.x),
+            y: Number(input.replyTo.y),
+          },
+        }
+      : {};
   const result = await createVideoUpload(user.id, String(input.uploadId), {
     caption: String(input.caption ?? ''),
     productIds: Array.isArray(input.productIds) ? input.productIds.map(String).slice(0, 10) : [],
@@ -78,7 +89,7 @@ export async function createVideoAction(input: {
             toSec: Number(input.stitch.toSec),
           }
         : null,
-    options: { ...postOptions, ...looks, ...(autoCaptions ? { autoCaptions } : {}) },
+    options: { ...postOptions, ...looks, ...reply, ...(autoCaptions ? { autoCaptions } : {}) },
   });
   if (!result.ok) return { error: (await getT())(`post.err.${result.error}`) };
   // Gắn tập phim ngay khi đăng; số tập trùng / sai thì mở trang phim để sửa (video vẫn đăng như thường).

@@ -46,6 +46,8 @@ export type FeedVideo = {
   // Bảng chia sẻ (SPEC-creator.md V5.7): mã nhúng chỉ cho video công khai; tải về khi công khai, cho tải, ≤ 10 phút.
   isPublic: boolean;
   canDownload: boolean;
+  // Thẻ bình luận được trả lời bằng video (SPEC-creator.md V5.8). text null: bình luận không còn (bị ẩn hoặc xoá).
+  replyTo: { text: string | null; authorName: string; avatarUrl: string | null; x: number; y: number } | null;
 };
 
 export const FEED_PAGE = 8;
@@ -215,6 +217,7 @@ export async function hydrateVideos(ids: string[], viewer: Viewer): Promise<Feed
   );
   const pinnedSet = new Set(pins);
   const soundOf = await videoSounds(await isFeatureOn('camera'), videos);
+  const replyOf = await replyCards(videos);
   const authors = await db.user.findMany({
     where: { id: { in: videos.map((v) => v.authorId) } },
     select: { id: true, displayName: true, avatarUrl: true },
@@ -250,6 +253,7 @@ export async function hydrateVideos(ids: string[], viewer: Viewer): Promise<Feed
       sdUrl: v.renditions[0]?.path ?? null,
       stitchOf: v.stitchOfId ? { id: v.stitchOfId, authorName: stitchName.get(v.stitchOfId) ?? '' } : null,
       sound: soundOf(v),
+      replyTo: replyOf(v),
       isPublic: v.visibility === 'public',
       canDownload:
         v.visibility === 'public' && v.allowDownload && (v.durationSec ?? 0) <= MAX_DOWNLOAD_SEC + 0.5,
@@ -260,6 +264,34 @@ export async function hydrateVideos(ids: string[], viewer: Viewer): Promise<Feed
     });
   }
   return out;
+}
+
+// Thẻ bình luận trên video trả lời bằng video: chữ, tên, ảnh người bình luận; bình luận đã ẩn / xoá thì text = null.
+async function replyCards(videos: { replyToCommentId: string | null }[]) {
+  const ids = videos.map((v) => v.replyToCommentId).filter((x): x is string => Boolean(x));
+  const comments = ids.length ? await db.comment.findMany({ where: { id: { in: ids } } }) : [];
+  const users = comments.length
+    ? await db.user.findMany({
+        where: { id: { in: comments.map((c) => c.userId) } },
+        select: { id: true, displayName: true, avatarUrl: true },
+      })
+    : [];
+  return (v: {
+    replyToCommentId: string | null;
+    replyCardX: number | null;
+    replyCardY: number | null;
+  }): FeedVideo['replyTo'] => {
+    if (!v.replyToCommentId) return null;
+    const c = comments.find((x) => x.id === v.replyToCommentId);
+    const u = users.find((x) => x.id === c?.userId);
+    return {
+      text: c && !c.hiddenAt ? c.text : null,
+      authorName: u?.displayName ?? '',
+      avatarUrl: u?.avatarUrl ?? null,
+      x: v.replyCardX ?? 0.5,
+      y: v.replyCardY ?? 0.2,
+    };
+  };
 }
 
 // Âm thanh hiện dưới chú thích: âm thanh video đã dùng (kể cả đã gỡ: vẫn mở được trang), hoặc âm thanh gốc còn hoạt động.

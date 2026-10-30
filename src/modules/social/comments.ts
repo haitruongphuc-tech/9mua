@@ -26,6 +26,7 @@ export type CommentView = {
   likeCount: number;
   liked: boolean;
   mutedHidden: boolean; // ẩn vì có từ cấm của chủ video (chỉ người viết và chủ video thấy)
+  replyVideoId: string | null; // "Đã trả lời bằng video" (SPEC-creator.md V5.8), chỉ khi video trả lời đã lên
   author: { id: string; displayName: string; avatarUrl: string | null };
   byVideoAuthor: boolean;
   replies: Omit<CommentView, 'replies'>[];
@@ -126,6 +127,14 @@ export async function listComments(
       take: 500,
     })
   ).filter((r) => !blocked.has(r.userId));
+  const replyIds = rows.map((r) => r.replyVideoId).filter((x): x is string => Boolean(x));
+  const readyReplies = new Set(
+    replyIds.length
+      ? (
+          await db.video.findMany({ where: { id: { in: replyIds }, status: 'ready' }, select: { id: true } })
+        ).map((v) => v.id)
+      : [],
+  );
   const likedSet = new Set(
     viewerId
       ? (
@@ -150,6 +159,7 @@ export async function listComments(
     likeCount: r.likeCount,
     liked: likedSet.has(r.id),
     mutedHidden: r.hiddenReason === 'keyword' && r.hiddenAt !== null,
+    replyVideoId: r.replyVideoId && readyReplies.has(r.replyVideoId) ? r.replyVideoId : null,
     author: name.get(r.userId) ?? { id: r.userId, displayName: '9MUA', avatarUrl: null },
     byVideoAuthor: r.userId === video.authorId,
   });
@@ -227,6 +237,29 @@ export async function toggleCommentLike(
     });
   });
   return { ok: true, liked: !had, likeCount: Math.max(0, updated.likeCount) };
+}
+
+// Trang đăng ?tra-loi=<id>: chỉ người đăng video có bình luận đó; bình luận còn hiện, chưa được trả lời.
+export async function replyCardFor(
+  userId: string,
+  commentId: string,
+): Promise<{ commentId: string; text: string; authorName: string } | null> {
+  const c = await db.comment.findFirst({ where: { id: commentId, hiddenAt: null, replyVideoId: null } });
+  if (!c) return null;
+  const v = await db.video.findUnique({ where: { id: c.videoId }, select: { authorId: true } });
+  if (v?.authorId !== userId) return null;
+  const u = await db.user.findUnique({ where: { id: c.userId }, select: { displayName: true } });
+  return { commentId: c.id, text: c.text, authorName: u?.displayName ?? '9MUA' };
+}
+
+// Video trả lời bình luận đã lên (SPEC-creator.md V5.8): báo người bình luận.
+export async function notifyVideoReply(videoId: string): Promise<boolean> {
+  const c = await db.comment.findFirst({ where: { replyVideoId: videoId }, select: { userId: true } });
+  const v = await db.video.findUnique({ where: { id: videoId }, select: { authorId: true } });
+  if (!c || !v || c.userId === v.authorId) return false;
+  const author = await db.user.findUnique({ where: { id: v.authorId }, select: { displayName: true } });
+  await notifyKey(c.userId, 'notify.videoReply', { name: author?.displayName ?? '9MUA' }, `/v/${videoId}`);
+  return true;
 }
 
 // Chủ video bấm "Hiện lại" một bình luận bị ẩn vì từ cấm.

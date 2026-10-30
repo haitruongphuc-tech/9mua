@@ -20,6 +20,7 @@ type C = {
   likeCount?: number;
   liked?: boolean;
   mutedHidden?: boolean;
+  replyVideoId?: string | null;
 };
 type Root = C & { replies: C[] };
 
@@ -169,6 +170,23 @@ export function CommentsSheet({
             >
               {t('feed.comments.unhide')}
             </button>
+          ) : null}
+          {c.replyVideoId ? (
+            <Link
+              href={`/v/${c.replyVideoId}`}
+              className="font-bold text-brand"
+              data-testid="comment-video-reply"
+            >
+              ▶ {t('feed.comments.repliedVideo')}
+            </Link>
+          ) : owner && isRoot && canBlock && !c.mutedHidden ? (
+            <Link
+              href={`/video/dang?tra-loi=${c.id}`}
+              className="font-bold"
+              data-testid="comment-reply-video"
+            >
+              🎬 {t('feed.comments.replyVideo')}
+            </Link>
           ) : null}
           {isRoot ? (
             <button type="button" onClick={() => setReplyTo(c)}>

@@ -150,7 +150,10 @@ describe('gỡ hồ sơ vi phạm (SPEC-social.md bổ sung 30/10, A2)', () => {
       error: 'Không tìm thấy người dùng.',
     });
     expect(await clearUserProfile(admin.id, u.id, 'Ảnh phản cảm')).toMatchObject({ ok: true });
-    expect(await db.user.findUniqueOrThrow({ where: { id: u.id } })).toMatchObject({ avatarUrl: null, bio: null });
+    expect(await db.user.findUniqueOrThrow({ where: { id: u.id } })).toMatchObject({
+      avatarUrl: null,
+      bio: null,
+    });
     expect(await db.adminAuditLog.findFirst({ where: { action: 'user.clear_profile' } })).toMatchObject({
       adminId: admin.id,
       targetId: u.id,

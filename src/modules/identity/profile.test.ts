@@ -14,9 +14,17 @@ describe('hồ sơ công khai (SPEC-social.md bổ sung 30/10, A2)', () => {
   it('giới thiệu: tối đa 160 ký tự, 4 dòng, không link; để trống là xoá', async () => {
     const u = await createUser();
     expect(await updateProfile(u.id, { bio: '  Bán thanh long Bình Thuận 🍉  ' })).toEqual({ ok: true });
-    expect((await db.user.findUniqueOrThrow({ where: { id: u.id } })).bio).toBe('Bán thanh long Bình Thuận 🍉');
-    expect(await updateProfile(u.id, { bio: 'a'.repeat(161) })).toMatchObject({ ok: false, error: 'BIO_TOO_LONG' });
-    expect(await updateProfile(u.id, { bio: '1\n2\n3\n4\n5' })).toMatchObject({ ok: false, error: 'BIO_TOO_LONG' });
+    expect((await db.user.findUniqueOrThrow({ where: { id: u.id } })).bio).toBe(
+      'Bán thanh long Bình Thuận 🍉',
+    );
+    expect(await updateProfile(u.id, { bio: 'a'.repeat(161) })).toMatchObject({
+      ok: false,
+      error: 'BIO_TOO_LONG',
+    });
+    expect(await updateProfile(u.id, { bio: '1\n2\n3\n4\n5' })).toMatchObject({
+      ok: false,
+      error: 'BIO_TOO_LONG',
+    });
     expect(await updateProfile(u.id, { bio: 'Mua tại shopee.vn/abc' })).toMatchObject({
       ok: false,
       error: 'HAS_LINK',
@@ -35,7 +43,11 @@ describe('hồ sơ công khai (SPEC-social.md bổ sung 30/10, A2)', () => {
     const u = await createUser();
     const first = await setProfileImage(u.id, 'avatar', await sampleImage('#fc6f15', 900, 600));
     if (!first.ok) throw new Error(first.error);
-    expect(await sharp(fileOf(first.url)).metadata()).toMatchObject({ width: 400, height: 400, format: 'webp' });
+    expect(await sharp(fileOf(first.url)).metadata()).toMatchObject({
+      width: 400,
+      height: 400,
+      format: 'webp',
+    });
     const second = await setProfileImage(u.id, 'avatar', await sampleImage('#1a1410', 500, 800));
     if (!second.ok) throw new Error(second.error);
     expect(existsSync(fileOf(first.url))).toBe(false);
@@ -87,7 +99,11 @@ describe('hồ sơ công khai (SPEC-social.md bổ sung 30/10, A2)', () => {
     const av = await setProfileImage(u.id, 'avatar', await sampleImage());
     const cv = await setProfileImage(u.id, 'cover', await sampleImage());
     if (!av.ok || !cv.ok) throw new Error('setup');
-    expect(await clearProfile(u.id)).toEqual({ avatarUrl: av.url, coverUrl: cv.url, bio: 'Giới thiệu vi phạm' });
+    expect(await clearProfile(u.id)).toEqual({
+      avatarUrl: av.url,
+      coverUrl: cv.url,
+      bio: 'Giới thiệu vi phạm',
+    });
     expect(await db.user.findUniqueOrThrow({ where: { id: u.id } })).toMatchObject({
       avatarUrl: null,
       coverUrl: null,

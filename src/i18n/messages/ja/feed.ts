@@ -7,7 +7,7 @@ export const feed: FeedMessages = {
   'feed.emptyFollowing': 'まだ誰もフォローしていません',
   'feed.seeForYou': 'おすすめを見る',
   'feed.post': '+ 動画を投稿',
-  'feed.postShort': "投稿",
+  'feed.postShort': '投稿',
   'feed.close': '閉じる',
   'feed.unmute': 'タップで音声オン',
   'feed.pinned': '📌 固定',

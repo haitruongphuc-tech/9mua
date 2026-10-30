@@ -48,7 +48,9 @@ describe('giá Kiot 1 USD/năm theo tỷ giá (SPEC-billing.md bổ sung 27/10)'
   it('lấy tỷ giá lỗi thì giữ giá cũ, không ghi gì', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
     expect(await updateKiotFeeFromRate({ fetchImpl: fetchOf('lỗi', 503) })).toMatchObject({ ok: false });
-    expect(await updateKiotFeeFromRate({ fetchImpl: fetchOf('<html>bảo trì</html>') })).toMatchObject({ ok: false });
+    expect(await updateKiotFeeFromRate({ fetchImpl: fetchOf('<html>bảo trì</html>') })).toMatchObject({
+      ok: false,
+    });
     const offline = vi.fn<typeof fetch>(async () => {
       throw new TypeError('fetch failed');
     });

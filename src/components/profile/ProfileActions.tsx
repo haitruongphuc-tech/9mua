@@ -111,7 +111,12 @@ export function ProfileActions({
             </>
           );
           return s.href ? (
-            <Link key={s.id} href={s.href} className="flex flex-col-reverse" data-testid={`stat-link-${s.id}`}>
+            <Link
+              key={s.id}
+              href={s.href}
+              className="flex flex-col-reverse"
+              data-testid={`stat-link-${s.id}`}
+            >
               {cell}
             </Link>
           ) : (

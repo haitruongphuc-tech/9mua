@@ -1,7 +1,12 @@
 import { kiotErrorText } from '@/i18n/module-messages';
 import { getT } from '@/i18n/server';
 import { MAX_IMAGE_BYTES } from '@/lib/media/process-image';
-import { getCurrentUser, removeProfileImage, setProfileImage, type ProfileImageKind } from '@/modules/identity';
+import {
+  getCurrentUser,
+  removeProfileImage,
+  setProfileImage,
+  type ProfileImageKind,
+} from '@/modules/identity';
 
 export const dynamic = 'force-dynamic';
 

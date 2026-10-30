@@ -85,7 +85,11 @@ export default async function MePage() {
     <div>
       <div className="mx-auto max-w-[760px] px-4 py-6">
         <div className="text-center">
-          <Link href={`/creator/${user.id}`} className="mx-auto inline-block" aria-label={t('me.viewProfile')}>
+          <Link
+            href={`/creator/${user.id}`}
+            className="mx-auto inline-block"
+            aria-label={t('me.viewProfile')}
+          >
             <Avatar name={user.displayName} url={user.avatarUrl} className="h-24 w-24 text-[36px]" />
           </Link>
           <h1 className="mt-3 font-display text-[22px] font-black">{user.displayName}</h1>

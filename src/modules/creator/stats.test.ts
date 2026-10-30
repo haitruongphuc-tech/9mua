@@ -14,7 +14,14 @@ const daysAgo = (n: number) => new Date(T.getTime() - n * 86_400_000);
 
 async function readyVideo(authorId: string) {
   return db.video.create({
-    data: { authorId, caption: 'v', hashtags: [], status: 'ready', fileUrl: '/uploads/v.mp4', readyAt: daysAgo(40) },
+    data: {
+      authorId,
+      caption: 'v',
+      hashtags: [],
+      status: 'ready',
+      fileUrl: '/uploads/v.mp4',
+      readyAt: daysAgo(40),
+    },
   });
 }
 
@@ -101,7 +108,12 @@ describe('thống kê creator 7/30 ngày (SPEC-social.md bổ sung 30/10, A4)', 
     });
 
     // Từng video: thêm số bình luận (không tính bị ẩn), lượt lưu, doanh số (đơn đã thanh toán, trừ huỷ/hoàn tiền).
-    expect((await myVideoStats(me.id))[0]).toMatchObject({ comments: 1, saves: 1, orders: 2, revenue: 190_000 });
+    expect((await myVideoStats(me.id))[0]).toMatchObject({
+      comments: 1,
+      saves: 1,
+      orders: 2,
+      revenue: 190_000,
+    });
   });
 
   it('chưa có video thì mọi số là 0', async () => {

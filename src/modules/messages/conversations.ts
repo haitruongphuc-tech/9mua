@@ -143,7 +143,12 @@ export async function listConversations(
       });
       return {
         id: c.id,
-        other: people.get(otherOf(c, userId)) ?? { id: otherOf(c, userId), displayName: '', kiotName: null, avatarUrl: null },
+        other: people.get(otherOf(c, userId)) ?? {
+          id: otherOf(c, userId),
+          displayName: '',
+          kiotName: null,
+          avatarUrl: null,
+        },
         status: c.status as 'request' | 'active',
         requestedByMe: c.requestedById === userId,
         last: {

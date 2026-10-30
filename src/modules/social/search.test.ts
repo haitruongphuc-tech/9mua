@@ -5,7 +5,11 @@ import { searchPublicUsers } from '@/modules/identity';
 import { searchHashtags } from '@/modules/social';
 import { createUser } from '../../../tests/helpers/factories';
 
-async function video(authorId: string, caption: string, data: Partial<{ status: string; kind: string; score: number; hashtags: string[] }> = {}) {
+async function video(
+  authorId: string,
+  caption: string,
+  data: Partial<{ status: string; kind: string; score: number; hashtags: string[] }> = {},
+) {
   return db.video.create({
     data: {
       authorId,
@@ -35,7 +39,12 @@ describe('tìm kiếm (SPEC-social.md bổ sung 30/10, A3)', () => {
 
     const found = await searchPublicUsers('thanh long', 10);
     expect(found.map((u) => u.id)).toEqual([c.id, b.id, a.id]);
-    expect(found[0]).toEqual({ id: c.id, displayName: 'Anh Thanh Long Ruột Đỏ', avatarUrl: null, followers: 1 });
+    expect(found[0]).toEqual({
+      id: c.id,
+      displayName: 'Anh Thanh Long Ruột Đỏ',
+      avatarUrl: null,
+      followers: 1,
+    });
     const prefix = await createUser({ displayName: 'Thanh Long Xanh' });
     expect((await searchPublicUsers('THANH LONG', 10))[0]!.id).toBe(prefix.id);
     expect((await searchPublicUsers('binh thuan vuon', 10)).map((u) => u.id)).toEqual([a.id]);

@@ -34,8 +34,7 @@ async function applyFee(fee: number, rate: number, actorId: string | null) {
 }
 
 export type RateUpdate =
-  | { ok: true; applied: boolean; rate: number; feeVnd: number }
-  | { ok: false; reason: string };
+  { ok: true; applied: boolean; rate: number; feeVnd: number } | { ok: false; reason: string };
 
 // Cron 7:00 mỗi sáng (và nút "Cập nhật tỷ giá ngay" ở /admin/cai-dat). Lỗi thì giữ giá gần nhất, mai thử lại.
 export async function updateKiotFeeFromRate(

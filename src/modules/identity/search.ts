@@ -9,7 +9,9 @@ export type UserSearchHit = { id: string; displayName: string; avatarUrl: string
 export async function searchPublicUsers(query: string, limit: number): Promise<UserSearchHit[]> {
   const q = normalizeSearchText(query);
   if (!q) return [];
-  const rows = await db.$queryRaw<{ id: string; displayName: string; avatarUrl: string | null; followers: bigint }[]>`
+  const rows = await db.$queryRaw<
+    { id: string; displayName: string; avatarUrl: string | null; followers: bigint }[]
+  >`
     SELECT u.id, u."displayName", u."avatarUrl",
       (SELECT count(*) FROM "Follow" f WHERE f."followeeId" = u.id) AS followers
     FROM "User" u

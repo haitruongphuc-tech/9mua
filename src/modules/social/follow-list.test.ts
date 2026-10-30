@@ -10,7 +10,11 @@ describe('danh sách người theo dõi / đang theo dõi (SPEC-social.md bổ s
     for (let i = 0; i < 32; i++) fans.push(await createUser({ displayName: `Fan ${i}` }));
     const base = Date.UTC(2026, 9, 1);
     await db.follow.createMany({
-      data: fans.map((f, i) => ({ followerId: f.id, followeeId: star.id, createdAt: new Date(base + i * 60_000) })),
+      data: fans.map((f, i) => ({
+        followerId: f.id,
+        followeeId: star.id,
+        createdAt: new Date(base + i * 60_000),
+      })),
     });
     await db.user.update({ where: { id: fans[31]!.id }, data: { lockedAt: new Date() } });
 

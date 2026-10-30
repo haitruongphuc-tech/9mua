@@ -13,7 +13,12 @@ export type MessageView = {
   hidden: boolean;
 };
 // avatarUrl: logo Kiot nếu người đó có Kiot (tên hiện là tên Kiot), không thì ảnh đại diện (SPEC-social.md bổ sung 30/10).
-export type ConversationPeer = { id: string; displayName: string; kiotName: string | null; avatarUrl: string | null };
+export type ConversationPeer = {
+  id: string;
+  displayName: string;
+  kiotName: string | null;
+  avatarUrl: string | null;
+};
 
 type Row = {
   id: string;

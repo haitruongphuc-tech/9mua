@@ -28,7 +28,10 @@ export default async function FollowListPage({
     `flex-1 border-b-2 pb-2 text-center text-[14px] font-bold ${on ? 'border-white text-white' : 'border-transparent text-white/50'}`;
   return (
     <section className="mx-auto flex w-full max-w-lg flex-col gap-4 px-4 py-6">
-      <Link href={`/creator/${userId}`} className="flex items-center gap-2 text-[13px] font-bold text-white/70">
+      <Link
+        href={`/creator/${userId}`}
+        className="flex items-center gap-2 text-[13px] font-bold text-white/70"
+      >
         <Avatar name={profile.displayName} url={profile.avatarUrl} className="h-7 w-7 text-[12px]" />
         {profile.displayName}
       </Link>
@@ -53,7 +56,11 @@ export default async function FollowListPage({
         <ul className="flex flex-col divide-y divide-white/10" data-testid="follow-list">
           {items.map((u) => (
             <li key={u.id}>
-              <Link href={`/creator/${u.id}`} className="flex items-center gap-3 py-3" data-testid="follow-person">
+              <Link
+                href={`/creator/${u.id}`}
+                className="flex items-center gap-3 py-3"
+                data-testid="follow-person"
+              >
                 <Avatar name={u.displayName} url={u.avatarUrl} className="h-11 w-11 text-[16px]" />
                 <span className="truncate font-bold">{u.displayName}</span>
               </Link>

@@ -32,7 +32,10 @@ export async function trendingHashtags(limit = 10): Promise<{ tag: string; video
 }
 
 // Tìm hashtag theo tên (SPEC-social.md bổ sung 30/10, A3): kèm số video đang lên feed, nhiều video lên trước.
-export async function searchHashtags(query: string, limit: number): Promise<{ tag: string; videos: number }[]> {
+export async function searchHashtags(
+  query: string,
+  limit: number,
+): Promise<{ tag: string; videos: number }[]> {
   const q = normalizeSearchText(query).replace(/ /g, '');
   if (!q) return [];
   return db.$queryRaw<{ tag: string; videos: number }[]>`

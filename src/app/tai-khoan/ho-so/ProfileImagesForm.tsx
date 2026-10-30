@@ -55,7 +55,11 @@ export function ProfileImagesForm({
   const buttons = (kind: Kind) => (
     <div className="flex flex-wrap gap-3 text-[13px]">
       <label className="cursor-pointer rounded-full border border-white/25 px-4 py-1.5 font-bold">
-        {busy === kind ? t('profile.edit.uploading') : urls[kind] ? t('profile.edit.change') : t('profile.edit.choose')}
+        {busy === kind
+          ? t('profile.edit.uploading')
+          : urls[kind]
+            ? t('profile.edit.change')
+            : t('profile.edit.choose')}
         <input
           type="file"
           accept="image/jpeg,image/png,image/webp"

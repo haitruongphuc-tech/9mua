@@ -7,7 +7,7 @@ export const feed: FeedMessages = {
   'feed.emptyFollowing': 'Aún no sigues a nadie',
   'feed.seeForYou': 'Ver Para ti',
   'feed.post': '+ Publicar video',
-  'feed.postShort': "Publicar",
+  'feed.postShort': 'Publicar',
   'feed.close': 'Cerrar',
   'feed.unmute': 'Toca para activar el sonido',
   'feed.pinned': '📌 FIJADO',

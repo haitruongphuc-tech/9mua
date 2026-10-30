@@ -81,7 +81,11 @@ export function StoriesRow({
         >
           <span className={`relative grid ${ring} place-items-center rounded-full bg-red-500 p-[3px]`}>
             <span className="block h-full w-full rounded-full border-2 border-ink">
-              <Avatar name={l.host.displayName} url={l.host.avatarUrl} className="h-full w-full text-[18px]" />
+              <Avatar
+                name={l.host.displayName}
+                url={l.host.avatarUrl}
+                className="h-full w-full text-[18px]"
+              />
             </span>
             <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded bg-red-600 px-1 text-[9px] font-black leading-[14px]">
               LIVE
@@ -123,7 +127,11 @@ export function StoriesRow({
               }`}
             >
               <span className="block h-full w-full rounded-full border-2 border-ink">
-                <Avatar name={g.author.displayName} url={g.author.avatarUrl} className="h-full w-full text-[20px]" />
+                <Avatar
+                  name={g.author.displayName}
+                  url={g.author.avatarUrl}
+                  className="h-full w-full text-[20px]"
+                />
               </span>
             </span>
             <span className="w-full truncate text-center text-[11px] font-bold">{g.author.displayName}</span>

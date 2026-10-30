@@ -4,7 +4,14 @@ import { db } from '@/lib/db';
 
 // Đơn được tính là "đơn từ video": đã thanh toán, trừ đơn huỷ, đang hoàn tiền, đã hoàn tiền (SPEC-social.md bổ sung
 // 30/10, A4). Dùng chung cho thống kê tổng và từng video để hai chỗ khớp nhau.
-export const PAID_STATUSES: OrderStatus[] = ['paid', 'confirmed', 'shipping', 'delivered', 'completed', 'disputed'];
+export const PAID_STATUSES: OrderStatus[] = [
+  'paid',
+  'confirmed',
+  'shipping',
+  'delivered',
+  'completed',
+  'disputed',
+];
 
 export type CreatorStats = {
   days: 7 | 30;
@@ -21,7 +28,9 @@ const vnDayOf = (at: Date) => new Date(at.getTime() + 7 * 3_600_000).toISOString
 // Thống kê 7 / 30 ngày gần nhất theo giờ Việt Nam (tính cả hôm nay) cho đầu trang /video/cua-toi.
 export async function creatorStats(userId: string, days: 7 | 30): Promise<CreatorStats> {
   const since = startOfVnDay(new Date(now().getTime() - (days - 1) * 86_400_000));
-  const ids = (await db.video.findMany({ where: { authorId: userId }, select: { id: true } })).map((v) => v.id);
+  const ids = (await db.video.findMany({ where: { authorId: userId }, select: { id: true } })).map(
+    (v) => v.id,
+  );
   const [views, likes, comments, newFollowers, sales] = await Promise.all([
     db.videoView.count({ where: { videoId: { in: ids }, day: { gte: vnDayOf(since) } } }),
     db.videoLike.count({ where: { videoId: { in: ids }, createdAt: { gte: since } } }),

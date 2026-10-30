@@ -282,14 +282,7 @@ export function LivePlayer({
           <span className="relative grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full border-2 border-red-500 bg-brand font-black">
             {/* Người phát có Kiot thì hiện logo Kiot; không có Kiot thì ảnh đại diện (SPEC-social.md bổ sung 30/10, A2). */}
             {hostImage ? (
-              <Image
-                src={hostImage}
-                alt=""
-                fill
-                sizes="36px"
-                className="object-cover"
-                unoptimized
-              />
+              <Image src={hostImage} alt="" fill sizes="36px" className="object-cover" unoptimized />
             ) : (
               initial
             )}

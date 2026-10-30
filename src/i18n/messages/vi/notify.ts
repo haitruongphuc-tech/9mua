@@ -7,7 +7,7 @@ export const notify = {
   'notify.videoReady': 'Video đã đăng xong',
   'notify.videoFailed': 'Video không đăng được',
   'notify.videoRemoved': 'Video của bạn bị gỡ',
-  'notify.profileCleared': "Ảnh đại diện, ảnh bìa và giới thiệu của bạn đã bị gỡ vì vi phạm quy định",
+  'notify.profileCleared': 'Ảnh đại diện, ảnh bìa và giới thiệu của bạn đã bị gỡ vì vi phạm quy định',
   'notify.reason': 'Lý do: {reason}',
   'notify.title': 'Thông báo',
   'notify.empty': 'Chưa có thông báo.',

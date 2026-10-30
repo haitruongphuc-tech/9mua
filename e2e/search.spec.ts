@@ -33,7 +33,9 @@ test('tìm tài khoản, video, hashtag từ header; tìm không dấu', async (
     await box.fill(`thanh long ${stamp}`);
     await box.press('Enter');
   }
-  await page.waitForURL((u) => u.pathname === '/tim-kiem' && u.searchParams.get('q') === `thanh long ${stamp}`);
+  await page.waitForURL(
+    (u) => u.pathname === '/tim-kiem' && u.searchParams.get('q') === `thanh long ${stamp}`,
+  );
 
   // Tab Tất cả: tài khoản (gõ không dấu vẫn ra "Thành Long") và video.
   await expect(page.getByTestId('search-user').first()).toContainText(`Thành Long ${stamp}`);
@@ -54,5 +56,7 @@ test('tìm tài khoản, video, hashtag từ header; tìm không dấu', async (
   await page.getByTestId('search-user').first().click();
   await page.waitForURL((u) => u.pathname === `/creator/${user.id}`);
   await page.goto(`/tim-kiem?q=khongcogi${stamp}`);
-  await expect(page.getByTestId('search-empty')).toHaveText(`Không tìm thấy kết quả cho “khongcogi${stamp}”.`);
+  await expect(page.getByTestId('search-empty')).toHaveText(
+    `Không tìm thấy kết quả cho “khongcogi${stamp}”.`,
+  );
 });

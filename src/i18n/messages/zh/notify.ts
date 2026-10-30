@@ -8,7 +8,7 @@ export const notify: NotifyMessages = {
   'notify.videoReady': '视频已发布',
   'notify.videoFailed': '视频未能发布',
   'notify.videoRemoved': '你的视频已被下架',
-  'notify.profileCleared': "你的头像、封面和简介因违反规定已被移除",
+  'notify.profileCleared': '你的头像、封面和简介因违反规定已被移除',
   'notify.reason': '原因：{reason}',
   'notify.title': '通知',
   'notify.empty': '还没有通知。',

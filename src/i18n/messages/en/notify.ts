@@ -8,7 +8,7 @@ export const notify: NotifyMessages = {
   'notify.videoReady': 'Your video is published',
   'notify.videoFailed': 'Your video could not be published',
   'notify.videoRemoved': 'Your video was removed',
-  'notify.profileCleared': "Your profile photo, cover photo and bio were removed for breaking the rules",
+  'notify.profileCleared': 'Your profile photo, cover photo and bio were removed for breaking the rules',
   'notify.reason': 'Reason: {reason}',
   'notify.title': 'Notifications',
   'notify.empty': 'No notifications yet.',

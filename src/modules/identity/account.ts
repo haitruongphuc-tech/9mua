@@ -19,12 +19,14 @@ export async function updateProfile(
   const data: { displayName?: string; bio?: string | null } = {};
   if (input.displayName !== undefined) {
     const parsed = registerInput.shape.displayName.safeParse(input.displayName);
-    if (!parsed.success) return { ok: false, error: 'INVALID_INPUT', message: parsed.error.issues[0]!.message };
+    if (!parsed.success)
+      return { ok: false, error: 'INVALID_INPUT', message: parsed.error.issues[0]!.message };
     data.displayName = parsed.data;
   }
   if (input.bio !== undefined) {
     const bio = input.bio.replace(/\r\n?/g, '\n').trim();
-    if ([...bio].length > MAX_BIO || bio.split('\n').length > MAX_BIO_LINES) return { ok: false, error: 'BIO_TOO_LONG' };
+    if ([...bio].length > MAX_BIO || bio.split('\n').length > MAX_BIO_LINES)
+      return { ok: false, error: 'BIO_TOO_LONG' };
     if (hasLink(bio)) return { ok: false, error: 'HAS_LINK' };
     data.bio = bio || null;
   }

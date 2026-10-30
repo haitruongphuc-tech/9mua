@@ -66,7 +66,11 @@ export default async function SearchPage({
   return (
     <ClientMessages prefixes={['market.']}>
       <section className="mx-auto flex w-full max-w-[900px] flex-col gap-5 px-4 py-5">
-        <form action="/tim-kiem" role="search" className="flex h-11 items-center gap-2 rounded-full bg-white/10 px-4">
+        <form
+          action="/tim-kiem"
+          role="search"
+          className="flex h-11 items-center gap-2 rounded-full bg-white/10 px-4"
+        >
           <Search className="h-4 w-4 shrink-0 text-white/50" aria-hidden />
           <input
             type="search"
@@ -83,7 +87,10 @@ export default async function SearchPage({
         </form>
 
         {q ? (
-          <nav className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4" aria-label={t('common.search.title')}>
+          <nav
+            className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4"
+            aria-label={t('common.search.title')}
+          >
             {TABS.map((x) => (
               <Link
                 key={x}
@@ -126,7 +133,11 @@ export default async function SearchPage({
             <ul className="flex flex-col divide-y divide-white/10">
               {users.map((u) => (
                 <li key={u.id}>
-                  <Link href={`/creator/${u.id}`} className="flex items-center gap-3 py-2.5" data-testid="search-user">
+                  <Link
+                    href={`/creator/${u.id}`}
+                    className="flex items-center gap-3 py-2.5"
+                    data-testid="search-user"
+                  >
                     <Avatar name={u.displayName} url={u.avatarUrl} className="h-11 w-11 text-[16px]" />
                     <span className="min-w-0">
                       <span className="block truncate font-bold">{u.displayName}</span>
@@ -160,7 +171,9 @@ export default async function SearchPage({
                     data-testid="search-hashtag"
                   >
                     <span className="font-bold">#{h.tag}</span>
-                    <span className="text-[12px] text-white/50">{t('common.search.videos', { count: h.videos })}</span>
+                    <span className="text-[12px] text-white/50">
+                      {t('common.search.videos', { count: h.videos })}
+                    </span>
                   </Link>
                 </li>
               ))}

@@ -7,7 +7,7 @@ export const feed: FeedMessages = {
   'feed.emptyFollowing': 'You are not following anyone yet',
   'feed.seeForYou': 'See For you',
   'feed.post': '+ Post video',
-  'feed.postShort': "Post",
+  'feed.postShort': 'Post',
   'feed.close': 'Close',
   'feed.unmute': 'Tap to unmute',
   'feed.pinned': '📌 PINNED',

@@ -37,7 +37,11 @@ export async function myVideoStats(userId: string): Promise<MyVideo[]> {
           FROM "OrderItem" oi JOIN "Order" o ON o.id = oi."orderId"
           WHERE oi."sourceVideoId" = ANY(${ids}) AND o.status::text = ANY(${PAID_STATUSES})
           GROUP BY oi."sourceVideoId"`,
-        db.comment.groupBy({ by: ['videoId'], where: { videoId: { in: ids }, hiddenAt: null }, _count: true }),
+        db.comment.groupBy({
+          by: ['videoId'],
+          where: { videoId: { in: ids }, hiddenAt: null },
+          _count: true,
+        }),
         db.savedVideo.groupBy({ by: ['videoId'], where: { videoId: { in: ids } }, _count: true }),
       ])
     : [[], [], []];

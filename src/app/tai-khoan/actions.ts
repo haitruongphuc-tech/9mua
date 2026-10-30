@@ -25,7 +25,8 @@ export async function updateProfileAction(_p: FormState, form: FormData): Promis
   });
   if (!result.ok)
     return {
-      error: result.error === 'INVALID_INPUT' ? t('auth.err.displayName') : t(`profile.edit.err.${result.error}`),
+      error:
+        result.error === 'INVALID_INPUT' ? t('auth.err.displayName') : t(`profile.edit.err.${result.error}`),
     };
   revalidatePath('/tai-khoan', 'layout');
   revalidatePath(`/creator/${user.id}`);

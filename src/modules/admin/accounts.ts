@@ -52,7 +52,11 @@ export async function unlockUserAccount(adminId: string, userId: string): Promis
 }
 
 // Gỡ ảnh đại diện, ảnh bìa và giới thiệu vi phạm (SPEC-social.md bổ sung 30/10, A2); người dùng được báo kèm lý do.
-export async function clearUserProfile(adminId: string, userId: string, reason: string): Promise<AdminResult> {
+export async function clearUserProfile(
+  adminId: string,
+  userId: string,
+  reason: string,
+): Promise<AdminResult> {
   const missing = needReason(reason);
   if (missing) return missing;
   const before = await clearProfile(userId);

@@ -38,7 +38,10 @@ export async function setProfileImage(
   kind: ProfileImageKind,
   data: Buffer,
 ): Promise<{ ok: true; url: string } | { ok: false; error: ImageError | 'NOT_FOUND' | 'DAILY_LIMIT' }> {
-  const user = await db.user.findUnique({ where: { id: userId }, select: { avatarUrl: true, coverUrl: true } });
+  const user = await db.user.findUnique({
+    where: { id: userId },
+    select: { avatarUrl: true, coverUrl: true },
+  });
   if (!user) return { ok: false, error: 'NOT_FOUND' };
   const processed = await processCroppedImage(data, SIZE[kind]);
   if (!processed.ok) return processed;
@@ -53,7 +56,10 @@ export async function setProfileImage(
 }
 
 export async function removeProfileImage(userId: string, kind: ProfileImageKind): Promise<void> {
-  const user = await db.user.findUnique({ where: { id: userId }, select: { avatarUrl: true, coverUrl: true } });
+  const user = await db.user.findUnique({
+    where: { id: userId },
+    select: { avatarUrl: true, coverUrl: true },
+  });
   if (!user) return;
   await db.user.update({ where: { id: userId }, data: { [column[kind]]: null } });
   const old = user[column[kind]];

@@ -73,7 +73,10 @@ test('đăng video gắn sản phẩm → feed → vuốt → thẻ sản phẩm
   await creator.goto('/');
   const post = creator.getByTestId('feed-post');
   await expect(post).toHaveText('Đăng');
-  const [postBox, tabsBox] = await Promise.all([post.boundingBox(), creator.getByRole('tablist').boundingBox()]);
+  const [postBox, tabsBox] = await Promise.all([
+    post.boundingBox(),
+    creator.getByRole('tablist').boundingBox(),
+  ]);
   expect(postBox!.x + postBox!.width).toBeLessThanOrEqual(tabsBox!.x);
   await post.click();
   await creator.waitForURL((u) => u.pathname === '/video/dang');

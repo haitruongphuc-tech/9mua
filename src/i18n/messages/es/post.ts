@@ -21,6 +21,7 @@ export const post: PostMessages = {
   'post.submitStory': 'Publicar historia',
   'post.remaining': 'Hoy puedes publicar {count} videos más.',
   'post.remainingStory': 'Hoy puedes publicar {count} historias más.',
+  'post.pickFirst': "Primero elige un video arriba.",
   'post.err.tooBig': 'Máximo 100 MB por video.',
   'post.err.tooLong': 'El video dura más de {sec} segundos, recórtalo y vuelve a intentarlo.',
   'post.err.upload': 'Error al subir, inténtalo de nuevo.',

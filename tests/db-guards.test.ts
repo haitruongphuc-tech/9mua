@@ -20,6 +20,7 @@ describe('chốt chặn trong database', () => {
         'KiotFeeRateLog_append_only',
         'XuEntry_append_only',
         'Commitment_append_only',
+        'SttUsage_append_only',
         'Product_search_name',
       ]),
     );
@@ -33,6 +34,7 @@ describe('chốt chặn trong database', () => {
       expect.arrayContaining([
         'Product_stock_nonnegative',
         'AiUsage_cost_nonnegative',
+        'SttUsage_cost_nonnegative',
         'Product_price_range',
         'Order_amounts_valid',
         'OrderItem_qty_price_valid',

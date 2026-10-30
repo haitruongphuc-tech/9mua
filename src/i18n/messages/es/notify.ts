@@ -10,6 +10,8 @@ export const notify: NotifyMessages = {
   'notify.videoScheduled': 'Tu video está listo y se publicará a la hora programada',
   'notify.videoPublished': 'Tu video programado ya está publicado',
   'notify.draftExpiring': 'Un borrador se eliminará en {days} días',
+  'notify.captionsReady': 'Subtítulos automáticos listos: revísalos, corrígelos y actívalos',
+  'notify.captionsSkipped': 'Tu video no recibió subtítulos automáticos',
   'notify.videoFailed': 'No se pudo publicar tu video',
   'notify.videoRemoved': 'Tu video fue retirado',
   'notify.profileCleared':

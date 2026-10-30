@@ -24,6 +24,7 @@ export const ALERT_LABELS: Record<string, string> = {
   xu_budget: 'Hết ngân sách thưởng xu tháng này',
   messages_reported: 'Tin nhắn bị nhiều người báo cáo',
   storage_full: 'Ổ đĩa VPS sắp đầy, đang từ chối video dài',
+  stt_budget: 'Phụ đề tự động chạm ngân sách tháng',
 };
 
 // Không bao giờ ném lỗi: cảnh báo hỏng không được làm hỏng luồng tiền đang chạy.

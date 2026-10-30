@@ -23,6 +23,7 @@ export const feed: FeedMessages = {
   'feed.unpinDone': 'Fijado quitado.',
   'feed.editVideo': '✏️ Editar video',
   'feed.pinError': 'No se pudo fijar, inténtalo de nuevo.',
+  'feed.cc': 'Subtítulos',
   'feed.close': 'Cerrar',
   'feed.unmute': 'Toca para activar el sonido',
   'feed.pinned': '📌 FIJADO',

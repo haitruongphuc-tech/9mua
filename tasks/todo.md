@@ -695,7 +695,7 @@ Nhánh `nang-cap-mot-dot`. Trừ App (C32–C36). Mỗi task: test trước → 
 - [x] **T87: Tải lên từng phần + video dài + hàng chờ short/long** (C06).
 - [x] **T88: Nhiều mức chất lượng, 3 ảnh bìa, ảnh xem trước động** (C07). Kèm đổi ảnh bìa sau khi đăng (chuyển từ T86).
 - [x] **T89: Kho video ngoài + trang Dung lượng** (C06).
-- [ ] **T90: Phụ đề tự động (OpenAI Whisper, tắt sẵn)** (C51).
+- [x] **T90: Phụ đề tự động (OpenAI Whisper, tắt sẵn)** (C51).
 - [ ] **T91: Quay trong app, bộ lọc màu, làm đẹp** (C08, C09).
 - [ ] **T92: Stitch** (C09).
 - [ ] **T93: Chỉnh video: cắt, ghép, chữ, nhãn dán** (C89).

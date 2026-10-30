@@ -8,6 +8,7 @@ import { env } from '@/lib/env';
 import { externalStore, imageStore, videoStore } from '@/lib/media/image-store';
 import { getSetting } from '@/lib/settings';
 import { notifyKey } from '@/lib/notifications';
+import { queueCaptions } from './captions';
 import { runVideoReadyHooks } from './hooks';
 import { initialScore } from './score';
 import { videoLimits } from './limits';
@@ -220,6 +221,14 @@ export async function processNextJob(): Promise<boolean> {
       db.videoRendition.createMany({ data: renditions.map((r) => ({ videoId: video.id, ...r })) }),
       db.videoJob.update({ where: { id: job.id }, data: { status: 'done', error: null } }),
     ]);
+    // Phụ đề tự động (SPEC-creator.md V5.4): tách tiếng từ file gốc trước khi xoá; lỗi ở đây không làm hỏng video.
+    await queueCaptions(video, {
+      path: job.sourcePath,
+      hasAudio: source!.hasAudio,
+      durationSec,
+    }).catch((e) =>
+      console.error(`[worker] phụ đề video ${video.id} lỗi:`, e instanceof Error ? e.message : e),
+    );
     await unlink(job.sourcePath).catch(() => {});
     if (finalStatus !== 'ready') {
       await notifyKey(

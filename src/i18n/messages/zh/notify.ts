@@ -10,6 +10,8 @@ export const notify: NotifyMessages = {
   'notify.videoScheduled': '视频已处理完毕，将在预定时间发布',
   'notify.videoPublished': '你的定时视频已发布',
   'notify.draftExpiring': '一个草稿将在 {days} 天后自动删除',
+  'notify.captionsReady': '自动字幕已完成——请查看、修改后向观众开启',
+  'notify.captionsSkipped': '你的视频暂无自动字幕',
   'notify.videoFailed': '视频未能发布',
   'notify.videoRemoved': '你的视频已被下架',
   'notify.profileCleared': '你的头像、封面和简介因违反规定已被移除',

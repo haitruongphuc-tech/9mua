@@ -29,6 +29,7 @@ export type PostOptions = VideoOptions & {
   province?: string | null;
   placeName?: string | null;
   aiGenerated?: boolean;
+  autoCaptions?: boolean; // phụ đề tự động (SPEC-creator.md V5.4)
 };
 
 // Giờ hẹn hợp lệ: từ 15 phút tới 30 ngày sau.

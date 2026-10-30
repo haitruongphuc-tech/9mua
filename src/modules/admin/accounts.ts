@@ -203,6 +203,7 @@ const RULES: Record<SettingKey, { min?: number; max?: number; bool?: true; json?
   video_max_mb: { min: 100, max: 4096, label: 'Dung lượng video tối đa (MB)' },
   video_long_daily_minutes: { min: 1, max: 600, label: 'Phút video dài mỗi ngày' },
   video_enable_1080: { bool: true, label: 'Mức 1080p' },
+  stt_monthly_budget_vnd: { min: 0, max: 100_000_000, label: 'Ngân sách phụ đề tự động mỗi tháng' },
 };
 
 export function validateSetting(key: SettingKey, value: string): string | null {

@@ -23,6 +23,7 @@ export const feed: FeedMessages = {
   'feed.unpinDone': 'Désépinglée.',
   'feed.editVideo': '✏️ Modifier la vidéo',
   'feed.pinError': "Impossible d'épingler, réessayez.",
+  'feed.cc': 'Sous-titres',
   'feed.close': 'Fermer',
   'feed.unmute': 'Touchez pour le son',
   'feed.pinned': '📌 ÉPINGLÉ',

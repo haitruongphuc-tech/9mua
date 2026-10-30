@@ -86,14 +86,28 @@ export function VideoFeed({
   const seeks = useRef<(HTMLInputElement | null)[]>([]);
   const [speed, setSpeed] = useState(1);
   const [autoScroll, setAutoScroll] = useState(false);
+  // Phụ đề (SPEC-creator.md V5.4): nút CC bật/tắt, nhớ trong trình duyệt.
+  const [cc, setCc] = useState(false);
   const [seeking, setSeeking] = useState<{ i: number; at: number; total: number } | null>(null);
   useEffect(() => {
     try {
       const s = Number(localStorage.getItem('nm.speed'));
       if ([0.5, 1, 1.5, 2].includes(s)) setSpeed(s);
       setAutoScroll(localStorage.getItem('nm.autoscroll') === '1');
+      setCc(localStorage.getItem('nm.cc') === '1');
     } catch {}
   }, []);
+  useEffect(() => {
+    for (const el of videos.current)
+      for (const track of Array.from(el?.textTracks ?? [])) track.mode = cc ? 'showing' : 'hidden';
+  }, [cc, items.length, active]);
+  const toggleCc = () =>
+    setCc((on) => {
+      try {
+        localStorage.setItem('nm.cc', on ? '0' : '1');
+      } catch {}
+      return !on;
+    });
   useEffect(() => {
     for (const v of videos.current) if (v) v.playbackRate = tools ? speed : 1;
   }, [speed, tools, items.length]);
@@ -538,7 +552,17 @@ export function VideoFeed({
                     if (seek && seeking?.i !== i) seek.value = String(el.currentTime);
                   }}
                   className="h-full w-full object-contain"
-                />
+                >
+                  {v.captionsUrl ? (
+                    <track
+                      kind="subtitles"
+                      src={v.captionsUrl}
+                      srcLang="vi"
+                      label={t('feed.cc')}
+                      default={cc}
+                    />
+                  ) : null}
+                </video>
                 {/* Thanh tiến độ 2px ở mép trên (V4). */}
                 <span className="pointer-events-none absolute inset-x-0 top-0 z-10 h-[2px] bg-white/10">
                   <span
@@ -664,6 +688,18 @@ export function VideoFeed({
                         ),
                       )}
                     </p>
+                  ) : null}
+                  {v.captionsUrl ? (
+                    <button
+                      type="button"
+                      onClick={toggleCc}
+                      aria-pressed={cc}
+                      aria-label={t('feed.cc')}
+                      data-testid="feed-cc"
+                      className={`mt-1 w-fit rounded-[6px] border px-1.5 text-[11px] font-black ${cc ? 'border-white bg-white text-black' : 'border-white/60 text-white'}`}
+                    >
+                      CC
+                    </button>
                   ) : null}
                   {postOptions && (v.place || v.edited) ? (
                     <p className="mt-1 text-[12px] text-white/70" data-testid="feed-place">

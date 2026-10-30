@@ -10,6 +10,8 @@ export const notify: NotifyMessages = {
   'notify.videoScheduled': '動画の処理が終わりました。予約時間に公開されます',
   'notify.videoPublished': '予約した動画が公開されました',
   'notify.draftExpiring': '下書きが {days} 日後に自動で削除されます',
+  'notify.captionsReady': '自動字幕ができました。確認・修正して視聴者に表示してください',
+  'notify.captionsSkipped': '動画に自動字幕は作られませんでした',
   'notify.videoFailed': '動画を投稿できませんでした',
   'notify.videoRemoved': '動画が削除されました',
   'notify.profileCleared': '規約違反のため、プロフィール写真・カバー写真・自己紹介が削除されました',

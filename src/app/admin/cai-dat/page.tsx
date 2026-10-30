@@ -140,6 +140,13 @@ export default async function SettingsPage({ searchParams }: { searchParams: Fla
           />
           Thêm mức 1080p cho video dài (tốn thêm dung lượng và thời gian xử lý)
         </label>
+        <h2 className="mt-2 text-lg font-extrabold">Phụ đề tự động (khi bật công tắc auto_captions)</h2>
+        {num(
+          'Ngân sách phụ đề tự động mỗi tháng (đ)',
+          'stt_monthly_budget_vnd',
+          s.stt_monthly_budget_vnd,
+          'Giá tham khảo OpenAI Whisper khoảng 0,006 USD mỗi phút tiếng. Hết ngân sách thì video mới không có phụ đề tự động, 9MUA báo bạn.',
+        )}
         <ConfirmSubmit confirm="Lưu các thay đổi cài đặt?">Lưu cài đặt</ConfirmSubmit>
       </form>
       <section

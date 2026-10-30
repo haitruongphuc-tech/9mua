@@ -10,6 +10,8 @@ export const notify: NotifyMessages = {
   'notify.videoScheduled': "Votre vidéo est prête et sera publiée à l'heure prévue",
   'notify.videoPublished': 'Votre vidéo programmée est en ligne',
   'notify.draftExpiring': 'Un brouillon sera supprimé dans {days} jours',
+  'notify.captionsReady': 'Sous-titres automatiques prêts : vérifiez, corrigez puis affichez-les',
+  'notify.captionsSkipped': "Votre vidéo n'a pas reçu de sous-titres automatiques",
   'notify.videoFailed': 'Votre vidéo n’a pas pu être publiée',
   'notify.videoRemoved': 'Votre vidéo a été retirée',
   'notify.profileCleared':

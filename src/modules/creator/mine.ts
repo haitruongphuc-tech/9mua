@@ -23,6 +23,7 @@ export type MyVideo = {
   publishAt: Date | null;
   profilePinned: boolean;
   edited: boolean;
+  captionStatus: string | null; // phụ đề tự động (SPEC-creator.md V5.4)
 };
 
 // Thống kê của tôi (SPEC-creator.md mục 8, bổ sung 30/10 A4). Đơn đếm theo OrderItem.sourceVideoId, cùng cách tính
@@ -32,6 +33,7 @@ export async function myVideoStats(userId: string): Promise<MyVideo[]> {
     where: { authorId: userId, status: { not: 'deleted' } },
     orderBy: { createdAt: 'desc' },
     take: 200,
+    include: { captions: { select: { status: true } } },
   });
   const ids = videos.map((v) => v.id);
   const [sales, comments, saves] = ids.length
@@ -74,5 +76,6 @@ export async function myVideoStats(userId: string): Promise<MyVideo[]> {
     publishAt: v.publishAt,
     profilePinned: v.profilePinnedAt !== null,
     edited: v.editedAt !== null,
+    captionStatus: v.captions?.status ?? null,
   }));
 }

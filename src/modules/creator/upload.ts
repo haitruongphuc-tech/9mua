@@ -218,6 +218,7 @@ export async function createVideoUpload(
         aiGenerated: meta.aiStudio === true || meta.options?.aiGenerated === true,
         aiStudio: meta.aiStudio === true,
         sourceSec,
+        wantCaptions: kind === 'video' && meta.options?.autoCaptions === true,
         createdAt: now(),
         products: { create: productIds.map((productId, position) => ({ productId, position })) },
       },

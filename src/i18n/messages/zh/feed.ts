@@ -23,6 +23,7 @@ export const feed: FeedMessages = {
   'feed.unpinDone': '已取消置顶。',
   'feed.editVideo': '✏️ 编辑视频',
   'feed.pinError': '置顶失败，请重试。',
+  'feed.cc': '字幕',
   'feed.close': '关闭',
   'feed.unmute': '点击开启声音',
   'feed.pinned': '📌 置顶',

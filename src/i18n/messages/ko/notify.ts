@@ -10,6 +10,8 @@ export const notify: NotifyMessages = {
   'notify.videoScheduled': '영상 처리가 끝났어요. 예약한 시간에 게시돼요',
   'notify.videoPublished': '예약한 영상이 게시됐어요',
   'notify.draftExpiring': '임시 저장한 영상이 {days}일 뒤 자동 삭제돼요',
+  'notify.captionsReady': '자동 자막이 완성됐어요. 확인하고 고친 뒤 시청자에게 켜 주세요',
+  'notify.captionsSkipped': '영상에 자동 자막이 만들어지지 않았어요',
   'notify.videoFailed': '동영상을 올리지 못했어요',
   'notify.videoRemoved': '내 동영상이 삭제됐어요',
   'notify.profileCleared': '규정 위반으로 프로필 사진, 커버 사진, 소개가 삭제되었습니다',

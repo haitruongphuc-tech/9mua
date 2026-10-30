@@ -68,6 +68,9 @@ const schema = z
     // AI Studio (SPEC-ai.md). Thiếu khoá thì phần tương ứng báo "Chưa bật". Driver fake chỉ cho dev/test/E2E.
     AI_DRIVER: z.enum(['live', 'fake']).optional(),
     ANTHROPIC_API_KEY: z.preprocess((v) => (v === '' ? undefined : v), z.string().optional()),
+    // Phụ đề tự động (SPEC-creator.md V5.4): openai = Whisper (OPENAI_API_KEY); fake chỉ cho dev/test.
+    STT_PROVIDER: z.enum(['openai', 'fake']).optional(),
+    OPENAI_API_KEY: z.preprocess((v) => (v === '' ? undefined : v), z.string().optional()),
     GEMINI_API_KEY: z.preprocess((v) => (v === '' ? undefined : v), z.string().optional()),
     AI_TEXT_MODEL: z.preprocess((v) => (v === '' ? undefined : v), z.string().default('claude-haiku-5-5')),
     AI_IMAGE_MODEL: z.preprocess(

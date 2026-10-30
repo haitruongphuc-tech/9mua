@@ -22,6 +22,7 @@ export const feed = {
   'feed.unpinDone': 'Đã bỏ ghim.',
   'feed.editVideo': '✏️ Sửa video',
   'feed.pinError': 'Chưa ghim được, hãy thử lại.',
+  'feed.cc': 'Phụ đề',
   'feed.close': 'Đóng',
   'feed.unmute': 'Chạm để bật tiếng',
   'feed.pinned': '📌 GHIM',

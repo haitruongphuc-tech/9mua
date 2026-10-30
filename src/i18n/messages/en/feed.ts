@@ -23,6 +23,7 @@ export const feed: FeedMessages = {
   'feed.unpinDone': 'Unpinned.',
   'feed.editVideo': '✏️ Edit video',
   'feed.pinError': "Couldn't pin, please try again.",
+  'feed.cc': 'Captions',
   'feed.close': 'Close',
   'feed.unmute': 'Tap to unmute',
   'feed.pinned': '📌 PINNED',

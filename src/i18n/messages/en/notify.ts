@@ -10,6 +10,8 @@ export const notify: NotifyMessages = {
   'notify.videoScheduled': 'Your video is processed and will go live at the scheduled time',
   'notify.videoPublished': 'Your scheduled video is now live',
   'notify.draftExpiring': 'A draft will be deleted in {days} days',
+  'notify.captionsReady': 'Auto captions are ready — review, edit and turn them on for viewers',
+  'notify.captionsSkipped': "Your video didn't get auto captions",
   'notify.videoFailed': 'Your video could not be published',
   'notify.videoRemoved': 'Your video was removed',
   'notify.profileCleared': 'Your profile photo, cover photo and bio were removed for breaking the rules',

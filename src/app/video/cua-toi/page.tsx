@@ -33,11 +33,12 @@ export default async function MyVideosPage({
   const user = await requireUser();
   const params = await searchParams;
   const days = params.ngay === '30' ? 30 : 7;
-  const [all, stats, t, postOptions] = await Promise.all([
+  const [all, stats, t, postOptions, captionsOn] = await Promise.all([
     myVideoStats(user.id),
     creatorStats(user.id, days),
     getT(),
     isFeatureOn('post_options'),
+    isFeatureOn('auto_captions'),
   ]);
   // Tab Nháp (SPEC-creator.md V5.3): nháp đã xử lý xong hoặc đang xử lý. Video hẹn giờ nằm ở danh sách chính.
   const isDraft = (v: MyVideo) => v.status === 'draft' || (v.status === 'processing' && v.draft);
@@ -214,6 +215,15 @@ export default async function MyVideosPage({
                       </Link>
                     ) : null}
                     {postOptions && v.kind === 'video' ? <PostTools v={v} back={back} t={t} /> : null}
+                    {captionsOn && v.captionStatus ? (
+                      <Link
+                        href={`/video/cua-toi/${v.id}/phu-de`}
+                        className="font-bold text-white underline"
+                        data-testid="edit-captions"
+                      >
+                        {t('post.mine.captions')}
+                      </Link>
+                    ) : null}
                     {v.status !== 'processing' ? (
                       <form action={deleteVideoAction}>
                         <input type="hidden" name="videoId" value={v.id} />

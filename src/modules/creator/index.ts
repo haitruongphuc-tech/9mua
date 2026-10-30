@@ -101,3 +101,13 @@ export {
 } from './chunked';
 // Bổ sung 30/10/2026 (SPEC-creator.md V5.1 mục 9–10): kho video ngoài, trang Dung lượng.
 export { migrateVideosToExternal, storageStats, type MigrateResult, type StorageStats } from './storage';
+// Bổ sung 30/10/2026 (SPEC-creator.md V5.4): phụ đề tự động.
+export {
+  processNextCaption,
+  captionsForEdit,
+  saveCaptions,
+  captionsForViewer,
+  sttUsedThisMonthVnd,
+  MAX_CAPTION_SECONDS,
+  type CaptionsForEdit,
+} from './captions';

@@ -9,6 +9,8 @@ export const notify = {
   'notify.videoScheduled': 'Video đã xử lý xong, sẽ lên đúng giờ hẹn',
   'notify.videoPublished': 'Video hẹn giờ của bạn đã lên',
   'notify.draftExpiring': 'Một nháp sẽ tự xoá sau {days} ngày',
+  'notify.captionsReady': 'Phụ đề tự động đã xong — vào xem, sửa rồi bật cho người xem',
+  'notify.captionsSkipped': 'Video của bạn chưa có phụ đề tự động',
   'notify.videoFailed': 'Video không đăng được',
   'notify.videoRemoved': 'Video của bạn bị gỡ',
   'notify.profileCleared': 'Ảnh đại diện, ảnh bìa và giới thiệu của bạn đã bị gỡ vì vi phạm quy định',

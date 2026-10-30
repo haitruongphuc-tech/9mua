@@ -34,6 +34,8 @@ export const SETTING_DEFAULTS = {
   video_long_max_seconds: '3600',
   video_max_mb: '2048',
   video_long_daily_minutes: '120',
+  // Phụ đề tự động (SPEC-creator.md V5.4): ngân sách tháng cho dịch vụ nghe giọng nói (OpenAI Whisper).
+  stt_monthly_budget_vnd: '200000',
   video_enable_1080: 'false', // thêm mức HLS 1080p khi video gốc ≥ 1080p (tốn thêm dung lượng và thời gian xử lý)
 } as const;
 

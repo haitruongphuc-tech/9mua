@@ -81,6 +81,9 @@ export function VideoUploadForm({
   const [placeName, setPlaceName] = useState('');
   const [aiUsed, setAiUsed] = useState(false);
   const [scheduleAt, setScheduleAt] = useState('');
+  // Phụ đề tự động (SPEC-creator.md V5.4, công tắc auto_captions).
+  const captionsOn = useFeature('auto_captions');
+  const [autoCaptions, setAutoCaptions] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -159,6 +162,7 @@ export function VideoUploadForm({
               publishAt: !asDraft && scheduleAt ? `${scheduleAt}:00+07:00` : null,
             }
           : undefined,
+      autoCaptions: captionsOn && mode === 'video' && autoCaptions,
     });
     setProgress(null);
     if (result?.error) setError(result.error);
@@ -346,6 +350,21 @@ export function VideoUploadForm({
             <span className="font-normal text-white/50">{t('post.scheduleHint')}</span>
           </label>
         </fieldset>
+      ) : null}
+      {captionsOn && mode === 'video' ? (
+        <label className="flex items-start gap-2 text-[13px]">
+          <input
+            type="checkbox"
+            checked={autoCaptions}
+            onChange={(e) => setAutoCaptions(e.target.checked)}
+            className="mt-0.5 h-4 w-4 accent-[#ff6b00]"
+            data-testid="video-auto-captions"
+          />
+          <span>
+            <span className="font-bold">{t('post.autoCaptions')}</span>
+            <span className="block text-[12px] text-white/50">{t('post.autoCaptionsHint')}</span>
+          </span>
+        </label>
       ) : null}
       <fieldset className="flex flex-col gap-2">
         <legend className="mb-1 text-[12px] font-bold text-white/70">

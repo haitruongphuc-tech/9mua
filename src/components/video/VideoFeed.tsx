@@ -17,7 +17,7 @@ import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { LivePlayer } from '@/components/live/LivePlayer';
-import { ME_CHANGED_EVENT, useMe } from '@/components/MeProvider';
+import { ME_CHANGED_EVENT, useFeature, useMe } from '@/components/MeProvider';
 import { addToCartAction } from '@/components/orders/add-to-cart-action';
 import { useT } from '@/i18n/client';
 import { formatVnd } from '@/lib/format';
@@ -43,6 +43,9 @@ const formatCount = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(n >= 10_00
 // sau khi ngón tay đã dừng vuốt. Hiệu ứng túi cam và các bảng trượt gắn vào <body>, ngoài khung snap.
 // variant "page" (/v/<id>): toàn màn hình, có nút ✕. "home" (trang chủ, menu Video): nằm giữa header và thanh dưới,
 // chỉ tải trước video đang xem để tiết kiệm 4G.
+// phút:giây cho nhãn khi kéo thanh tua.
+const clock = (sec: number) => `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, '0')}`;
+
 export function VideoFeed({
   initial,
   nextCursor,
@@ -76,6 +79,49 @@ export function VideoFeed({
   const scroller = useRef<HTMLDivElement>(null);
   const videos = useRef<(HTMLVideoElement | null)[]>([]);
   const bars = useRef<(HTMLSpanElement | null)[]>([]);
+  // Công cụ xem (SPEC-creator.md V5.2, công tắc feed_tools): thanh tua, tốc độ, tự cuộn — nhớ trong trình duyệt.
+  const tools = useFeature('feed_tools');
+  const seeks = useRef<(HTMLInputElement | null)[]>([]);
+  const [speed, setSpeed] = useState(1);
+  const [autoScroll, setAutoScroll] = useState(false);
+  const [seeking, setSeeking] = useState<{ i: number; at: number; total: number } | null>(null);
+  useEffect(() => {
+    try {
+      const s = Number(localStorage.getItem('nm.speed'));
+      if ([0.5, 1, 1.5, 2].includes(s)) setSpeed(s);
+      setAutoScroll(localStorage.getItem('nm.autoscroll') === '1');
+    } catch {}
+  }, []);
+  useEffect(() => {
+    for (const v of videos.current) if (v) v.playbackRate = tools ? speed : 1;
+  }, [speed, tools, items.length]);
+  const chooseSpeed = (s: number) => {
+    setSpeed(s);
+    try {
+      localStorage.setItem('nm.speed', String(s));
+    } catch {}
+  };
+  const toggleAutoScroll = () =>
+    setAutoScroll((on) => {
+      try {
+        localStorage.setItem('nm.autoscroll', on ? '0' : '1');
+      } catch {}
+      return !on;
+    });
+  const nextItem = (i: number) =>
+    scroller.current?.querySelectorAll('[data-feed-item]')[i + 1]?.scrollIntoView({ behavior: 'smooth' });
+  const fullscreen = (i: number) => {
+    const el = videos.current[i];
+    if (!el) return;
+    void el
+      .requestFullscreen?.()
+      .then(() =>
+        (screen.orientation as ScreenOrientation & { lock?: (o: string) => Promise<void> }).lock?.(
+          'landscape',
+        ),
+      )
+      .catch(() => {});
+  };
   const watched = useRef(new Map<string, number>());
   const queue = useRef<ViewEntry[]>([]);
   const loading = useRef(false);
@@ -403,7 +449,13 @@ export function VideoFeed({
                   poster={v.posterUrl ?? undefined}
                   muted={muted}
                   playsInline
-                  loop
+                  loop={!(tools && autoScroll)}
+                  onEnded={() => tools && autoScroll && nextItem(i)}
+                  onLoadedMetadata={(e) => {
+                    e.currentTarget.playbackRate = tools ? speed : 1;
+                    const seek = seeks.current[i];
+                    if (seek) seek.max = String(e.currentTarget.duration || 0);
+                  }}
                   preload={i === active ? 'auto' : i === active + 1 ? (home ? 'metadata' : 'auto') : 'none'}
                   onClick={(e) => onTap(e, v)}
                   onTimeUpdate={(e) => {
@@ -411,6 +463,8 @@ export function VideoFeed({
                     watched.current.set(v.id, Math.max(watched.current.get(v.id) ?? 0, el.currentTime));
                     const bar = bars.current[i];
                     if (bar && el.duration) bar.style.width = `${(el.currentTime / el.duration) * 100}%`;
+                    const seek = seeks.current[i];
+                    if (seek && seeking?.i !== i) seek.value = String(el.currentTime);
                   }}
                   className="h-full w-full object-contain"
                 />
@@ -423,6 +477,57 @@ export function VideoFeed({
                     className="block h-full w-0 bg-brand"
                   />
                 </span>
+                {tools ? (
+                  // Thanh tua + tự cuộn + toàn màn hình (video ngang) ở đáy video (SPEC-creator.md V5.2).
+                  <div className="absolute inset-x-0 bottom-0 z-20 flex items-center gap-2 px-3 pb-1">
+                    <input
+                      ref={(el) => {
+                        seeks.current[i] = el;
+                      }}
+                      type="range"
+                      min={0}
+                      max={0}
+                      step={0.1}
+                      defaultValue={0}
+                      aria-label={t('feed.tools.seek')}
+                      data-testid="feed-seek"
+                      onInput={(e) => {
+                        const el = videos.current[i];
+                        const at = Number(e.currentTarget.value);
+                        if (el) el.currentTime = at;
+                        setSeeking({ i, at, total: el?.duration ?? 0 });
+                      }}
+                      onPointerUp={() => setSeeking(null)}
+                      onChange={() => setSeeking(null)}
+                      className="h-5 min-w-0 flex-1 accent-[#ff6b00]"
+                    />
+                    <button
+                      type="button"
+                      onClick={toggleAutoScroll}
+                      aria-pressed={autoScroll}
+                      data-testid="feed-autoscroll"
+                      className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black ${autoScroll ? 'bg-brand text-white' : 'bg-black/50 text-white/80'}`}
+                    >
+                      {t('feed.tools.autoscroll')}
+                    </button>
+                    {v.width && v.height && v.width > v.height ? (
+                      <button
+                        type="button"
+                        onClick={() => fullscreen(i)}
+                        aria-label={t('feed.tools.fullscreen')}
+                        data-testid="feed-fullscreen"
+                        className="shrink-0 rounded-full bg-black/50 px-2 py-0.5 text-[12px] font-black"
+                      >
+                        ⤢
+                      </button>
+                    ) : null}
+                  </div>
+                ) : null}
+                {seeking?.i === i ? (
+                  <span className="pointer-events-none absolute bottom-10 left-1/2 z-20 -translate-x-1/2 rounded-full bg-black/70 px-3 py-1 text-[13px] font-black tabular-nums">
+                    {clock(seeking.at)} / {clock(seeking.total)}
+                  </span>
+                ) : null}
                 {/* Luôn có trong trang, chỉ ẩn/hiện bằng class (xem ghi chú đầu file về Safari). */}
                 <button
                   type="button"
@@ -686,6 +791,27 @@ export function VideoFeed({
         title={t('feed.report')}
         testId="report-sheet"
       >
+        {tools ? (
+          // Tốc độ phát (SPEC-creator.md V5.2), nhớ trong trình duyệt.
+          <div className="mb-2 flex items-center gap-2 border-b border-black/10 pb-3">
+            <span className="text-[13px] font-bold">{t('feed.tools.speed')}</span>
+            {[0.5, 1, 1.5, 2].map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => {
+                  chooseSpeed(s);
+                  setSheet(null);
+                }}
+                aria-pressed={speed === s}
+                data-testid={`speed-${s}`}
+                className={`h-8 rounded-full px-3 text-[12px] font-black ${speed === s ? 'bg-brand text-white' : 'bg-black/5'}`}
+              >
+                {String(s).replace('.', ',')}x
+              </button>
+            ))}
+          </div>
+        ) : null}
         <Link
           href={`/video/dang?duet=${sheet?.video.id ?? ''}`}
           className="mb-2 flex items-center gap-2 border-b border-black/10 py-3 font-bold"

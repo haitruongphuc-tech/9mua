@@ -689,7 +689,7 @@ Nhánh `nang-cap-mot-dot`. Trừ App (C32–C36). Mỗi task: test trước → 
 - [x] **T83: Cam kết nội dung** (C10, C11).
 
 ### Video
-- [ ] **T84: Thanh tua, tốc độ, xoay ngang, tự cuộn** (C57–C59, C63).
+- [x] **T84: Thanh tua, tốc độ, xoay ngang, tự cuộn** (C57–C59, C63).
 - [ ] **T85: Không quan tâm + lịch sử đã xem** (C60, C61).
 - [ ] **T86: Nháp, hẹn giờ, địa điểm, ghim, nhãn AI, sửa sau khi đăng** (C48, C49, C53–C56).
 - [ ] **T87: Tải lên từng phần + video dài + hàng chờ short/long** (C06).

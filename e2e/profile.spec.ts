@@ -5,6 +5,8 @@ import { e2eDb } from './helpers/db';
 
 // Trang cá nhân đầy đủ (SPEC-social.md bổ sung 30/10, A2): ảnh đại diện, ảnh bìa, giới thiệu, danh sách theo dõi.
 test('sửa hồ sơ → ảnh trên trang cá nhân, header và video; danh sách người theo dõi', async ({ browser }) => {
+  // Có tải và chuyển mã video: khi máy test bận có lúc quá 30 giây (như e2e/creator.spec.ts).
+  test.setTimeout(60_000);
   const stamp = String(Date.now()).slice(-6);
   const page = await newBuyerPage(browser, `Chị Hoa ${stamp}`);
   const me = await e2eDb.user.findFirstOrThrow({ where: { displayName: `Chị Hoa ${stamp}` } });
@@ -65,4 +67,18 @@ test('sửa hồ sơ → ảnh trên trang cá nhân, header và video; danh sá
   await expect(
     fan.getByTestId('feed-item').first().getByTestId('feed-author-avatar').locator('img'),
   ).toHaveAttribute('src', /\/uploads\/users\//);
+
+  // @tên (SPEC-identity.md V5.1): link cũ /creator/<id> chuyển sang /@<tên>; đổi @tên trong Cài đặt, tên cũ chuyển hướng.
+  await page.goto(`/creator/${me.id}`);
+  await page.waitForURL((u) => u.pathname.startsWith('/@'));
+  const oldHandle = new URL(page.url()).pathname.slice(2);
+  await expect(page.getByTestId('creator-handle')).toHaveText(`@${oldHandle}`);
+  const newHandle = `hoa.${stamp}`;
+  await page.goto('/tai-khoan/cai-dat');
+  await page.fill('#handle', newHandle);
+  await page.locator('#ten-nguoi-dung button[type=submit]').click();
+  await expect(page.getByTestId('handle-ok')).toHaveText('Đã đổi tên người dùng.');
+  await page.goto(`/@${oldHandle}`);
+  await page.waitForURL((u) => u.pathname === `/@${newHandle}`);
+  await expect(page.getByTestId('creator-handle')).toHaveText(`@${newHandle}`);
 });

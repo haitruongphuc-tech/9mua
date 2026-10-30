@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { db } from '@/lib/db';
 import { searchVideos } from '@/modules/creator';
-import { searchPublicUsers } from '@/modules/identity';
+import { searchPublicUsers, setHandle } from '@/modules/identity';
 import { searchHashtags } from '@/modules/social';
 import { createUser } from '../../../tests/helpers/factories';
 
@@ -44,12 +44,23 @@ describe('tìm kiếm (SPEC-social.md bổ sung 30/10, A3)', () => {
       displayName: 'Anh Thanh Long Ruột Đỏ',
       avatarUrl: null,
       followers: 1,
+      handle: null,
     });
     const prefix = await createUser({ displayName: 'Thanh Long Xanh' });
     expect((await searchPublicUsers('THANH LONG', 10))[0]!.id).toBe(prefix.id);
     expect((await searchPublicUsers('binh thuan vuon', 10)).map((u) => u.id)).toEqual([a.id]);
     expect(await searchPublicUsers('%', 10)).toEqual([]);
     expect(await searchPublicUsers('   ', 10)).toEqual([]);
+  });
+
+  it('tài khoản: tìm được theo @tên (SPEC-identity.md V5.1), có hay không có dấu @', async () => {
+    const u = await createUser({ displayName: 'Chị Hoa' });
+    expect(await setHandle(u.id, 'hoa_vuon.9')).toEqual({ ok: true });
+    await createUser({ displayName: 'Hoa Vườn Khác' });
+    expect((await searchPublicUsers('@hoa_vuon', 10)).map((x) => x.id)).toEqual([u.id]);
+    expect((await searchPublicUsers('hoa_vuon.9', 10)).map((x) => x.id)).toEqual([u.id]);
+    // "_" không bị hiểu là ký tự đại diện của LIKE.
+    expect(await searchPublicUsers('@hoaxvuon', 10)).toEqual([]);
   });
 
   it('video: theo chú thích và hashtag, chỉ video đang lên feed, xếp theo điểm', async () => {

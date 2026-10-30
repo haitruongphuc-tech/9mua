@@ -42,6 +42,16 @@ export const me = {
   'me.link.settingsSub': 'Email, mật khẩu, thiết bị',
   'me.viewProfile': 'Trang cá nhân',
   'me.settings.profileHint': 'Tên hiển thị, ảnh đại diện, ảnh bìa và giới thiệu sửa ở trang Sửa hồ sơ.',
+  'me.settings.handle': 'Tên người dùng',
+  'me.settings.handleHint':
+    'Trang của bạn: 9mua.com/@{handle}. 3–24 ký tự: chữ thường không dấu, số, dấu chấm, gạch dưới. Đổi 30 ngày một lần.',
+  'me.settings.handleNext': 'Bạn đổi tiếp được từ {date}.',
+  'me.settings.handleSaved': 'Đã đổi tên người dùng.',
+  'me.settings.handleErr.INVALID':
+    'Tên chỉ gồm 3–24 ký tự: chữ thường không dấu, số, dấu chấm, gạch dưới; không bắt đầu hay kết thúc bằng dấu chấm.',
+  'me.settings.handleErr.TAKEN': 'Tên này đã có người dùng.',
+  'me.settings.handleErr.RESERVED': 'Tên này được dành riêng, hãy chọn tên khác.',
+  'me.settings.handleErr.TOO_SOON': 'Mỗi 30 ngày chỉ đổi tên người dùng một lần.',
   'me.link.admin': 'Trang CEO /admin',
   'me.link.adminSub': 'Quản trị 9MUA',
   'me.saved': 'Bộ sưu tập',

@@ -141,6 +141,9 @@ export default async function SearchPage({
                     <Avatar name={u.displayName} url={u.avatarUrl} className="h-11 w-11 text-[16px]" />
                     <span className="min-w-0">
                       <span className="block truncate font-bold">{u.displayName}</span>
+                      {u.handle ? (
+                        <span className="block truncate text-[12px] text-white/60">@{u.handle}</span>
+                      ) : null}
                       <span className="text-[12px] text-white/50">
                         {t('common.search.followers', { count: u.followers.toLocaleString(t.lang) })}
                       </span>

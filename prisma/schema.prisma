@@ -18,27 +18,32 @@ enum Role {
 }
 
 model User {
-  id                 String               @id @default(cuid(2))
-  phone              String?              @unique // dạng +84xxxxxxxxx
-  email              String?              @unique // chữ thường
-  googleSub          String?              @unique // mã tài khoản Google đã liên kết (SPEC-identity.md bổ sung 27/10)
-  displayName        String
-  passwordHash       String
-  role               Role                 @default(user)
-  mustChangePassword Boolean              @default(false)
-  lockedAt           DateTime?
+  id                  String               @id @default(cuid(2))
+  phone               String?              @unique // dạng +84xxxxxxxxx
+  email               String?              @unique // chữ thường
+  googleSub           String?              @unique // mã tài khoản Google đã liên kết (SPEC-identity.md bổ sung 27/10)
+  displayName         String
+  passwordHash        String
+  role                Role                 @default(user)
+  mustChangePassword  Boolean              @default(false)
+  lockedAt            DateTime?
   // Hồ sơ công khai (SPEC-social.md bổ sung 30/10, A2): để trống được, tài khoản cũ không đổi gì.
-  avatarUrl          String?
-  coverUrl           String?
-  bio                String?
-  createdAt          DateTime             @default(now())
-  updatedAt          DateTime             @updatedAt
-  sessions           Session[]
-  resetTokens        PasswordResetToken[]
-  kiot               Kiot?
-  cartItems          CartItem[]
-  address            BuyerAddress?
-  authIdentities     AuthIdentity[]
+  avatarUrl           String?
+  coverUrl            String?
+  bio                 String?
+  // @tên (SPEC-identity.md V5.1): tự đặt cho tài khoản cũ; đổi 30 ngày một lần, @tên cũ giữ 30 ngày để chuyển hướng.
+  handle              String?              @unique
+  handleChangedAt     DateTime?
+  previousHandle      String?              @unique
+  previousHandleUntil DateTime?
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  sessions            Session[]
+  resetTokens         PasswordResetToken[]
+  kiot                Kiot?
+  cartItems           CartItem[]
+  address             BuyerAddress?
+  authIdentities      AuthIdentity[]
 }
 
 // Tài khoản Zalo/Facebook đã liên kết (SPEC-identity.md bổ sung 29/10). Google dùng cột googleSub có sẵn.

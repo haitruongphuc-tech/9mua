@@ -43,6 +43,16 @@ export const me: MeMessages = {
   'me.link.settingsSub': 'メール、パスワード、端末',
   'me.viewProfile': 'プロフィール',
   'me.settings.profileHint': '表示名・写真・自己紹介は「プロフィールを編集」で変更できます。',
+  'me.settings.handle': 'ユーザー名',
+  'me.settings.handleHint':
+    'あなたのページ：9mua.com/@{handle}。3〜24文字：小文字、数字、ピリオド、アンダースコア。30日に1回変更できます。',
+  'me.settings.handleNext': '{date}から再度変更できます。',
+  'me.settings.handleSaved': 'ユーザー名を変更しました。',
+  'me.settings.handleErr.INVALID':
+    '3〜24文字の小文字・数字・ピリオド・アンダースコアで入力してください（先頭と末尾にピリオド不可）。',
+  'me.settings.handleErr.TAKEN': 'このユーザー名は使われています。',
+  'me.settings.handleErr.RESERVED': 'このユーザー名は予約されています。別の名前を選んでください。',
+  'me.settings.handleErr.TOO_SOON': 'ユーザー名の変更は30日に1回です。',
   'me.link.admin': 'CEOページ /admin',
   'me.link.adminSub': '9MUAを管理',
   'me.saved': 'コレクション',

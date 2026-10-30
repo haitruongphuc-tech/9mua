@@ -3,9 +3,11 @@ import Link from 'next/link';
 import { logoutAction, logoutOtherDevicesAction } from '@/app/(auth)/actions';
 import { ClientMessages } from '@/i18n/ClientMessages';
 import { getT } from '@/i18n/server';
-import { requireUser } from '@/modules/identity';
+import { handleInfo, requireUser } from '@/modules/identity';
+import { isFeatureOn } from '@/lib/features';
+import { formatDate } from '@/lib/format';
 import { EmailOtpForm } from '@/components/auth/EmailOtpForm';
-import { Card, EmailForm, PasswordForm, SetPasswordForm } from '../AccountForms';
+import { Card, EmailForm, HandleForm, PasswordForm, SetPasswordForm } from '../AccountForms';
 
 export const metadata: Metadata = { title: 'Cài đặt tài khoản', robots: { index: false } };
 
@@ -16,7 +18,8 @@ export default async function AccountSettingsPage({
   searchParams: Promise<{ 'da-dang-xuat-thiet-bi-khac'?: string }>;
 }) {
   const user = await requireUser();
-  const [params, t] = await Promise.all([searchParams, getT()]);
+  const [params, t, handleOn] = await Promise.all([searchParams, getT(), isFeatureOn('account_more')]);
+  const handle = handleOn ? await handleInfo(user.id) : null;
   return (
     <ClientMessages prefixes={['me.settings.', 'auth.otp.', 'auth.addEmail.']}>
       <div>
@@ -26,6 +29,12 @@ export default async function AccountSettingsPage({
           </Link>
           <h1 className="font-display text-[22px] font-black">{t('me.settings.title')}</h1>
           {user.mustChangePassword ? <PasswordForm forced /> : null}
+          {handle?.handle ? (
+            <HandleForm
+              handle={handle.handle}
+              nextChange={handle.nextChangeAt ? formatDate(handle.nextChangeAt, t.lang) : null}
+            />
+          ) : null}
           {/* Tên, ảnh, giới thiệu chuyển sang trang Sửa hồ sơ (SPEC-social.md bổ sung 30/10, A2). */}
           <Card title={t('me.settings.info')} id="thong-tin">
             <p className="text-[13px] text-white/60">{t('me.settings.profileHint')}</p>

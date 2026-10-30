@@ -30,3 +30,8 @@ ENVFILE=/opt/9mua/.env
 
 # T37 — sao lưu DB + ảnh lúc 2:00 mỗi đêm (giữ 14 ngày)
 0 2 * * * root sh /opt/9mua/scripts/backup-db.sh >> /var/log/9mua-backup.log 2>&1
+
+# Đợt nâng cấp 30/10 (src/server/periodic.ts): việc mỗi 5 phút và việc hằng ngày.
+*/5 * * * * root . $ENVFILE; curl -fsS -m 240 -H "X-Internal-Token: $INTERNAL_CRON_TOKEN" $APP/api/internal/v5/tick >/dev/null
+
+20 3 * * * root . $ENVFILE; curl -fsS -m 600 -H "X-Internal-Token: $INTERNAL_CRON_TOKEN" $APP/api/internal/v5/daily >/dev/null

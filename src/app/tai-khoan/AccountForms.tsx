@@ -10,6 +10,7 @@ import {
   changeEmailAction,
   changePasswordAction,
   sendSetPasswordCodeAction,
+  setHandleAction,
   setPasswordAction,
   updateProfileAction,
   type FormState,
@@ -238,6 +239,42 @@ export function SetPasswordForm({ email }: { email: string | null }) {
       ) : (
         <p className="text-[13px] text-white/60">{t('me.settings.setPasswordNoEmail')}</p>
       )}
+    </Card>
+  );
+}
+
+// Tên người dùng @tên (SPEC-identity.md V5.1): đổi 30 ngày một lần; nextChange là ngày được đổi tiếp (đã định dạng).
+export function HandleForm({ handle, nextChange }: { handle: string; nextChange: string | null }) {
+  const t = useT();
+  const [state, action] = useActionState<FormState, FormData>(setHandleAction, {});
+  return (
+    <Card title={t('me.settings.handle')} id="ten-nguoi-dung">
+      <p className="text-[13px] text-white/60">{t('me.settings.handleHint', { handle })}</p>
+      {nextChange ? (
+        <p className="text-[13px] font-bold text-white/70" data-testid="handle-next">
+          {t('me.settings.handleNext', { date: nextChange })}
+        </p>
+      ) : null}
+      <form action={action} className="flex flex-col gap-4">
+        <Feedback state={state} id="handle" />
+        <label className="flex h-12 items-center gap-1 rounded-[14px] border border-white/15 bg-white/10 px-3 focus-within:border-brand">
+          <span className="font-bold text-white/60">@</span>
+          <input
+            id="handle"
+            name="handle"
+            defaultValue={handle}
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            maxLength={24}
+            aria-label={t('me.settings.handle')}
+            className="min-w-0 flex-1 bg-transparent text-[15px] text-white outline-none"
+          />
+        </label>
+        <SubmitButton tone="v4" pendingText={t('me.settings.saving')}>
+          {t('me.settings.save')}
+        </SubmitButton>
+      </form>
     </Card>
   );
 }

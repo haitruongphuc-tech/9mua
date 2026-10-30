@@ -54,7 +54,8 @@ test('tìm tài khoản, video, hashtag từ header; tìm không dấu', async (
   // Tab Tài khoản: bấm vào là trang cá nhân. Không có kết quả thì báo rõ.
   await page.goto(`/tim-kiem?q=thanh%20long%20${stamp}&tab=tai-khoan`);
   await page.getByTestId('search-user').first().click();
-  await page.waitForURL((u) => u.pathname === `/creator/${user.id}`);
+  // Có @tên thì link cũ /creator/<id> chuyển sang /@<tên> (SPEC-identity.md V5.1).
+  await page.waitForURL((u) => u.pathname.startsWith('/@'));
   await page.goto(`/tim-kiem?q=khongcogi${stamp}`);
   await expect(page.getByTestId('search-empty')).toHaveText(
     `Không tìm thấy kết quả cho “khongcogi${stamp}”.`,

@@ -43,6 +43,16 @@ export const me: MeMessages = {
   'me.link.settingsSub': '이메일, 비밀번호, 기기',
   'me.viewProfile': '내 프로필',
   'me.settings.profileHint': '표시 이름, 사진, 소개는 프로필 편집 페이지에서 바꿀 수 있어요.',
+  'me.settings.handle': '사용자 이름',
+  'me.settings.handleHint':
+    '내 페이지: 9mua.com/@{handle}. 3–24자: 소문자, 숫자, 점, 밑줄. 30일에 한 번 바꿀 수 있어요.',
+  'me.settings.handleNext': '{date}부터 다시 바꿀 수 있어요.',
+  'me.settings.handleSaved': '사용자 이름을 바꿨어요.',
+  'me.settings.handleErr.INVALID':
+    '소문자, 숫자, 점, 밑줄로 3–24자를 입력하세요. 점으로 시작하거나 끝날 수 없어요.',
+  'me.settings.handleErr.TAKEN': '이미 사용 중인 이름이에요.',
+  'me.settings.handleErr.RESERVED': '예약된 이름이에요. 다른 이름을 고르세요.',
+  'me.settings.handleErr.TOO_SOON': '사용자 이름은 30일에 한 번만 바꿀 수 있어요.',
   'me.link.admin': 'CEO 페이지 /admin',
   'me.link.adminSub': '9MUA 관리',
   'me.saved': '컬렉션',

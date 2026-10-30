@@ -82,3 +82,14 @@ export {
   type FullPublicProfile,
 } from './profile';
 export { searchPublicUsers, type UserSearchHit } from './search';
+// Bổ sung 30/10/2026 (SPEC-identity.md V5.1): @tên người dùng.
+export {
+  setHandle,
+  resolveHandle,
+  ensureHandle,
+  assignMissingHandles,
+  handleInfo,
+  validateHandle,
+  RESERVED_HANDLES,
+  type SetHandleResult,
+} from './handle';

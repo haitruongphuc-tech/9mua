@@ -44,6 +44,16 @@ export const me: MeMessages = {
   'me.link.settingsSub': 'E-mail, mot de passe, appareils',
   'me.viewProfile': 'Mon profil',
   'me.settings.profileHint': 'Modifiez votre nom, vos photos et votre bio sur la page Modifier le profil.',
+  'me.settings.handle': 'Nom d’utilisateur',
+  'me.settings.handleHint':
+    'Votre page : 9mua.com/@{handle}. 3 à 24 caractères : minuscules, chiffres, points, tirets bas. Modifiable une fois tous les 30 jours.',
+  'me.settings.handleNext': 'Vous pourrez le changer à nouveau à partir du {date}.',
+  'me.settings.handleSaved': 'Nom d’utilisateur modifié.',
+  'me.settings.handleErr.INVALID':
+    'Utilisez 3 à 24 caractères : minuscules, chiffres, points, tirets bas ; pas de point au début ni à la fin.',
+  'me.settings.handleErr.TAKEN': 'Ce nom d’utilisateur est déjà pris.',
+  'me.settings.handleErr.RESERVED': 'Ce nom est réservé, choisissez-en un autre.',
+  'me.settings.handleErr.TOO_SOON': 'Le nom d’utilisateur ne peut être changé qu’une fois tous les 30 jours.',
   'me.link.admin': 'Page CEO /admin',
   'me.link.adminSub': 'Gérer 9MUA',
   'me.saved': 'Collection',

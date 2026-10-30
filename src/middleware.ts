@@ -23,6 +23,13 @@ export function middleware(request: NextRequest) {
     return res;
   };
 
+  // Trang cá nhân 9mua.com/@<tên> (SPEC-identity.md V5.1) nằm ở /u/<tên>.
+  const at = decision.type === 'next' ? /^\/@([^/]+)$/.exec(pathname) : null;
+  if (at)
+    return secure(
+      NextResponse.rewrite(new URL(`/u/${at[1]}${search}`, request.url), { request: { headers } }),
+    );
+
   switch (decision.type) {
     case 'redirect':
       return NextResponse.redirect(decision.url, 308);

@@ -9,9 +9,11 @@ import {
   getCurrentSessionId,
   requestEmailOtp,
   requireUser,
+  setHandle,
   setPasswordWithOtp,
   updateProfile,
 } from '@/modules/identity';
+import { isFeatureOn } from '@/lib/features';
 
 export type FormState = { ok?: string; error?: string; email?: string };
 
@@ -93,4 +95,15 @@ export async function setPasswordAction(_p: FormState, form: FormData): Promise<
   if (r.error === 'INVALID_PASSWORD') return { error: t('me.settings.passwordLength') };
   if (r.error === 'NO_EMAIL') return { error: t('me.settings.setPasswordNoEmail') };
   return { error: t(`auth.otp.err.${r.error}`) };
+}
+
+// Đổi @tên (SPEC-identity.md V5.1): 30 ngày một lần.
+export async function setHandleAction(_p: FormState, form: FormData): Promise<FormState> {
+  const user = await requireUser();
+  const t = await getT();
+  if (!(await isFeatureOn('account_more'))) return { error: t('me.settings.handleErr.INVALID') };
+  const result = await setHandle(user.id, String(form.get('handle') ?? '').toLowerCase());
+  if (!result.ok) return { error: t(`me.settings.handleErr.${result.error}`) };
+  revalidatePath('/tai-khoan', 'layout');
+  return { ok: t('me.settings.handleSaved') };
 }

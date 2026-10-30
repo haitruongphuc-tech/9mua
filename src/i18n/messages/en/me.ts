@@ -43,6 +43,16 @@ export const me: MeMessages = {
   'me.link.settingsSub': 'Email, password, devices',
   'me.viewProfile': 'My profile',
   'me.settings.profileHint': 'Change your display name, photos and bio on the Edit profile page.',
+  'me.settings.handle': 'Username',
+  'me.settings.handleHint':
+    'Your page: 9mua.com/@{handle}. 3–24 characters: lowercase letters, numbers, dots, underscores. Change once every 30 days.',
+  'me.settings.handleNext': 'You can change it again from {date}.',
+  'me.settings.handleSaved': 'Username changed.',
+  'me.settings.handleErr.INVALID':
+    'Use 3–24 characters: lowercase letters, numbers, dots, underscores; no dot at the start or end.',
+  'me.settings.handleErr.TAKEN': 'This username is taken.',
+  'me.settings.handleErr.RESERVED': 'This username is reserved, please choose another.',
+  'me.settings.handleErr.TOO_SOON': 'You can change your username once every 30 days.',
   'me.link.admin': 'CEO page /admin',
   'me.link.adminSub': 'Manage 9MUA',
   'me.saved': 'Collection',

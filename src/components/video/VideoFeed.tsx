@@ -25,7 +25,9 @@ import type { LiveView } from '@/modules/live';
 import type { SocialFeedVideo } from '@/modules/social';
 import { CommentsSheet } from './CommentsSheet';
 import { attachHls, isHls, prefersLowData } from './hls';
-import { interleaveLives } from './interleave';
+import { interleaveLives, interleavePosts } from './interleave';
+import { PostCard } from '@/components/post/PostCard';
+import type { PostView } from '@/modules/creator';
 import { ShareMore } from './ShareMore';
 import { ShareSheet } from './ShareSheet';
 import { Sheet } from './Sheet';
@@ -54,6 +56,7 @@ export function VideoFeed({
   appUrl,
   variant = 'page',
   lives = [],
+  posts = [],
   loggedIn = false,
   header,
 }: {
@@ -62,6 +65,7 @@ export function VideoFeed({
   appUrl: string;
   variant?: 'page' | 'home';
   lives?: LiveData[];
+  posts?: PostView[]; // bài viết ảnh + chữ chèn vào feed trang chủ (SPEC-creator.md V5.10)
   loggedIn?: boolean;
   header?: ReactNode; // hàng Story/live trên cùng (trang chủ)
 }) {
@@ -177,8 +181,11 @@ export function VideoFeed({
   const tapTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const lastTap = useRef(0);
   const entries = useMemo(
-    () => (tab === 'for-you' ? interleaveLives(items, lives, !cursor) : interleaveLives(items, [], true)),
-    [items, lives, cursor, tab],
+    () =>
+      tab === 'for-you'
+        ? interleavePosts(interleaveLives(items, lives, !cursor), posts, !cursor)
+        : interleavePosts(interleaveLives(items, [], true), [] as PostView[], true),
+    [items, lives, posts, cursor, tab],
   );
   const activeEntry = entries[active];
   const activeVideoId = activeEntry?.kind === 'video' ? activeEntry.video.id : undefined;
@@ -513,6 +520,23 @@ export function VideoFeed({
           onScroll={onScroll}
         >
           {entries.map((entry, i) => {
+            if (entry.kind === 'post')
+              return (
+                <section
+                  key={`post-${entry.post.id}`}
+                  data-feed-item
+                  data-index={i}
+                  data-testid="feed-post-slide"
+                  className="relative h-full w-full snap-start snap-always overflow-hidden"
+                >
+                  <PostCard
+                    post={entry.post}
+                    variant="slide"
+                    loggedIn={loggedIn}
+                    onToast={(text) => show(text)}
+                  />
+                </section>
+              );
             if (entry.kind === 'live')
               return (
                 <section

@@ -12,6 +12,7 @@ import {
 import { getKiotByOwner, PROVINCES } from '@/modules/kiot';
 import { requireUser } from '@/modules/identity';
 import { isFeatureOn } from '@/lib/features';
+import { PostComposer } from './PostComposer';
 import { VideoUploadForm } from './VideoUploadForm';
 import { requireCommitment } from '@/server/commitment';
 
@@ -23,7 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function UploadVideoPage({
   searchParams,
 }: {
-  searchParams: Promise<{ duet?: string; story?: string; stitch?: string; sound?: string }>;
+  searchParams: Promise<{ duet?: string; story?: string; stitch?: string; sound?: string; bai?: string }>;
 }) {
   const user = await requireUser();
   const params = await searchParams;
@@ -32,7 +33,22 @@ export default async function UploadVideoPage({
     `/video/dang${params.story ? '?story=1' : params.duet ? `?duet=${params.duet}` : params.stitch ? `?stitch=${params.stitch}` : ''}`,
   );
   // Stitch (SPEC-creator.md V5.5 mục 4): chỉ video công khai còn cho Duet/Stitch, là MP4 (máy chủ kiểm lại khi đăng).
-  const [camera, watchOn] = await Promise.all([isFeatureOn('camera'), isFeatureOn('watch')]);
+  const [camera, watchOn, postsOn, postOptions] = await Promise.all([
+    isFeatureOn('camera'),
+    isFeatureOn('watch'),
+    isFeatureOn('posts'),
+    isFeatureOn('post_options'),
+  ]);
+  // Chế độ "Bài viết" (SPEC-creator.md V5.10): ảnh + chữ, không cần video.
+  if (params.bai && postsOn)
+    return (
+      <div className="mx-auto flex w-full max-w-lg flex-col gap-4 px-4 py-6">
+        <h1 className="font-display text-[22px] font-bold">{(await getT())('post.article.title')}</h1>
+        <ClientMessages prefixes={['post.']}>
+          <PostComposer postOptions={postOptions} />
+        </ClientMessages>
+      </div>
+    );
   const series = watchOn ? await mySeries(user.id) : [];
   const [t, videos, stories, duet, kiot, limits, stitch, sound] = await Promise.all([
     getT(),

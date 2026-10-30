@@ -1,7 +1,38 @@
 'use server';
 
 import { requireAdminVerified, resolveProductReport, resolveVideoReport } from '@/modules/admin';
+import { audit } from '@/lib/audit';
+import { resolvePostReports } from '@/modules/creator';
 import { back } from '../flash';
+
+// Bài viết bị báo cáo (SPEC-creator.md V5.10 mục 3): gỡ bài hoặc bỏ qua (bài tự ẩn thì hiện lại).
+export async function resolvePostAction(
+  postId: string,
+  decision: 'remove' | 'dismiss',
+  form: FormData,
+): Promise<void> {
+  const admin = await requireAdminVerified();
+  const reason =
+    String(form.get('reason') ?? '')
+      .trim()
+      .slice(0, 300) || null;
+  if (decision === 'remove' && !reason) back('/admin/bao-cao', { ok: false, message: 'Hãy ghi lý do gỡ.' });
+  const ok = await resolvePostReports(postId, decision, reason);
+  if (ok)
+    await audit({
+      adminId: admin.id,
+      action: `post.${decision}`,
+      targetType: 'post',
+      targetId: postId,
+      reason,
+    });
+  back(
+    '/admin/bao-cao',
+    ok
+      ? { ok: true, message: decision === 'remove' ? 'Đã gỡ bài viết.' : 'Đã bỏ qua báo cáo.' }
+      : { ok: false, message: 'Bài viết không còn.' },
+  );
+}
 
 export async function resolveProductAction(
   productId: string,

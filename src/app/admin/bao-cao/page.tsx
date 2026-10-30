@@ -5,7 +5,8 @@ import { requireAdminVerified } from '@/modules/admin';
 import { listFailedVideoJobs, listVideoReports, VIDEO_REPORT_REASONS } from '@/modules/creator';
 import { listReports, REPORT_REASONS } from '@/modules/marketplace';
 import type { FlashParams } from '../flash';
-import { resolveProductAction, resolveVideoAction } from './actions';
+import { resolvePostAction, resolveProductAction, resolveVideoAction } from './actions';
+import { listPostReports } from '@/modules/creator';
 
 export const dynamic = 'force-dynamic';
 const input = 'h-11 min-w-0 flex-1 rounded-[14px] border border-white/15 bg-white/10 text-white px-3';
@@ -16,11 +17,12 @@ const label = (list: readonly { value: string; label: string }[], counts: Record
 
 export default async function ReportsQueuePage({ searchParams }: { searchParams: FlashParams }) {
   await requireAdminVerified();
-  const [products, videos, failed, params] = await Promise.all([
+  const [products, videos, failed, params, posts] = await Promise.all([
     listReports(),
     listVideoReports(),
     listFailedVideoJobs(),
     searchParams,
+    listPostReports(),
   ]);
   return (
     <section className="flex flex-col gap-4 px-4 py-5">
@@ -88,6 +90,40 @@ export default async function ReportsQueuePage({ searchParams }: { searchParams:
             ) : null}
           </li>
         ))}
+      </ul>
+      <h2 className="font-extrabold">Bài viết ({posts.length})</h2>
+      <ul className="flex flex-col gap-2" data-testid="post-reports">
+        {posts.map((r) =>
+          r.post ? (
+            <li
+              key={r.post.id}
+              className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-white/5 p-3"
+            >
+              <a href={`/p/${r.post.id}`} className="line-clamp-3 whitespace-pre-line text-sm font-bold">
+                {r.post.text || '(bài chỉ có ảnh)'}
+              </a>
+              <p className="text-xs text-white/60">
+                {r.reports.length} báo cáo · {r.post.status === 'removed' ? 'đang ẩn' : 'đang hiện'}
+              </p>
+              <form action={resolvePostAction.bind(null, r.post.id, 'remove')} className="flex gap-2">
+                <input
+                  name="reason"
+                  maxLength={300}
+                  placeholder="Lý do gỡ"
+                  className="h-10 min-w-0 flex-1 rounded-xl border border-white/15 bg-white/10 px-3 text-sm"
+                />
+                <ConfirmSubmit confirm="Gỡ bài viết này?" tone="danger">
+                  Gỡ
+                </ConfirmSubmit>
+              </form>
+              <form action={resolvePostAction.bind(null, r.post.id, 'dismiss')}>
+                <ConfirmSubmit confirm="Bỏ qua báo cáo, hiện lại bài?" tone="plain">
+                  Bỏ qua
+                </ConfirmSubmit>
+              </form>
+            </li>
+          ) : null,
+        )}
       </ul>
       <h2 id="video-loi" className="font-extrabold">
         Video xử lý lỗi nhiều lần ({failed.length})

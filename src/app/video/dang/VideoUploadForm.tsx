@@ -2,6 +2,7 @@
 
 import { Repeat2 } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { useFeature } from '@/components/MeProvider';
 import { useT } from '@/i18n/client';
@@ -139,6 +140,7 @@ export function VideoUploadForm({
   // Quay trong app, bộ lọc màu, làm đẹp (SPEC-creator.md V5.5, công tắc camera). Trình duyệt không cho camera thì chỉ
   // còn nút chọn file.
   const cameraOn = useFeature('camera');
+  const postsOn = useFeature('posts');
   const [canRecord, setCanRecord] = useState(false);
   useEffect(
     () => setCanRecord(Boolean(navigator.mediaDevices?.getUserMedia) && typeof MediaRecorder !== 'undefined'),
@@ -462,6 +464,15 @@ export function VideoUploadForm({
               {t(m === 'video' ? 'post.mode.video' : 'post.mode.story')}
             </button>
           ))}
+          {postsOn ? (
+            <Link
+              href="/video/dang?bai=1"
+              className="flex h-9 items-center rounded-full border border-white/15 bg-white/5 px-4 text-[12px] font-bold text-white/70"
+              data-testid="mode-post"
+            >
+              {t('post.article.tab')}
+            </Link>
+          ) : null}
         </div>
       )}
       {mode === 'story' ? <p className="text-[12px] text-white/60">{t('post.storyHint')}</p> : null}

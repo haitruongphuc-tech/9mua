@@ -645,6 +645,112 @@ model Video {
   @@index([seriesId, episodeNo])
 }
 
+// Bài đăng ảnh + chữ (SPEC-creator.md V5.10). status: draft | scheduled | ready | removed | deleted.
+// Bình luận, lưu, báo cáo, cảm xúc của bài nằm ở bảng riêng (PostComment, SavedPost, PostReport, Reaction): luật đợt này
+// chỉ thêm bảng/cột, không đổi cột videoId đang bắt buộc của Comment, SavedVideo, VideoReport.
+model Post {
+  id             String        @id @default(cuid(2))
+  authorId       String
+  text           String        @default("")
+  bgColor        String? // bài chỉ có chữ ≤ 300 ký tự: 1 trong 6 nền màu
+  hashtags       String[]
+  visibility     String        @default("public") // public | followers | private
+  allowComments  Boolean       @default(true)
+  soundId        String? // nhạc nền (V5.6)
+  status         String        @default("ready")
+  publishAt      DateTime?
+  likes          Int           @default(0)
+  editedAt       DateTime?
+  moderationNote String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @default(now())
+  images         PostImage[]
+  products       PostProduct[]
+
+  @@index([status, createdAt])
+  @@index([authorId, createdAt])
+}
+
+model PostImage {
+  id       String @id @default(cuid(2))
+  postId   String
+  post     Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  position Int
+  url      String
+  thumbUrl String
+  width    Int
+  height   Int
+
+  @@index([postId, position])
+}
+
+model PostProduct {
+  postId    String
+  post      Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  productId String
+  position  Int
+
+  @@id([postId, productId])
+}
+
+// Ảnh tải lên trước khi đăng bài (giữ 24 giờ nếu không dùng).
+model PostUpload {
+  id        String   @id @default(cuid(2))
+  ownerId   String
+  url       String
+  thumbUrl  String
+  width     Int
+  height    Int
+  createdAt DateTime @default(now())
+
+  @@index([ownerId, createdAt])
+}
+
+model PostComment {
+  id        String    @id @default(cuid(2))
+  postId    String
+  userId    String
+  parentId  String?
+  text      String
+  hiddenAt  DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([postId, createdAt])
+  @@index([userId, createdAt])
+}
+
+model SavedPost {
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+
+  @@id([userId, postId])
+}
+
+model PostReport {
+  id        String   @id @default(cuid(2))
+  postId    String
+  userId    String
+  reason    String
+  message   String   @default("")
+  status    String   @default("open") // open | dismissed | actioned
+  createdAt DateTime @default(now())
+
+  @@unique([postId, userId])
+  @@index([status, createdAt])
+}
+
+// Cảm xúc trên bài viết (SPEC-social.md V5.8): mỗi người một cảm xúc mỗi bài.
+model Reaction {
+  userId    String
+  postId    String
+  reaction  String   @default("like") // like | love | haha | wow | sad | angry
+  createdAt DateTime @default(now())
+
+  @@id([userId, postId])
+  @@index([postId])
+}
+
 // Phim ngắn nhiều tập (SPEC-creator.md V5.9). Thể loại: tinh-cam | hai | gia-dinh | hanh-dong | khac.
 model Series {
   id           String   @id @default(cuid(2))

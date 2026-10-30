@@ -5,13 +5,14 @@ import { ProfileActions } from '@/components/profile/ProfileActions';
 import { SocialLinks } from '@/components/profile/SocialLinks';
 import { Avatar } from '@/components/ui/Avatar';
 import { VideoGrid } from '@/components/video/VideoGrid';
+import { PostCard } from '@/components/post/PostCard';
 import { ClientMessages } from '@/i18n/ClientMessages';
 import { getT } from '@/i18n/server';
 import { isBlockedEither } from '@/lib/blocks';
 import { env } from '@/lib/env';
 import { isFeatureOn } from '@/lib/features';
 import { BlockButton } from '@/components/social/BlockButton';
-import type { CreatorProfile } from '@/modules/creator';
+import { postsByAuthor, type CreatorProfile } from '@/modules/creator';
 import { liveIdOfHost } from '@/modules/live';
 import { getCurrentUser } from '@/modules/identity';
 import { followStats, getSocialLinks, listBlockedUsers } from '@/modules/social';
@@ -53,11 +54,13 @@ export async function CreatorProfileView({
     isFeatureOn('social_more'),
   ]);
   const isSelf = viewer?.id === p.id;
+  // Tab "Bài viết" (SPEC-creator.md V5.10 mục 2), công tắc posts.
+  const posts = (await isFeatureOn('posts')) ? await postsByAuthor(p.id, { userId: viewer?.id }) : [];
   // Có @tên thì link chia sẻ là 9mua.com/@<tên> (SPEC-identity.md V5.1).
   const path = handle ? `/@${handle}` : `/creator/${p.id}`;
   const url = `${env().APP_URL}${path}`;
   return (
-    <ClientMessages prefixes={['profile.', 'feed.share.']}>
+    <ClientMessages prefixes={['profile.', 'feed.share', 'feed.post.']}>
       <div>
         {/* Ảnh bìa 3:1 (SPEC-social.md bổ sung 30/10, A2); chưa có thì nền màu. */}
         <div className="relative mx-auto aspect-[3/1] max-h-[300px] w-full max-w-[900px] overflow-hidden bg-gradient-to-br from-brand/50 via-[#7c2d12] to-ink md:rounded-b-[18px]">
@@ -161,6 +164,21 @@ export async function CreatorProfileView({
               />
             )}
           </div>
+          {posts.length ? (
+            <>
+              <h2
+                className="mt-6 border-b border-white/10 pb-2 text-[13px] font-bold"
+                data-testid="profile-posts"
+              >
+                {t('feed.post.section', { count: posts.length })}
+              </h2>
+              <div className="mt-2 flex flex-col gap-3">
+                {posts.map((post) => (
+                  <PostCard key={post.id} post={post} loggedIn={Boolean(viewer)} />
+                ))}
+              </div>
+            </>
+          ) : null}
         </section>
       </div>
     </ClientMessages>

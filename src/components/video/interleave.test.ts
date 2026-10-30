@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { interleaveLives } from './interleave';
+import { interleaveLives, interleavePosts } from './interleave';
 
 const kinds = (list: ReturnType<typeof interleaveLives<number, string>>) =>
   list.map((e) => (e.kind === 'video' ? `v${e.video}` : `L${e.live}`)).join(' ');
@@ -26,5 +26,22 @@ describe('chèn live vào feed trang chủ (SPEC-creator.md bổ sung 29/10)', (
       list.findIndex((e) => e.kind === 'live' && e.live === id);
     expect(pos(after, 'a')).toBe(pos(before, 'a'));
     expect(pos(after, 'b')).toBe(pos(before, 'b'));
+  });
+});
+
+describe('chèn bài viết vào feed trang chủ (SPEC-creator.md V5.10)', () => {
+  const show = (list: ReturnType<typeof interleavePosts<number, string, string>>) =>
+    list
+      .map((e) => (e.kind === 'video' ? `v${e.video}` : e.kind === 'live' ? `L${e.live}` : `P${e.post}`))
+      .join(' ');
+  it('bài đầu sau video thứ 4, sau đó cứ 6 video 1 bài; live không tính là video', () => {
+    const v = Array.from({ length: 12 }, (_, i) => i + 1);
+    expect(show(interleavePosts(interleaveLives(v, ['a'], false), ['x', 'y', 'z'], false))).toBe(
+      'v1 La v2 v3 v4 Px v5 v6 v7 v8 v9 v10 Py v11 v12',
+    );
+  });
+  it('feed đã hết thì bài còn lại nối vào cuối; chưa hết thì không đặt bài sau video cuối', () => {
+    expect(show(interleavePosts(interleaveLives([1, 2, 3, 4], [], false), ['x'], false))).toBe('v1 v2 v3 v4');
+    expect(show(interleavePosts(interleaveLives([1, 2], [], true), ['x', 'y'], true))).toBe('v1 v2 Px Py');
   });
 });

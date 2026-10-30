@@ -5,7 +5,8 @@ import { VideoFeed } from '@/components/video/VideoFeed';
 import { ClientMessages } from '@/i18n/ClientMessages';
 import { readAnonId } from '@/lib/anon-id';
 import { env } from '@/lib/env';
-import { listStories } from '@/modules/creator';
+import { listStories, postFeed } from '@/modules/creator';
+import { isFeatureOn } from '@/lib/features';
 import { getCurrentUser } from '@/modules/identity';
 import { getLiveForViewer, listLiveNow, type LiveView } from '@/modules/live';
 import { loadFeed } from '@/server/feed';
@@ -22,7 +23,13 @@ export const metadata: Metadata = {
 export default async function HomePage() {
   const [user, anonId] = await Promise.all([getCurrentUser(), readAnonId()]);
   const viewer = { userId: user?.id, anonId };
-  const [feed, stories, cards] = await Promise.all([loadFeed(viewer), listStories(), listLiveNow()]);
+  const [feed, stories, cards, posts] = await Promise.all([
+    loadFeed(viewer),
+    listStories(),
+    listLiveNow(),
+    // Bài viết ảnh + chữ chèn vào feed (SPEC-creator.md V5.10, công tắc posts).
+    isFeatureOn('posts').then((on) => (on ? postFeed(viewer, null, 6).then((r) => r.items) : [])),
+  ]);
   const lives = (await Promise.all(cards.map((c) => getLiveForViewer(c.id, viewer)))).filter(
     (v): v is Extract<LiveView, { kind: 'live' }> => v?.kind === 'live',
   );
@@ -51,6 +58,7 @@ export default async function HomePage() {
           nextCursor={feed.nextCursor}
           appUrl={env().APP_URL}
           lives={lives}
+          posts={posts}
           loggedIn={Boolean(user)}
           header={
             <StoriesRow

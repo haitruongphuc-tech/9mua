@@ -7,6 +7,7 @@ import {
   expireStories,
   processNextCaption,
   processNextDownload,
+  publishScheduledPosts,
   recomputeScores,
 } from '@/modules/creator';
 import { cleanupLiveChat } from '@/modules/live';
@@ -76,6 +77,9 @@ async function liveLoop() {
       lastScheduled = Date.now();
       await publishScheduledVideos().catch((e) =>
         console.error('[worker] đăng video hẹn giờ lỗi:', e instanceof Error ? e.message : e),
+      );
+      await publishScheduledPosts().catch((e) =>
+        console.error('[worker] đăng bài hẹn giờ lỗi:', e instanceof Error ? e.message : e),
       );
     }
     await sleep(LIVE_SYNC_MS);

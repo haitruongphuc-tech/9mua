@@ -702,7 +702,7 @@ Nhánh `nang-cap-mot-dot`. Trừ App (C32–C36). Mỗi task: test trước → 
 - [x] **T94: Âm thanh từ video người dùng + thịnh hành** (C90).
 - [x] **T95: Tải về, nhúng, TikTok/Instagram, gửi qua Hộp thư** (C03–C05, C65).
 - [x] **T96: Watch — phim ngắn nhiều tập** (C02).
-- [ ] **T97: Bài đăng ảnh + chữ** (C86).
+- [x] **T97: Bài đăng ảnh + chữ** (C86).
 
 ### Mạng xã hội
 - [ ] **T98: Tim bình luận, @nhắc tên, từ cấm** (C25, C52, C67).

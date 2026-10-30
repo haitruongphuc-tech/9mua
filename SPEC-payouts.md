@@ -185,7 +185,7 @@ Chưa có kênh chi thì hệ thống tự chạy chế độ duyệt tay.
 
 ## Bổ sung 30/10/2026 — Nâng cấp một đợt (V5)
 
-> **Trạng thái: chờ CEO duyệt.** Quyết định, công tắc, dữ liệu: `docs/nang-cap-mot-dot.md`. Mọi phần dưới đây đụng tiền và
+> **Trạng thái: CEO duyệt qua chat 30/10/2026 ("duyệt làm đi").** Quyết định, công tắc, dữ liệu: `docs/nang-cap-mot-dot.md`. Mọi phần dưới đây đụng tiền và
 > **tắt sẵn**. Sổ chỉ thêm, khoá duy nhất `(type, refId)` như hiện nay.
 
 ### V5.1 Cộng số dư khi có giảm giá, giao qua hãng, COD (C31, C84, C85)

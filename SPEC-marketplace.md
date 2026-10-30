@@ -125,7 +125,7 @@ Không có. Quảng cáo trả tiền để lên top để sau MVP.
 
 ## Bổ sung 30/10/2026 — Nâng cấp một đợt (V5)
 
-> **Trạng thái: chờ CEO duyệt.** Quyết định, công tắc, thư viện, dữ liệu: `docs/nang-cap-mot-dot.md`. Hình: M6.
+> **Trạng thái: CEO duyệt qua chat 30/10/2026 ("duyệt làm đi").** Quyết định, công tắc, thư viện, dữ liệu: `docs/nang-cap-mot-dot.md`. Hình: M6.
 
 ### V5.1 Tìm Kiot theo tên (C12, C15) — công tắc `feature.search_more`
 

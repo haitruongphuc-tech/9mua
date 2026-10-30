@@ -164,7 +164,7 @@ listRefundsPending(), listDisputes()          // cho admin
 
 ## Bổ sung 30/10/2026 — Nâng cấp một đợt (V5)
 
-> **Trạng thái: chờ CEO duyệt.** Quyết định, công tắc, dịch vụ ngoài, dữ liệu: `docs/nang-cap-mot-dot.md`. Hình: M7.
+> **Trạng thái: CEO duyệt qua chat 30/10/2026 ("duyệt làm đi").** Quyết định, công tắc, dịch vụ ngoài, dữ liệu: `docs/nang-cap-mot-dot.md`. Hình: M7.
 > Phần đụng tiền (V5.2 hoàn tiền, V5.3, V5.4, V5.5) **tắt sẵn** khi đưa lên web. Mọi chuyển trạng thái mới vẫn đi qua
 > `transition()`, ghi `OrderEvent`, chỉ **thêm** cặp chuyển mới vào bảng, không sửa cặp cũ.
 

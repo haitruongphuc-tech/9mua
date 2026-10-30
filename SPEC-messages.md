@@ -117,7 +117,7 @@ Cần thêm ở `social` (chỉ thêm): `followRelation(a, b): Promise<boolean>`
 
 ## Bổ sung 30/10/2026 — Nâng cấp một đợt (V5)
 
-> **Trạng thái: chờ CEO duyệt.** Quyết định, công tắc, dữ liệu: `docs/nang-cap-mot-dot.md`.
+> **Trạng thái: CEO duyệt qua chat 30/10/2026 ("duyệt làm đi").** Quyết định, công tắc, dữ liệu: `docs/nang-cap-mot-dot.md`.
 
 ### V5.1 Gửi video qua Hộp thư (C65, M2) — công tắc `feature.share_more`
 

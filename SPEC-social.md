@@ -244,7 +244,7 @@ Giữ nguyên đường dẫn để link đã chia sẻ không hỏng.
 
 ## Bổ sung 30/10/2026 — Nâng cấp một đợt (V5)
 
-> **Trạng thái: chờ CEO duyệt.** Quyết định, công tắc, thư viện, dữ liệu: `docs/nang-cap-mot-dot.md`.
+> **Trạng thái: CEO duyệt qua chat 30/10/2026 ("duyệt làm đi").** Quyết định, công tắc, thư viện, dữ liệu: `docs/nang-cap-mot-dot.md`.
 
 ### V5.1 Bạn chung, gợi ý follow (C23, C24, M10) — công tắc `feature.social_more`
 

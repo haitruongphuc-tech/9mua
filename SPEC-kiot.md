@@ -178,7 +178,7 @@ Hai người mua cùng lúc món cuối cùng thì chỉ một người thành c
 
 ## Bổ sung 30/10/2026 — Nâng cấp một đợt (V5)
 
-> **Trạng thái: chờ CEO duyệt.** Quyết định, công tắc, thư viện, dữ liệu: `docs/nang-cap-mot-dot.md`. Hình: M7, M8.
+> **Trạng thái: CEO duyệt qua chat 30/10/2026 ("duyệt làm đi").** Quyết định, công tắc, thư viện, dữ liệu: `docs/nang-cap-mot-dot.md`. Hình: M7, M8.
 
 ### V5.1 Vị trí Kiot (dùng cho C13, C14)
 

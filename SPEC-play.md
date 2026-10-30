@@ -2,7 +2,7 @@
 
 > Module mới trong `CAPABILITY-MAP.md`. Phụ thuộc `identity`, `social`, `payouts` (ví thu nhập).
 > Nền móng chung theo `SPEC-identity.md`. Giao diện chuẩn V4 (`docs/BRAND.md`), đủ 7 thứ tiếng (`SPEC-i18n.md`).
-> **Trạng thái: chờ CEO duyệt.** CEO chốt 30/10/2026 "làm luôn", **tắt sẵn** (`feature.play`). Mã C30.
+> **Trạng thái: CEO duyệt qua chat 30/10/2026 ("duyệt làm đi").** CEO chốt 30/10/2026 "làm luôn", **tắt sẵn** (`feature.play`). Mã C30.
 > Quyết định chung: `docs/nang-cap-mot-dot.md`.
 
 ## Objective

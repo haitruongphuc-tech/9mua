@@ -79,3 +79,78 @@ Thứ tự đi theo capability map. Phase 6 và 7 độc lập với nhau, làm 
 
 Ghi chú: máy làm việc của Claude không chạy được MediaMTX thật (bị chặn tải và build phần mềm ngoài), nên E2E dùng
 "máy chủ hình giả" khi `TEST_MODE=e2e` (giả lập MediaMTX báo có hình); phát/xem hình thật kiểm tra trên VPS.
+
+## Nâng cấp một đợt (T79–T136) — CEO duyệt 30/10/2026 ("duyệt làm đi")
+
+Nguồn: `docs/nang-cap-mot-dot.md` (quyết định, công tắc, dịch vụ ngoài, thư viện, dữ liệu) và mục "Bổ sung 30/10/2026 — Nâng cấp
+một đợt (V5)" trong từng `SPEC-<module>.md`, cùng `SPEC-play.md`. Làm trên nhánh `nang-cap-mot-dot`. Trừ App (C32–C36).
+
+**Luật cho mọi task:**
+- Test trước → code → `sh scripts/check.sh` (prettier, lint, typecheck, vitest) → **một commit** → push ngay.
+- Migration **chỉ thêm** bảng/cột (cột mới cho phép trống hoặc có mặc định). Sổ chỉ thêm có trigger chặn sửa/xoá như các sổ cũ.
+- Mỗi chức năng kiểm công tắc `isFeatureOn('<tên>')` (T79) ở trang, API và việc nền. Mặc định bật/tắt đúng bảng ở
+  `docs/nang-cap-mot-dot.md` mục 3. Phần đụng tiền và phần chờ khoá **tắt sẵn**.
+- Dịch vụ ngoài luôn có driver `fake`; thiếu khoá thì công tắc không bật được.
+- Chỉ thêm 3 thư viện đã duyệt: `leaflet`, `hls.js`, `@aws-sdk/client-s3`. Cần thư viện khác thì hỏi CEO.
+- Hợp đồng `index.ts` chỉ thêm hàm, không đổi hàm cũ. Chữ giao diện mới đủ 7 thứ tiếng.
+
+| Task | Việc (mã) | Kiểm tra |
+|---|---|---|
+| T79 | Công tắc chức năng: khoá `feature.*` trong `Setting`, `isFeatureOn`, `/admin/cong-tac`, mã 2 lớp khi bật công tắc tiền, báo "Chưa có khoá" | unit + integration + admin route test |
+| T80 | @tên người dùng (C69): cột `handle`, tự đặt cho tài khoản cũ, `/@<tên>`, `/creator/<id>` chuyển 301, đổi 30 ngày, giữ tên cũ 30 ngày | unit luật tên + integration |
+| T81 | Chặn toàn web (C68): `UserBlock`, chép `MessageBlock`, `isBlockedEither` ở feed, bình luận, follow, live, Hộp thư | integration hai chiều |
+| T82 | Quyền riêng tư video + `canViewVideo` dùng mọi nơi (C50) | integration từng nơi hiện video |
+| T83 | Cam kết nội dung (C10, C11): `CommitmentVersion`, `Commitment`, chặn 7 thao tác ở máy chủ, bảng M5, `/cam-ket` | integration + E2E |
+| T84 | Công cụ xem: thanh tua, tốc độ, xoay ngang, tự cuộn (C57–C59, C63) | E2E điện thoại + máy tính |
+| T85 | Không quan tâm + lịch sử đã xem (C60, C61) | unit điểm feed + integration |
+| T86 | Nháp, hẹn giờ, địa điểm, ghim lên trang cá nhân, nhãn AI, sửa sau khi đăng (C48, C49, C53–C56) | integration (đồng hồ giả) |
+| T87 | Tải lên từng phần, giới hạn video dài, tài khoản ≥ 3 ngày, hàng chờ `short`/`long`, chặn khi ổ đầy (C06) | integration mất phần, gửi trùng |
+| T88 | Nhiều mức chất lượng: MP4 480p, HLS 360–1080p, 3 ảnh bìa, ảnh xem trước động, `hls.js` (C07) | worker test với video mẫu |
+| T89 | Kho video ngoài: driver `s3`, `/admin/dung-luong`, `npm run media:migrate` | unit với S3 giả |
+| T90 | Phụ đề tự động (C51): driver OpenAI Whisper + `fake`, sửa phụ đề, nút CC, ngân sách | unit + integration |
+| T91 | Quay trong app, 8 bộ lọc màu, làm đẹp (C08, C09) | E2E (camera giả của Playwright) + worker test |
+| T92 | Stitch (C09) | worker test 720×1280 |
+| T93 | Chỉnh video: cắt, ghép, chữ, nhãn dán, `editSpec` (C89) | worker test + E2E |
+| T94 | Âm thanh: tự tạo âm thanh gốc, "dùng âm thanh này", thịnh hành, thư viện CEO, `/am-thanh/<id>` (C90) | integration |
+| T95 | Chia sẻ thêm: tải về có logo, `/nhung/<id>`, TikTok/Instagram, gửi qua Hộp thư (C03–C05, C65) | integration + E2E |
+| T96 | Watch: phim nhiều tập, tab Watch, tự phát tập tiếp, lưu phim, bình luận theo phút (C02) | integration + E2E |
+| T97 | Bài đăng ảnh + chữ trong feed, trang cá nhân, hashtag (C86) | integration + E2E |
+| T98 | Tim bình luận, @nhắc tên, từ cấm (C25, C52, C67) | unit khớp không dấu + integration |
+| T99 | Trả lời bình luận bằng video (C64) | integration |
+| T100 | Thông báo mới (gộp theo giờ) + cài đặt thông báo (C66) | integration |
+| T101 | Bạn chung, gợi ý follow, tab Đã thích (C23, C24, C62) | integration |
+| T102 | Cảm xúc 6 loại + đăng lại (C87, C88) | integration |
+| T103 | Điểm thưởng + đổi điểm ra xu (C01) | unit chống cày + integration ngân sách |
+| T104 | Sự kiện + Kỷ niệm "ngày này năm trước" (C26) | integration |
+| T105 | Nhóm công khai/riêng tư, quản trị, duyệt bài (C91) | integration |
+| T106 | Tài khoản riêng tư + yêu cầu follow (C70) | integration |
+| T107 | Tự xoá tài khoản: điều kiện, 30 ngày chờ, ẩn danh hoá, giữ sổ tiền (C71) | integration (đồng hồ giả) |
+| T108 | Đăng nhập Apple (C72) | integration với driver giả |
+| T109 | Nhiều tài khoản trên một máy (C73) | integration + E2E |
+| T110 | Vị trí Kiot, tìm Kiot theo tên, Gần tôi, khoảng giá, lọc sao (C12, C13) | unit khoảng cách + integration |
+| T111 | Bản đồ nhiệt `leaflet` (C14) | integration đếm ô + E2E |
+| T112 | Gợi ý từ khoá, lịch sử tìm, từ khoá hot, micro (C38, C74) | integration |
+| T113 | Đánh giá sản phẩm + sao Kiot (C15, C82) | integration |
+| T114 | Hồ sơ nguồn gốc riêng tư, huy hiệu 3 mức, CEO duyệt (C16, C17, C42) | integration + route quyền |
+| T115 | Tố cáo hàng giả 24 giờ; hoàn tiền tắt sẵn, dòng `adjustment` (C18) | integration tiền |
+| T116 | Giao diện Kiot kéo thả 50 mẫu + bảo hành (C27, C29) | unit cấu trúc layout + E2E |
+| T117 | Nhập Page 6 mạng, driver giả (C28) | integration |
+| T118 | Biến thể sản phẩm, giỏ, đơn, tồn kho theo biến thể (C83) | integration tranh mua |
+| T119 | Mã giảm giá, giảm giá theo giờ, công thức cộng số dư mới (C84, payouts V5.1) | integration + so công thức cũ |
+| T120 | GHN/GHTK: tính phí, tạo đơn giao, webhook (C31) | integration webhook trùng, sai chữ ký |
+| T121 | COD: trạng thái `cod_pending`, đối soát, hoàn hàng (C85) | integration tiền |
+| T122 | Ví thu nhập + hoa hồng creator + rút tiền CEO duyệt (C92) | integration tiền |
+| T123 | Dùng xu: gia hạn Kiot, đẩy video/live (C94) | integration |
+| T124 | Vui chơi: quay số, bắn tim, xếp hạng tuần (C30, `SPEC-play.md`) | unit xác suất + integration ngân sách |
+| T125 | AI kiểm duyệt bằng Claude, viết sẵn, tắt (C19) | integration với driver giả |
+| T126 | Lý do báo cáo mới, xử lý 3 lần, trang `/kiem-duyet` (C20–C22) | integration |
+| T127 | Nhãn "Cổng thế giới đã mở", `/huong-dan`, slogan trang mới, Pháp lý thêm STK + con dấu (C37, C39–C41) | E2E |
+| T128 | Kanban CEO (C43) | integration |
+| T129 | Chi phí + trả tự động qua PayOS chi hộ (C44, C45) | integration mức trần, chạy 2 lần |
+| T130 | Casso + Tài chính + xuất file cho MISA (C46, C47) | integration webhook |
+| T131 | Live: giới hạn chỉnh được, hẹn lịch, người quản lý chat (C75, C77, C79) | integration |
+| T132 | Xem lại buổi live (C76) | worker test |
+| T133 | Mời khách cùng live (C78) | integration + E2E máy chủ hình giả |
+| T134 | Nhắn nhóm (C80) | integration |
+| T135 | Tin thoại, tin video, thu hồi (C81) | integration |
+| T136 | Kiểm tra toàn bộ: E2E điện thoại + máy tính, dịch 7 thứ tiếng, `docs/deploy.md` (biến môi trường, Nginx), hướng dẫn CEO bật công tắc | toàn bộ test + E2E |

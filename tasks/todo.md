@@ -676,3 +676,83 @@
 ### Giai đoạn C — Công cụ CEO
 - [ ] Ghim Kiot/video lên đầu, sửa slogan, sửa thông tin pháp lý (có nhật ký).
 
+
+## Nâng cấp một đợt — CEO duyệt 30/10/2026 (`docs/nang-cap-mot-dot.md`, kế hoạch ở `tasks/plan.md`)
+
+Nhánh `nang-cap-mot-dot`. Trừ App (C32–C36). Mỗi task: test trước → code → `sh scripts/check.sh` → 1 commit → push.
+
+### Nền móng
+- [ ] **T79: Công tắc chức năng** + `/admin/cong-tac`.
+- [ ] **T80: @tên người dùng** (C69).
+- [ ] **T81: Chặn toàn web** (C68).
+- [ ] **T82: Quyền riêng tư video + `canViewVideo`** (C50).
+- [ ] **T83: Cam kết nội dung** (C10, C11).
+
+### Video
+- [ ] **T84: Thanh tua, tốc độ, xoay ngang, tự cuộn** (C57–C59, C63).
+- [ ] **T85: Không quan tâm + lịch sử đã xem** (C60, C61).
+- [ ] **T86: Nháp, hẹn giờ, địa điểm, ghim, nhãn AI, sửa sau khi đăng** (C48, C49, C53–C56).
+- [ ] **T87: Tải lên từng phần + video dài + hàng chờ short/long** (C06).
+- [ ] **T88: Nhiều mức chất lượng, 3 ảnh bìa, ảnh xem trước động** (C07).
+- [ ] **T89: Kho video ngoài + trang Dung lượng** (C06).
+- [ ] **T90: Phụ đề tự động (OpenAI Whisper, tắt sẵn)** (C51).
+- [ ] **T91: Quay trong app, bộ lọc màu, làm đẹp** (C08, C09).
+- [ ] **T92: Stitch** (C09).
+- [ ] **T93: Chỉnh video: cắt, ghép, chữ, nhãn dán** (C89).
+- [ ] **T94: Âm thanh từ video người dùng + thịnh hành** (C90).
+- [ ] **T95: Tải về, nhúng, TikTok/Instagram, gửi qua Hộp thư** (C03–C05, C65).
+- [ ] **T96: Watch — phim ngắn nhiều tập** (C02).
+- [ ] **T97: Bài đăng ảnh + chữ** (C86).
+
+### Mạng xã hội
+- [ ] **T98: Tim bình luận, @nhắc tên, từ cấm** (C25, C52, C67).
+- [ ] **T99: Trả lời bình luận bằng video** (C64).
+- [ ] **T100: Thông báo mới + cài đặt thông báo** (C66).
+- [ ] **T101: Bạn chung, gợi ý follow, tab Đã thích** (C23, C24, C62).
+- [ ] **T102: Cảm xúc + đăng lại** (C87, C88).
+- [ ] **T103: Điểm thưởng + đổi điểm ra xu (đổi xu tắt sẵn)** (C01).
+- [ ] **T104: Sự kiện + Kỷ niệm** (C26).
+- [ ] **T105: Nhóm** (C91).
+
+### Tài khoản
+- [ ] **T106: Tài khoản riêng tư** (C70).
+- [ ] **T107: Tự xoá tài khoản** (C71).
+- [ ] **T108: Đăng nhập Apple (tắt tới khi có khoá)** (C72).
+- [ ] **T109: Nhiều tài khoản trên một máy** (C73).
+
+### Tìm kiếm, Kiot, mua bán
+- [ ] **T110: Vị trí Kiot, tìm Kiot theo tên, Gần tôi** (C12, C13).
+- [ ] **T111: Bản đồ nhiệt (tắt tới khi có khoá bản đồ)** (C14).
+- [ ] **T112: Gợi ý từ khoá, lịch sử, từ khoá hot, micro** (C38, C74).
+- [ ] **T113: Đánh giá sản phẩm + sao Kiot** (C15, C82).
+- [ ] **T114: Hồ sơ nguồn gốc + huy hiệu** (C16, C17, C42).
+- [ ] **T115: Tố cáo hàng giả 24 giờ (hoàn tiền tắt sẵn)** (C18).
+- [ ] **T116: Giao diện Kiot kéo thả 50 mẫu + bảo hành** (C27, C29).
+- [ ] **T117: Nhập Page (tắt tới khi có khoá)** (C28).
+
+### Phần đụng tiền (tắt sẵn)
+- [ ] **T118: Biến thể sản phẩm** (C83).
+- [ ] **T119: Mã giảm giá, giảm giá theo giờ, công thức cộng số dư mới** (C84).
+- [ ] **T120: GHN/GHTK** (C31).
+- [ ] **T121: Thanh toán khi nhận hàng + đối soát** (C85).
+- [ ] **T122: Ví thu nhập + hoa hồng creator** (C92).
+- [ ] **T123: Gia hạn Kiot bằng xu + đẩy video/live bằng xu** (C94).
+- [ ] **T124: Vui chơi có thưởng** (C30).
+
+### Trang CEO
+- [ ] **T125: AI kiểm duyệt (viết sẵn, tắt)** (C19).
+- [ ] **T126: Lý do báo cáo mới, xử lý 3 lần, trang Kiểm duyệt** (C20–C22).
+- [ ] **T127: Nhãn cổng thế giới, Hướng dẫn, slogan trang mới, Pháp lý thêm STK + con dấu** (C37, C39–C41).
+- [ ] **T128: Kanban** (C43).
+- [ ] **T129: Chi phí + trả tự động (tắt sẵn)** (C44, C45).
+- [ ] **T130: Casso + Tài chính + xuất MISA** (C46, C47).
+
+### Live, Hộp thư
+- [ ] **T131: Giới hạn live chỉnh được, hẹn lịch, người quản lý chat** (C75, C77, C79).
+- [ ] **T132: Xem lại buổi live (tắt sẵn)** (C76).
+- [ ] **T133: Mời khách cùng live (tắt sẵn)** (C78).
+- [ ] **T134: Nhắn nhóm** (C80).
+- [ ] **T135: Tin thoại, tin video, thu hồi** (C81).
+
+### Kết thúc
+- [ ] **T136: Kiểm tra toàn bộ, dịch 7 thứ tiếng, cập nhật `docs/deploy.md` và hướng dẫn CEO bật công tắc.**

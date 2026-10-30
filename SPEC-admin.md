@@ -156,7 +156,7 @@ trong các module đó nhận `adminId` và tự ghi `AdminAuditLog` qua `src/li
 
 ## Bổ sung 30/10/2026 — Nâng cấp một đợt (V5)
 
-> **Trạng thái: chờ CEO duyệt.** Quyết định, công tắc, dịch vụ ngoài, dữ liệu: `docs/nang-cap-mot-dot.md`. Hình: M12, M14.
+> **Trạng thái: CEO duyệt qua chat 30/10/2026 ("duyệt làm đi").** Quyết định, công tắc, dịch vụ ngoài, dữ liệu: `docs/nang-cap-mot-dot.md`. Hình: M12, M14.
 > Mọi thao tác mới của CEO ghi đúng 1 dòng nhật ký CEO có trước/sau, như hiện nay.
 
 ### V5.0 Trang công tắc `/admin/cong-tac`

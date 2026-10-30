@@ -197,7 +197,7 @@ Xem `SPEC-social.md` mục "Bổ sung 30/10/2026 — Đợt A" (A1, A3, A4). Hoa
 
 ## Bổ sung 30/10/2026 — Nâng cấp một đợt (V5)
 
-> **Trạng thái: chờ CEO duyệt.** Quyết định, công tắc, dịch vụ ngoài, thư viện mới: `docs/nang-cap-mot-dot.md`.
+> **Trạng thái: CEO duyệt qua chat 30/10/2026 ("duyệt làm đi").** Quyết định, công tắc, dịch vụ ngoài, thư viện mới: `docs/nang-cap-mot-dot.md`.
 > Mã C.. và hình M.. theo tài liệu "Đề xuất nâng cấp 9MUA". Mỗi mục dưới đây ẩn hẳn khi công tắc của nó tắt.
 
 ### V5.1 Video dài, nhiều mức chất lượng, ảnh bìa (C06, C07) — công tắc `feature.long_video`
@@ -369,10 +369,12 @@ Xem `SPEC-social.md` mục "Bổ sung 30/10/2026 — Đợt A" (A1, A3, A4). Hoa
 
 ### V5.10 Bài đăng ảnh + chữ (C86) — công tắc `feature.posts`
 
-1. **Đăng bài** ở `/video/dang`, chế độ thứ ba "Bài viết":
-   - 1–10 ảnh (JPG, PNG, WebP ≤ 10MB mỗi ảnh, xử lý như ảnh sản phẩm) và chữ ≤ 2.000 ký tự.
+1. **Đăng bài** ở `/video/dang`, chế độ thứ ba "Bài viết" (nút ＋ Đăng mở thẳng được chế độ này):
+   - **Viết bài:** chữ ≤ 2.000 ký tự, xuống dòng giữ nguyên, hashtag và @tên bấm được. Có ảnh hay không đều được.
+   - **Đăng ảnh:** 0–10 ảnh (JPG, PNG, WebP ≤ 10MB mỗi ảnh, xử lý như ảnh sản phẩm), kéo để đổi thứ tự.
+   - Bài phải có chữ hoặc ít nhất 1 ảnh. Bài chỉ có chữ và ≤ 300 ký tự được chọn 1 trong 6 nền màu, chữ to ở giữa.
    - Không cho link trong chữ (giống bình luận). Gắn ≤ 3 sản phẩm; nhạc nền tuỳ chọn (V5.6); quyền riêng tư như video (V5.3).
-   - Bài chỉ có chữ (≤ 300 ký tự): chọn 1 trong 6 nền màu, chữ to ở giữa.
+   - Sửa chữ, ảnh, sản phẩm sau khi đăng như video (V5.3 mục 7); lưu nháp và hẹn giờ đăng như video (V5.3 mục 1–2).
 2. **Hiện ở:** feed trang chủ (chèn như video, ảnh vuốt ngang), tab "Bài viết" trên trang cá nhân, trang hashtag.
 3. Thả cảm xúc, bình luận, lưu, chia sẻ, báo cáo, ghim như video. Mỗi người tối đa 20 bài mỗi ngày.
 4. Bảng `Post` (id, authorId, text, bgColor, visibility, allowComments, soundId, status, createdAt) và `PostImage`. Bảng
@@ -420,7 +422,8 @@ createPost(userId, input): Promise<Result>; updatePost; deletePost; canViewPost
 - Hẹn giờ: tới giờ mới lên feed và mới gửi thông báo; huỷ hẹn thì không đăng.
 - Không quan tâm làm giảm điểm feed đúng 30 ngày; lịch sử xem xoá được mà lượt xem không đổi.
 - Stitch ra 720×1280, có đoạn gốc đúng giây đã chọn; Watch đánh dấu tập đã xem ở 90%; bình luận theo phút tua đúng.
-- Bài viết: không cho link; 11 ảnh bị từ chối; bài `private` không lên feed.
+- Bài viết: không cho link; bài trống (không chữ, không ảnh) bị từ chối; 11 ảnh bị từ chối; bài chỉ chữ 2.000 ký tự đăng được;
+  bài `private` không lên feed.
 
 ### Boundaries V5
 

@@ -1,6 +1,6 @@
 # Nâng cấp một đợt (30/10/2026)
 
-> **Trạng thái: chờ CEO duyệt.** Tài liệu chung cho đợt nâng cấp lớn sau khi so 3 bản thiết kế (V4.1, V4.3, V4.7) và TikTok
+> **Trạng thái: CEO duyệt qua chat 30/10/2026 ("duyệt làm đi").** Tài liệu chung cho đợt nâng cấp lớn sau khi so 3 bản thiết kế (V4.1, V4.3, V4.7) và TikTok
 > với 9mua.com bản `main` ngày 30/10/2026. Danh sách chức năng C01–C85 và hình các màn hình M1–M14 nằm trong tài liệu
 > "Đề xuất nâng cấp 9MUA" (Claude Docs). File này ghi quyết định, bảng tra mã → spec, công tắc, dịch vụ ngoài, thư viện mới,
 > thay đổi dữ liệu và cách đưa lên web. Hành vi chi tiết của từng chức năng nằm trong các `SPEC-<module>.md`, mục

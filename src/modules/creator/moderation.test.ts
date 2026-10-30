@@ -117,7 +117,8 @@ describe('người đăng', () => {
     expect((await getHotVideos(1)).map((v) => v.id)).toEqual([a.id]);
   });
 
-  it('đơn hoàn tất có món mua từ video thì thống kê tăng đúng 1 đơn', async () => {
+  // SPEC-social.md bổ sung 30/10, A4: đơn đã thanh toán tính ngay (trước đây chỉ tính đơn hoàn tất); hoàn tiền thì bỏ.
+  it('đơn đã thanh toán có món mua từ video thì thống kê tăng đúng 1 đơn; hoàn tiền thì bỏ ra', async () => {
     const author = await createUser();
     const v = await readyVideo(author.id);
     const seller = await createSeller({ active: true });
@@ -129,12 +130,14 @@ describe('người đăng', () => {
     if (!placed.ok) throw new Error(JSON.stringify(placed));
     await simulatePaid((await getPayment(placed.intentId))!.orderCode);
     const order = await db.order.findFirstOrThrow({ where: { checkoutId: placed.checkoutId } });
-    expect((await myVideoStats(author.id))[0]!.orders).toBe(0);
+    expect((await myVideoStats(author.id))[0]).toMatchObject({ orders: 1, revenue: 2 * product.price });
     await db.order.update({
       where: { id: order.id },
       data: { status: 'delivered', deliveredAt: new Date(Date.now() - 8 * 86_400_000) },
     });
     await runOrderTick();
     expect((await myVideoStats(author.id))[0]!.orders).toBe(1);
+    await db.order.update({ where: { id: order.id }, data: { status: 'refunded' } });
+    expect((await myVideoStats(author.id))[0]).toMatchObject({ orders: 0, revenue: 0 });
   });
 });

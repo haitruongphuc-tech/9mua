@@ -42,3 +42,4 @@ export {
 } from './moderation';
 export { getCreatorProfile, getHotVideos, type CreatorProfile, type VideoThumb } from './profile';
 export { searchVideos } from './search';
+export { creatorStats, type CreatorStats } from './stats';

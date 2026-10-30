@@ -43,6 +43,8 @@ feed như TikTok, bấm sản phẩm trên video là mua được ngay. Mục ti
 7. **Trang creator `/creator/<userId>`**: tên, số video, tổng lượt thích, lưới video.
 8. **Thống kê của tôi `/video/cua-toi`**: mỗi video có lượt xem, lượt thích, **số đơn hoàn tất có nguồn
    từ video** (đếm `OrderItem.sourceVideoId`). Người đăng xoá được video của mình.
+   *(Từ 30/10, theo `SPEC-social.md` A4 đã duyệt: đếm đơn **đã thanh toán**, trừ đơn huỷ / đang hoàn tiền / đã hoàn
+   tiền, để số của từng video khớp với thống kê 7/30 ngày.)*
 9. **Kiểm duyệt**:
    - Nút "Báo cáo" (lý do: nội dung xấu, lừa đảo, bản quyền, khác).
    - **5 người khác nhau** báo cáo thì video tự ẩn, chờ CEO xem.

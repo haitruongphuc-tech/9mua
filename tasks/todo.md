@@ -656,7 +656,7 @@
   CEO gỡ hồ sơ vi phạm.
 - [x] **T76: Trang cá nhân + Sửa hồ sơ + danh sách theo dõi**; ảnh đại diện hiện ở video, bình luận, Hộp thư, Live, header.
 - [x] **T77: Tìm kiếm `/tim-kiem`** — tài khoản, video, hashtag, sản phẩm; header chuyển sang trang này.
-- [ ] **T78: Thống kê creator** 7/30 ngày trên `/video/cua-toi`.
+- [x] **T78: Thống kê creator** 7/30 ngày trên `/video/cua-toi`.
 - [x] **Đổi giao diện V4 + dịch từng trang** (gộp với T41–T46): Chợ & sản phẩm; Kiot; giỏ, đặt hàng, đơn mua;
   đăng nhập & tài khoản; Kiot của tôi; video & creator; admin.
 - [ ] **T41: Feed: thả tim 2 chạm + túi cam, thanh tiến độ, chia sẻ có QR** (S)

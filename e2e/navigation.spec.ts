@@ -61,19 +61,20 @@ test('header V4: logo tròn về trang chủ; điện thoại có nút tìm, má
   await page.goto('/cho/kiot');
   const header = page.getByRole('banner');
   await expect(header.getByRole('link', { name: 'Giỏ hàng (0 món)' })).toBeVisible();
+  // Tìm kiếm chung: tài khoản, video, hashtag, sản phẩm (SPEC-social.md bổ sung 30/10, A3).
   if (isMobile) {
     await header.getByRole('link', { name: 'Tìm kiếm' }).tap();
-    await page.waitForURL((u) => u.pathname === '/cho');
-    const search = page.getByRole('searchbox', { name: 'Tìm sản phẩm' });
+    await page.waitForURL((u) => u.pathname === '/tim-kiem');
+    const search = page.getByRole('main').getByRole('searchbox', { name: 'Tìm trên 9MUA' });
     await search.fill('mật ong');
     await search.press('Enter');
   } else {
     await expect(header.getByRole('link', { name: 'Tìm kiếm' })).toBeHidden();
-    const search = header.getByRole('searchbox', { name: 'Tìm trên Chợ 9MUA' });
+    const search = header.getByRole('searchbox', { name: 'Tìm trên 9MUA' });
     await search.fill('mật ong');
     await search.press('Enter');
   }
-  await page.waitForURL((u) => u.pathname === '/cho' && u.searchParams.get('q') === 'mật ong');
+  await page.waitForURL((u) => u.pathname === '/tim-kiem' && u.searchParams.get('q') === 'mật ong');
   await header.getByRole('link', { name: '9MUA - Trang chủ' }).click();
   await page.waitForURL((u) => u.pathname === '/');
 });

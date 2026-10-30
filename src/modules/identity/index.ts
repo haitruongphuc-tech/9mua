@@ -81,3 +81,4 @@ export {
   type PublicProfile,
   type FullPublicProfile,
 } from './profile';
+export { searchPublicUsers, type UserSearchHit } from './search';

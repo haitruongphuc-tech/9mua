@@ -1,18 +1,8 @@
 import { z } from 'zod';
 import { CATEGORIES, PROVINCES } from '@/modules/kiot';
 
-// Chuẩn hoá từ khoá giống hàm search_norm trong DB: bỏ dấu (đ → d), chữ thường, chỉ giữ chữ và số.
-export function normalizeQuery(q: string): string {
-  return q
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/đ/g, 'd')
-    .replace(/Đ/g, 'D')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, ' ')
-    .trim()
-    .slice(0, 80);
-}
+// Chuẩn hoá từ khoá giống hàm search_norm trong DB (dùng chung với tìm tài khoản, video ở src/lib/search-text.ts).
+export { normalizeSearchText as normalizeQuery } from '@/lib/search-text';
 
 export const SORTS = [
   { value: 'phu-hop', label: 'Phù hợp' },

@@ -27,7 +27,7 @@ export function HeaderActions({ base }: { base: string }) {
   return (
     <>
       <Link
-        href={`${base}/cho`}
+        href={`${base}/tim-kiem`}
         aria-label={t('common.search.button')}
         className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white/10 md:hidden"
       >

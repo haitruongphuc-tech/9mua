@@ -22,7 +22,7 @@ export {
   type CommentView,
 } from './comments';
 export { toggleSave, savedVideos, savedSet } from './saves';
-export { hashtagVideos, trendingHashtags, normalizeTag } from './hashtags';
+export { hashtagVideos, trendingHashtags, normalizeTag, searchHashtags } from './hashtags';
 export { heartVideo, toggleKiotHeart, kiotHeartStats } from './hearts';
 export {
   checkVoucher,

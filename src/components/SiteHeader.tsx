@@ -31,7 +31,7 @@ export async function SiteHeader() {
           </Link>
           <HeaderSlogan onKiotHost={Boolean(kiotSlug)} />
           <form
-            action={`${base}/cho`}
+            action={`${base}/tim-kiem`}
             role="search"
             className="hidden h-10 w-[300px] items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 md:flex"
           >

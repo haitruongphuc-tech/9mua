@@ -5,7 +5,13 @@ import { ClientMessages } from '@/i18n/ClientMessages';
 import { getT } from '@/i18n/server';
 import { handleInfo, requireUser } from '@/modules/identity';
 import { listBlockedUsers, listMutedKeywords, MENTION_POLICIES, mentionPolicyOf } from '@/modules/social';
-import { addMutedKeywordAction, removeMutedKeywordAction, setMentionPolicyAction } from './social-actions';
+import {
+  addMutedKeywordAction,
+  removeMutedKeywordAction,
+  setMentionPolicyAction,
+  setNotifyTypesAction,
+} from './social-actions';
+import { NOTIFY_TYPES, notifyOffTypes } from '@/lib/notify-events';
 import { Avatar } from '@/components/ui/Avatar';
 import { BlockButton } from '@/components/social/BlockButton';
 import { isFeatureOn } from '@/lib/features';
@@ -33,6 +39,7 @@ export default async function AccountSettingsPage({
   const muted = blockOn ? await listMutedKeywords(user.id) : [];
   const policy = blockOn ? await mentionPolicyOf(user.id) : 'everyone';
   const mutedError = params['loi-tu-cam'];
+  const notifyOff = blockOn ? await notifyOffTypes(user.id) : [];
   const handle = handleOn ? await handleInfo(user.id) : null;
   return (
     <ClientMessages prefixes={['me.settings.', 'auth.otp.', 'auth.addEmail.']}>
@@ -48,6 +55,32 @@ export default async function AccountSettingsPage({
               handle={handle.handle}
               nextChange={handle.nextChangeAt ? formatDate(handle.nextChangeAt, t.lang) : null}
             />
+          ) : null}
+          {blockOn ? (
+            <Card title={t('me.settings.notify.title')} id="thong-bao">
+              <p className="text-[12px] text-white/60">{t('me.settings.notify.hint')}</p>
+              <form action={setNotifyTypesAction} className="flex flex-col gap-2" data-testid="notify-types">
+                {NOTIFY_TYPES.map((type) => (
+                  <label key={type} className="flex items-center gap-2 text-[13px]">
+                    <input
+                      type="checkbox"
+                      name={`n.${type}`}
+                      defaultChecked={!notifyOff.includes(type)}
+                      className="h-4 w-4 accent-[#ff6b00]"
+                      data-testid={`notify-type-${type}`}
+                    />
+                    {t(`me.settings.notify.type.${type}`)}
+                  </label>
+                ))}
+                <button
+                  type="submit"
+                  className="h-10 w-fit rounded-full bg-white/10 px-4 text-[12px] font-black"
+                  data-testid="notify-save"
+                >
+                  {t('me.settings.save')}
+                </button>
+              </form>
+            </Card>
           ) : null}
           {blockOn ? (
             <Card title={t('me.settings.mention.title')} id="nhac-ten">

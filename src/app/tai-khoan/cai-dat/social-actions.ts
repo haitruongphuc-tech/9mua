@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation';
 import { requireUser } from '@/modules/identity';
 import { addMutedKeyword, removeMutedKeyword, setMentionPolicy } from '@/modules/social';
+import { NOTIFY_TYPES, setNotifyTypes } from '@/lib/notify-events';
 
 // Cài đặt bình luận (SPEC-social.md V5.4): "Ai được nhắc tên tôi" và từ cấm.
 export async function setMentionPolicyAction(form: FormData): Promise<void> {
@@ -21,4 +22,14 @@ export async function removeMutedKeywordAction(id: string): Promise<void> {
   const user = await requireUser();
   await removeMutedKeyword(user.id, id);
   redirect('/tai-khoan/cai-dat#tu-cam');
+}
+
+// Bật / tắt từng loại thông báo (SPEC-social.md V5.5). Ô không tích = tắt.
+export async function setNotifyTypesAction(form: FormData): Promise<void> {
+  const user = await requireUser();
+  await setNotifyTypes(
+    user.id,
+    NOTIFY_TYPES.filter((t) => form.get(`n.${t}`) === 'on'),
+  );
+  redirect('/tai-khoan/cai-dat?da-luu=thong-bao#thong-bao');
 }

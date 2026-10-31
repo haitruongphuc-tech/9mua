@@ -3,6 +3,7 @@ import { blockedEitherIds, isBlockedEither } from '@/lib/blocks';
 import { db } from '@/lib/db';
 import { withinRate } from '@/lib/rate-window';
 import { notifyKey } from '@/lib/notifications';
+import { notifyEvent } from '@/lib/notify-events';
 import { canViewVideo } from '@/modules/creator';
 import { hasLink } from './links';
 import { isFeatureOn } from '@/lib/features';
@@ -258,7 +259,13 @@ export async function notifyVideoReply(videoId: string): Promise<boolean> {
   const v = await db.video.findUnique({ where: { id: videoId }, select: { authorId: true } });
   if (!c || !v || c.userId === v.authorId) return false;
   const author = await db.user.findUnique({ where: { id: v.authorId }, select: { displayName: true } });
-  await notifyKey(c.userId, 'notify.videoReply', { name: author?.displayName ?? '9MUA' }, `/v/${videoId}`);
+  await notifyEvent({
+    userId: c.userId,
+    type: 'video_reply',
+    key: 'notify.videoReply',
+    vars: { name: author?.displayName ?? '9MUA' },
+    url: `/v/${videoId}`,
+  });
   return true;
 }
 

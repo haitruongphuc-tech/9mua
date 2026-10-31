@@ -2,7 +2,7 @@ import { isBlockedEither } from '@/lib/blocks';
 import { now } from '@/lib/clock';
 import { db } from '@/lib/db';
 import { isFeatureOn } from '@/lib/features';
-import { notifyKey } from '@/lib/notifications';
+import { notifyEvent } from '@/lib/notify-events';
 
 // Nhắc tên @ (SPEC-social.md V5.4 mục 2): trong bình luận, chú thích video, chữ bài viết. Tối đa 10 lần mỗi nội dung.
 // Người được nhắc nhận thông báo, theo cài đặt "Ai được nhắc tên tôi" (everyone | following | nobody); không nhắc được
@@ -56,12 +56,13 @@ export async function recordMentions(
       })
       .catch(() => null); // đã nhắc trong nội dung này (sửa lại chữ) thì không báo lần nữa
     if (!created) continue;
-    await notifyKey(
-      u.id,
-      'notify.mentioned',
-      { name: by?.displayName ?? '9MUA', detail: text.slice(0, 80) },
-      source.url,
-    );
+    await notifyEvent({
+      userId: u.id,
+      type: 'mention',
+      key: 'notify.mentioned',
+      vars: { name: by?.displayName ?? '9MUA', detail: text.slice(0, 80) },
+      url: source.url,
+    });
     sent += 1;
   }
   return sent;

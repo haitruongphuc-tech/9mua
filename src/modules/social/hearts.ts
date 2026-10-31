@@ -1,5 +1,7 @@
 import { Prisma } from '@prisma/client';
 import { db } from '@/lib/db';
+import { isFeatureOn } from '@/lib/features';
+import { notifyEvent } from '@/lib/notify-events';
 import { likeVideo, toggleLike } from '@/modules/creator';
 import { consumeDailyAction } from './limits';
 import { checkVoucher } from './voucher';
@@ -24,6 +26,22 @@ export async function heartVideo(
   }
   const r = mode === 'like' ? await likeVideo(videoId, userId) : await toggleLike(videoId, userId);
   if (r.ok && r.liked) await checkVoucher(userId);
+  // Có người thích video (SPEC-social.md V5.5): mỗi video tối đa 1 thông báo mỗi giờ, gộp tên.
+  if (r.ok && r.liked && !already && (await isFeatureOn('social_more'))) {
+    const v = await db.video.findUnique({ where: { id: videoId }, select: { authorId: true } });
+    if (v && v.authorId !== userId) {
+      const me = await db.user.findUnique({ where: { id: userId }, select: { displayName: true } });
+      await notifyEvent({
+        userId: v.authorId,
+        type: 'like',
+        key: 'notify.videoLiked',
+        groupedKey: 'notify.videoLikedMany',
+        vars: { name: me?.displayName ?? '9MUA' },
+        url: `/v/${videoId}`,
+        groupKey: `like:video:${videoId}`,
+      });
+    }
+  }
   return r;
 }
 

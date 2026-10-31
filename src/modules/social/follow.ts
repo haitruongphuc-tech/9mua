@@ -1,6 +1,8 @@
 import { Prisma } from '@prisma/client';
 import { isBlockedEither } from '@/lib/blocks';
 import { db } from '@/lib/db';
+import { isFeatureOn } from '@/lib/features';
+import { notifyEvent } from '@/lib/notify-events';
 import { notifyKey } from '@/lib/notifications';
 import { hydrateVideos, type FeedVideo, type Viewer } from '@/modules/creator';
 import { consumeDailyAction } from './limits';
@@ -40,6 +42,19 @@ export async function toggleFollow(
       if (!(e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002')) throw e;
     });
     following = true;
+    // Có người follow mình (SPEC-social.md V5.5), gộp theo giờ.
+    if (await isFeatureOn('social_more')) {
+      const me = await db.user.findUnique({ where: { id: followerId }, select: { displayName: true } });
+      await notifyEvent({
+        userId: followeeId,
+        type: 'follow',
+        key: 'notify.newFollower',
+        groupedKey: 'notify.newFollowers',
+        vars: { name: me?.displayName ?? '9MUA' },
+        url: `/creator/${followerId}`,
+        groupKey: 'follow',
+      });
+    }
   }
   return { ok: true, following, followers: await db.follow.count({ where: { followeeId } }) };
 }

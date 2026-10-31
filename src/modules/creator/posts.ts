@@ -7,6 +7,7 @@ import { hasLink } from '@/lib/links';
 import { imageStore } from '@/lib/media/image-store';
 import { processImage } from '@/lib/media/process-image';
 import { notifyKey } from '@/lib/notifications';
+import { notifyEvent } from '@/lib/notify-events';
 import { getProductForCheckout, kiotBasics, productPath } from '@/modules/kiot';
 import { kiotOrigin } from '@/lib/urls';
 import { hasCurrentCommitment } from '@/modules/identity';
@@ -484,6 +485,18 @@ export async function togglePostLike(
       select: { likes: true, authorId: true },
     });
   });
+  if (!had && post.authorId !== userId) {
+    const me = await db.user.findUnique({ where: { id: userId }, select: { displayName: true } });
+    await notifyEvent({
+      userId: post.authorId,
+      type: 'like',
+      key: 'notify.postLiked',
+      groupedKey: 'notify.postLikedMany',
+      vars: { name: me?.displayName ?? '9MUA' },
+      url: `/p/${postId}`,
+      groupKey: `like:post:${postId}`,
+    });
+  }
   return { ok: true, liked: !had, likes: post.likes };
 }
 

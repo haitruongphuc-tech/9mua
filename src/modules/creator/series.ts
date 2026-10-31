@@ -6,7 +6,7 @@ import { db } from '@/lib/db';
 import { hasLink } from '@/lib/links';
 import { imageStore } from '@/lib/media/image-store';
 import { processCroppedImage } from '@/lib/media/process-image';
-import { notifyKey } from '@/lib/notifications';
+import { notifyEvent } from '@/lib/notify-events';
 import { hydrateVideos, type FeedVideo, type Viewer } from './feed';
 import { canViewVideo } from './visibility';
 
@@ -316,12 +316,13 @@ export async function notifyNewEpisode(videoId: string): Promise<number> {
     select: { userId: true },
   });
   for (const f of followers)
-    await notifyKey(
-      f.userId,
-      'notify.newEpisode',
-      { detail: `${s?.title ?? ''} · ${v.episodeNo ?? ''}` },
-      `/watch/${v.seriesId}?tap=${videoId}`,
-    );
+    await notifyEvent({
+      userId: f.userId,
+      type: 'episode',
+      key: 'notify.newEpisode',
+      vars: { detail: `${s?.title ?? ''} · ${v.episodeNo ?? ''}` },
+      url: `/watch/${v.seriesId}?tap=${videoId}`,
+    });
   return followers.length;
 }
 

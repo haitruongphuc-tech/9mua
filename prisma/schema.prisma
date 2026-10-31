@@ -35,6 +35,8 @@ model User {
   handle              String?              @unique
   // "Ai được nhắc tên tôi" (SPEC-social.md V5.4 mục 2): everyone | following | nobody.
   mentionPolicy       String               @default("everyone")
+  // Loại thông báo người dùng đã tắt (SPEC-social.md V5.5). Mặc định bật hết.
+  notifyOff           String[]             @default([])
   handleChangedAt     DateTime?
   previousHandle      String?              @unique
   previousHandleUntil DateTime?
@@ -1019,9 +1021,14 @@ model Notification {
   body      String    @default("")
   url       String?
   readAt    DateTime?
+  // Thông báo mới (SPEC-social.md V5.5): loại (bật/tắt trong Cài đặt), khoá gộp theo giờ, số người đã gộp.
+  kind      String?
+  groupKey  String?
+  count     Int       @default(1)
   createdAt DateTime  @default(now())
 
   @@index([userId, readAt, createdAt])
+  @@index([userId, groupKey, createdAt])
 }
 
 // ===== Admin (SPEC-admin.md) =====

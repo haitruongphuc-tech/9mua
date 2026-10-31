@@ -44,3 +44,24 @@ export {
 } from './buyer';
 export { runOrderTick } from './tick';
 export { ORDER_STATUSES, nextStatus, type OrderAction, type ActorRole } from './state-machine';
+// Bổ sung 31/10/2026 (SPEC-orders.md V5.1): đánh giá sản phẩm, sao Kiot.
+export {
+  canReviewItem,
+  createReview,
+  editReview,
+  replyReview,
+  reportReview,
+  listReviewReports,
+  resolveReviewReports,
+  productReviews,
+  kiotRating,
+  myReview,
+  reviewsForKiot,
+  remindReviews,
+  MAX_REVIEW_TEXT,
+  MAX_REPLY_TEXT,
+  KIOT_STARS_MIN_REVIEWS,
+  type ReviewView,
+  type ReviewSummary,
+  type ReviewError,
+} from './reviews';

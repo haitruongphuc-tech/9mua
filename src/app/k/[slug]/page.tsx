@@ -14,6 +14,7 @@ import { VideoGrid } from '@/components/video/VideoGrid';
 import { EventCardView } from '@/components/social/EventCardView';
 import { isFeatureOn } from '@/lib/features';
 import { upcomingEvents } from '@/modules/social';
+import { kiotRating } from '@/modules/orders';
 import { ClientMessages } from '@/i18n/ClientMessages';
 import { getT } from '@/i18n/server';
 import { env } from '@/lib/env';
@@ -72,6 +73,8 @@ export default async function KiotPage({
   const tabHref = (id: Tab) => (id === 'san-pham' ? home : `${home}?tab=${id}`);
   const loginHref = `${env().APP_URL}/dang-nhap?next=${encodeURIComponent(`/k/${slug}`)}`;
   const ownerId = await kiotOwnerId(kiot.id);
+  // Sao Kiot (SPEC-orders.md V5.1 mục 7): chỉ khi từ 3 đánh giá, công tắc reviews.
+  const rating = (await isFeatureOn('reviews')) ? await kiotRating(kiot.id) : null;
   // Sự kiện sắp diễn ra của chủ Kiot (SPEC-social.md V5.7), công tắc events.
   const events =
     ownerId && (await isFeatureOn('events')) ? await upcomingEvents(undefined, { ownerId }, 4) : [];
@@ -167,6 +170,11 @@ export default async function KiotPage({
               }}
               loginHref={loginHref}
             >
+              {rating ? (
+                <p className="mt-2 text-[13px] font-bold text-amber-300" data-testid="kiot-rating">
+                  ★ {rating.avg.toLocaleString(t.lang)} · {t('shop.review.section', { count: rating.count })}
+                </p>
+              ) : null}
               {kiot.description ? <HashtagText text={kiot.description} className="mt-3 text-[13px]" /> : null}
               {kiot.province ? (
                 <p

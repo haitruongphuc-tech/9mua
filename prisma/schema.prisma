@@ -189,6 +189,9 @@ model Product {
   hiddenByAdminAt DateTime? // CEO gỡ vì vi phạm
   hiddenReason    String?
   deletedAt       DateTime? // xoá mềm: đơn cũ vẫn tham chiếu
+  // Đánh giá (SPEC-orders.md V5.1): tính lại trong cùng transaction với đánh giá, chỉ đánh giá đang hiện.
+  ratingAvg       Float          @default(0)
+  ratingCount     Int            @default(0)
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
   images          ProductImage[]
@@ -371,36 +374,37 @@ model Checkout {
 }
 
 model Order {
-  id              String       @id @default(cuid(2))
-  code            String       @unique // DH + số, dễ đọc qua điện thoại
-  checkoutId      String
-  checkout        Checkout     @relation(fields: [checkoutId], references: [id])
-  kiotId          String
-  kiot            Kiot         @relation(fields: [kiotId], references: [id])
-  buyerId         String
-  status          OrderStatus  @default(pending_payment)
-  subtotal        Int
-  shippingFee     Int
-  total           Int
-  platformFeeRate Int // basis point lúc đặt hàng: 500 = 5%
-  shipTo          Json
-  note            String?
-  trackingCode    String?
-  carrier         String?
-  paidAt          DateTime?
-  confirmedAt     DateTime?
-  shippedAt       DateTime?
-  deliveredAt     DateTime?
-  completedAt     DateTime?
-  cancelledAt     DateTime?
-  refundAccount   Json?
-  refundRef       String?
-  refundedAt      DateTime?
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
-  items           OrderItem[]
-  events          OrderEvent[]
-  dispute         Dispute?
+  id               String       @id @default(cuid(2))
+  code             String       @unique // DH + số, dễ đọc qua điện thoại
+  checkoutId       String
+  checkout         Checkout     @relation(fields: [checkoutId], references: [id])
+  kiotId           String
+  kiot             Kiot         @relation(fields: [kiotId], references: [id])
+  buyerId          String
+  status           OrderStatus  @default(pending_payment)
+  subtotal         Int
+  shippingFee      Int
+  total            Int
+  platformFeeRate  Int // basis point lúc đặt hàng: 500 = 5%
+  shipTo           Json
+  note             String?
+  trackingCode     String?
+  carrier          String?
+  paidAt           DateTime?
+  confirmedAt      DateTime?
+  shippedAt        DateTime?
+  deliveredAt      DateTime?
+  completedAt      DateTime?
+  cancelledAt      DateTime?
+  refundAccount    Json?
+  refundRef        String?
+  refundedAt       DateTime?
+  reviewRemindedAt DateTime? // đã nhắc đánh giá 3 ngày sau khi giao (SPEC-orders.md V5.1 mục 3)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  items            OrderItem[]
+  events           OrderEvent[]
+  dispute          Dispute?
 
   @@index([kiotId, status])
   @@index([buyerId, createdAt])
@@ -914,6 +918,52 @@ model SearchLog {
 
   @@index([userId, createdAt])
   @@index([createdAt])
+}
+
+// Đánh giá sản phẩm (SPEC-orders.md V5.1): mỗi OrderItem một đánh giá. hiddenBy: reports | admin: <lý do>.
+model ProductReview {
+  id          String        @id @default(cuid(2))
+  orderItemId String        @unique
+  productId   String
+  kiotId      String
+  buyerId     String
+  stars       Int
+  text        String        @default("")
+  editedAt    DateTime?
+  reply       String?
+  repliedAt   DateTime?
+  hiddenAt    DateTime?
+  hiddenBy    String?
+  createdAt   DateTime      @default(now())
+  media       ReviewMedia[]
+
+  @@index([productId, hiddenAt, createdAt])
+  @@index([kiotId, hiddenAt])
+}
+
+model ReviewMedia {
+  id       String        @id @default(cuid(2))
+  reviewId String
+  review   ProductReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  url      String
+  thumbUrl String
+  width    Int
+  height   Int
+  position Int
+
+  @@index([reviewId])
+}
+
+model ReviewReport {
+  id        String   @id @default(cuid(2))
+  reviewId  String
+  userId    String
+  reason    String
+  status    String   @default("open")
+  createdAt DateTime @default(now())
+
+  @@unique([reviewId, userId])
+  @@index([status, createdAt])
 }
 
 // Đăng lại (SPEC-social.md V5.9): mỗi người đăng lại một video / bài public tối đa 1 lần.

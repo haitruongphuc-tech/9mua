@@ -9,6 +9,7 @@ import { assignMissingHandles } from '@/modules/identity';
 import { remindEvents, revokeLockedPoints } from '@/modules/social';
 import { isFeatureOn } from '@/lib/features';
 import { cleanupSearchLog } from '@/modules/marketplace';
+import { remindReviews } from '@/modules/orders';
 import { finalizeAccountDeletions } from './account-delete';
 import { publishScheduledVideos } from './creator';
 
@@ -38,6 +39,8 @@ const DAILY_JOBS: Job[] = [
   { name: 'account-deletions', run: () => finalizeAccountDeletions() },
   // Lịch sử tìm cũ hơn 90 ngày (SPEC-marketplace.md V5.4 mục 5).
   { name: 'search-log-cleanup', run: () => cleanupSearchLog() },
+  // Nhắc đánh giá 3 ngày sau khi giao (SPEC-orders.md V5.1 mục 3), công tắc reviews.
+  { name: 'review-reminders', run: async () => ((await isFeatureOn('reviews')) ? remindReviews() : 0) },
   // Ảnh tải lên cho bài viết nhưng không đăng trong 24 giờ.
   { name: 'post-uploads', run: () => cleanupPostUploads() },
   // Nháp quá 90 ngày tự xoá, báo trước 7 ngày. Công tắc tắt thì người dùng không thấy tab Nháp nên không xoá.

@@ -5,6 +5,7 @@ export const notify = {
   'notify.mentioned': '{name} đã nhắc tên bạn',
   'notify.videoReply': '{name} đã trả lời bình luận của bạn bằng video',
   'notify.reposted': '{name} đã đăng lại nội dung của bạn',
+  'notify.reviewReminder': 'Đơn {code} đã giao. Đánh giá sản phẩm để giúp người mua khác nhé!',
   'notify.followRequest': '{name} muốn follow bạn',
   'notify.followAccepted': '{name} đã chấp nhận yêu cầu follow của bạn',
   'notify.eventSoon': 'Sự kiện bạn quan tâm sắp bắt đầu',

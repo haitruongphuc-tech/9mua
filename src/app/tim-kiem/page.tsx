@@ -39,7 +39,7 @@ const FULL = 30;
 export default async function SearchPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; tab?: string }>;
+  searchParams: Promise<{ q?: string; tab?: string; sao?: string }>;
 }) {
   const params = await searchParams;
   const q = (params.q ?? '').trim().slice(0, 100);
@@ -59,7 +59,9 @@ export default async function SearchPage({
       : Promise.resolve([]),
     q ? Promise.resolve([]) : trendingHashtags(10),
     searchMore && want('kiot', 1)
-      ? searchKiots({ q, limit: all ? ALL.kiots : FULL }).then((p) => p.items)
+      ? searchKiots({ q, limit: all ? ALL.kiots : FULL, minStars: params.sao === '4' ? 4 : undefined }).then(
+          (p) => p.items,
+        )
       : Promise.resolve([]),
   ]);
   const href = (to: Tab) => `/tim-kiem?q=${encodeURIComponent(q)}${to === 'tat-ca' ? '' : `&tab=${to}`}`;
@@ -204,6 +206,16 @@ export default async function SearchPage({
 
         {searchMore && q && (tab === 'kiot' || tab === 'san-pham') ? (
           <NearMe tab={tab === 'kiot' ? 'kiot' : 'san-pham'} q={q} />
+        ) : null}
+
+        {searchMore && q && tab === 'kiot' ? (
+          <Link
+            href={`/tim-kiem?q=${encodeURIComponent(q)}&tab=kiot${params.sao === '4' ? '' : '&sao=4'}`}
+            className={`w-fit rounded-full px-3 py-1.5 text-[12px] font-bold ${params.sao === '4' ? 'bg-amber-300 text-ink' : 'bg-white/10'}`}
+            data-testid="kiot-stars-filter"
+          >
+            ★ 4+
+          </Link>
         ) : null}
 
         {kiots.length ? (

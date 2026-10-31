@@ -23,6 +23,7 @@ export type KiotSearchCard = {
   url: string;
   distanceKm: number | null;
   approx: boolean; // Kiot chưa đặt ghim: tính theo tâm tỉnh ("khoảng 12 km")
+  stars: number | null; // sao Kiot (SPEC-orders.md V5.1 mục 7), null khi chưa đủ 3 đánh giá
 };
 
 type Row = {
@@ -35,6 +36,8 @@ type Row = {
   price_max: number | null;
   dist: number | null;
   approx: boolean;
+  stars: number | null;
+  reviews: number;
 };
 
 // Khớp tên Kiot gần đúng (gõ sai nhẹ), giới thiệu khớp nguyên cụm đã bỏ dấu — cùng cách tìm sản phẩm.
@@ -53,6 +56,7 @@ export async function searchKiots(params: {
   area?: string; // phường/xã hoặc địa danh: khớp địa chỉ lấy hàng
   near?: Near;
   cell?: { lat: number; lng: number }; // một ô ~1,1 km trên bản đồ nhiệt (SPEC-marketplace.md V5.3 mục 3)
+  minStars?: number; // "★ 4+": trung bình từ minStars, chỉ Kiot có từ 3 đánh giá
   limit?: number;
   offset?: number;
 }): Promise<{ items: KiotSearchCard[]; nextOffset: number | null }> {
@@ -84,12 +88,15 @@ export async function searchKiots(params: {
           (SELECT COUNT(*)::int FROM "Product" p WHERE p."kiotId" = k.id AND ${visibleOnMarket(at)}) AS products,
           (SELECT MIN(p.price)::int FROM "Product" p WHERE p."kiotId" = k.id AND ${visibleOnMarket(at)}) AS price_min,
           (SELECT MAX(p.price)::int FROM "Product" p WHERE p."kiotId" = k.id AND ${visibleOnMarket(at)}) AS price_max,
-          (SELECT COUNT(DISTINCT ps."orderId")::int FROM "ProductSale" ps WHERE ps."kiotId" = k.id) AS orders
+          (SELECT COUNT(DISTINCT ps."orderId")::int FROM "ProductSale" ps WHERE ps."kiotId" = k.id) AS orders,
+          (SELECT AVG(r.stars)::float8 FROM "ProductReview" r WHERE r."kiotId" = k.id AND r."hiddenAt" IS NULL) AS stars,
+          (SELECT COUNT(*)::int FROM "ProductReview" r WHERE r."kiotId" = k.id AND r."hiddenAt" IS NULL) AS reviews
         FROM "Kiot" k LEFT JOIN ${provinceCentersSql} ON pc.slug = k.province
         WHERE ${Prisma.join(filters, ' AND ')}
       )
-      SELECT slug, name, "logoUrl", province, products, price_min, price_max, dist, approx FROM kiots
-      WHERE products > 0 ${near ? Prisma.sql`AND dist IS NOT NULL AND dist <= ${near.radiusKm}::float8` : Prisma.empty}
+      SELECT slug, name, "logoUrl", province, products, price_min, price_max, dist, approx, stars, reviews FROM kiots
+      WHERE products > 0
+        ${params.minStars ? Prisma.sql`AND reviews >= 3 AND stars >= ${params.minStars}::float8` : Prisma.empty} ${near ? Prisma.sql`AND dist IS NOT NULL AND dist <= ${near.radiusKm}::float8` : Prisma.empty}
       ORDER BY ${order}, "createdAt" DESC, id
       LIMIT ${limit + 1} OFFSET ${offset}`;
   });
@@ -105,6 +112,7 @@ export async function searchKiots(params: {
       url: kiotOrigin(r.slug),
       distanceKm: r.dist === null ? null : Math.round(r.dist * 10) / 10,
       approx: r.approx,
+      stars: r.reviews >= 3 && r.stars !== null ? Math.round(r.stars * 10) / 10 : null,
     })),
     nextOffset: rows.length > limit ? offset + limit : null,
   };

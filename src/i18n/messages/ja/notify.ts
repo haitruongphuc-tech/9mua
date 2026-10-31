@@ -6,6 +6,7 @@ export const notify: NotifyMessages = {
   'notify.mentioned': '{name} さんがあなたをメンションしました',
   'notify.videoReply': '{name} さんがあなたのコメントに動画で返信しました',
   'notify.reposted': '{name} さんがあなたの投稿を再投稿しました',
+  'notify.reviewReminder': '注文 {code} が届きました。レビューで他の購入者を助けましょう！',
   'notify.followRequest': '{name} さんがフォローをリクエストしました',
   'notify.followAccepted': '{name} さんがフォローリクエストを承認しました',
   'notify.eventSoon': '興味ありのイベントがまもなく始まります',

@@ -5,7 +5,8 @@ import { requireAdminVerified } from '@/modules/admin';
 import { listFailedVideoJobs, listVideoReports, VIDEO_REPORT_REASONS } from '@/modules/creator';
 import { listReports, REPORT_REASONS } from '@/modules/marketplace';
 import type { FlashParams } from '../flash';
-import { resolveGroupAction } from './actions';
+import { resolveGroupAction, resolveReviewAction } from './actions';
+import { listReviewReports } from '@/modules/orders';
 import { resolveEventAction, resolvePostAction, resolveProductAction, resolveVideoAction } from './actions';
 import { listEventReports, listGroupReports } from '@/modules/social';
 import { listPostReports } from '@/modules/creator';
@@ -28,6 +29,7 @@ export default async function ReportsQueuePage({ searchParams }: { searchParams:
   ]);
   const eventReports = await listEventReports();
   const groupReports = await listGroupReports();
+  const reviewReports = await listReviewReports();
   return (
     <section className="flex flex-col gap-4 px-4 py-5">
       <h1 className="text-xl font-extrabold">Báo cáo vi phạm</h1>
@@ -122,6 +124,41 @@ export default async function ReportsQueuePage({ searchParams }: { searchParams:
               </form>
               <form action={resolvePostAction.bind(null, r.post.id, 'dismiss')}>
                 <ConfirmSubmit confirm="Bỏ qua báo cáo, hiện lại bài?" tone="plain">
+                  Bỏ qua
+                </ConfirmSubmit>
+              </form>
+            </li>
+          ) : null,
+        )}
+      </ul>
+      <h2 className="font-extrabold">Đánh giá sản phẩm ({reviewReports.length})</h2>
+      <ul className="flex flex-col gap-2" data-testid="review-reports">
+        {reviewReports.map((r) =>
+          r.review ? (
+            <li
+              key={r.review.id}
+              className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-white/5 p-3"
+            >
+              <p className="text-sm">
+                {'★'.repeat(r.review.stars)} {r.review.text || '(không có chữ)'}
+              </p>
+              <p className="text-xs text-white/60">
+                {r.count} báo cáo · {r.review.hiddenAt ? 'đang ẩn' : 'đang hiện'}
+              </p>
+              <form action={resolveReviewAction.bind(null, r.review.id, 'hide')} className="flex gap-2">
+                <input
+                  name="reason"
+                  required
+                  maxLength={200}
+                  placeholder="Lý do ẩn"
+                  className="h-9 min-w-0 flex-1 rounded-lg border border-white/15 bg-white/5 px-2 text-xs"
+                />
+                <ConfirmSubmit confirm="Ẩn đánh giá này?" tone="danger">
+                  Ẩn
+                </ConfirmSubmit>
+              </form>
+              <form action={resolveReviewAction.bind(null, r.review.id, 'dismiss')}>
+                <ConfirmSubmit confirm="Bỏ qua báo cáo, hiện lại đánh giá?" tone="plain">
                   Bỏ qua
                 </ConfirmSubmit>
               </form>

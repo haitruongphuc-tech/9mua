@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
+import { isFeatureOn } from '@/lib/features';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { eventLabel, OrderStatusBadge } from '@/components/orders/status';
 import { ClientMessages } from '@/i18n/ClientMessages';
@@ -28,6 +30,7 @@ export default async function BuyerOrderPage({ params }: { params: Promise<{ id:
     accountName: string;
   } | null;
   const total = formatVnd(order.total);
+  const reviewsOn = await isFeatureOn('reviews');
 
   return (
     <section className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 py-6">
@@ -53,6 +56,15 @@ export default async function BuyerOrderPage({ params }: { params: Promise<{ id:
               {i.name} × {i.qty}
             </span>
             <span>{formatVnd(i.price * i.qty)}</span>
+            {reviewsOn && (order.status === 'delivered' || order.status === 'completed') ? (
+              <Link
+                href={`/don-mua/${order.id}/danh-gia/${i.id}`}
+                className="rounded-full bg-white/10 px-3 py-1 text-[12px] font-bold"
+                data-testid="review-link"
+              >
+                ★ {t('shop.review.link')}
+              </Link>
+            ) : null}
           </li>
         ))}
         <li className="flex justify-between border-t border-white/10 pt-2 font-black">

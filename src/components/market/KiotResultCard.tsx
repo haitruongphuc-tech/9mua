@@ -21,7 +21,12 @@ export function KiotResultCard({
         ) : null}
       </span>
       <span className="flex min-w-0 flex-col">
-        <span className="truncate text-[14px] font-bold">{kiot.name}</span>
+        <span className="truncate text-[14px] font-bold">
+          {kiot.name}
+          {kiot.stars !== null ? (
+            <span className="ml-1 text-[12px] text-amber-300">★ {kiot.stars}</span>
+          ) : null}
+        </span>
         <span className="text-[12px] text-white/60">
           {[kiot.province, labels.products, labels.price].filter(Boolean).join(' · ')}
         </span>

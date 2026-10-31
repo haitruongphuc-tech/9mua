@@ -4,6 +4,32 @@ import { requireAdminVerified, resolveProductReport, resolveVideoReport } from '
 import { audit } from '@/lib/audit';
 import { resolvePostReports } from '@/modules/creator';
 import { resolveEventReports, resolveGroupReports } from '@/modules/social';
+import { resolveReviewReports } from '@/modules/orders';
+
+// Đánh giá bị báo cáo (SPEC-orders.md V5.1 mục 5): CEO ẩn kèm lý do, hoặc bỏ qua (đánh giá tự ẩn thì hiện lại).
+export async function resolveReviewAction(
+  reviewId: string,
+  decision: 'hide' | 'dismiss',
+  form: FormData,
+): Promise<void> {
+  const admin = await requireAdminVerified();
+  const reason = String(form.get('reason') ?? '').trim();
+  const ok = await resolveReviewReports(reviewId, decision, reason);
+  if (ok)
+    await audit({
+      adminId: admin.id,
+      action: `review.${decision}`,
+      targetType: 'review',
+      targetId: reviewId,
+      reason: reason || null,
+    });
+  back(
+    '/admin/bao-cao',
+    ok
+      ? { ok: true, message: decision === 'hide' ? 'Đã ẩn đánh giá.' : 'Đã bỏ qua báo cáo.' }
+      : { ok: false, message: 'Đánh giá không còn.' },
+  );
+}
 
 // Nhóm bị báo cáo (SPEC-social.md V5.10 mục 5): CEO khoá nhóm kèm lý do hoặc bỏ qua.
 export async function resolveGroupAction(

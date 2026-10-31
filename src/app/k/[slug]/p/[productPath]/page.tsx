@@ -15,6 +15,9 @@ import { env } from '@/lib/env';
 import { formatVnd } from '@/lib/format';
 import { getCurrentUser } from '@/modules/identity';
 import { CATEGORIES, getPublicProduct, kiotOwnerId, productPath } from '@/modules/kiot';
+import { productReviews } from '@/modules/orders';
+import { isFeatureOn } from '@/lib/features';
+import { ProductReviews } from './ProductReviews';
 import { kiotBasePath, kiotCanonical } from '../../../kiot-context';
 
 const viewer = cache(getCurrentUser);
@@ -23,7 +26,10 @@ const load = cache(async (slug: string, path: string) => {
   return getPublicProduct(slug, id, (await viewer())?.id ?? null);
 });
 
-type Params = { params: Promise<{ slug: string; productPath: string }> };
+type Params = {
+  params: Promise<{ slug: string; productPath: string }>;
+  searchParams?: Promise<{ sao?: string; 'co-anh'?: string }>;
+};
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug, productPath: path } = await params;
@@ -53,7 +59,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 const contact = 'flex h-11 flex-1 items-center justify-center gap-2 rounded-full text-[14px] font-black';
 
 // Trang sản phẩm kiểu V4: ảnh trên nền trắng, giá cam, nút giỏ cam, liên hệ Zalo/Gọi.
-export default async function ProductPage({ params }: Params) {
+export default async function ProductPage({ params, searchParams }: Params) {
   const { slug, productPath: path } = await params;
   const found = await load(slug, path);
   if (!found) notFound();
@@ -64,6 +70,14 @@ export default async function ProductPage({ params }: Params) {
   if (`/p/${path}` !== productPath(product)) permanentRedirect(`${base}${productPath(product)}`);
   const category = CATEGORIES.find((c) => c.slug === product.category);
   const local = '0' + kiot.contactPhone.replace(/^\+84/, '');
+  // Đánh giá (SPEC-orders.md V5.1 mục 6), công tắc reviews.
+  const query = (await searchParams) ?? {};
+  const reviewFilter = {
+    stars: [1, 2, 3, 4, 5].find((s) => String(s) === query.sao),
+    withMedia: query['co-anh'] === '1',
+  };
+  const reviews =
+    !preview && (await isFeatureOn('reviews')) ? await productReviews(product.id, reviewFilter) : null;
 
   return (
     <ClientMessages prefixes={['market.p.', 'market.report.', 'shop.add.', 'shop.cart.qty']}>
@@ -120,6 +134,16 @@ export default async function ProductPage({ params }: Params) {
               </h2>
               <ProductDescription text={product.description} />
             </section>
+          ) : null}
+          {reviews ? (
+            <ProductReviews
+              summary={reviews.summary}
+              items={reviews.items}
+              filter={reviewFilter}
+              basePath={`${base}${productPath(product)}`}
+              loggedIn={Boolean(await viewer())}
+              t={t}
+            />
           ) : null}
           {preview ? null : (
             <ReportProduct

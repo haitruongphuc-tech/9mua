@@ -122,6 +122,28 @@ export const me: MeMessages = {
   'me.settings.private.kiot':
     '운영 중인 Kiot이 있어 비공개로 바꿀 수 없어요. Kiot은 판매를 위해 공개여야 해요.',
   'me.settings.private.requests': '팔로우 요청',
+  'me.delete.title': '계정 삭제',
+  'me.delete.wait':
+    '확인하면 모든 기기에서 로그아웃되고 프로필이 바로 숨겨져요. 30일 안에 다시 로그인하면 삭제가 취소돼요.',
+  'me.delete.what':
+    '30일 후: 이름이 "삭제된 계정"으로 바뀌고 이메일, 전화번호, 사진, @아이디, 동영상, 게시물, 댓글이 삭제돼요.',
+  'me.delete.keep': '주문 내역과 거래 기록은 규정에 따라 보관돼요(익명 처리).',
+  'me.delete.blocked': '아직 삭제할 수 없어요:',
+  'me.delete.blocker.KIOT_BALANCE': 'Kiot에 잔액이 남아 있어요. 먼저 모두 출금하세요.',
+  'me.delete.blocker.OPEN_ORDERS': '끝나지 않은 구매 또는 판매 주문이 있어요(분쟁 포함).',
+  'me.delete.blocker.PAYOUT_PENDING': '처리 중인 출금 요청이 있어요.',
+  'me.delete.password': '비밀번호를 입력해 확인',
+  'me.delete.confirm': '내 계정 삭제',
+  'me.delete.noPassword':
+    '비밀번호를 모르나요(이메일 코드, Google, Zalo, Facebook으로 로그인)? 이메일로 받은 코드로 확인하세요.',
+  'me.delete.sendCode': '이메일로 코드 보내기',
+  'me.delete.err.BAD_PASSWORD': '비밀번호가 틀렸어요.',
+  'me.delete.err.CODE_INVALID': '코드가 틀렸어요.',
+  'me.delete.err.CODE_EXPIRED': '코드가 만료됐어요. 새 코드를 요청하세요.',
+  'me.delete.err.NO_EMAIL': '이 계정에는 이메일이 없어요.',
+  'me.delete.err.ADMIN': '관리자 계정은 직접 삭제할 수 없어요.',
+  'me.delete.err.SEND_FAILED': '코드를 보내지 못했어요. 나중에 다시 시도하세요.',
+  'me.delete.err.NOT_FOUND': '계정을 찾을 수 없어요.',
   'me.requests.title': '팔로우 요청',
   'me.requests.empty': '아직 요청이 없어요.',
   'me.requests.accept': '수락',

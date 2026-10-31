@@ -1,4 +1,5 @@
 import { now } from '@/lib/clock';
+import { lockedForLogin } from './deletion-lock';
 import { db } from '@/lib/db';
 import { normalizeIdentifier } from './identifier';
 import { hashPassword, verifyPassword } from './password';
@@ -29,7 +30,7 @@ export async function login(input: { identifier: string; password: string }): Pr
     await db.loginAttempt.create({ data: { identifier: key, createdAt: now() } });
     return { ok: false, error: 'INVALID_CREDENTIALS' };
   }
-  if (user.lockedAt) return { ok: false, error: 'ACCOUNT_LOCKED' };
+  if (await lockedForLogin(user)) return { ok: false, error: 'ACCOUNT_LOCKED' };
 
   await db.loginAttempt.deleteMany({ where: { identifier: key } });
   return { ok: true, userId: user.id, mustChangePassword: user.mustChangePassword };

@@ -12,6 +12,8 @@ export {
 } from './upload';
 export { processNextJob, claimJob } from './jobs';
 export { onVideoReady, type VideoReadyHook } from './hooks';
+// Tự xoá tài khoản (SPEC-identity.md V5.3): gỡ nội dung khi hết 30 ngày chờ.
+export { purgeUserContent } from './purge';
 export { listStories, expireStories, type StoryGroup, type StoryItem } from './stories';
 export { extractHashtags } from './hashtags';
 export { feedScore } from './score';

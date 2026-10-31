@@ -1,4 +1,5 @@
 import { createHash, createHmac, randomBytes } from 'node:crypto';
+import { lockedForLogin } from './deletion-lock';
 import { Prisma } from '@prisma/client';
 import { now } from '@/lib/clock';
 import { decryptSecret, encryptSecret } from '@/lib/crypto';
@@ -187,7 +188,7 @@ export async function completeOauthLogin(p: OauthProvider, profile: OauthProfile
   });
   if (linked) {
     if (linked.user.role === 'admin') return { kind: 'error', error: 'ADMIN' };
-    if (linked.user.lockedAt) return { kind: 'error', error: 'LOCKED' };
+    if (await lockedForLogin(linked.user)) return { kind: 'error', error: 'LOCKED' };
     return { kind: 'login', userId: linked.userId, created: false };
   }
   // Zalo không cho email; chỉ email Facebook mới được dùng.

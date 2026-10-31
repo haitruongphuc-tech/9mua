@@ -1,4 +1,5 @@
 import { createHash, createPublicKey, randomBytes, verify, type JsonWebKey } from 'node:crypto';
+import { lockedForLogin } from './deletion-lock';
 import { now } from '@/lib/clock';
 import { decryptSecret, encryptSecret } from '@/lib/crypto';
 import { db } from '@/lib/db';
@@ -176,7 +177,7 @@ export async function completeGoogleLogin(claims: GoogleClaims): Promise<GoogleL
   const linked = await db.user.findUnique({ where: { googleSub: claims.sub } });
   if (linked) {
     if (linked.role === 'admin') return { kind: 'error', error: 'ADMIN' };
-    if (linked.lockedAt) return { kind: 'error', error: 'LOCKED' };
+    if (await lockedForLogin(linked)) return { kind: 'error', error: 'LOCKED' };
     return { kind: 'login', userId: linked.id };
   }
   const existing = await db.user.findUnique({ where: { email: claims.email } });

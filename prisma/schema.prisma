@@ -43,6 +43,9 @@ model User {
   showMemories        Boolean              @default(true)
   // Tài khoản riêng tư (SPEC-identity.md V5.2): follow mới thành yêu cầu, nội dung public hiển thị như followers.
   isPrivate           Boolean              @default(false)
+  // Tự xoá tài khoản (SPEC-identity.md V5.3): yêu cầu lúc nào; hết 30 ngày chờ thì ẩn danh hoá (deletedAt).
+  deleteRequestedAt   DateTime?
+  deletedAt           DateTime?
   handleChangedAt     DateTime?
   previousHandle      String?              @unique
   previousHandleUntil DateTime?

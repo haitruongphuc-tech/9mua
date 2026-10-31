@@ -86,8 +86,9 @@ export async function pointBalance(userId: string): Promise<number> {
 
 // Thu hồi điểm của tài khoản bị khoá bằng dòng trừ (việc hằng ngày). Một lần khoá chỉ thu hồi một lần.
 export async function revokeLockedPoints(): Promise<number> {
+  // Tài khoản đang chờ tự xoá (SPEC-identity.md V5.3) không tính: đăng nhập lại là huỷ xoá.
   const locked = await db.user.findMany({
-    where: { lockedAt: { not: null } },
+    where: { lockedAt: { not: null }, deleteRequestedAt: null },
     select: { id: true, lockedAt: true },
   });
   let n = 0;

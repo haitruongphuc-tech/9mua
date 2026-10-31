@@ -1,4 +1,5 @@
 import { createHmac, randomBytes, randomInt, timingSafeEqual } from 'node:crypto';
+import { lockedForLogin } from './deletion-lock';
 import { Prisma } from '@prisma/client';
 import { now } from '@/lib/clock';
 import { db } from '@/lib/db';
@@ -12,7 +13,7 @@ import { registerInput } from './register';
 
 // Mã 6 số gửi qua email (SPEC-identity.md bổ sung 29/10): đăng nhập/đăng ký không cần mật khẩu, liên kết Google/
 // Facebook khi email trùng, thêm email cho tài khoản chưa có. Không bao giờ ghi log mã.
-export type OtpPurpose = 'login' | 'link' | 'add-email' | 'set-password';
+export type OtpPurpose = 'login' | 'link' | 'add-email' | 'set-password' | 'delete-account';
 
 const CODE_TTL_MS = 10 * 60_000;
 const RESEND_MS = 60_000;
@@ -32,6 +33,7 @@ const SUBJECT: Record<OtpPurpose, string> = {
   link: 'mã liên kết tài khoản 9MUA',
   'add-email': 'mã xác nhận email 9MUA',
   'set-password': 'mã đặt mật khẩu 9MUA',
+  'delete-account': 'mã xác nhận xoá tài khoản 9MUA',
 };
 
 function normalEmail(raw: string): string | null {
@@ -146,7 +148,7 @@ export async function loginWithEmailOtp(input: {
   const existing = await db.user.findUnique({ where: { email } });
   if (existing) {
     if (existing.role === 'admin') return { ok: false, error: 'ADMIN' };
-    if (existing.lockedAt) return { ok: false, error: 'LOCKED' };
+    if (await lockedForLogin(existing)) return { ok: false, error: 'LOCKED' };
     return { ok: true, userId: existing.id, created: false };
   }
   const name = input.displayName?.trim().slice(0, 50);
@@ -205,7 +207,7 @@ export async function linkWithOtp(sealed: string | undefined, code: string): Pro
   const user = await db.user.findUnique({ where: { email: t.email } });
   if (!user) return { ok: false, error: 'TICKET_EXPIRED' };
   if (user.role === 'admin') return { ok: false, error: 'ADMIN' };
-  if (user.lockedAt) return { ok: false, error: 'LOCKED' };
+  if (await lockedForLogin(user)) return { ok: false, error: 'LOCKED' };
   await applyLink(user.id, t);
   return { ok: true, userId: user.id };
 }
@@ -235,6 +237,11 @@ export async function setPasswordWithOtp(
     db.session.deleteMany({ where: { userId, id: { not: currentSessionId } } }),
   ]);
   return { ok: true };
+}
+
+// Xác nhận xoá tài khoản bằng mã email (SPEC-identity.md V5.3).
+export function consumeOtpForUser(email: string, purpose: OtpPurpose, code: string): Promise<OtpCheck> {
+  return consumeOtp(email, purpose, code);
 }
 
 // Email trong vé liên kết (để trang đăng nhập gửi mã đúng địa chỉ mà không cho người dùng tự nhập).

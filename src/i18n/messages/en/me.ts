@@ -122,6 +122,28 @@ export const me: MeMessages = {
   'me.settings.private.kiot':
     "You have an active Kiot, so you can't go private: a Kiot must be public to sell.",
   'me.settings.private.requests': 'Follow requests',
+  'me.delete.title': 'Delete account',
+  'me.delete.wait':
+    'After you confirm, you are signed out everywhere and your profile is hidden right away. Signing in again within 30 days cancels the deletion.',
+  'me.delete.what':
+    'After 30 days: your name becomes "Deleted account"; your email, phone, photos, @handle, videos, posts and comments are removed.',
+  'me.delete.keep': 'Order history and money records are kept as required (anonymised).',
+  'me.delete.blocked': "You can't delete yet because:",
+  'me.delete.blocker.KIOT_BALANCE': 'Your Kiot still has a balance. Withdraw it first.',
+  'me.delete.blocker.OPEN_ORDERS': 'You have unfinished purchases or sales (including disputes).',
+  'me.delete.blocker.PAYOUT_PENDING': 'You have a pending withdrawal request.',
+  'me.delete.password': 'Enter your password to confirm',
+  'me.delete.confirm': 'Delete my account',
+  'me.delete.noPassword':
+    "Don't know your password (signed in with an email code, Google, Zalo or Facebook)? Confirm with a code sent to your email.",
+  'me.delete.sendCode': 'Send code to email',
+  'me.delete.err.BAD_PASSWORD': 'Wrong password.',
+  'me.delete.err.CODE_INVALID': 'Wrong code.',
+  'me.delete.err.CODE_EXPIRED': 'The code has expired. Request a new one.',
+  'me.delete.err.NO_EMAIL': 'This account has no email.',
+  'me.delete.err.ADMIN': "Admin accounts can't delete themselves.",
+  'me.delete.err.SEND_FAILED': "Couldn't send the code. Try again later.",
+  'me.delete.err.NOT_FOUND': 'Account not found.',
   'me.requests.title': 'Follow requests',
   'me.requests.empty': 'No requests yet.',
   'me.requests.accept': 'Accept',

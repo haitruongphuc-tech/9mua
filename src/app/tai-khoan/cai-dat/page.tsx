@@ -321,6 +321,15 @@ export default async function AccountSettingsPage({
               </button>
             </form>
           </Card>
+          {handleOn ? (
+            <Link
+              href="/tai-khoan/xoa-tai-khoan"
+              className="text-center text-[12px] font-bold text-danger/80 hover:underline"
+              data-testid="delete-account-link"
+            >
+              {t('me.delete.title')}
+            </Link>
+          ) : null}
         </div>
       </div>
     </ClientMessages>

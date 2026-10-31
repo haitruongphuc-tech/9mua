@@ -121,6 +121,28 @@ export const me = {
   'me.settings.private.kiot':
     'Bạn đang có Kiot hoạt động nên không bật được: Kiot phải công khai để bán hàng.',
   'me.settings.private.requests': 'Yêu cầu follow',
+  'me.delete.title': 'Xoá tài khoản',
+  'me.delete.wait':
+    'Sau khi xác nhận, bạn bị đăng xuất mọi thiết bị và trang cá nhân ẩn ngay. Đăng nhập lại trong 30 ngày là huỷ xoá.',
+  'me.delete.what':
+    'Hết 30 ngày: tên thành "Tài khoản đã xoá"; email, SĐT, ảnh, @tên, video, bài viết, bình luận bị xoá.',
+  'me.delete.keep': 'Lịch sử đơn hàng và sổ tiền được giữ theo quy định (đã ẩn danh).',
+  'me.delete.blocked': 'Chưa xoá được vì:',
+  'me.delete.blocker.KIOT_BALANCE': 'Kiot còn số dư. Hãy rút hết tiền trước.',
+  'me.delete.blocker.OPEN_ORDERS': 'Còn đơn mua hoặc đơn bán chưa xong (kể cả đang khiếu nại).',
+  'me.delete.blocker.PAYOUT_PENDING': 'Còn yêu cầu rút tiền đang chờ.',
+  'me.delete.password': 'Nhập mật khẩu để xác nhận',
+  'me.delete.confirm': 'Xoá tài khoản của tôi',
+  'me.delete.noPassword':
+    'Không nhớ mật khẩu (đăng nhập bằng mã email, Google, Zalo, Facebook)? Xác nhận bằng mã gửi về email.',
+  'me.delete.sendCode': 'Gửi mã về email',
+  'me.delete.err.BAD_PASSWORD': 'Mật khẩu không đúng.',
+  'me.delete.err.CODE_INVALID': 'Mã không đúng.',
+  'me.delete.err.CODE_EXPIRED': 'Mã đã hết hạn, hãy gửi mã mới.',
+  'me.delete.err.NO_EMAIL': 'Tài khoản chưa có email.',
+  'me.delete.err.ADMIN': 'Tài khoản quản trị không tự xoá được.',
+  'me.delete.err.SEND_FAILED': 'Không gửi được mã, thử lại sau.',
+  'me.delete.err.NOT_FOUND': 'Không tìm thấy tài khoản.',
   'me.requests.title': 'Yêu cầu follow',
   'me.requests.empty': 'Chưa có yêu cầu nào.',
   'me.requests.accept': 'Chấp nhận',

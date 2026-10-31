@@ -102,3 +102,15 @@ export {
   commitmentRecords,
   type CommitmentText,
 } from './commitment';
+// Bổ sung 31/10/2026 (SPEC-identity.md V5.3): tự xoá tài khoản.
+export {
+  confirmAccountDeletion,
+  markAccountDeletion,
+  accountsDueForDeletion,
+  anonymizeUser,
+  deletionStatus,
+  DELETE_WAIT_DAYS,
+  DELETED_NAME,
+  type DeleteConfirm,
+  type DeleteRequestError,
+} from './account-delete';

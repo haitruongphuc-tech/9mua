@@ -8,6 +8,7 @@ import {
 import { assignMissingHandles } from '@/modules/identity';
 import { remindEvents, revokeLockedPoints } from '@/modules/social';
 import { isFeatureOn } from '@/lib/features';
+import { finalizeAccountDeletions } from './account-delete';
 import { publishScheduledVideos } from './creator';
 
 // Việc định kỳ của đợt nâng cấp (docs/nang-cap-mot-dot.md): cron gọi /api/internal/v5/tick mỗi 5 phút và
@@ -32,6 +33,8 @@ const DAILY_JOBS: Job[] = [
   { name: 'downloads', run: () => expireDownloads() },
   // Điểm thưởng của tài khoản bị khoá: thu hồi bằng dòng trừ (SPEC-social.md V5.6).
   { name: 'points-revoke', run: () => revokeLockedPoints() },
+  // Tự xoá tài khoản hết 30 ngày chờ: gỡ nội dung, ẩn danh hoá (SPEC-identity.md V5.3).
+  { name: 'account-deletions', run: () => finalizeAccountDeletions() },
   // Ảnh tải lên cho bài viết nhưng không đăng trong 24 giờ.
   { name: 'post-uploads', run: () => cleanupPostUploads() },
   // Nháp quá 90 ngày tự xoá, báo trước 7 ngày. Công tắc tắt thì người dùng không thấy tab Nháp nên không xoá.

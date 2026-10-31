@@ -22,6 +22,21 @@ function recall(key: string): string | null {
   }
 }
 
+// Gửi một phần bằng XMLHttpRequest (như đường tải một lần vốn chạy tốt trên iPhone), có tiến độ từng byte.
+// fetch() với Blob cắt từ video trong Ảnh trên iPhone gửi sai số byte (log 31/10: mọi phần bị BAD_PART). Trả 0 khi rớt mạng.
+function putPart(url: string, body: Blob, onLoaded: (bytes: number) => void): Promise<number> {
+  return new Promise((resolve) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('PUT', url);
+    xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+    xhr.upload.onprogress = (e) => onLoaded(e.loaded);
+    xhr.onload = () => resolve(xhr.status);
+    xhr.onerror = () => resolve(0);
+    xhr.ontimeout = () => resolve(0);
+    xhr.send(body);
+  });
+}
+
 export async function chunkedUpload(
   file: File,
   durationSec: number | null,
@@ -59,13 +74,14 @@ export async function chunkedUpload(
   const have = new Set(session.received);
   const started = Date.now();
   let sent = 0;
-  const done = () => have.size * session.partSize;
+  let inFlight = 0; // byte của phần đang gửi, để thanh tiến độ chạy trong lúc gửi (không đứng 0% tới hết 8MB)
+  const done = () => Math.min(have.size * session.partSize, file.size);
   const report = () => {
     const elapsed = (Date.now() - started) / 1000;
-    const speed = elapsed > 0 ? sent / elapsed : 0;
-    const left = Math.max(file.size - done(), 0);
+    const speed = elapsed > 0 ? (sent + inFlight) / elapsed : 0;
+    const left = Math.max(file.size - done() - inFlight, 0);
     onProgress({
-      pct: Math.min(99, Math.round((Math.min(done(), file.size) / file.size) * 100)),
+      pct: Math.min(99, Math.round(((done() + inFlight) / file.size) * 100)),
       bytesPerSec: speed,
       etaSec: speed > 0 ? Math.round(left / speed) : null,
     });
@@ -73,21 +89,24 @@ export async function chunkedUpload(
   report();
   for (let n = 0; n < session.parts; n++) {
     if (have.has(n)) continue;
-    const blob = file.slice(n * session.partSize, (n + 1) * session.partSize);
+    // File chỉ 1 phần thì gửi nguyên file, không cắt: iPhone (WebKit) gửi sai dữ liệu khi cắt video lấy từ Ảnh.
+    const blob = session.parts === 1 ? file : file.slice(n * session.partSize, (n + 1) * session.partSize);
     let ok = false;
     // Mỗi phần thử tối đa 5 lần, chờ dài dần (mạng 4G chập chờn).
     for (let attempt = 0; attempt < 5 && !ok; attempt++) {
       if (attempt) await sleep(1000 * 2 ** attempt);
-      const r = await fetch(`/api/uploads/video/${session.id}/parts/${n}`, {
-        method: 'PUT',
-        body: blob,
-      }).catch(() => null);
-      if (r?.status === 404) {
+      inFlight = 0;
+      const status = await putPart(`/api/uploads/video/${session.id}/parts/${n}`, blob, (loaded) => {
+        inFlight = Math.min(loaded, blob.size);
+        report();
+      });
+      if (status === 404) {
         remember(key, null);
         return { ok: false, message: messages.failed };
       }
-      ok = Boolean(r?.ok);
+      ok = status >= 200 && status < 300;
     }
+    inFlight = 0;
     if (!ok) return { ok: false, message: messages.offline }; // giữ phiên: bấm đăng lại sẽ gửi tiếp
     have.add(n);
     sent += blob.size;

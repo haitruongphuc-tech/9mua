@@ -154,10 +154,15 @@ export async function putUploadPart(
     await pipeline(body, limiter, createWriteStream(tmp, { flags: 'wx', mode: 0o640 }));
   } catch (e) {
     await unlink(tmp).catch(() => {});
-    if (e instanceof PartTooLarge) return { ok: false, error: 'BAD_PART' };
+    if (e instanceof PartTooLarge) {
+      console.warn(`[upload] phần ${n} của phiên ${s.id}: nhận hơn ${expected} byte`);
+      return { ok: false, error: 'BAD_PART' };
+    }
     throw e;
   }
   if (size !== expected) {
+    // Chỉ ghi số byte (không có dữ liệu người dùng) để tìm lỗi trình duyệt gửi thiếu/sai.
+    console.warn(`[upload] phần ${n} của phiên ${s.id}: nhận ${size} byte, cần ${expected}`);
     await unlink(tmp).catch(() => {});
     return { ok: false, error: 'BAD_PART' };
   }

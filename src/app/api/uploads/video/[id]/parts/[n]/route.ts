@@ -14,7 +14,10 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   if (!user) return Response.json({ ok: false, error: 'NOT_FOUND' }, { status: 401 });
   if (Number(request.headers.get('content-length') ?? 0) > PART_SIZE)
     return Response.json({ ok: false, error: 'BAD_PART' }, { status: 413 });
-  if (!request.body) return Response.json({ ok: false, error: 'BAD_PART' }, { status: 400 });
+  if (!request.body) {
+    console.warn('[upload] phần gửi lên không có dữ liệu');
+    return Response.json({ ok: false, error: 'BAD_PART' }, { status: 400 });
+  }
   const { id, n } = await params;
   const result = await putUploadPart(
     user.id,

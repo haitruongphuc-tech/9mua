@@ -90,6 +90,8 @@ export const feed: FeedMessages = {
   'feed.repost.done': '팔로워에게 리포스트했어요',
   'feed.repost.undone': '리포스트를 취소했어요',
   'feed.repost.label': '{name} 님이 리포스트',
+  'feed.points.earned': '+{points}포인트',
+  'feed.points.streak': '연속 x2',
   'feed.comments.reported': '댓글을 신고했어요.',
   'feed.comments.author': '작성자',
   'feed.comments.err.HAS_LINK': '댓글에는 링크를 넣을 수 없어요.',

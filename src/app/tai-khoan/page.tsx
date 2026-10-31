@@ -24,7 +24,8 @@ import { logoutAction } from '@/app/(auth)/actions';
 import { getT } from '@/i18n/server';
 import { isTemporaryName, requireUser } from '@/modules/identity';
 import { loadMePage } from '@/server/me-page';
-import { followSuggestions } from '@/modules/social';
+import { followSuggestions, pointBalance } from '@/modules/social';
+import { exchangePointsAction } from './points-actions';
 import { isFeatureOn } from '@/lib/features';
 import { ClientMessages } from '@/i18n/ClientMessages';
 import { SuggestRow } from '@/components/profile/SuggestRow';
@@ -34,12 +35,20 @@ export const metadata: Metadata = { title: 'Tài khoản', robots: { index: fals
 
 // Trang Tôi kiểu V4: hồ sơ, Free n/50 hoặc Kiot của bạn, voucher, lối tắt, Bộ sưu tập (SPEC-social.md mục 4, 7, 8).
 // Các form đổi tên/email/mật khẩu nằm ở /tai-khoan/cai-dat.
-export default async function MePage() {
+export default async function MePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ 'doi-diem'?: string; 'loi-doi-diem'?: string }>;
+}) {
   const user = await requireUser();
   if (user.mustChangePassword) redirect('/tai-khoan/cai-dat?doi-mat-khau=1');
   const [data, t] = await Promise.all([loadMePage(user), getT()]);
   // Gợi ý follow (SPEC-social.md V5.1 mục 2), công tắc social_more.
   const suggestions = (await isFeatureOn('social_more')) ? await followSuggestions(user.id) : [];
+  // Điểm thưởng (SPEC-social.md V5.6): tổng điểm; đổi điểm ra xu khi công tắc points_exchange bật.
+  const [pointsOn, exchangeOn] = await Promise.all([isFeatureOn('points'), isFeatureOn('points_exchange')]);
+  const points = pointsOn ? await pointBalance(user.id) : 0;
+  const query = await searchParams;
   const { role, follow, free, voucher, kiot, notifications, socialCount, saved, xu } = data;
 
   const links = [
@@ -278,6 +287,43 @@ export default async function MePage() {
           </section>
         ) : null}
 
+        {pointsOn ? (
+          <section
+            className="mt-6 flex flex-col gap-2 rounded-[18px] border border-white/10 bg-white/5 p-4"
+            data-testid="me-points"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[13px] font-bold text-white/70">⭐ {t('me.points.title')}</span>
+              <span className="text-[18px] font-black" data-testid="me-points-balance">
+                {t('me.points.balance', { points: points.toLocaleString(t.lang) })}
+              </span>
+            </div>
+            <p className="text-[11px] text-white/50">{t('me.points.hint')}</p>
+            {query['doi-diem'] ? (
+              <p role="status" className="text-[12px] font-bold text-green-300">
+                {t('me.points.done', { xu: query['doi-diem'] })}
+              </p>
+            ) : null}
+            {query['loi-doi-diem'] ? (
+              <p role="alert" className="text-[12px] font-bold text-red-300">
+                {t(
+                  `me.points.err.${['TOO_FEW', 'ONCE_A_DAY', 'MONTH_CAP', 'BUDGET', 'NOT_ALLOWED'].includes(query['loi-doi-diem']) ? query['loi-doi-diem'] : 'OFF'}` as 'me.points.err.OFF',
+                )}
+              </p>
+            ) : null}
+            {exchangeOn ? (
+              <form action={exchangePointsAction}>
+                <button
+                  type="submit"
+                  className="h-10 w-full rounded-full bg-brand text-[13px] font-black text-white"
+                  data-testid="me-points-exchange"
+                >
+                  {t('me.points.exchange')}
+                </button>
+              </form>
+            ) : null}
+          </section>
+        ) : null}
         {suggestions.length ? (
           <div className="mt-6">
             <ClientMessages prefixes={['profile.suggest.']}>

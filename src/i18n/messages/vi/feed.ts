@@ -89,6 +89,8 @@ export const feed = {
   'feed.repost.done': 'Đã đăng lại cho người follow bạn',
   'feed.repost.undone': 'Đã bỏ đăng lại',
   'feed.repost.label': '{name} đã đăng lại',
+  'feed.points.earned': '+{points} điểm',
+  'feed.points.streak': 'chuỗi x2',
   'feed.comments.reported': 'Đã báo cáo bình luận.',
   'feed.comments.author': 'Tác giả',
   'feed.comments.err.HAS_LINK': 'Bình luận không được chứa link.',

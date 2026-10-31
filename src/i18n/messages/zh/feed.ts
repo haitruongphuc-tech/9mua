@@ -90,6 +90,8 @@ export const feed: FeedMessages = {
   'feed.repost.done': '已转发给关注你的人',
   'feed.repost.undone': '已取消转发',
   'feed.repost.label': '{name} 转发了',
+  'feed.points.earned': '+{points} 积分',
+  'feed.points.streak': '连续 x2',
   'feed.comments.reported': '已举报该评论。',
   'feed.comments.author': '作者',
   'feed.comments.err.HAS_LINK': '评论不能包含链接。',

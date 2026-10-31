@@ -757,6 +757,22 @@ model RateWindow {
   count       Int      @default(0)
 }
 
+// Sổ điểm thưởng (SPEC-social.md V5.6), chỉ thêm (trigger chặn sửa / xoá). kind: like | follow | mutual | exchange |
+// revoke. Khoá duy nhất (userId, kind, refId): mỗi việc chỉ được điểm một lần.
+model PointEntry {
+  id        String   @id @default(cuid(2))
+  userId    String
+  kind      String
+  points    Int
+  refType   String
+  refId     String
+  vnDay     String // YYYY-MM-DD giờ VN: trần điểm mỗi ngày, chuỗi ngày, đổi 1 lần mỗi ngày
+  createdAt DateTime @default(now())
+
+  @@unique([userId, kind, refId])
+  @@index([userId, vnDay])
+}
+
 // Đăng lại (SPEC-social.md V5.9): mỗi người đăng lại một video / bài public tối đa 1 lần.
 model Repost {
   id        String   @id @default(cuid(2))
@@ -1399,9 +1415,11 @@ model XuEntry {
   rewardDay   String? // YYYY-MM-DD giờ VN, chỉ dòng thưởng: mỗi người tối đa 1 buổi được thưởng mỗi ngày
   note        String?
   createdById String?
+  refId       String? // mã tham chiếu cho các loại dòng mới (vd. đổi điểm "px:<user>:<ngày>"), khoá duy nhất theo kind
   createdAt   DateTime @default(now())
 
   @@unique([userId, rewardDay])
+  @@unique([kind, refId])
   @@index([userId, createdAt])
   @@index([createdAt])
 }

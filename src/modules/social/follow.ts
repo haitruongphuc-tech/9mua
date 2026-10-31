@@ -7,6 +7,7 @@ import { notifyEvent } from '@/lib/notify-events';
 import { notifyKey } from '@/lib/notifications';
 import { hydrateVideos, type FeedVideo, type Viewer } from '@/modules/creator';
 import { consumeDailyAction } from './limits';
+import { awardFollowPoints, type PointAward } from './points';
 
 // Một trong hai người follow người kia (SPEC-messages.md: nhắn tin vào thẳng hộp thư chính).
 export async function followRelation(a: string, b: string): Promise<boolean> {
@@ -26,7 +27,7 @@ export async function toggleFollow(
   followerId: string,
   followeeId: string,
 ): Promise<
-  | { ok: true; following: boolean; followers: number }
+  | { ok: true; following: boolean; followers: number; points?: PointAward }
   | { ok: false; error: 'SELF' | 'FREE_LIMIT' | 'NOT_FOUND' | 'BLOCKED' }
 > {
   if (followerId === followeeId) return { ok: false, error: 'SELF' };
@@ -57,7 +58,13 @@ export async function toggleFollow(
       });
     }
   }
-  return { ok: true, following, followers: await db.follow.count({ where: { followeeId } }) };
+  const points = following ? await awardFollowPoints(followerId, followeeId) : null;
+  return {
+    ok: true,
+    following,
+    followers: await db.follow.count({ where: { followeeId } }),
+    ...(points ? { points } : {}),
+  };
 }
 
 export async function followStats(userId: string, viewerId?: string) {

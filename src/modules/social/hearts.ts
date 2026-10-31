@@ -5,6 +5,7 @@ import { notifyEvent } from '@/lib/notify-events';
 import { likeVideo, toggleLike } from '@/modules/creator';
 import { consumeDailyAction } from './limits';
 import { checkVoucher } from './voucher';
+import { awardLikePoints, type PointAward } from './points';
 
 // Thích video qua module social để áp giới hạn tài khoản Free và tặng voucher (SPEC-social.md mục 7–8).
 // mode 'toggle': nút tim; 'like': chạm 2 lần (chỉ thích, không bỏ thích).
@@ -12,7 +13,10 @@ export async function heartVideo(
   userId: string,
   videoId: string,
   mode: 'toggle' | 'like',
-): Promise<{ ok: true; liked: boolean; likes: number } | { ok: false; error: 'NOT_FOUND' | 'FREE_LIMIT' }> {
+): Promise<
+  | { ok: true; liked: boolean; likes: number; points?: PointAward }
+  | { ok: false; error: 'NOT_FOUND' | 'FREE_LIMIT' }
+> {
   const already = (await db.videoLike.count({ where: { userId, videoId } })) > 0;
   if (already && mode === 'like') {
     const v = await db.video.findUnique({ where: { id: videoId }, select: { likes: true } });
@@ -41,6 +45,11 @@ export async function heartVideo(
         groupKey: `like:video:${videoId}`,
       });
     }
+  }
+  if (r.ok && r.liked && !already) {
+    const v = await db.video.findUnique({ where: { id: videoId }, select: { authorId: true } });
+    const points = v ? await awardLikePoints(userId, videoId, v.authorId) : null;
+    if (points) return { ...r, points };
   }
   return r;
 }

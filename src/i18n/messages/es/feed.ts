@@ -92,6 +92,8 @@ export const feed: FeedMessages = {
   'feed.repost.done': 'Publicado de nuevo para tus seguidores',
   'feed.repost.undone': 'Se quitó la republicación',
   'feed.repost.label': '{name} lo volvió a publicar',
+  'feed.points.earned': '+{points} pts',
+  'feed.points.streak': 'racha x2',
   'feed.comments.reported': 'Comentario denunciado.',
   'feed.comments.author': 'Autor',
   'feed.comments.err.HAS_LINK': 'Los comentarios no pueden tener enlaces.',

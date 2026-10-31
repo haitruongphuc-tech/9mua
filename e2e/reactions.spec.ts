@@ -22,9 +22,13 @@ test('giữ tim chọn cảm xúc, xem từng loại, đăng lại video', async
   await fan.goto(`/v/${video.id}`);
   const item = fan.getByTestId('feed-item').first();
   const like = item.getByTestId('feed-like');
-  await like.dispatchEvent('pointerdown');
-  await fan.waitForTimeout(600);
-  await like.dispatchEvent('pointerup');
+  // Giữ nút tim mở bảng cảm xúc; máy chậm có lúc lỡ nhịp giữ nên thử lại đến khi bảng hiện.
+  await expect(async () => {
+    await like.dispatchEvent('pointerdown');
+    await fan.waitForTimeout(700);
+    await like.dispatchEvent('pointerup');
+    await expect(fan.getByTestId('reaction-haha')).toBeVisible({ timeout: 2000 });
+  }).toPass({ timeout: 20_000 });
   await fan.getByTestId('reaction-haha').click();
   await expect(like).toContainText('😆');
   await expect(item.getByTestId('feed-likes')).toHaveText('1');

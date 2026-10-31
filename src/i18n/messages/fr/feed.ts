@@ -92,6 +92,8 @@ export const feed: FeedMessages = {
   'feed.repost.done': 'Republié pour vos abonnés',
   'feed.repost.undone': 'Republication retirée',
   'feed.repost.label': '{name} a republié',
+  'feed.points.earned': '+{points} pts',
+  'feed.points.streak': 'série x2',
   'feed.comments.reported': 'Commentaire signalé.',
   'feed.comments.author': 'Auteur',
   'feed.comments.err.HAS_LINK': 'Les commentaires ne peuvent pas contenir de lien.',

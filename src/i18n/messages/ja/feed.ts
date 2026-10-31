@@ -91,6 +91,8 @@ export const feed: FeedMessages = {
   'feed.repost.done': 'フォロワーに再投稿しました',
   'feed.repost.undone': '再投稿を取り消しました',
   'feed.repost.label': '{name} さんが再投稿',
+  'feed.points.earned': '+{points} pt',
+  'feed.points.streak': '連続 x2',
   'feed.comments.reported': 'コメントを報告しました。',
   'feed.comments.author': '投稿者',
   'feed.comments.err.HAS_LINK': 'コメントにリンクは入れられません。',

@@ -204,6 +204,14 @@ const RULES: Record<SettingKey, { min?: number; max?: number; bool?: true; json?
   video_long_daily_minutes: { min: 1, max: 600, label: 'Phút video dài mỗi ngày' },
   video_enable_1080: { bool: true, label: 'Mức 1080p' },
   stt_monthly_budget_vnd: { min: 0, max: 100_000_000, label: 'Ngân sách phụ đề tự động mỗi tháng' },
+  points_like: { min: 0, max: 1000, label: 'Điểm khi thả tim video' },
+  points_follow: { min: 0, max: 1000, label: 'Điểm khi follow' },
+  points_mutual: { min: 0, max: 1000, label: 'Điểm khi follow nhau' },
+  points_daily_cap: { min: 0, max: 100_000, label: 'Trần điểm mỗi ngày' },
+  points_min_account_days: { min: 0, max: 365, label: 'Tuổi tài khoản tối thiểu để có điểm (ngày)' },
+  points_per_xu: { min: 1, max: 1_000_000, label: 'Số điểm đổi 1 xu' },
+  points_xu_month_cap: { min: 0, max: 100_000, label: 'Xu đổi từ điểm tối đa mỗi người mỗi tháng' },
+  points_xu_month_budget: { min: 0, max: 100_000_000, label: 'Ngân sách xu đổi từ điểm mỗi tháng' },
 };
 
 export function validateSetting(key: SettingKey, value: string): string | null {

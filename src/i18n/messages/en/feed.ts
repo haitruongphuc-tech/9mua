@@ -90,6 +90,8 @@ export const feed: FeedMessages = {
   'feed.repost.done': 'Reposted to your followers',
   'feed.repost.undone': 'Repost removed',
   'feed.repost.label': '{name} reposted',
+  'feed.points.earned': '+{points} pts',
+  'feed.points.streak': 'streak x2',
   'feed.comments.reported': 'Comment reported.',
   'feed.comments.author': 'Creator',
   'feed.comments.err.HAS_LINK': 'Comments cannot contain links.',

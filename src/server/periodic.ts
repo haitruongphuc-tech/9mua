@@ -6,6 +6,7 @@ import {
   publishScheduledPosts,
 } from '@/modules/creator';
 import { assignMissingHandles } from '@/modules/identity';
+import { revokeLockedPoints } from '@/modules/social';
 import { isFeatureOn } from '@/lib/features';
 import { publishScheduledVideos } from './creator';
 
@@ -27,6 +28,8 @@ const TICK_JOBS: Job[] = [
 const DAILY_JOBS: Job[] = [
   // Bản tải về có logo quá 7 ngày: xoá file (SPEC-creator.md V5.7 mục 1). Chạy cả khi công tắc tắt để dọn ổ.
   { name: 'downloads', run: () => expireDownloads() },
+  // Điểm thưởng của tài khoản bị khoá: thu hồi bằng dòng trừ (SPEC-social.md V5.6).
+  { name: 'points-revoke', run: () => revokeLockedPoints() },
   // Ảnh tải lên cho bài viết nhưng không đăng trong 24 giờ.
   { name: 'post-uploads', run: () => cleanupPostUploads() },
   // Nháp quá 90 ngày tự xoá, báo trước 7 ngày. Công tắc tắt thì người dùng không thấy tab Nháp nên không xoá.

@@ -49,6 +49,15 @@ export {
 export { decorateFeed, type SocialFeedVideo } from './decorate';
 export { hasLink } from './links';
 export {
+  awardLikePoints,
+  awardFollowPoints,
+  pointBalance,
+  revokeLockedPoints,
+  exchangePoints,
+  type PointAward,
+  type ExchangeError,
+} from './points';
+export {
   REACTIONS,
   isReaction,
   setVideoReaction,

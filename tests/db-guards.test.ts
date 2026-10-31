@@ -21,6 +21,7 @@ describe('chốt chặn trong database', () => {
         'XuEntry_append_only',
         'Commitment_append_only',
         'SttUsage_append_only',
+        'PointEntry_append_only',
         'Product_search_name',
       ]),
     );

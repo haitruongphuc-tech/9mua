@@ -370,9 +370,15 @@ export function VideoFeed({
       likes?: number;
       error?: string;
       limit?: number;
+      points?: { points: number; streak: boolean } | null;
     };
-    if (data.ok) patch(v.id, { liked: data.liked!, likes: data.likes! });
-    else if (data.error === 'FREE_LIMIT') show(t('feed.freeLimit', { limit: data.limit ?? 50 }), true);
+    if (data.ok) {
+      patch(v.id, { liked: data.liked!, likes: data.likes! });
+      if (data.points)
+        show(
+          `⭐ ${t('feed.points.earned', { points: data.points.points })}${data.points.streak ? ` · ${t('feed.points.streak')}` : ''}`,
+        );
+    } else if (data.error === 'FREE_LIMIT') show(t('feed.freeLimit', { limit: data.limit ?? 50 }), true);
   }
 
   // Cảm xúc (SPEC-social.md V5.8): chạm = Thích / bỏ thích như cũ; chọn cảm xúc khác qua API cảm xúc.

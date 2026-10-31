@@ -34,6 +34,8 @@ export const TRANSITIONS = {
   resolve_refund: { from: ['disputed'], to: 'refund_pending', roles: ['admin'] },
   resolve_release: { from: ['disputed'], to: 'completed', roles: ['admin'] },
   mark_refunded: { from: ['refund_pending'], to: 'refunded', roles: ['admin'] },
+  // Tố cáo hàng giả được CEO xác nhận (SPEC-orders.md V5.2 mục 6). Đơn đã hoàn tất thì tầng ứng dụng trừ lại số dư.
+  fake_refund: { from: ['delivered', 'disputed', 'completed'], to: 'refund_pending', roles: ['admin'] },
 } as const satisfies Record<
   string,
   { from: readonly OrderStatus[]; to: OrderStatus; roles: readonly ActorRole[] }

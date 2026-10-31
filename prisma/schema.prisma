@@ -998,6 +998,31 @@ model OriginFile {
   @@index([dossierId])
 }
 
+// Tố cáo hàng giả (SPEC-orders.md V5.2): open → investigating → confirmed | rejected; hạn xử lý 24 giờ.
+model FakeReport {
+  id                String    @id @default(cuid(2))
+  reporterId        String
+  productId         String
+  kiotId            String
+  orderId           String?
+  reason            String // fake | wrong_origin
+  text              String
+  images            String[]  @default([])
+  status            String    @default("open")
+  deadlineAt        DateTime
+  sellerResponse    String?
+  sellerImages      String[]  @default([])
+  sellerRespondedAt DateTime?
+  resolution        String?
+  resolvedBy        String?
+  resolvedAt        DateTime?
+  createdAt         DateTime  @default(now())
+
+  @@index([status, deadlineAt])
+  @@index([kiotId, createdAt])
+  @@index([reporterId, status, resolvedAt])
+}
+
 // Đăng lại (SPEC-social.md V5.9): mỗi người đăng lại một video / bài public tối đa 1 lần.
 model Repost {
   id        String   @id @default(cuid(2))

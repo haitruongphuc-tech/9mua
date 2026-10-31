@@ -103,3 +103,29 @@ export async function listBalanceEntries(kiotId: string, take = 100): Promise<Ba
     fee: fee.get(e.refId) ?? null,
   }));
 }
+
+// Hoàn tiền vì hàng giả cho đơn đã hoàn tất (SPEC-orders.md V5.2 mục 6): trừ lại đúng số đã cộng cho người bán bằng dòng
+// adjustment, refId = mã tố cáo (khoá duy nhất nên chạy lại không trừ 2 lần). Số dư được phép âm; Kiot âm không rút được.
+export async function debitForFakeRefund(
+  order: {
+    id: string;
+    code: string;
+    kiotId: string;
+    subtotal: number;
+    shippingFee: number;
+    total: number;
+    platformFeeRate: number;
+  },
+  adminId: string,
+  fakeReportId: string,
+): Promise<void> {
+  const { credit } = sellerCredit(order);
+  await db.$transaction(async (tx) => {
+    await lockKiotBalance(tx, order.kiotId);
+    await tx.$executeRaw`
+      INSERT INTO "BalanceEntry" (id, "kiotId", type, amount, "refId", note, "actorId", "createdAt")
+      VALUES (${randomUUID()}, ${order.kiotId}, 'adjustment', ${-credit}, ${fakeReportId},
+        ${`Hoàn tiền hàng giả đơn ${order.code}`}, ${adminId}, ${now()})
+      ON CONFLICT (type, "refId") DO NOTHING`;
+  });
+}

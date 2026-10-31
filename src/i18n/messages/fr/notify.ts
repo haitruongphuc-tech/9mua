@@ -13,6 +13,10 @@ export const notify: NotifyMessages = {
   'notify.originRejected': 'Justificatifs refusés : {reason}',
   'notify.originRevoked': "Badge d'origine retiré : {reason}",
   'notify.originRenew': 'Vos justificatifs expirent dans 30 jours. Renvoyez-les pour garder le badge.',
+  'notify.fakeReportSeller':
+    'Un signalement de contrefaçon vise votre produit. Répondez sous {hours} heures.',
+  'notify.fakeReportConfirmed': '9MUA a confirmé votre signalement : {reason}',
+  'notify.fakeReportRejected': '9MUA a rejeté votre signalement : {reason}',
   'notify.followRequest': '{name} souhaite vous suivre',
   'notify.followAccepted': '{name} a accepté votre demande',
   'notify.eventSoon': 'Un événement qui vous intéresse commence bientôt',

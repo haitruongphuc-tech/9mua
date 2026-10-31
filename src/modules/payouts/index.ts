@@ -6,6 +6,7 @@ export {
   availableBalance,
   listBalanceEntries,
   adjustBalance,
+  debitForFakeRefund,
   type AdjustResult,
   type BalanceEntryView,
 } from './ledger';

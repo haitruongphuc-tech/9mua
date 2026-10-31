@@ -12,6 +12,10 @@ export const notify: NotifyMessages = {
   'notify.originRejected': 'Origin documents rejected: {reason}',
   'notify.originRevoked': 'Origin badge revoked: {reason}',
   'notify.originRenew': 'Your origin documents expire within 30 days. Submit again to keep the badge.',
+  'notify.fakeReportSeller':
+    'A counterfeit report was filed on your product. Send an explanation within {hours} hours.',
+  'notify.fakeReportConfirmed': '9MUA confirmed your counterfeit report: {reason}',
+  'notify.fakeReportRejected': '9MUA rejected your counterfeit report: {reason}',
   'notify.followRequest': '{name} wants to follow you',
   'notify.followAccepted': '{name} accepted your follow request',
   'notify.eventSoon': "An event you're interested in starts soon",

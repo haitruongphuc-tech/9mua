@@ -150,6 +150,15 @@ export default async function ProductPage({ params, searchParams }: Params) {
               t={t}
             />
           ) : null}
+          {!preview && (await isFeatureOn('fake_report')) ? (
+            <a
+              href={`${env().APP_URL}/to-cao-hang-gia?sp=${product.id}`}
+              className="text-[12px] font-bold text-red-300 hover:underline"
+              data-testid="fake-report-link"
+            >
+              ⚠ {t('shop.fake.title')}
+            </a>
+          ) : null}
           {preview ? null : (
             <ReportProduct
               productId={product.id}

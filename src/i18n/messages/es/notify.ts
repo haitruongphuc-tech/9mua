@@ -14,6 +14,10 @@ export const notify: NotifyMessages = {
   'notify.originRevoked': 'Insignia de origen retirada: {reason}',
   'notify.originRenew':
     'Tus documentos de origen vencen en 30 días. Envíalos de nuevo para mantener la insignia.',
+  'notify.fakeReportSeller':
+    'Hay una denuncia de falsificación sobre tu producto. Responde en {hours} horas.',
+  'notify.fakeReportConfirmed': '9MUA confirmó tu denuncia: {reason}',
+  'notify.fakeReportRejected': '9MUA rechazó tu denuncia: {reason}',
   'notify.followRequest': '{name} quiere seguirte',
   'notify.followAccepted': '{name} aceptó tu solicitud',
   'notify.eventSoon': 'Un evento que te interesa empieza pronto',

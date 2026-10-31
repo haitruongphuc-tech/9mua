@@ -20,6 +20,10 @@ describe('máy trạng thái đơn hàng', () => {
     ['disputed', 'resolve_refund', 'admin', 'refund_pending'],
     ['disputed', 'resolve_release', 'admin', 'completed'],
     ['refund_pending', 'mark_refunded', 'admin', 'refunded'],
+    // Tố cáo hàng giả được CEO xác nhận (SPEC-orders.md V5.2 mục 6).
+    ['delivered', 'fake_refund', 'admin', 'refund_pending'],
+    ['disputed', 'fake_refund', 'admin', 'refund_pending'],
+    ['completed', 'fake_refund', 'admin', 'refund_pending'],
   ];
 
   it.each(allowed)('%s --%s(%s)--> %s', (from, action, role, to) => {

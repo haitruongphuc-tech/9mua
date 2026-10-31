@@ -76,6 +76,7 @@ export {
   listOriginQueue,
   listApprovedOrigins,
   reviewOrigin,
+  revokeOriginForKiot,
   readOriginFile,
   kiotBadges,
   remindOriginRenewal,

@@ -239,3 +239,12 @@ export async function listApprovedOrigins(take = 100) {
     take,
   });
 }
+
+// Tố cáo hàng giả được xác nhận (SPEC-orders.md V5.2 mục 6): thu hồi hồ sơ nguồn gốc đang hiệu lực của Kiot.
+export async function revokeOriginForKiot(kiotId: string, adminId: string, reason: string): Promise<boolean> {
+  const r = await db.originDossier.updateMany({
+    where: { kiotId, status: 'approved' },
+    data: { status: 'revoked', reason: reason.slice(0, 300), reviewedBy: adminId, reviewedAt: now() },
+  });
+  return r.count > 0;
+}

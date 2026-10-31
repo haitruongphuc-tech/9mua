@@ -65,3 +65,20 @@ export {
   type ReviewSummary,
   type ReviewError,
 } from './reviews';
+// Bổ sung 31/10/2026 (SPEC-orders.md V5.2): tố cáo hàng giả.
+export {
+  submitFakeReport,
+  respondFakeReport,
+  fakeReportsForKiot,
+  myFakeReports,
+  listFakeReportQueue,
+  getFakeReport,
+  closeFakeReport,
+  fakeReportBannedUntil,
+  fakeReportOrder,
+  ordersWithProduct,
+  overdueFakeReports,
+  FAKE_REASONS,
+  SELLER_RESPONSE_HOURS,
+  type FakeReportError,
+} from './fake-reports';

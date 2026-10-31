@@ -726,7 +726,7 @@ Nhánh `nang-cap-mot-dot`. Trừ App (C32–C36). Mỗi task: test trước → 
 - [x] **T112: Gợi ý từ khoá, lịch sử, từ khoá hot, micro** (C38, C74).
 - [x] **T113: Đánh giá sản phẩm + sao Kiot** (C15, C82).
 - [x] **T114: Hồ sơ nguồn gốc + huy hiệu** (C16, C17, C42).
-- [ ] **T115: Tố cáo hàng giả 24 giờ (hoàn tiền tắt sẵn)** (C18).
+- [x] **T115: Tố cáo hàng giả 24 giờ (hoàn tiền tắt sẵn)** (C18).
 - [ ] **T116: Giao diện Kiot kéo thả 50 mẫu + bảo hành** (C27, C29).
 - [ ] **T117: Nhập Page (tắt tới khi có khoá)** (C28).
 

@@ -143,6 +143,12 @@ model Kiot {
   lockReason            String?
   shippingFee           Int                 @default(0) // phí ship cố định mỗi đơn (0–200.000đ)
   freeShippingThreshold Int? // tiền hàng từ mức này trở lên thì miễn phí ship
+  // Vị trí cửa hàng (SPEC-kiot.md V5.1). Chưa đặt ghim (lat null) thì tính theo tâm tỉnh. Toạ độ chính xác chỉ chủ Kiot
+  // và admin thấy; công khai chỉ khoảng cách / điểm làm tròn ~500m, trừ khi showExactLocation.
+  lat                   Float?
+  lng                   Float?
+  geoSource             String              @default("province") // pin | province
+  showExactLocation     Boolean             @default(false)
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
   products              Product[]

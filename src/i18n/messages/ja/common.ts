@@ -18,6 +18,7 @@ export const common: CommonMessages = {
   'common.search.tab.videos': '動画',
   'common.search.tab.hashtags': 'ハッシュタグ',
   'common.search.tab.products': '商品',
+  'common.search.tab.kiots': 'Kiot',
   'common.search.more': 'もっと見る',
   'common.search.followers': 'フォロワー{count}人',
   'common.search.videos': '動画{count}本',

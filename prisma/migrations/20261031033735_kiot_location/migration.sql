@@ -1,0 +1,6 @@
+-- AlterTable
+ALTER TABLE "Kiot" ADD COLUMN     "geoSource" TEXT NOT NULL DEFAULT 'province',
+ADD COLUMN     "lat" DOUBLE PRECISION,
+ADD COLUMN     "lng" DOUBLE PRECISION,
+ADD COLUMN     "showExactLocation" BOOLEAN NOT NULL DEFAULT false;
+

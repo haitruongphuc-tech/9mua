@@ -8,14 +8,18 @@ import { ClientMessages } from '@/i18n/ClientMessages';
 import { getT } from '@/i18n/server';
 import { searchVideos } from '@/modules/creator';
 import { searchPublicUsers } from '@/modules/identity';
-import { searchProducts } from '@/modules/marketplace';
+import { searchKiots, searchProducts } from '@/modules/marketplace';
+import { KiotResultCard } from '@/components/market/KiotResultCard';
+import { NearMe } from '@/components/market/NearMe';
+import { isFeatureOn } from '@/lib/features';
+import { formatVnd } from '@/lib/format';
 import { searchHashtags, trendingHashtags } from '@/modules/social';
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getT())('common.search.title'), robots: { index: false } };
 }
 
-const TABS = ['tat-ca', 'tai-khoan', 'video', 'hashtag', 'san-pham'] as const;
+const TABS = ['tat-ca', 'tai-khoan', 'video', 'hashtag', 'san-pham', 'kiot'] as const;
 type Tab = (typeof TABS)[number];
 const TAB_LABEL = {
   'tat-ca': 'common.search.tab.all',
@@ -23,9 +27,10 @@ const TAB_LABEL = {
   video: 'common.search.tab.videos',
   hashtag: 'common.search.tab.hashtags',
   'san-pham': 'common.search.tab.products',
+  kiot: 'common.search.tab.kiots',
 } as const;
 // Tab "Tất cả": 3 tài khoản, 6 video, 5 hashtag, 6 sản phẩm; tab riêng: 30 kết quả (SPEC-social.md bổ sung 30/10, A3).
-const ALL = { users: 3, videos: 6, hashtags: 5, products: 6 };
+const ALL = { users: 3, videos: 6, hashtags: 5, products: 6, kiots: 3 };
 const FULL = 30;
 
 // Tìm kiếm chung: tài khoản, video, hashtag, sản phẩm. Tìm không dấu, không phân biệt hoa thường.
@@ -39,7 +44,10 @@ export default async function SearchPage({
   const tab: Tab = TABS.find((x) => x === params.tab) ?? 'tat-ca';
   const all = tab === 'tat-ca';
   const want = (t: Tab, n: number) => (q && (all || tab === t) ? n : 0);
-  const [t, users, videos, hashtags, products, trending] = await Promise.all([
+  // Tab Kiot + Gần tôi (SPEC-marketplace.md V5.1–V5.2), công tắc search_more.
+  const searchMore = await isFeatureOn('search_more');
+  const tabs = TABS.filter((x) => x !== 'kiot' || searchMore);
+  const [t, users, videos, hashtags, products, trending, kiots] = await Promise.all([
     getT(),
     want('tai-khoan', 1) ? searchPublicUsers(q, all ? ALL.users : FULL) : Promise.resolve([]),
     want('video', 1) ? searchVideos(q, all ? ALL.videos : FULL) : Promise.resolve([]),
@@ -48,9 +56,13 @@ export default async function SearchPage({
       ? searchProducts({ q, sort: 'phu-hop' }, all ? ALL.products : FULL).then((p) => p.items)
       : Promise.resolve([]),
     q ? Promise.resolve([]) : trendingHashtags(10),
+    searchMore && want('kiot', 1)
+      ? searchKiots({ q, limit: all ? ALL.kiots : FULL }).then((p) => p.items)
+      : Promise.resolve([]),
   ]);
   const href = (to: Tab) => `/tim-kiem?q=${encodeURIComponent(q)}${to === 'tat-ca' ? '' : `&tab=${to}`}`;
-  const nothing = q && !users.length && !videos.length && !hashtags.length && !products.length;
+  const nothing =
+    q && !users.length && !videos.length && !hashtags.length && !products.length && !kiots.length;
 
   const heading = (to: Tab, show: boolean) => (
     <div className="flex items-baseline justify-between">
@@ -91,7 +103,7 @@ export default async function SearchPage({
             className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4"
             aria-label={t('common.search.title')}
           >
-            {TABS.map((x) => (
+            {tabs.map((x) => (
               <Link
                 key={x}
                 href={href(x)}
@@ -190,6 +202,33 @@ export default async function SearchPage({
             <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
               {products.map((p) => (
                 <MarketProductCard key={p.id} p={p} />
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
+        {searchMore && q && (tab === 'kiot' || tab === 'san-pham') ? (
+          <NearMe tab={tab === 'kiot' ? 'kiot' : 'san-pham'} q={q} />
+        ) : null}
+
+        {kiots.length ? (
+          <div className="flex flex-col gap-2">
+            {heading('kiot', kiots.length >= ALL.kiots)}
+            <ul className="grid gap-2 sm:grid-cols-2" data-testid="search-kiots">
+              {kiots.map((k) => (
+                <li key={k.slug}>
+                  <KiotResultCard
+                    kiot={k}
+                    labels={{
+                      products: t('market.kiotSearch.products', { count: k.products }),
+                      price:
+                        k.priceMin !== null && k.priceMax !== null
+                          ? `${formatVnd(k.priceMin)} – ${formatVnd(k.priceMax)}`
+                          : null,
+                      distance: null,
+                    }}
+                  />
+                </li>
               ))}
             </ul>
           </div>

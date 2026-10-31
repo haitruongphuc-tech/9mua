@@ -7,6 +7,7 @@ import { BANKS, getKiotByOwner, getPayoutAccount } from '@/modules/kiot';
 import { updateKiotAction } from '../actions';
 import { KiotForm } from '../KiotForm';
 import { AddressForm } from './AddressForm';
+import { LocationForm } from './LocationForm';
 import { BrandingForm } from './BrandingForm';
 import { PayoutAccountForm } from './PayoutAccountForm';
 import { ShippingForm } from './ShippingForm';
@@ -51,6 +52,10 @@ export default async function KiotSettingsPage() {
             addressLine: kiot.addressLine ?? '',
           }}
         />
+      </div>
+      <div className={card} id="vi-tri">
+        <h2 className={heading}>{t('seller.loc.title')}</h2>
+        <LocationForm pinned={kiot.lat !== null} showExact={kiot.showExactLocation} />
       </div>
       <div className={card}>
         <h2 className={heading}>{t('seller.settings.shipping')}</h2>

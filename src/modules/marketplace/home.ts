@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 import { activePinSql, addPin } from '@/lib/pins';
 import { kiotOrigin } from '@/lib/urls';
 import { categoryName, provinceName } from '@/modules/kiot';
+import { normalizeQuery } from './query';
 import { hydrate, searchProducts, visibleOnMarket, type MarketCard } from './search';
 
 export type KiotCard = {
@@ -46,6 +47,7 @@ function kiotQuery(opts: {
   since?: Date;
   province?: string;
   category?: string;
+  q?: string; // tên / giới thiệu Kiot, đã chuẩn hoá (SPEC-marketplace.md V5.1)
   limit: number;
   offset?: number;
 }): Prisma.Sql {
@@ -61,6 +63,11 @@ function kiotQuery(opts: {
       FROM "Kiot" k
       WHERE k."activeUntil" > ${at} AND k."lockedAt" IS NULL
         ${opts.province ? Prisma.sql`AND k.province = ${opts.province}` : Prisma.empty}
+        ${
+          opts.q
+            ? Prisma.sql`AND (search_norm(k.name) LIKE ${`%${opts.q}%`} OR search_norm(k.description) LIKE ${`%${opts.q}%`})`
+            : Prisma.empty
+        }
     )
     SELECT slug, name, "logoUrl", province, main_category, products, orders, pin_pos FROM kiots
     WHERE products > 0 ${opts.category ? Prisma.sql`AND main_category = ${opts.category}` : Prisma.empty}
@@ -72,12 +79,14 @@ function kiotQuery(opts: {
 export async function listKiots(params: {
   province?: string;
   category?: string;
+  q?: string;
   cursor?: string;
   limit?: number;
 }) {
   const limit = params.limit ?? 24;
   const offset = Math.max(Number(params.cursor ?? 0) || 0, 0);
-  const rows = await db.$queryRaw<KiotRow[]>(kiotQuery({ ...params, limit: limit + 1, offset }));
+  const q = params.q ? normalizeQuery(params.q) : undefined;
+  const rows = await db.$queryRaw<KiotRow[]>(kiotQuery({ ...params, q, limit: limit + 1, offset }));
   return {
     items: rows.slice(0, limit).map(toKiotCard),
     nextCursor: rows.length > limit ? String(offset + limit) : null,

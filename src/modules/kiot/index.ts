@@ -14,6 +14,18 @@ export {
 } from './kiot';
 export { CATEGORIES, categoryName, type CategorySlug } from './categories';
 export { PROVINCES, provinceName, type ProvinceSlug } from './provinces';
+// Bổ sung 31/10/2026 (SPEC-kiot.md V5.1): vị trí Kiot.
+export {
+  PROVINCE_CENTERS,
+  validLatLng,
+  distanceKm,
+  distanceSql,
+  provinceCentersSql,
+  kiotLatSql,
+  kiotLngSql,
+  roundPublic,
+} from './geo';
+export { setKiotLocation } from './location';
 export { updateKiotAddress, setKiotImage, removeKiotImage, type KiotImageKind } from './profile';
 export {
   uploadProductImage,

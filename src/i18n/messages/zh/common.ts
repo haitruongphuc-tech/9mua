@@ -18,6 +18,7 @@ export const common: CommonMessages = {
   'common.search.tab.videos': '视频',
   'common.search.tab.hashtags': '话题',
   'common.search.tab.products': '商品',
+  'common.search.tab.kiots': 'Kiot',
   'common.search.more': '查看更多',
   'common.search.followers': '{count} 位粉丝',
   'common.search.videos': '{count} 个视频',

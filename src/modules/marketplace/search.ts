@@ -2,7 +2,7 @@ import { Prisma } from '@prisma/client';
 import { now } from '@/lib/clock';
 import { db } from '@/lib/db';
 import { kiotOrigin } from '@/lib/urls';
-import { productPath, provinceName, type Page } from '@/modules/kiot';
+import { distanceSql, productPath, provinceCentersSql, provinceName, type Page } from '@/modules/kiot';
 import { normalizeQuery, type SearchParams, type Sort } from './query';
 
 export type MarketCard = {
@@ -81,7 +81,12 @@ export function visibleOnMarket(at: Date): Prisma.Sql {
     AND k."activeUntil" > ${at} AND k."lockedAt" IS NULL`;
 }
 
-export async function searchProducts(params: SearchParams, limit = PAGE_SIZE): Promise<Page<MarketCard>> {
+// near: Gần tôi (SPEC-marketplace.md V5.2) — lọc bán kính, xếp gần nhất trước. Không truyền thì như cũ.
+export async function searchProducts(
+  params: SearchParams,
+  limit = PAGE_SIZE,
+  near?: { lat: number; lng: number; radiusKm: number },
+): Promise<Page<MarketCard>> {
   const q = params.q ? normalizeQuery(params.q) : '';
   const sort: Sort = params.sort === 'phu-hop' && !q ? 'moi-nhat' : params.sort;
   const cursor = decodeCursor(params.cursor);
@@ -93,6 +98,7 @@ export async function searchProducts(params: SearchParams, limit = PAGE_SIZE): P
   if (params.province) filters.push(Prisma.sql`k.province = ${params.province}`);
   if (params.priceMin !== undefined) filters.push(Prisma.sql`p.price >= ${params.priceMin}`);
   if (params.priceMax !== undefined) filters.push(Prisma.sql`p.price <= ${params.priceMax}`);
+  if (near) filters.push(Prisma.sql`${distanceSql(near.lat, near.lng)} <= ${near.radiusKm}::float8`);
 
   // Điểm phù hợp chỉ tính trên tên (mô tả dài, tính độ giống rất tốn): giống nhiều + chứa nguyên cụm thì cao.
   const score = q
@@ -104,15 +110,17 @@ export async function searchProducts(params: SearchParams, limit = PAGE_SIZE): P
     await tx.$executeRawUnsafe(`SET LOCAL pg_trgm.word_similarity_threshold = ${WORD_SIMILARITY}`);
     return tx.$queryRaw<{ id: string; k1: number; k2: number; k3: number }[]>`
       WITH matched AS (
-        SELECT p.id, p.stock, p.price, p."createdAt", s."sold30d", ${score} AS score
+        SELECT p.id, p.stock, p.price, p."createdAt", s."sold30d", ${score} AS score,
+          ${near ? distanceSql(near.lat, near.lng) : Prisma.sql`0::float8`} AS dist
         FROM "Product" p
         JOIN "Kiot" k ON k.id = p."kiotId"
         LEFT JOIN "ProductSalesStat" s ON s."productId" = p.id
+        ${near ? Prisma.sql`LEFT JOIN ${provinceCentersSql} ON pc.slug = k.province` : Prisma.empty}
         WHERE ${Prisma.join(filters, ' AND ')}
       ), keyed AS (
         SELECT p.id,
           (CASE WHEN p.stock > 0 THEN 0 ELSE 1 END)::float8 AS k1,
-          ${sortKey(sort)} AS k2,
+          ${near ? Prisma.sql`p.dist` : sortKey(sort)} AS k2,
           (-EXTRACT(EPOCH FROM p."createdAt") * 1000)::float8 AS k3
         FROM matched p
       )

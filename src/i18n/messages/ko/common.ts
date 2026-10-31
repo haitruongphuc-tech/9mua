@@ -18,6 +18,7 @@ export const common: CommonMessages = {
   'common.search.tab.videos': '동영상',
   'common.search.tab.hashtags': '해시태그',
   'common.search.tab.products': '상품',
+  'common.search.tab.kiots': 'Kiot',
   'common.search.more': '더 보기',
   'common.search.followers': '팔로워 {count}명',
   'common.search.videos': '동영상 {count}개',

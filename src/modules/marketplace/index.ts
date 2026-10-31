@@ -1,5 +1,7 @@
 // Hợp đồng public của module marketplace (SPEC-marketplace.md). Module khác chỉ import từ file này.
 export { searchProducts, PAGE_SIZE, type MarketCard } from './search';
+// Bổ sung 31/10/2026 (SPEC-marketplace.md V5.1–V5.2): tìm Kiot, Gần tôi.
+export { searchKiots, NEAR_RADII, type KiotSearchCard, type Near } from './kiot-search';
 export { recordSale, refreshSales30d, kiotSoldTotal } from './stats';
 export { getHomeSections, listKiots, pinKiot, type HomeSections, type KiotCard } from './home';
 export { listSitemapEntries } from './sitemap';

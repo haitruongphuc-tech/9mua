@@ -24,7 +24,7 @@ describe('CSP', () => {
 
   it('camera/micro chỉ cho chính trang 9mua (phát live), các quyền khác tắt', () => {
     expect(STATIC_SECURITY_HEADERS['Permissions-Policy']).toBe(
-      'camera=(self), microphone=(self), geolocation=(), payment=(), usb=()',
+      'camera=(self), microphone=(self), geolocation=(self), payment=(), usb=()',
     );
   });
 });

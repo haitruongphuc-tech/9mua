@@ -18,6 +18,7 @@ export const common: CommonMessages = {
   'common.search.tab.videos': 'Videos',
   'common.search.tab.hashtags': 'Hashtags',
   'common.search.tab.products': 'Productos',
+  'common.search.tab.kiots': 'Kiots',
   'common.search.more': 'Ver más',
   'common.search.followers': '{count} seguidores',
   'common.search.videos': '{count} videos',

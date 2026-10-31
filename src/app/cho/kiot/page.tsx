@@ -4,6 +4,7 @@ import { KiotCardList } from '@/components/market/KiotCardList';
 import { getT } from '@/i18n/server';
 import { CATEGORIES, PROVINCES } from '@/modules/kiot';
 import { listKiots } from '@/modules/marketplace';
+import { isFeatureOn } from '@/lib/features';
 
 export const metadata: Metadata = {
   title: 'Danh bạ Kiot',
@@ -17,21 +18,38 @@ const field =
 export default async function KiotDirectoryPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tinh?: string; dm?: string; trang?: string }>;
+  searchParams: Promise<{ tinh?: string; dm?: string; trang?: string; q?: string }>;
 }) {
   const sp = await searchParams;
   const province = PROVINCES.some((p) => p.slug === sp.tinh) ? sp.tinh : undefined;
   const category = CATEGORIES.some((c) => c.slug === sp.dm) ? sp.dm : undefined;
-  const [page, t] = await Promise.all([listKiots({ province, category, cursor: sp.trang }), getT()]);
+  // Ô tìm Kiot theo tên (SPEC-marketplace.md V5.1), công tắc search_more.
+  const q = (await isFeatureOn('search_more')) ? (sp.q ?? '').trim().slice(0, 100) : '';
+  const [page, t] = await Promise.all([listKiots({ province, category, q, cursor: sp.trang }), getT()]);
   const next = new URLSearchParams({
     ...(province ? { tinh: province } : {}),
     ...(category ? { dm: category } : {}),
+    ...(q ? { q } : {}),
     ...(page.nextCursor ? { trang: page.nextCursor } : {}),
   });
   return (
     <section className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-5">
       <h1 className="font-display text-[22px] font-black">{t('market.dir.title')}</h1>
-      <form action="/cho/kiot" method="get" className="grid grid-cols-2 gap-2 sm:grid-cols-[1fr_1fr_auto]">
+      <form
+        action="/cho/kiot"
+        method="get"
+        className="grid grid-cols-2 gap-2 sm:grid-cols-[2fr_1fr_1fr_auto]"
+      >
+        <input
+          type="search"
+          name="q"
+          defaultValue={q}
+          maxLength={100}
+          placeholder={t('market.kiotSearch.placeholder')}
+          aria-label={t('market.kiotSearch.placeholder')}
+          className={`${field} col-span-2 sm:col-span-1`}
+          data-testid="kiot-dir-search"
+        />
         <select
           name="tinh"
           defaultValue={province ?? ''}

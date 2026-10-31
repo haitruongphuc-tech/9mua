@@ -28,7 +28,8 @@ export const STATIC_SECURITY_HEADERS: Record<string, string> = {
   'X-Frame-Options': 'DENY',
   'X-Content-Type-Options': 'nosniff',
   'Referrer-Policy': 'strict-origin-when-cross-origin',
-  // Camera/micro chỉ cho chính 9mua.com (trang Phát live — SPEC-live.md); trang nhúng hay site khác không dùng được.
-  'Permissions-Policy': 'camera=(self), microphone=(self), geolocation=(), payment=(), usb=()',
+  // Camera/micro (trang Phát live — SPEC-live.md) và vị trí (Gần tôi, vị trí Kiot — SPEC-marketplace.md V5.2) chỉ cho
+  // chính 9mua.com; trang nhúng hay site khác không dùng được.
+  'Permissions-Policy': 'camera=(self), microphone=(self), geolocation=(self), payment=(), usb=()',
   'Cross-Origin-Opener-Policy': 'same-origin',
 };

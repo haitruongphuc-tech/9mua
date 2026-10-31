@@ -17,6 +17,7 @@ export const common = {
   'common.search.tab.videos': 'Video',
   'common.search.tab.hashtags': 'Hashtag',
   'common.search.tab.products': 'Sản phẩm',
+  'common.search.tab.kiots': 'Kiot',
   'common.search.more': 'Xem thêm',
   'common.search.followers': '{count} người theo dõi',
   'common.search.videos': '{count} video',

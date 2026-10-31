@@ -58,6 +58,9 @@ const schema = z
     APPLE_TEAM_ID: z.preprocess((v) => (v === '' ? undefined : v), z.string().optional()),
     APPLE_KEY_ID: z.preprocess((v) => (v === '' ? undefined : v), z.string().optional()),
     APPLE_PRIVATE_KEY: z.preprocess((v) => (v === '' ? undefined : v), z.string().optional()),
+    // Bản đồ nhiệt Kiot (SPEC-marketplace.md V5.3, công tắc map): mẫu địa chỉ ảnh nền {z}/{x}/{y} và dòng ghi nguồn.
+    MAP_TILE_URL: z.preprocess((v) => (v === '' ? undefined : v), z.string().optional()),
+    MAP_ATTRIBUTION: z.preprocess((v) => (v === '' ? undefined : v), z.string().optional()),
     // Kho video ngoài chuẩn S3 (SPEC-creator.md V5.1 mục 9; Cloudflare R2: vùng "auto"). Thiếu khoá thì video lưu trên VPS.
     // Driver fake chỉ cho dev/test.
     STORAGE_DRIVER: z.enum(['s3', 'fake']).optional(),

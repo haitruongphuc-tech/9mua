@@ -2,16 +2,25 @@
 // (mang nonce của request) mới chạy; script lạ chèn vào HTML (XSS) bị trình duyệt chặn.
 // mediaUrl: kho video ngoài (STORAGE_PUBLIC_URL, SPEC-creator.md V5.1 mục 9) — cho phép ảnh, video và hls.js tải đoạn.
 // embed: trang /nhung/<id> (SPEC-creator.md V5.7 mục 2) cho mọi web nhúng; mọi trang khác vẫn chặn nhúng.
-export function buildCsp(nonce: string, appUrl: string, mediaUrl?: string, embed = false): string {
+// mapTileUrl: ảnh nền bản đồ nhiệt (MAP_TILE_URL, SPEC-marketplace.md V5.3), dạng mẫu https://{s}.host/{z}/{x}/{y}.png.
+export function buildCsp(
+  nonce: string,
+  appUrl: string,
+  mediaUrl?: string,
+  embed = false,
+  mapTileUrl?: string,
+): string {
   const app = new URL(appUrl);
   const sub = `${app.protocol}//*.${app.host}`;
   const media = mediaUrl ? ` ${new URL(mediaUrl).origin}` : '';
+  const tileOrigin = mapTileUrl?.match(/^https?:\/\/[^/]+/)?.[0]?.replace('{s}', '*');
+  const tiles = tileOrigin ? ` ${tileOrigin}` : '';
   return [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
     // Tailwind + style={{…}} trong React cần inline style; không ảnh hưởng chặn script.
     "style-src 'self' 'unsafe-inline'",
-    `img-src 'self' data: blob:${media}`,
+    `img-src 'self' data: blob:${media}${tiles}`,
     `media-src 'self' blob:${media}`,
     "font-src 'self'",
     // Trên tenkiot.9mua.com, link ở thanh trên trỏ về 9mua.com (Next.js tải trước) → cho phép cả 2 tên miền.

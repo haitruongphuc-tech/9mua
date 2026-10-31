@@ -2,6 +2,8 @@
 export { searchProducts, PAGE_SIZE, type MarketCard } from './search';
 // Bổ sung 31/10/2026 (SPEC-marketplace.md V5.1–V5.2): tìm Kiot, Gần tôi.
 export { searchKiots, NEAR_RADII, type KiotSearchCard, type Near } from './kiot-search';
+// Bổ sung 31/10/2026 (SPEC-marketplace.md V5.3): bản đồ nhiệt.
+export { kiotHeatmap, validBounds, CELL_DEG, type Bounds, type HeatCell } from './heatmap';
 export { recordSale, refreshSales30d, kiotSoldTotal } from './stats';
 export { getHomeSections, listKiots, pinKiot, type HomeSections, type KiotCard } from './home';
 export { listSitemapEntries } from './sitemap';

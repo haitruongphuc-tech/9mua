@@ -722,7 +722,7 @@ Nhánh `nang-cap-mot-dot`. Trừ App (C32–C36). Mỗi task: test trước → 
 
 ### Tìm kiếm, Kiot, mua bán
 - [x] **T110: Vị trí Kiot, tìm Kiot theo tên, Gần tôi** (C12, C13).
-- [ ] **T111: Bản đồ nhiệt (tắt tới khi có khoá bản đồ)** (C14).
+- [x] **T111: Bản đồ nhiệt (tắt tới khi có khoá bản đồ)** (C14).
 - [ ] **T112: Gợi ý từ khoá, lịch sử, từ khoá hot, micro** (C38, C74).
 - [ ] **T113: Đánh giá sản phẩm + sao Kiot** (C15, C82).
 - [ ] **T114: Hồ sơ nguồn gốc + huy hiệu** (C16, C17, C42).

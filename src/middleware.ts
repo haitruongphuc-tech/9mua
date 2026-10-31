@@ -22,6 +22,7 @@ export function middleware(request: NextRequest) {
           appUrl,
           process.env.STORAGE_PUBLIC_URL || undefined,
           embed,
+          process.env.MAP_TILE_URL || undefined,
         )
       : null;
   if (csp) headers.set('content-security-policy', csp); // Next.js đọc nonce từ đây để gắn vào script của nó

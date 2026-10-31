@@ -34,7 +34,18 @@ export default async function KiotDirectoryPage({
   });
   return (
     <section className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-5">
-      <h1 className="font-display text-[22px] font-black">{t('market.dir.title')}</h1>
+      <div className="flex items-center justify-between gap-3">
+        <h1 className="font-display text-[22px] font-black">{t('market.dir.title')}</h1>
+        {(await isFeatureOn('map')) ? (
+          <Link
+            href="/cho/ban-do"
+            className="flex h-10 items-center rounded-full bg-white/10 px-4 text-[13px] font-black"
+            data-testid="kiot-map-link"
+          >
+            🗺 {t('market.map.button')}
+          </Link>
+        ) : null}
+      </div>
       <form
         action="/cho/kiot"
         method="get"

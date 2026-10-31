@@ -2,13 +2,14 @@ import { Prisma } from '@prisma/client';
 import { now } from '@/lib/clock';
 import { db } from '@/lib/db';
 import { kiotOrigin } from '@/lib/urls';
-import { distanceSql, provinceCentersSql, provinceName } from '@/modules/kiot';
+import { distanceSql, kiotLatSql, kiotLngSql, provinceCentersSql, provinceName } from '@/modules/kiot';
 import { normalizeQuery } from './query';
 import { visibleOnMarket } from './search';
 
 // Tìm Kiot theo tên / giới thiệu (SPEC-marketplace.md V5.1), Gần tôi (V5.2). Vị trí người mua chỉ dùng trong lần tìm này:
 // không lưu, không ghi log.
 export const NEAR_RADII = [1, 3, 5, 10, 20, 50] as const;
+const CELL = 0.01; // cùng ô lưới với heatmap.ts
 export type Near = { lat: number; lng: number; radiusKm: number };
 
 export type KiotSearchCard = {
@@ -51,6 +52,7 @@ export async function searchKiots(params: {
   province?: string;
   area?: string; // phường/xã hoặc địa danh: khớp địa chỉ lấy hàng
   near?: Near;
+  cell?: { lat: number; lng: number }; // một ô ~1,1 km trên bản đồ nhiệt (SPEC-marketplace.md V5.3 mục 3)
   limit?: number;
   offset?: number;
 }): Promise<{ items: KiotSearchCard[]; nextOffset: number | null }> {
@@ -65,6 +67,9 @@ export async function searchKiots(params: {
   if (params.province) filters.push(Prisma.sql`k.province = ${params.province}`);
   if (area)
     filters.push(Prisma.sql`search_norm(concat_ws(' ', k."addressLine", k.district)) LIKE ${`%${area}%`}`);
+  if (params.cell)
+    filters.push(Prisma.sql`floor(${kiotLatSql} / ${CELL}) = floor(${params.cell.lat}::float8 / ${CELL})
+      AND floor(${kiotLngSql} / ${CELL}) = floor(${params.cell.lng}::float8 / ${CELL})`);
   const dist = near ? distanceSql(near.lat, near.lng) : Prisma.sql`NULL::float8`;
   const order = near
     ? Prisma.sql`dist ASC, orders DESC`

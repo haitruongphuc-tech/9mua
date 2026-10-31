@@ -84,6 +84,18 @@ export const profile: ProfileMessages = {
   'profile.list.next': 'Página siguiente →',
   'profile.list.prev': '← Página anterior',
   'profile.connect.title': 'Conectar redes sociales',
+  'profile.import.title': 'Importar páginas',
+  'profile.import.lead':
+    'Importa el nombre, la foto y los seguidores de las páginas / canales que gestionas. No se importan publicaciones ni vídeos.',
+  'profile.import.network': 'Red',
+  'profile.import.hint': 'Pega el enlace o @usuario de la página / canal',
+  'profile.import.find': 'Buscar',
+  'profile.import.all': 'Seleccionar todo',
+  'profile.import.import': 'Importar',
+  'profile.import.followers': '{count} seguidores',
+  'profile.import.disconnect': 'Desconectar',
+  'profile.import.none': 'No se encontraron páginas.',
+  'profile.import.limit': 'Las cuentas sin Kiot solo pueden importar 1 página.',
   'profile.connect.intro':
     'Pega los enlaces de tus páginas en estas redes. Se muestran como botones redondos en tu página de creador y de Kiot.',
   'profile.connect.linked': 'Conectadas',

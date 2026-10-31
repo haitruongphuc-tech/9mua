@@ -6,7 +6,7 @@ import {
   publishScheduledPosts,
 } from '@/modules/creator';
 import { assignMissingHandles } from '@/modules/identity';
-import { remindEvents, revokeLockedPoints } from '@/modules/social';
+import { refreshImportedPages, remindEvents, revokeLockedPoints } from '@/modules/social';
 import { isFeatureOn } from '@/lib/features';
 import { cleanupSearchLog } from '@/modules/marketplace';
 import { remindReviews } from '@/modules/orders';
@@ -43,6 +43,11 @@ const DAILY_JOBS: Job[] = [
   // Nhắc đánh giá 3 ngày sau khi giao (SPEC-orders.md V5.1 mục 3), công tắc reviews.
   // Nhắc gia hạn hồ sơ nguồn gốc trước 30 ngày (SPEC-kiot.md V5.2 mục 3).
   { name: 'origin-renewal', run: () => remindOriginRenewal() },
+  // Số người theo dõi của Page đã nhập (SPEC-kiot.md V5.4 mục 3), công tắc page_import.
+  {
+    name: 'page-import-refresh',
+    run: async () => ((await isFeatureOn('page_import')) ? refreshImportedPages() : 0),
+  },
   { name: 'review-reminders', run: async () => ((await isFeatureOn('reviews')) ? remindReviews() : 0) },
   // Ảnh tải lên cho bài viết nhưng không đăng trong 24 giờ.
   { name: 'post-uploads', run: () => cleanupPostUploads() },

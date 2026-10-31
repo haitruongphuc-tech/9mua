@@ -81,6 +81,18 @@ export const profile = {
   'profile.list.next': 'Trang sau →',
   'profile.list.prev': '← Trang trước',
   'profile.connect.title': 'Kết nối mạng xã hội',
+  'profile.import.title': 'Nhập Page',
+  'profile.import.lead':
+    'Nhập tên, ảnh và số người theo dõi của Page / kênh bạn quản lý. Không lấy bài đăng hay video.',
+  'profile.import.network': 'Mạng',
+  'profile.import.hint': 'Dán link hoặc @tên Page / kênh',
+  'profile.import.find': 'Tìm',
+  'profile.import.all': 'Chọn tất cả',
+  'profile.import.import': 'Nhập',
+  'profile.import.followers': '{count} người theo dõi',
+  'profile.import.disconnect': 'Ngắt kết nối',
+  'profile.import.none': 'Không tìm thấy Page nào.',
+  'profile.import.limit': 'Tài khoản chưa có Kiot chỉ nhập được 1 Page.',
   'profile.connect.intro':
     'Dán link trang của bạn trên các mạng dưới đây. Link hiện thành nút tròn trên trang creator và trang Kiot của bạn.',
   'profile.connect.linked': 'Đã gắn',

@@ -4,15 +4,36 @@ import { ClientMessages } from '@/i18n/ClientMessages';
 import { getT } from '@/i18n/server';
 import { requireUser } from '@/modules/identity';
 import { getKiotByOwner } from '@/modules/kiot';
-import { getSocialLinks, PLATFORM_LIST } from '@/modules/social';
+import {
+  availableNetworks,
+  getSocialLinks,
+  importedPages,
+  lookupPages,
+  PLATFORM_LIST,
+} from '@/modules/social';
+import { isFeatureOn } from '@/lib/features';
+import { ImportPages } from './ImportPages';
 import { kiotCanonical } from '../k/kiot-context';
 import { ConnectForm } from './ConnectForm';
 
 export const metadata: Metadata = { title: 'Kết nối mạng xã hội', robots: { index: false } };
 
 // Social Connect bản thật (SPEC-kiot.md bổ sung 27/10): chỉ gắn link, không lấy số follower của mạng khác.
-export default async function ConnectPage() {
+export default async function ConnectPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ nhap?: string; q?: string; 'loi-nhap'?: string }>;
+}) {
   const user = await requireUser();
+  // Nhập Page (SPEC-kiot.md V5.4), công tắc page_import (tắt sẵn, mạng nào có khoá mới hiện).
+  const query = await searchParams;
+  const importOn = await isFeatureOn('page_import');
+  const networks = importOn ? availableNetworks() : [];
+  const network = networks.find((n) => n === query.nhap) ?? null;
+  const q = (query.q ?? '').trim().slice(0, 200);
+  const [found, imported] = importOn
+    ? await Promise.all([network && q ? lookupPages(network, q) : [], importedPages(user.id)])
+    : [[], []];
   const [links, kiot, t] = await Promise.all([getSocialLinks(user.id), getKiotByOwner(user.id), getT()]);
   const count = PLATFORM_LIST.filter((p) => links[p]).length;
   return (
@@ -40,6 +61,19 @@ export default async function ConnectPage() {
             </div>
           </div>
           <ConnectForm links={links} />
+          {importOn && networks.length ? (
+            <div id="nhap-page">
+              <ImportPages
+                networks={networks}
+                network={network}
+                q={q}
+                found={found}
+                imported={imported}
+                error={query['loi-nhap'] ?? null}
+                t={t}
+              />
+            </div>
+          ) : null}
           <p className="mt-4 text-[11px] text-white/40">{t('profile.connect.note')}</p>
         </div>
       </div>

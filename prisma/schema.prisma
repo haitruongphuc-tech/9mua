@@ -1029,6 +1029,24 @@ model FakeReport {
   @@index([reporterId, status, resolvedAt])
 }
 
+// Page nhập từ mạng xã hội (SPEC-kiot.md V5.4): chỉ tên, ảnh, link, số người theo dõi. tokenEnc để dành cho mạng cần
+// token riêng của người dùng (hiện dùng khoá của 9MUA nên để trống).
+model PageImport {
+  id         String   @id @default(cuid(2))
+  userId     String
+  network    String
+  externalId String
+  name       String
+  avatarPath String?
+  url        String
+  followers  Int      @default(0)
+  tokenEnc   String?
+  updatedAt  DateTime @default(now())
+
+  @@unique([userId, network, externalId])
+  @@index([updatedAt])
+}
+
 // Đăng lại (SPEC-social.md V5.9): mỗi người đăng lại một video / bài public tối đa 1 lần.
 model Repost {
   id        String   @id @default(cuid(2))

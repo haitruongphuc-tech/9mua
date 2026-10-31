@@ -23,12 +23,14 @@ import {
   likedVideos,
   listBlockedUsers,
   canSeeProfileContent,
+  importedPages,
   hasFollowRequest,
   repostedContent,
   upcomingEvents,
   mutualFollowers,
 } from '@/modules/social';
 import { SuggestRow } from '@/components/profile/SuggestRow';
+import { ImportedPagesRow } from '@/components/profile/ImportedPagesRow';
 import { EventCardView } from '@/components/social/EventCardView';
 
 // Trang creator kiểu V4 (SPEC-creator.md mục 7, SPEC-social.md mục 1): số liệu thật, Follow, link mạng xã hội.
@@ -68,6 +70,8 @@ export async function CreatorProfileView({
     isFeatureOn('social_more'),
   ]);
   const isSelf = viewer?.id === p.id;
+  // Page đã nhập (SPEC-kiot.md V5.4), công tắc page_import.
+  const importedList = (await isFeatureOn('page_import')) ? await importedPages(p.id) : [];
   // Tài khoản riêng tư (SPEC-identity.md V5.2): người chưa follow chỉ thấy tên, ảnh, @tên, số follow.
   const contentOk = await canSeeProfileContent(p.id, viewer?.id);
   const requested = !contentOk && !follow.isFollowing ? await hasFollowRequest(viewer?.id, p.id) : false;
@@ -195,6 +199,7 @@ export async function CreatorProfileView({
                 <MessageButton toUserId={p.id} loginHref={`/dang-nhap?next=${encodeURIComponent(path)}`} />
               )}
               <SocialLinks links={links} />
+              <ImportedPagesRow pages={importedList} lang={t.lang} />
               {!isSelf && viewer && canBlock ? (
                 <BlockButton
                   userId={p.id}

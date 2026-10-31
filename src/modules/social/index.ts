@@ -156,3 +156,15 @@ export { vnDay } from './day';
 // Bổ sung 30/10/2026 (SPEC-social.md V5.3): chặn trên toàn web.
 export { blockUser, unblockUser, listBlockedUsers, MAX_BLOCKS } from './blocks';
 export { isBlockedEither } from '@/lib/blocks';
+// Bổ sung 31/10/2026 (SPEC-kiot.md V5.4): nhập Page từ mạng xã hội.
+export {
+  IMPORT_NETWORKS,
+  availableNetworks,
+  lookupPages,
+  importPages,
+  importedPages,
+  disconnectNetwork,
+  refreshImportedPages,
+  type ImportNetwork,
+  type PageInfo,
+} from './page-import';

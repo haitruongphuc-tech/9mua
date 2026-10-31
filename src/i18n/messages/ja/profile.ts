@@ -83,6 +83,18 @@ export const profile: ProfileMessages = {
   'profile.list.next': '次のページ →',
   'profile.list.prev': '← 前のページ',
   'profile.connect.title': 'SNSを連携',
+  'profile.import.title': 'ページを取り込む',
+  'profile.import.lead':
+    '管理しているページ / チャンネルの名前・写真・フォロワー数を取り込みます。投稿や動画は取り込みません。',
+  'profile.import.network': 'SNS',
+  'profile.import.hint': 'ページ / チャンネルのリンクか @名前 を貼り付け',
+  'profile.import.find': '検索',
+  'profile.import.all': 'すべて選択',
+  'profile.import.import': '取り込む',
+  'profile.import.followers': 'フォロワー {count} 人',
+  'profile.import.disconnect': '接続を解除',
+  'profile.import.none': 'ページが見つかりません。',
+  'profile.import.limit': 'Kiot がないアカウントは1ページまでです。',
   'profile.connect.intro':
     '以下のSNSのページリンクを貼り付けてください。クリエイターページとKiotページに丸いボタンとして表示されます。',
   'profile.connect.linked': '連携済み',

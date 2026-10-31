@@ -84,6 +84,18 @@ export const profile: ProfileMessages = {
   'profile.list.next': 'Next page →',
   'profile.list.prev': '← Previous page',
   'profile.connect.title': 'Connect social networks',
+  'profile.import.title': 'Import pages',
+  'profile.import.lead':
+    'Import the name, photo and follower count of pages / channels you manage. Posts and videos are not imported.',
+  'profile.import.network': 'Network',
+  'profile.import.hint': 'Paste the page / channel link or @handle',
+  'profile.import.find': 'Find',
+  'profile.import.all': 'Select all',
+  'profile.import.import': 'Import',
+  'profile.import.followers': '{count} followers',
+  'profile.import.disconnect': 'Disconnect',
+  'profile.import.none': 'No pages found.',
+  'profile.import.limit': 'Accounts without a Kiot can import only 1 page.',
   'profile.connect.intro':
     'Paste links to your pages on the networks below. They appear as round buttons on your creator page and Kiot page.',
   'profile.connect.linked': 'Linked',

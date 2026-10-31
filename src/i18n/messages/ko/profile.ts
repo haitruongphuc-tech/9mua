@@ -82,6 +82,18 @@ export const profile: ProfileMessages = {
   'profile.list.next': '다음 페이지 →',
   'profile.list.prev': '← 이전 페이지',
   'profile.connect.title': 'SNS 연결',
+  'profile.import.title': '페이지 가져오기',
+  'profile.import.lead':
+    '관리하는 페이지 / 채널의 이름, 사진, 팔로워 수를 가져와요. 게시물이나 동영상은 가져오지 않아요.',
+  'profile.import.network': '네트워크',
+  'profile.import.hint': '페이지 / 채널 링크나 @이름을 붙여 넣으세요',
+  'profile.import.find': '찾기',
+  'profile.import.all': '모두 선택',
+  'profile.import.import': '가져오기',
+  'profile.import.followers': '팔로워 {count}명',
+  'profile.import.disconnect': '연결 해제',
+  'profile.import.none': '페이지를 찾지 못했어요.',
+  'profile.import.limit': 'Kiot이 없는 계정은 페이지 1개만 가져올 수 있어요.',
   'profile.connect.intro':
     '아래 SNS의 내 페이지 링크를 붙여 넣으세요. 크리에이터 페이지와 Kiot 페이지에 둥근 버튼으로 보여요.',
   'profile.connect.linked': '연결됨',

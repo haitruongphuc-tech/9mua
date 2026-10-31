@@ -85,6 +85,18 @@ export const profile: ProfileMessages = {
   'profile.list.next': 'Page suivante →',
   'profile.list.prev': '← Page précédente',
   'profile.connect.title': 'Relier vos réseaux sociaux',
+  'profile.import.title': 'Importer des pages',
+  'profile.import.lead':
+    "Importez le nom, la photo et le nombre d'abonnés des pages / chaînes que vous gérez. Les publications et vidéos ne sont pas importées.",
+  'profile.import.network': 'Réseau',
+  'profile.import.hint': 'Collez le lien ou le @nom de la page / chaîne',
+  'profile.import.find': 'Chercher',
+  'profile.import.all': 'Tout sélectionner',
+  'profile.import.import': 'Importer',
+  'profile.import.followers': '{count} abonnés',
+  'profile.import.disconnect': 'Déconnecter',
+  'profile.import.none': 'Aucune page trouvée.',
+  'profile.import.limit': "Un compte sans Kiot ne peut importer qu'une page.",
   'profile.connect.intro':
     'Collez les liens de vos pages sur les réseaux ci-dessous. Ils s’affichent en boutons ronds sur votre page créateur et votre page Kiot.',
   'profile.connect.linked': 'Reliés',

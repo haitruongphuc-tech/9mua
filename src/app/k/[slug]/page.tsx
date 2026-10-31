@@ -13,7 +13,8 @@ import { SocialLinks } from '@/components/profile/SocialLinks';
 import { VideoGrid } from '@/components/video/VideoGrid';
 import { EventCardView } from '@/components/social/EventCardView';
 import { isFeatureOn } from '@/lib/features';
-import { upcomingEvents } from '@/modules/social';
+import { importedPages, upcomingEvents } from '@/modules/social';
+import { ImportedPagesRow } from '@/components/profile/ImportedPagesRow';
 import { kiotRating } from '@/modules/orders';
 import { badgesForKiot, badgeStyle } from '@/server/kiot-badges';
 import { KiotBadgeRow } from '@/components/kiot/KiotBadgeRow';
@@ -100,6 +101,7 @@ export default async function KiotPage({
   const shownTabs = TABS.filter((id) =>
     blockOn(id === 'san-pham' ? 'products' : id === 'video' ? 'video' : 'live'),
   );
+  const importedList = ownerId && (await isFeatureOn('page_import')) ? await importedPages(ownerId) : [];
   const icons = { video: Grid3x3, 'san-pham': ShoppingBag, live: Radio } as const;
   const tabLabel = {
     video: t('profile.tab.video'),
@@ -224,6 +226,7 @@ export default async function KiotPage({
                   <MessageButton toUserId={ownerId} loginHref={loginHref} />
                 )}
                 {blockOn('social') ? <SocialLinks links={socialLinks} /> : null}
+                {blockOn('social') ? <ImportedPagesRow pages={importedList} lang={t.lang} /> : null}
                 {viewer.isOwner ? (
                   <Link
                     href={`${env().APP_URL}/ket-noi`}

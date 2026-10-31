@@ -134,7 +134,10 @@ export async function createProduct(
 
   const product = await db
     .$transaction(async (tx) => {
-      const created = await tx.product.create({ data: { ...data, kiotId } });
+      const warranty = (
+        await tx.kiot.findUnique({ where: { id: kiotId }, select: { warrantyDefault: true } })
+      )?.warrantyDefault;
+      const created = await tx.product.create({ data: { ...data, kiotId, warranty: warranty ?? null } });
       for (const [position, id] of imageIds.entries()) {
         // Điều kiện productId = null chặn hai sản phẩm giành cùng một ảnh khi lưu đồng thời.
         const claimed = await tx.productImage.updateMany({

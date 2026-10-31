@@ -8,6 +8,8 @@ import { updateKiotAction } from '../actions';
 import { KiotForm } from '../KiotForm';
 import { AddressForm } from './AddressForm';
 import { LocationForm } from './LocationForm';
+import { setWarrantyDefaultAction } from '../warranty-actions';
+import { isFeatureOn } from '@/lib/features';
 import { BrandingForm } from './BrandingForm';
 import { PayoutAccountForm } from './PayoutAccountForm';
 import { ShippingForm } from './ShippingForm';
@@ -22,6 +24,7 @@ export default async function KiotSettingsPage() {
   const kiot = await getKiotByOwner(user.id);
   if (!kiot) redirect('/kiot-cua-toi/tao');
   const [payout, t] = await Promise.all([getPayoutAccount(kiot.id), getT()]);
+  const builderOn = await isFeatureOn('kiot_builder');
   return (
     <section className="flex flex-col gap-6 px-4 py-6">
       <div className={card}>
@@ -53,6 +56,27 @@ export default async function KiotSettingsPage() {
           }}
         />
       </div>
+      {builderOn ? (
+        <div className={card} id="bao-hanh">
+          <h2 className={heading}>{t('seller.warranty.title')}</h2>
+          <form action={setWarrantyDefaultAction} className="flex gap-2">
+            <input
+              name="warranty"
+              maxLength={60}
+              defaultValue={kiot.warrantyDefault ?? ''}
+              placeholder={t('seller.warranty.hint')}
+              className="h-11 min-w-0 flex-1 rounded-[14px] border border-white/15 bg-white/10 px-3 text-[14px]"
+              data-testid="warranty-default"
+            />
+            <button
+              type="submit"
+              className="h-11 shrink-0 rounded-full bg-white/10 px-4 text-[13px] font-black"
+            >
+              {t('seller.warranty.save')}
+            </button>
+          </form>
+        </div>
+      ) : null}
       <div className={card} id="vi-tri">
         <h2 className={heading}>{t('seller.loc.title')}</h2>
         <LocationForm pinned={kiot.lat !== null} showExact={kiot.showExactLocation} />

@@ -13,6 +13,7 @@ const TABS = [
   { href: '/kiot-cua-toi/to-cao', key: 'seller.nav.fake' },
   { href: '/kiot-cua-toi/so-du', key: 'seller.nav.balance' },
   { href: '/kiot-cua-toi/thanh-toan', key: 'seller.nav.billing' },
+  { href: '/kiot-cua-toi/giao-dien', key: 'seller.nav.design' },
   { href: '/kiot-cua-toi/cai-dat', key: 'seller.nav.settings' },
 ] as const;
 

@@ -15,6 +15,7 @@ const PUBLIC_KIOT = {
   coverUrl: true,
   province: true,
   district: true,
+  layout: true, // giao diện Kiot (SPEC-kiot.md V5.3): công khai, chỉ là cách trình bày
 } as const satisfies Prisma.KiotSelect;
 
 export type PublicKiot = Prisma.KiotGetPayload<{ select: typeof PUBLIC_KIOT }>;
@@ -160,5 +161,18 @@ export function kiotBasics(
   return db.kiot.findMany({
     where: { id: { in: ids } },
     select: { id: true, slug: true, name: true, logoUrl: true },
+  });
+}
+
+// Khối "Sản phẩm nổi bật" của giao diện Kiot (SPEC-kiot.md V5.3): chỉ sản phẩm đang hiện, theo thứ tự chủ Kiot chọn.
+export async function featuredProducts(kiotId: string, ids: string[]): Promise<ProductCard[]> {
+  if (!ids.length) return [];
+  const rows = await db.product.findMany({
+    where: { id: { in: ids }, kiotId, ...PUBLIC_PRODUCT_WHERE },
+    include: { images: { orderBy: { position: 'asc' }, take: 1 } },
+  });
+  return ids.flatMap((id) => {
+    const p = rows.find((r) => r.id === id);
+    return p ? [toCard(p)] : [];
   });
 }

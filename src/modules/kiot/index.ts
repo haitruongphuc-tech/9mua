@@ -84,3 +84,23 @@ export {
   type KiotBadges,
   type OriginError,
 } from './origin';
+// Bổ sung 31/10/2026 (SPEC-kiot.md V5.3, V5.5): giao diện Kiot kéo thả, bảo hành.
+export {
+  KIOT_TEMPLATES,
+  KIOT_PALETTES,
+  KIOT_BLOCKS,
+  MAX_FEATURED,
+  DEFAULT_LAYOUT,
+  parseLayout,
+  setKiotLayout,
+  kiotLayoutOf,
+  templateOf,
+  paletteOf,
+  setWarrantyDefault,
+  setProductWarranty,
+  type KiotLayout,
+  type KiotBlock,
+  type KiotTemplate,
+  type KiotPalette,
+} from './layout';
+export { featuredProducts } from './public';

@@ -21,7 +21,17 @@ import { ClientMessages } from '@/i18n/ClientMessages';
 import { getT } from '@/i18n/server';
 import { env } from '@/lib/env';
 import { getCurrentUser } from '@/modules/identity';
-import { kiotOwnerId, listPublicProducts, provinceName } from '@/modules/kiot';
+import {
+  featuredProducts,
+  kiotLayoutOf,
+  kiotOwnerId,
+  listPublicProducts,
+  paletteOf,
+  provinceName,
+  templateOf,
+  type KiotBlock,
+} from '@/modules/kiot';
+import { KiotBlocks } from '@/components/kiot/KiotBlocks';
 import { loadKiotPage } from '@/server/kiot-page';
 import { kiotBasePath, kiotCanonical } from '../kiot-context';
 
@@ -83,6 +93,13 @@ export default async function KiotPage({
   // Sự kiện sắp diễn ra của chủ Kiot (SPEC-social.md V5.7), công tắc events.
   const events =
     ownerId && (await isFeatureOn('events')) ? await upcomingEvents(undefined, { ownerId }, 4) : [];
+  // Giao diện Kiot (SPEC-kiot.md V5.3), công tắc kiot_builder. Kiot chưa chỉnh (layout null) giữ trang cũ.
+  const layout = (await isFeatureOn('kiot_builder')) ? kiotLayoutOf(kiot) : null;
+  const blockOn = (id: KiotBlock) => !layout || layout.blocks.some((b) => b.id === id && b.on);
+  const featured = layout && blockOn('featured') ? await featuredProducts(kiot.id, layout.featured) : [];
+  const shownTabs = TABS.filter((id) =>
+    blockOn(id === 'san-pham' ? 'products' : id === 'video' ? 'video' : 'live'),
+  );
   const icons = { video: Grid3x3, 'san-pham': ShoppingBag, live: Radio } as const;
   const tabLabel = {
     video: t('profile.tab.video'),
@@ -99,8 +116,17 @@ export default async function KiotPage({
               <PreviewBanner />
             </div>
           ) : null}
-          <div className="relative h-[170px] bg-gradient-to-br from-brand via-[#ff8a3d] to-[#7c2d12] md:h-[220px] md:rounded-b-[24px]">
-            {kiot.coverUrl ? (
+          <div
+            className={`relative bg-gradient-to-br from-brand via-[#ff8a3d] to-[#7c2d12] md:rounded-b-[24px] ${
+              layout ? (blockOn('cover') ? '' : 'h-14') : 'h-[170px] md:h-[220px]'
+            }`}
+            style={
+              layout && blockOn('cover')
+                ? { aspectRatio: templateOf(layout).cover, maxHeight: 300 }
+                : undefined
+            }
+          >
+            {kiot.coverUrl && blockOn('cover') ? (
               <Image
                 src={kiot.coverUrl}
                 alt=""
@@ -181,7 +207,9 @@ export default async function KiotPage({
                   ★ {rating.avg.toLocaleString(t.lang)} · {t('shop.review.section', { count: rating.count })}
                 </p>
               ) : null}
-              {kiot.description ? <HashtagText text={kiot.description} className="mt-3 text-[13px]" /> : null}
+              {kiot.description && blockOn('about') ? (
+                <HashtagText text={kiot.description} className="mt-3 text-[13px]" />
+              ) : null}
               {kiot.province ? (
                 <p
                   className="mt-1 flex items-center gap-1 text-[12px] text-white/50"
@@ -195,7 +223,7 @@ export default async function KiotPage({
                 {viewer.isOwner || !ownerId ? null : (
                   <MessageButton toUserId={ownerId} loginHref={loginHref} />
                 )}
-                <SocialLinks links={socialLinks} />
+                {blockOn('social') ? <SocialLinks links={socialLinks} /> : null}
                 {viewer.isOwner ? (
                   <Link
                     href={`${env().APP_URL}/ket-noi`}
@@ -207,8 +235,25 @@ export default async function KiotPage({
               </div>
             </ProfileActions>
 
+            {layout ? (
+              <KiotBlocks
+                layout={layout}
+                template={templateOf(layout)}
+                palette={paletteOf(layout)}
+                featured={featured}
+                basePath={base}
+                phone={kiot.contactPhone}
+                locationText={
+                  kiot.province
+                    ? [kiot.district, provinceName(kiot.province)].filter(Boolean).join(', ')
+                    : null
+                }
+                rating={rating}
+                t={t}
+              />
+            ) : null}
             <nav className="mt-5 flex border-b border-white/10" aria-label={t('profile.tabs')}>
-              {TABS.map((id) => {
+              {shownTabs.map((id) => {
                 const Icon = icons[id];
                 return (
                   <Link
@@ -227,7 +272,7 @@ export default async function KiotPage({
               })}
             </nav>
 
-            {tab === 'video' && events.length ? (
+            {tab === 'video' && events.length && blockOn('events') ? (
               <ul className="mt-3 grid gap-2 sm:grid-cols-2" data-testid="kiot-events">
                 {events.map((e) => (
                   <li key={e.id}>

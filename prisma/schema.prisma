@@ -149,6 +149,10 @@ model Kiot {
   lng                   Float?
   geoSource             String              @default("province") // pin | province
   showExactLocation     Boolean             @default(false)
+  // Giao diện Kiot (SPEC-kiot.md V5.3): null = chưa từng chỉnh, giữ trang cũ.
+  layout                Json?
+  // Bảo hành mặc định điền sẵn cho sản phẩm mới (SPEC-kiot.md V5.5), ≤ 60 ký tự.
+  warrantyDefault       String?
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
   products              Product[]
@@ -192,6 +196,8 @@ model Product {
   deletedAt       DateTime? // xoá mềm: đơn cũ vẫn tham chiếu
   // Đánh giá (SPEC-orders.md V5.1): tính lại trong cùng transaction với đánh giá, chỉ đánh giá đang hiện.
   ratingAvg       Float          @default(0)
+  // Bảo hành (SPEC-kiot.md V5.5), ≤ 60 ký tự; trống thì không hiện.
+  warranty        String?
   ratingCount     Int            @default(0)
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt

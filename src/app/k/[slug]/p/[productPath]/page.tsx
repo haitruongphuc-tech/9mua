@@ -104,6 +104,11 @@ export default async function ProductPage({ params, searchParams }: Params) {
               <span className="text-white/50 line-through">{formatVnd(product.compareAtPrice)}</span>
             ) : null}
           </p>
+          {product.warranty && (await isFeatureOn('kiot_builder')) ? (
+            <p className="text-[13px] font-bold text-green-300" data-testid="product-warranty">
+              🛡 {product.warranty}
+            </p>
+          ) : null}
           <p className="text-[13px] text-white/60">
             {category ? `${category.icon} ${t(`market.cat.${category.slug}`)}` : t('market.cat.khac')} ·{' '}
             {product.stock > 0 ? t('market.p.left', { stock: product.stock }) : t('market.soldOut')}

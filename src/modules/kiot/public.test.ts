@@ -67,6 +67,7 @@ describe('getPublicKiot', () => {
         'description',
         'district',
         'id',
+        'layout', // giao diện Kiot (SPEC-kiot.md V5.3): chỉ là cách trình bày
         'logoUrl',
         'name',
         'province',

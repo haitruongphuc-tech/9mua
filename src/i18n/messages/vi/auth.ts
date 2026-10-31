@@ -18,6 +18,7 @@ export const auth = {
   'auth.google.admin': 'Tài khoản quản trị không đăng nhập bằng Google.',
   'auth.zalo': 'Tiếp tục với Zalo',
   'auth.facebook': 'Tiếp tục với Facebook',
+  'auth.apple': 'Tiếp tục với Apple',
   'auth.oauth.error': 'Không đăng nhập được bằng {provider}. Vui lòng thử lại.',
   'auth.oauth.admin': 'Tài khoản quản trị không đăng nhập bằng {provider}.',
   'auth.login.linkProvider':

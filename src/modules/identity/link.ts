@@ -6,7 +6,7 @@ import { db } from '@/lib/db';
 // Vé liên kết (SPEC-identity.md bổ sung 27/10 và 29/10): đăng nhập Google/Facebook bằng email trùng tài khoản có sẵn thì
 // chưa liên kết ngay. Vé niêm phong (AES-GCM) nằm trong cookie 10 phút; người dùng chứng minh là chủ tài khoản bằng mật
 // khẩu hoặc mã gửi về email đó rồi mới liên kết.
-export type LinkProvider = 'google' | 'facebook';
+export type LinkProvider = 'google' | 'facebook' | 'apple';
 export type LinkTicket = { provider: LinkProvider; subject: string; email: string; exp: number };
 
 const TICKET_TTL_MS = 10 * 60_000;
@@ -26,7 +26,7 @@ export function openLinkTicket(sealed: string | undefined): LinkTicket | null {
       email: raw.email ?? '',
       exp: raw.exp ?? 0,
     };
-    if (!['google', 'facebook'].includes(t.provider) || !t.subject || !t.email) return null;
+    if (!['google', 'facebook', 'apple'].includes(t.provider) || !t.subject || !t.email) return null;
     return t.exp > now().getTime() ? t : null;
   } catch {
     return null;

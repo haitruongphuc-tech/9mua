@@ -104,9 +104,14 @@ export function SignupPopup({
           modes={modes}
           next={next}
           tone="sheet"
-          labels={{ zalo: t('auth.zalo'), google: t('common.google'), facebook: t('auth.facebook') }}
+          labels={{
+            zalo: t('auth.zalo'),
+            google: t('common.google'),
+            facebook: t('auth.facebook'),
+            apple: t('auth.apple'),
+          }}
         />
-        {modes.zalo || modes.google || modes.facebook ? (
+        {modes.zalo || modes.google || modes.facebook || modes.apple ? (
           <div className="my-4 flex items-center gap-3 text-[11px] text-zinc-400">
             <span className="h-px flex-1 bg-zinc-200" />
             {t('auth.or')}

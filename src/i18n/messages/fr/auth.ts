@@ -19,6 +19,7 @@ export const auth: AuthMessages = {
   'auth.google.admin': 'Les comptes administrateur ne peuvent pas se connecter avec Google.',
   'auth.zalo': 'Continuer avec Zalo',
   'auth.facebook': 'Continuer avec Facebook',
+  'auth.apple': 'Continuer avec Apple',
   'auth.oauth.error': 'Connexion avec {provider} impossible. Veuillez réessayer.',
   'auth.oauth.admin': 'Les comptes administrateur ne peuvent pas se connecter avec {provider}.',
   'auth.login.linkProvider':

@@ -19,6 +19,7 @@ export const auth: AuthMessages = {
   'auth.google.admin': 'Las cuentas de administrador no pueden iniciar sesión con Google.',
   'auth.zalo': 'Continuar con Zalo',
   'auth.facebook': 'Continuar con Facebook',
+  'auth.apple': 'Continuar con Apple',
   'auth.oauth.error': 'No se pudo iniciar sesión con {provider}. Inténtalo de nuevo.',
   'auth.oauth.admin': 'Las cuentas de administrador no pueden iniciar sesión con {provider}.',
   'auth.login.linkProvider':

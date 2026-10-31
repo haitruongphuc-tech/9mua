@@ -16,7 +16,12 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getT())('auth.login.submit'), robots: { index: false } };
 }
 
-const PROVIDER_NAME: Record<string, string> = { google: 'Google', zalo: 'Zalo', facebook: 'Facebook' };
+const PROVIDER_NAME: Record<string, string> = {
+  google: 'Google',
+  zalo: 'Zalo',
+  facebook: 'Facebook',
+  apple: 'Apple',
+};
 
 // Đăng nhập (SPEC-identity.md bổ sung 29/10): Zalo · Google · Facebook, mã email, và mật khẩu cho tài khoản cũ/admin.
 // Email Google/Facebook trùng tài khoản có sẵn: nhập mã gửi về email đó hoặc mật khẩu để liên kết.
@@ -87,9 +92,14 @@ export default async function LoginPage({
         ) : (
           <>
             <SocialButtons
-              modes={socialModes()}
+              modes={await socialModes()}
               next={next}
-              labels={{ zalo: t('auth.zalo'), google: t('common.google'), facebook: t('auth.facebook') }}
+              labels={{
+                zalo: t('auth.zalo'),
+                google: t('common.google'),
+                facebook: t('auth.facebook'),
+                apple: t('auth.apple'),
+              }}
             />
             <OrDivider label={t('auth.or')} />
             <EmailOtpForm next={next} />

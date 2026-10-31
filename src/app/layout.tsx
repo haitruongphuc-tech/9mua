@@ -67,7 +67,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                     cookieDomain={root === 'localhost' ? null : `.${root}`}
                     freeLimit={freeLimit}
                     voucherThreshold={voucherThreshold}
-                    modes={socialModes()}
+                    modes={await socialModes()}
                   />
                 </ClientMessages>
               </Suspense>

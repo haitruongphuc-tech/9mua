@@ -25,9 +25,14 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
   return (
     <AuthShell title={t('auth.register.title')} lead={t('auth.register.lead')}>
       <SocialButtons
-        modes={socialModes()}
+        modes={await socialModes()}
         next={next}
-        labels={{ zalo: t('auth.zalo'), google: t('common.google'), facebook: t('auth.facebook') }}
+        labels={{
+          zalo: t('auth.zalo'),
+          google: t('common.google'),
+          facebook: t('auth.facebook'),
+          apple: t('auth.apple'),
+        }}
       />
       <OrDivider label={t('auth.or')} />
       <ClientMessages prefixes={['auth.']}>

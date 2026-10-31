@@ -19,6 +19,7 @@ export const auth: AuthMessages = {
   'auth.google.admin': '관리자 계정은 Google로 로그인할 수 없습니다.',
   'auth.zalo': 'Zalo로 계속하기',
   'auth.facebook': 'Facebook으로 계속하기',
+  'auth.apple': 'Apple로 계속하기',
   'auth.oauth.error': '{provider}(으)로 로그인하지 못했습니다. 다시 시도해 주세요.',
   'auth.oauth.admin': '관리자 계정은 {provider}(으)로 로그인할 수 없습니다.',
   'auth.login.linkProvider':

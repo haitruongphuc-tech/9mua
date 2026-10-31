@@ -53,6 +53,11 @@ const schema = z
     ZALO_APP_SECRET: z.preprocess((v) => (v === '' ? undefined : v), z.string().optional()),
     FACEBOOK_APP_ID: z.preprocess((v) => (v === '' ? undefined : v), z.string().optional()),
     FACEBOOK_APP_SECRET: z.preprocess((v) => (v === '' ? undefined : v), z.string().optional()),
+    // Đăng nhập Apple (SPEC-identity.md V5.4, công tắc apple_login). Thiếu một khoá thì ẩn nút.
+    APPLE_CLIENT_ID: z.preprocess((v) => (v === '' ? undefined : v), z.string().optional()),
+    APPLE_TEAM_ID: z.preprocess((v) => (v === '' ? undefined : v), z.string().optional()),
+    APPLE_KEY_ID: z.preprocess((v) => (v === '' ? undefined : v), z.string().optional()),
+    APPLE_PRIVATE_KEY: z.preprocess((v) => (v === '' ? undefined : v), z.string().optional()),
     // Kho video ngoài chuẩn S3 (SPEC-creator.md V5.1 mục 9; Cloudflare R2: vùng "auto"). Thiếu khoá thì video lưu trên VPS.
     // Driver fake chỉ cho dev/test.
     STORAGE_DRIVER: z.enum(['s3', 'fake']).optional(),

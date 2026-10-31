@@ -18,6 +18,7 @@ export const auth: AuthMessages = {
   'auth.google.admin': '管理员账户不能使用Google登录。',
   'auth.zalo': '使用 Zalo 继续',
   'auth.facebook': '使用 Facebook 继续',
+  'auth.apple': '通过 Apple 继续',
   'auth.oauth.error': '无法使用 {provider} 登录，请重试。',
   'auth.oauth.admin': '管理员账号不能使用 {provider} 登录。',
   'auth.login.linkProvider':

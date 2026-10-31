@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { env } from '@/lib/env';
 import { googleCookieOptions, oauthFlowCookie } from '@/lib/google-cookies';
 import { safeNextPath } from '@/lib/safe-next-path';
+import { isFeatureOn } from '@/lib/features';
 import { isOauthProvider, oauthMode, startOauthFlow } from '@/modules/identity';
 
 export const dynamic = 'force-dynamic';
@@ -13,8 +14,15 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   const { provider } = await params;
   if (!isOauthProvider(provider)) return new NextResponse('Not found', { status: 404 });
   const next = safeNextPath(request.nextUrl.searchParams.get('next'));
-  if (oauthMode(provider) === 'off') return NextResponse.redirect(`${env().APP_URL}/dang-nhap`);
+  if (oauthMode(provider) === 'off' || (provider === 'apple' && !(await isFeatureOn('apple_login'))))
+    return NextResponse.redirect(`${env().APP_URL}/dang-nhap`);
   const { url, cookie } = startOauthFlow(provider, next);
-  (await cookies()).set(oauthFlowCookie(provider), cookie, googleCookieOptions(`/api/auth/${provider}`));
+  const options = googleCookieOptions(`/api/auth/${provider}`);
+  // Apple quay về bằng POST từ appleid.apple.com: cookie SameSite=Lax không được gửi kèm, nên dùng None (cần HTTPS).
+  (await cookies()).set(
+    oauthFlowCookie(provider),
+    cookie,
+    provider === 'apple' && options.secure ? { ...options, sameSite: 'none' } : options,
+  );
   return NextResponse.redirect(url);
 }

@@ -19,6 +19,7 @@ export const auth: AuthMessages = {
   'auth.google.admin': 'Admin accounts cannot sign in with Google.',
   'auth.zalo': 'Continue with Zalo',
   'auth.facebook': 'Continue with Facebook',
+  'auth.apple': 'Continue with Apple',
   'auth.oauth.error': 'Could not sign in with {provider}. Please try again.',
   'auth.oauth.admin': 'Admin accounts cannot sign in with {provider}.',
   'auth.login.linkProvider':

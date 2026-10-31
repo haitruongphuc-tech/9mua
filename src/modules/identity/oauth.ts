@@ -1,4 +1,4 @@
-import { createHash, createHmac, randomBytes } from 'node:crypto';
+import { createHash, createHmac, createSign, randomBytes } from 'node:crypto';
 import { lockedForLogin } from './deletion-lock';
 import { Prisma } from '@prisma/client';
 import { now } from '@/lib/clock';
@@ -11,7 +11,7 @@ import { hashPassword } from './password';
 // Đăng nhập Zalo và Facebook (SPEC-identity.md bổ sung 29/10): OAuth 2.0 luồng authorization code, `state` niêm phong
 // trong cookie; Zalo có PKCE. Máy chủ đổi mã lấy token rồi lấy mã tài khoản + tên (+ email nếu Facebook cho), không lưu
 // token, không ghi log token. Không thêm thư viện npm.
-export const OAUTH_PROVIDERS = ['zalo', 'facebook'] as const;
+export const OAUTH_PROVIDERS = ['zalo', 'facebook', 'apple'] as const;
 export type OauthProvider = (typeof OAUTH_PROVIDERS)[number];
 export type OauthMode = 'off' | 'real' | 'fake';
 
@@ -20,9 +20,56 @@ const FLOW_TTL_MS = 10 * 60_000;
 
 function keys(p: OauthProvider): { id?: string; secret?: string } {
   const e = env();
+  if (p === 'apple')
+    // Apple không có "app secret" cố định: ký JWT bằng khoá .p8 mỗi lần đổi mã (appleClientSecret).
+    return {
+      id: e.APPLE_CLIENT_ID,
+      secret: e.APPLE_TEAM_ID && e.APPLE_KEY_ID && e.APPLE_PRIVATE_KEY ? 'p8' : undefined,
+    };
   return p === 'zalo'
     ? { id: e.ZALO_APP_ID, secret: e.ZALO_APP_SECRET }
     : { id: e.FACEBOOK_APP_ID, secret: e.FACEBOOK_APP_SECRET };
+}
+
+const APPLE = 'https://appleid.apple.com';
+
+// client_secret của Apple: JWT ES256 ký bằng khoá .p8 (SPEC-identity.md V5.4), sống 5 phút. Không cần thư viện.
+export function appleClientSecret(
+  k: { clientId: string; teamId: string; keyId: string; privateKey: string } = {
+    clientId: env().APPLE_CLIENT_ID ?? '',
+    teamId: env().APPLE_TEAM_ID ?? '',
+    keyId: env().APPLE_KEY_ID ?? '',
+    privateKey: env().APPLE_PRIVATE_KEY ?? '',
+  },
+): string {
+  const enc = (o: object) => Buffer.from(JSON.stringify(o)).toString('base64url');
+  const iat = Math.floor(now().getTime() / 1000);
+  const data = `${enc({ alg: 'ES256', kid: k.keyId })}.${enc({ iss: k.teamId, iat, exp: iat + 300, aud: APPLE, sub: k.clientId })}`;
+  const sig = createSign('SHA256')
+    .update(data)
+    .sign({ key: k.privateKey.replace(/\\n/g, '\n'), dsaEncoding: 'ieee-p1363' })
+    .toString('base64url');
+  return `${data}.${sig}`;
+}
+
+// id_token nhận thẳng từ máy chủ Apple qua HTTPS (không qua trình duyệt) nên chỉ kiểm iss, aud, hạn.
+export function appleIdentity(
+  idToken: unknown,
+  clientId: string,
+): { sub: string; email: string | null } | null {
+  if (typeof idToken !== 'string') return null;
+  try {
+    const c = JSON.parse(Buffer.from(idToken.split('.')[1] ?? '', 'base64url').toString('utf8')) as Record<
+      string,
+      unknown
+    >;
+    if (c.iss !== APPLE || c.aud !== clientId || typeof c.sub !== 'string' || !c.sub) return null;
+    if (typeof c.exp !== 'number' || c.exp * 1000 < now().getTime()) return null;
+    const verified = c.email_verified === true || c.email_verified === 'true';
+    return { sub: c.sub, email: verified ? cleanEmail(c.email) : null };
+  } catch {
+    return null;
+  }
 }
 
 // real: đã có khoá; fake: máy chạy E2E (TEST_MODE, không bao giờ trên HTTPS thật); off: ẩn nút.
@@ -51,6 +98,16 @@ export function startOauthFlow(p: OauthProvider, next: string): { url: string; c
   let url: string;
   if (oauthMode(p) === 'fake') {
     url = `${env().APP_URL}/api/auth/${p}/fake?${new URLSearchParams({ state: flow.state })}`;
+  } else if (p === 'apple') {
+    // Apple gửi kết quả bằng POST (form_post) về /api/auth/apple/callback.
+    url = `${APPLE}/auth/authorize?${new URLSearchParams({
+      client_id: k.id ?? '',
+      redirect_uri: oauthRedirectUri(p),
+      state: flow.state,
+      response_type: 'code',
+      response_mode: 'form_post',
+      scope: 'name email',
+    })}`;
   } else if (p === 'zalo') {
     url = `https://oauth.zaloapp.com/v4/permission?${new URLSearchParams({
       app_id: k.id ?? '',
@@ -115,6 +172,25 @@ export async function profileFromCode(
   }
   const k = keys(p);
   const timeout = () => AbortSignal.timeout(15_000);
+  if (p === 'apple') {
+    const token = await readJson(
+      await fetchImpl(`${APPLE}/auth/token`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          client_id: k.id ?? '',
+          client_secret: appleClientSecret(),
+          code,
+          grant_type: 'authorization_code',
+          redirect_uri: oauthRedirectUri(p),
+        }),
+        signal: timeout(),
+      }),
+    );
+    const id = appleIdentity(token?.id_token, k.id ?? '');
+    // Tên Apple chỉ gửi lần đầu, trong form_post (callback ghép vào sau).
+    return id ? { subject: id.sub, name: '', email: id.email } : null;
+  }
   if (p === 'zalo') {
     const token = await readJson(
       await fetchImpl('https://oauth.zaloapp.com/v4/access_token', {
@@ -191,13 +267,17 @@ export async function completeOauthLogin(p: OauthProvider, profile: OauthProfile
     if (await lockedForLogin(linked.user)) return { kind: 'error', error: 'LOCKED' };
     return { kind: 'login', userId: linked.userId, created: false };
   }
-  // Zalo không cho email; chỉ email Facebook mới được dùng.
-  const email = p === 'facebook' ? profile.email : null;
+  // Zalo không cho email; email Facebook và Apple (đã xác minh) mới được dùng.
+  const email = p === 'facebook' || p === 'apple' ? profile.email : null;
   if (email) {
     const existing = await db.user.findUnique({ where: { email } });
     if (existing) {
       if (existing.role === 'admin') return { kind: 'error', error: 'ADMIN' };
-      const ticket = sealLinkTicket({ provider: 'facebook', subject: profile.subject, email });
+      const ticket = sealLinkTicket({
+        provider: p === 'apple' ? 'apple' : 'facebook',
+        subject: profile.subject,
+        email,
+      });
       return { kind: 'link-required', email, ticket };
     }
   }

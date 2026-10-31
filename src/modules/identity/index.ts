@@ -63,6 +63,8 @@ export {
   profileFromCode,
   completeOauthLogin,
   sealFakeOauthCode,
+  appleClientSecret,
+  appleIdentity,
   type OauthProvider,
   type OauthMode,
   type OauthProfile,

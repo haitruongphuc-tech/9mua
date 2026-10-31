@@ -36,6 +36,7 @@ export const profile: ProfileMessages = {
   'profile.mutual.many': '{names} 님 외 내가 팔로우하는 {others}명도 이 계정을 팔로우해요',
   'profile.mutual.title': '함께 아는 친구',
   'profile.tab.liked': '좋아요',
+  'profile.tab.reposts': '리포스트',
   'profile.liked.public': '· 공개 중',
   'profile.liked.private': '· 나만 보기',
   'profile.liked.empty': '아직 좋아요한 영상이 없어요.',

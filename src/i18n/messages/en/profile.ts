@@ -37,6 +37,7 @@ export const profile: ProfileMessages = {
   'profile.mutual.many': '{names} and {others} others you follow also follow this account',
   'profile.mutual.title': 'Mutual followers',
   'profile.tab.liked': 'Liked',
+  'profile.tab.reposts': 'Reposts',
   'profile.liked.public': '· public',
   'profile.liked.private': '· only you can see',
   'profile.liked.empty': 'No liked videos yet.',

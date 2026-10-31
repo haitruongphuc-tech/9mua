@@ -48,6 +48,7 @@ export type FeedVideo = {
   canDownload: boolean;
   // Thẻ bình luận được trả lời bằng video (SPEC-creator.md V5.8). text null: bình luận không còn (bị ẩn hoặc xoá).
   replyTo: { text: string | null; authorName: string; avatarUrl: string | null; x: number; y: number } | null;
+  repostedBy?: string | null; // "@tên đã đăng lại" ở tab Đang Follow (SPEC-social.md V5.9)
 };
 
 export const FEED_PAGE = 8;

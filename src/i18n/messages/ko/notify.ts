@@ -5,6 +5,7 @@ export const notify: NotifyMessages = {
   'notify.newComment': '{name}님의 댓글: {text}',
   'notify.mentioned': '{name} 님이 나를 언급했어요',
   'notify.videoReply': '{name} 님이 내 댓글에 영상으로 답했어요',
+  'notify.reposted': '{name} 님이 내 콘텐츠를 리포스트했어요',
   'notify.newFollower': '{name} 님이 나를 팔로우했어요',
   'notify.newFollowers': '{name} 님 외 {others}명이 나를 팔로우했어요',
   'notify.videoLiked': '{name} 님이 내 영상을 좋아해요',

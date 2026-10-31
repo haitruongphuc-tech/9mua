@@ -5,6 +5,7 @@ export const notify: NotifyMessages = {
   'notify.newComment': '{name} commented: {text}',
   'notify.mentioned': '{name} mentioned you',
   'notify.videoReply': '{name} replied to your comment with a video',
+  'notify.reposted': '{name} reposted your content',
   'notify.newFollower': '{name} followed you',
   'notify.newFollowers': '{name} and {others} others followed you',
   'notify.videoLiked': '{name} liked your video',

@@ -37,6 +37,7 @@ export type PostView = {
   author: { id: string; displayName: string; avatarUrl: string | null };
   likes: number;
   liked: boolean;
+  reaction: string | null; // cảm xúc của người xem (SPEC-social.md V5.8)
   saved: boolean;
   comments: number;
   allowComments: boolean;
@@ -353,7 +354,7 @@ export async function hydratePosts(ids: string[], viewer: Viewer): Promise<PostV
     viewer.userId
       ? db.reaction.findMany({
           where: { userId: viewer.userId, postId: { in: ids } },
-          select: { postId: true },
+          select: { postId: true, reaction: true },
         })
       : [],
     viewer.userId
@@ -387,6 +388,7 @@ export async function hydratePosts(ids: string[], viewer: Viewer): Promise<PostV
       },
       likes: p.likes,
       liked: likedSet.has(p.id),
+      reaction: liked.find((l) => l.postId === p.id)?.reaction ?? null,
       saved: savedSet.has(p.id),
       comments: counts.find((c) => c.postId === p.id)?._count._all ?? 0,
       allowComments: p.allowComments,

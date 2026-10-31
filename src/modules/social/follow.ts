@@ -1,5 +1,6 @@
 import { Prisma } from '@prisma/client';
 import { isBlockedEither } from '@/lib/blocks';
+import { now } from '@/lib/clock';
 import { db } from '@/lib/db';
 import { isFeatureOn } from '@/lib/features';
 import { notifyEvent } from '@/lib/notify-events';
@@ -99,11 +100,33 @@ export async function followingFeed(
     ORDER BY v."readyAt" DESC, v.id DESC LIMIT ${PAGE + 1}`;
   const page = rows.slice(0, PAGE);
   const last = page.at(-1);
-  return {
-    items: await hydrateVideos(
-      page.map((r) => r.id),
+  const items = await hydrateVideos(
+    page.map((r) => r.id),
+    viewer,
+  );
+  // Đăng lại (SPEC-social.md V5.9): trang đầu chèn video người mình follow đã đăng lại trong 3 ngày, sau mỗi 2 video.
+  if (!cursor) {
+    const since = new Date(now().getTime() - 3 * 86_400_000);
+    const reposts = await db.$queryRaw<{ videoId: string; name: string }[]>`
+      SELECT DISTINCT ON (r."videoId") r."videoId", u."displayName" AS name
+      FROM "Repost" r JOIN "Follow" f ON f."followeeId" = r."userId" AND f."followerId" = ${viewer.userId}
+      JOIN "User" u ON u.id = r."userId"
+      JOIN "Video" v ON v.id = r."videoId"
+      WHERE r."videoId" IS NOT NULL AND r."createdAt" >= ${since} AND v.status = 'ready'
+        AND v.visibility = 'public' AND v."authorId" <> ${viewer.userId}
+      ORDER BY r."videoId", r."createdAt" DESC LIMIT 10`;
+    const fresh = reposts.filter((r) => !items.some((v) => v.id === r.videoId)).slice(0, 5);
+    const hydrated = await hydrateVideos(
+      fresh.map((r) => r.videoId),
       viewer,
-    ),
+    );
+    hydrated.forEach((v, k) => {
+      v.repostedBy = fresh.find((r) => r.videoId === v.id)?.name ?? null;
+      items.splice(Math.min(items.length, 2 + 3 * k), 0, v);
+    });
+  }
+  return {
+    items,
     nextCursor: rows.length > PAGE && last ? `${last.readyAt.toISOString()}|${last.id}` : null,
   };
 }

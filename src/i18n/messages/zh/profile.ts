@@ -36,6 +36,7 @@ export const profile: ProfileMessages = {
   'profile.mutual.many': '{names} 和你关注的另外 {others} 人也关注了此账号',
   'profile.mutual.title': '共同关注',
   'profile.tab.liked': '已赞',
+  'profile.tab.reposts': '转发',
   'profile.liked.public': '· 公开',
   'profile.liked.private': '· 仅自己可见',
   'profile.liked.empty': '还没有赞过视频。',

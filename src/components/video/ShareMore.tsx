@@ -7,7 +7,7 @@ import { useT } from '@/i18n/client';
 
 // Chia sẻ thêm cho video (SPEC-creator.md V5.7, SPEC-messages.md V5.1 — công tắc share_more): TikTok/Instagram (chép link
 // rồi mở app), tải về có logo, mã nhúng, gửi qua Hộp thư cho 8 cuộc trò chuyện gần nhất hoặc tìm theo tên.
-export type ShareVideo = { id: string; isPublic: boolean; canDownload: boolean };
+export type ShareVideo = { id: string; isPublic: boolean; canDownload: boolean; canRepost?: boolean };
 type Recent = { conversationId: string; name: string; avatarUrl: string | null };
 
 const APPS = {
@@ -98,6 +98,17 @@ export function ShareMore({
     onToast(t('feed.share.downloadFailed'));
     setBusy(false);
   };
+  // Đăng lại (SPEC-social.md V5.9): video public của người khác.
+  const repost = async () => {
+    if (!loggedIn) return window.location.assign(`/dang-nhap?next=${encodeURIComponent(`/v/${video.id}`)}`);
+    const r = await fetch('/api/social/repost', {
+      method: 'POST',
+      body: JSON.stringify({ videoId: video.id }),
+    })
+      .then((x) => x.json() as Promise<{ ok: boolean; reposted?: boolean }>)
+      .catch(() => null);
+    if (r?.ok) onToast(t(r.reposted ? 'feed.repost.done' : 'feed.repost.undone'));
+  };
   const embed = `<iframe src="${appUrl}/nhung/${video.id}" width="325" height="580" style="border:0" allow="fullscreen" allowfullscreen></iframe>`;
   const send = async (c: Recent) => {
     const r = await fetch('/api/hop-thu/gui-video', {
@@ -183,6 +194,17 @@ export function ShareMore({
             <span className="text-[11px] font-bold">{APPS[key].label}</span>
           </button>
         ))}
+        {video.canRepost ? (
+          <button
+            type="button"
+            onClick={() => void repost()}
+            className="flex flex-col items-center gap-1"
+            data-testid="share-repost"
+          >
+            <span className={`${circle} bg-brand`}>⟳</span>
+            <span className="text-[11px] font-bold">{t('feed.repost.button')}</span>
+          </button>
+        ) : null}
         {video.canDownload ? (
           <button
             type="button"

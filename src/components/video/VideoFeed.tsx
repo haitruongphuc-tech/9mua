@@ -27,6 +27,7 @@ import { CommentsSheet } from './CommentsSheet';
 import { attachHls, isHls, prefersLowData } from './hls';
 import { interleaveLives, interleavePosts } from './interleave';
 import { PostCard } from '@/components/post/PostCard';
+import { ReactionButton, type Reaction } from '@/components/social/ReactionButton';
 import { RichText } from '@/components/ui/RichText';
 import type { PostView } from '@/modules/creator';
 import { ShareMore } from './ShareMore';
@@ -91,6 +92,7 @@ export function VideoFeed({
   const postOptions = useFeature('post_options');
   const camera = useFeature('camera');
   const watchOn = useFeature('watch');
+  const postsOn = useFeature('posts');
   const seeks = useRef<(HTMLInputElement | null)[]>([]);
   const [speed, setSpeed] = useState(1);
   const [autoScroll, setAutoScroll] = useState(false);
@@ -370,6 +372,26 @@ export function VideoFeed({
       limit?: number;
     };
     if (data.ok) patch(v.id, { liked: data.liked!, likes: data.likes! });
+    else if (data.error === 'FREE_LIMIT') show(t('feed.freeLimit', { limit: data.limit ?? 50 }), true);
+  }
+
+  // Cảm xúc (SPEC-social.md V5.8): chạm = Thích / bỏ thích như cũ; chọn cảm xúc khác qua API cảm xúc.
+  async function react(v: SocialFeedVideo, r: Reaction | null, toggle: boolean) {
+    if (toggle) return like(v, 'toggle');
+    if (requireLogin(v.id)) return;
+    const res = await fetch('/api/social/reaction', {
+      method: 'POST',
+      body: JSON.stringify({ videoId: v.id, reaction: r }),
+    });
+    const data = (await res.json()) as {
+      ok: boolean;
+      reaction?: string | null;
+      total?: number;
+      error?: string;
+      limit?: number;
+    };
+    if (data.ok)
+      patch(v.id, { liked: Boolean(data.reaction), likes: data.total!, reaction: data.reaction ?? null });
     else if (data.error === 'FREE_LIMIT') show(t('feed.freeLimit', { limit: data.limit ?? 50 }), true);
   }
 
@@ -683,6 +705,14 @@ export function VideoFeed({
                 ) : null}
 
                 <div className="absolute bottom-0 left-0 right-[76px] flex flex-col p-4 pb-6">
+                  {v.repostedBy ? (
+                    <span
+                      className="mb-1 w-fit rounded-full bg-black/50 px-2 py-0.5 text-[11px] font-bold"
+                      data-testid="feed-reposted"
+                    >
+                      ⟳ {t('feed.repost.label', { name: v.repostedBy })}
+                    </span>
+                  ) : null}
                   <div className="mb-2 flex flex-wrap items-center gap-2">
                     {v.pinned ? (
                       <span
@@ -856,21 +886,35 @@ export function VideoFeed({
                       {v.followingAuthor ? '✓' : '+'}
                     </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => void like(v, 'toggle')}
-                    aria-label={t('feed.like')}
-                    aria-pressed={v.liked}
-                    className="flex flex-col items-center gap-1"
-                    data-testid="feed-like"
-                  >
-                    <span className={`${action} ${v.liked ? on : idle}`}>
-                      <Heart className={`h-6 w-6 ${v.liked ? 'fill-white' : ''}`} aria-hidden />
-                    </span>
-                    <span className="text-[11px] font-bold" data-testid="feed-likes">
-                      {formatCount(v.likes)}
-                    </span>
-                  </button>
+                  {postsOn ? (
+                    <ReactionButton
+                      reaction={v.liked ? ((v.reaction ?? 'like') as Reaction) : null}
+                      total={v.likes}
+                      onReact={(r, toggle) => void react(v, r, toggle)}
+                      summaryUrl={`/api/social/reaction?videoId=${v.id}`}
+                      className={`${action} ${v.liked ? on : idle}`}
+                      iconClass={`h-6 w-6 ${v.liked ? 'fill-white' : ''}`}
+                      testId="feed-like"
+                    >
+                      <span data-testid="feed-likes">{formatCount(v.likes)}</span>
+                    </ReactionButton>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => void like(v, 'toggle')}
+                      aria-label={t('feed.like')}
+                      aria-pressed={v.liked}
+                      className="flex flex-col items-center gap-1"
+                      data-testid="feed-like"
+                    >
+                      <span className={`${action} ${v.liked ? on : idle}`}>
+                        <Heart className={`h-6 w-6 ${v.liked ? 'fill-white' : ''}`} aria-hidden />
+                      </span>
+                      <span className="text-[11px] font-bold" data-testid="feed-likes">
+                        {formatCount(v.likes)}
+                      </span>
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={() => setSheet({ kind: 'comments', video: v })}
@@ -969,6 +1013,7 @@ export function VideoFeed({
                 id: sheet.video.id,
                 isPublic: sheet.video.isPublic,
                 canDownload: sheet.video.canDownload,
+                canRepost: postsOn && sheet.video.isPublic && !sheet.video.mine,
               }}
               url={`${appUrl}/v/${sheet.video.id}`}
               appUrl={appUrl}

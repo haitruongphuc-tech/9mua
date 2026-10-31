@@ -49,6 +49,19 @@ export {
 export { decorateFeed, type SocialFeedVideo } from './decorate';
 export { hasLink } from './links';
 export {
+  REACTIONS,
+  isReaction,
+  setVideoReaction,
+  setPostReaction,
+  reactionSummary,
+  myReaction,
+  toggleRepost,
+  repostsOf,
+  repostedContent,
+  type ReactionKind,
+  type ReactionTarget,
+} from './reactions';
+export {
   mutualFollowers,
   followSuggestions,
   dismissSuggestion,

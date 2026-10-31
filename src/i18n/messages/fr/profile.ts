@@ -37,6 +37,7 @@ export const profile: ProfileMessages = {
   'profile.mutual.many': '{names} et {others} autres personnes que vous suivez suivent aussi ce compte',
   'profile.mutual.title': 'Abonnés en commun',
   'profile.tab.liked': 'Aimées',
+  'profile.tab.reposts': 'Republications',
   'profile.liked.public': '· public',
   'profile.liked.private': '· visible par vous seul',
   'profile.liked.empty': 'Aucune vidéo aimée.',

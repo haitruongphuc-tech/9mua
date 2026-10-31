@@ -5,6 +5,7 @@ export const notify: NotifyMessages = {
   'notify.newComment': '{name}评论：{text}',
   'notify.mentioned': '{name} 提到了你',
   'notify.videoReply': '{name} 用视频回复了你的评论',
+  'notify.reposted': '{name} 转发了你的内容',
   'notify.newFollower': '{name} 关注了你',
   'notify.newFollowers': '{name} 和另外 {others} 人关注了你',
   'notify.videoLiked': '{name} 赞了你的视频',

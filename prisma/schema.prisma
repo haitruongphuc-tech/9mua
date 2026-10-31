@@ -757,6 +757,19 @@ model RateWindow {
   count       Int      @default(0)
 }
 
+// Đăng lại (SPEC-social.md V5.9): mỗi người đăng lại một video / bài public tối đa 1 lần.
+model Repost {
+  id        String   @id @default(cuid(2))
+  userId    String
+  videoId   String?
+  postId    String?
+  createdAt DateTime @default(now())
+
+  @@unique([userId, videoId])
+  @@unique([userId, postId])
+  @@index([userId, createdAt])
+}
+
 // Gợi ý follow bị "Ẩn" (SPEC-social.md V5.1): không gợi ý lại trong 30 ngày.
 model SuggestionDismiss {
   userId    String
@@ -993,6 +1006,7 @@ model VideoUploadSession {
 model VideoLike {
   videoId   String
   userId    String
+  reaction  String   @default("like") // cảm xúc (SPEC-social.md V5.8): like | love | haha | wow | sad | angry
   createdAt DateTime @default(now())
 
   @@id([videoId, userId])

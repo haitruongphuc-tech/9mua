@@ -37,6 +37,7 @@ export const profile: ProfileMessages = {
   'profile.mutual.many': '{names} y {others} personas más que sigues también siguen esta cuenta',
   'profile.mutual.title': 'Seguidores en común',
   'profile.tab.liked': 'Me gusta',
+  'profile.tab.reposts': 'Republicaciones',
   'profile.liked.public': '· público',
   'profile.liked.private': '· solo tú lo ves',
   'profile.liked.empty': 'Aún no hay videos que te gusten.',

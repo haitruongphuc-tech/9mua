@@ -37,6 +37,7 @@ export const profile: ProfileMessages = {
   'profile.mutual.many': '{names} さんとフォロー中のほか {others} 人もこのアカウントをフォローしています',
   'profile.mutual.title': '共通のフォロー',
   'profile.tab.liked': 'いいね済み',
+  'profile.tab.reposts': '再投稿',
   'profile.liked.public': '· 公開中',
   'profile.liked.private': '· 自分だけ',
   'profile.liked.empty': 'いいねした動画はまだありません。',

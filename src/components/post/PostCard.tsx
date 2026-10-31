@@ -1,6 +1,7 @@
 'use client';
 
-import { Bookmark, Heart, MessageCircle, Share2 } from 'lucide-react';
+import { Bookmark, MessageCircle, Share2 } from 'lucide-react';
+import { ReactionButton, type Reaction } from '@/components/social/ReactionButton';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useT } from '@/i18n/client';
@@ -36,6 +37,23 @@ export function PostCard({
     if (r?.ok) {
       setLiked(r.liked);
       setLikes(r.likes);
+    }
+  };
+  // Cảm xúc (SPEC-social.md V5.8): chạm = Thích / bỏ thích; giữ lâu chọn 6 cảm xúc.
+  const [reaction, setReaction] = useState<Reaction>((post.reaction as Reaction | null) ?? 'like');
+  const react = async (r: Reaction | null, toggle: boolean) => {
+    if (toggle) return like();
+    if (!loggedIn) return login();
+    const res = await fetch('/api/social/reaction', {
+      method: 'POST',
+      body: JSON.stringify({ postId: post.id, reaction: r }),
+    })
+      .then((x) => x.json() as Promise<{ ok: boolean; reaction?: Reaction | null; total?: number }>)
+      .catch(() => null);
+    if (res?.ok) {
+      setLiked(Boolean(res.reaction));
+      if (res.reaction) setReaction(res.reaction);
+      setLikes(res.total ?? likes);
     }
   };
   const save = async () => {
@@ -141,16 +159,15 @@ export function PostCard({
             : 'flex items-center gap-6 border-t border-white/10 pt-2'
         }
       >
-        <button
-          type="button"
-          onClick={() => void like()}
-          aria-pressed={liked}
+        <ReactionButton
+          reaction={liked ? reaction : null}
+          total={likes}
+          onReact={(r, toggle) => void react(r, toggle)}
+          summaryUrl={`/api/social/reaction?postId=${post.id}`}
           className={btn}
-          data-testid="post-like"
-        >
-          <Heart className={`h-6 w-6 ${liked ? 'fill-brand text-brand' : ''}`} aria-hidden />
-          <span>{likes}</span>
-        </button>
+          iconClass={`h-6 w-6 ${liked ? 'fill-brand text-brand' : ''}`}
+          testId="post-like"
+        />
         <Link href={`/p/${post.id}#binh-luan`} className={btn} data-testid="post-comments">
           <MessageCircle className="h-6 w-6" aria-hidden />
           <span>{post.comments}</span>

@@ -22,6 +22,7 @@ import {
   likedTabPublic,
   likedVideos,
   listBlockedUsers,
+  repostedContent,
   mutualFollowers,
 } from '@/modules/social';
 import { SuggestRow } from '@/components/profile/SuggestRow';
@@ -70,6 +71,10 @@ export async function CreatorProfileView({
     socialMore && viewer ? (await followSuggestions(viewer.id)).filter((x) => x.id !== p.id) : [];
   const liked = socialMore ? await likedVideos(p.id, viewer?.id) : null;
   const likedPublic = isSelf && liked ? await likedTabPublic(p.id) : false;
+  // Tab "Đăng lại" (SPEC-social.md V5.9), công tắc posts.
+  const reposts = (await isFeatureOn('posts'))
+    ? await repostedContent(p.id, viewer?.id)
+    : { videos: [], posts: [] };
   // Tab "Bài viết" (SPEC-creator.md V5.10 mục 2), công tắc posts.
   const posts = (await isFeatureOn('posts')) ? await postsByAuthor(p.id, { userId: viewer?.id }) : [];
   // Có @tên thì link chia sẻ là 9mua.com/@<tên> (SPEC-identity.md V5.1).
@@ -243,6 +248,34 @@ export async function CreatorProfileView({
                 ) : (
                   <p className="py-6 text-center text-[13px] text-white/50">{t('profile.liked.empty')}</p>
                 )}
+              </div>
+            </>
+          ) : null}
+          {reposts.videos.length || reposts.posts.length ? (
+            <>
+              <h2
+                className="mt-6 border-b border-white/10 pb-2 text-[13px] font-bold"
+                data-testid="profile-reposts"
+              >
+                ⟳ {t('profile.tab.reposts')}
+              </h2>
+              <div className="mt-2 flex flex-col gap-3">
+                {reposts.videos.length ? (
+                  <VideoGrid
+                    showAuthor
+                    videos={reposts.videos.map((v) => ({
+                      id: v.id,
+                      posterUrl: v.posterUrl,
+                      caption: v.caption,
+                      views: v.views,
+                      likes: v.likes,
+                      authorName: v.author.displayName,
+                    }))}
+                  />
+                ) : null}
+                {reposts.posts.map((post) => (
+                  <PostCard key={post.id} post={post} loggedIn={Boolean(viewer)} />
+                ))}
               </div>
             </>
           ) : null}

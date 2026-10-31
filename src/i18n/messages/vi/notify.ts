@@ -4,6 +4,7 @@ export const notify = {
   'notify.newComment': '{name} bình luận: {text}',
   'notify.mentioned': '{name} đã nhắc tên bạn',
   'notify.videoReply': '{name} đã trả lời bình luận của bạn bằng video',
+  'notify.reposted': '{name} đã đăng lại nội dung của bạn',
   'notify.newFollower': '{name} đã follow bạn',
   'notify.newFollowers': '{name} và {others} người khác đã follow bạn',
   'notify.videoLiked': '{name} đã thích video của bạn',

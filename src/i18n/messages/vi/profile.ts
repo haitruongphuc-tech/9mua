@@ -35,6 +35,7 @@ export const profile = {
   'profile.mutual.many': '{names} và {others} người bạn follow khác cũng follow trang này',
   'profile.mutual.title': 'Bạn chung',
   'profile.tab.liked': 'Đã thích',
+  'profile.tab.reposts': 'Đăng lại',
   'profile.liked.public': '· đang công khai',
   'profile.liked.private': '· chỉ mình bạn thấy',
   'profile.liked.empty': 'Chưa thích video nào.',

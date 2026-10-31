@@ -61,5 +61,7 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   runtime: 'nodejs',
-  matcher: ['/((?!_next/static|_next/image).*)'],
+  // Bỏ qua các đường tải file lên: Next.js chép thân request qua middleware và làm rơi phần đuôi khi mạng chậm
+  // (31/10: iPhone 4G gửi 8MB, app chỉ nhận ~8,1MB → BAD_PART). Các đường này không cần định tuyến Kiot.
+  matcher: ['/((?!_next/static|_next/image|api/uploads/|api/video/upload|api/video/recording).*)'],
 };

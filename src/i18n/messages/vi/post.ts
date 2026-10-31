@@ -8,7 +8,7 @@ export const post = {
   'post.storyHint': 'Story dài tối đa 30 giây, tự ẩn sau 24 giờ và hiện ở đầu trang Live.',
   'post.duetWith': 'Duet với @{name}',
   'post.duetHint': 'Video của bạn sẽ được ghép cạnh video gốc: bên trái video gốc, bên phải video của bạn.',
-  'post.pick': 'Chọn video (≤ {sec} giây, ≤ 100MB)',
+  'post.pick': 'Chọn video (≤ {sec} giây, ≤ {mb} MB)',
   'post.caption': 'Chú thích ({count}/{max})',
   'post.captionPlaceholder': 'Giới thiệu sản phẩm… #thanhlong',
   'post.products': 'Gắn sản phẩm ({count}/3)',

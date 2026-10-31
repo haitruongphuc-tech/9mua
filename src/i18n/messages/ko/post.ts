@@ -9,7 +9,7 @@ export const post: PostMessages = {
   'post.storyHint': '스토리는 최대 30초, 24시간 후 사라지며 라이브 페이지 상단에 보여요.',
   'post.duetWith': '@{name}님과 듀엣',
   'post.duetHint': '내 동영상이 원본 옆에 붙어요: 왼쪽은 원본, 오른쪽은 내 동영상.',
-  'post.pick': '동영상 선택 ({sec}초 이하, 100MB 이하)',
+  'post.pick': '동영상 선택 ({sec}초 이하, {mb} MB 이하)',
   'post.caption': '설명 ({count}/{max})',
   'post.captionPlaceholder': '상품을 소개해 주세요… #용과',
   'post.products': '상품 연결 ({count}/3)',

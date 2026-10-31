@@ -10,7 +10,7 @@ export const post: PostMessages = {
     'Las historias duran hasta 30 segundos, desaparecen a las 24 horas y salen arriba en la página Directo.',
   'post.duetWith': 'Dúo con @{name}',
   'post.duetHint': 'Tu video irá junto al original: el original a la izquierda y el tuyo a la derecha.',
-  'post.pick': 'Elegir video (≤ {sec} segundos, ≤ 100 MB)',
+  'post.pick': 'Elegir video (≤ {sec} segundos, ≤ {mb} MB)',
   'post.caption': 'Descripción ({count}/{max})',
   'post.captionPlaceholder': 'Presenta tu producto… #pitahaya',
   'post.products': 'Vincular productos ({count}/3)',

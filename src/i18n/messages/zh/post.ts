@@ -8,7 +8,7 @@ export const post: PostMessages = {
   'post.storyHint': '快拍最长30秒，24小时后自动隐藏，显示在直播页顶部。',
   'post.duetWith': '与@{name}合拍',
   'post.duetHint': '你的视频会放在原视频旁边：左边是原视频，右边是你的视频。',
-  'post.pick': '选择视频（≤{sec}秒，≤100MB）',
+  'post.pick': '选择视频（≤{sec}秒，≤{mb} MB）',
   'post.caption': '说明（{count}/{max}）',
   'post.captionPlaceholder': '介绍你的商品…#火龙果',
   'post.products': '关联商品（{count}/3）',

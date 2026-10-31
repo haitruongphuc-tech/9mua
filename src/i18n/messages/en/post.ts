@@ -11,7 +11,7 @@ export const post: PostMessages = {
   'post.duetWith': 'Duet with @{name}',
   'post.duetHint':
     'Your video will be placed next to the original: original on the left, yours on the right.',
-  'post.pick': 'Choose a video (≤ {sec} seconds, ≤ 100MB)',
+  'post.pick': 'Choose a video (≤ {sec} seconds, ≤ {mb} MB)',
   'post.caption': 'Caption ({count}/{max})',
   'post.captionPlaceholder': 'Introduce your product… #dragonfruit',
   'post.products': 'Tag products ({count}/3)',

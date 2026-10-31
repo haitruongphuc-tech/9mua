@@ -205,6 +205,7 @@ const RULES: Record<SettingKey, { min?: number; max?: number; bool?: true; json?
   video_max_mb: { min: 100, max: 4096, label: 'Dung lượng video tối đa (MB)' },
   video_long_daily_minutes: { min: 1, max: 600, label: 'Phút video dài mỗi ngày' },
   video_enable_1080: { bool: true, label: 'Mức 1080p' },
+  new_account_limits: { bool: true, label: 'Giới hạn tài khoản mới' },
   stt_monthly_budget_vnd: { min: 0, max: 100_000_000, label: 'Ngân sách phụ đề tự động mỗi tháng' },
   points_like: { min: 0, max: 1000, label: 'Điểm khi thả tim video' },
   points_follow: { min: 0, max: 1000, label: 'Điểm khi follow' },

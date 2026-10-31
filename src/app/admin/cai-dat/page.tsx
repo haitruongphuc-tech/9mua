@@ -140,6 +140,23 @@ export default async function SettingsPage({ searchParams }: { searchParams: Fla
           />
           Thêm mức 1080p cho video dài (tốn thêm dung lượng và thời gian xử lý)
         </label>
+        <h2 className="mt-2 text-lg font-extrabold">Tài khoản mới</h2>
+        <label className="flex items-start gap-2 text-sm font-bold">
+          <input
+            type="checkbox"
+            name="new_account_limits"
+            defaultChecked={s.new_account_limits !== 'false'}
+            className="mt-0.5 h-5 w-5 accent-brand"
+            data-testid="new-account-limits"
+          />
+          <span>
+            Giới hạn tài khoản mới: phải đủ 3 ngày mới phát live, đăng video dài; đủ 7 ngày mới tạo nhóm.
+            <span className="block text-xs font-normal text-white/60">
+              Bỏ tick thì thành viên mới làm được ngay. Xu thưởng khi xem live, đổi điểm ra xu, voucher mở
+              Kiot vẫn giữ giới hạn để chống tạo tài khoản ảo.
+            </span>
+          </span>
+        </label>
         <h2 className="mt-2 text-lg font-extrabold">Phụ đề tự động (khi bật công tắc auto_captions)</h2>
         {num(
           'Ngân sách phụ đề tự động mỗi tháng (đ)',

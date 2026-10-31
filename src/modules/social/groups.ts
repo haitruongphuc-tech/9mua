@@ -1,4 +1,5 @@
 import { randomBytes } from 'node:crypto';
+import { accountTooNew } from '@/lib/settings';
 import { now } from '@/lib/clock';
 import { db } from '@/lib/db';
 import { hasLink } from '@/lib/links';
@@ -15,7 +16,6 @@ export const MAX_GROUPS_OWNED = 5;
 export const MAX_GROUP_ADMINS = 3; // ngoài người tạo
 export const MAX_GROUP_MEMBERS = 10_000;
 const MIN_ACCOUNT_DAYS = 7;
-const DAY = 86_400_000;
 
 export type GroupPrivacy = 'public' | 'private';
 export type GroupRole = 'owner' | 'admin' | 'member';
@@ -72,8 +72,8 @@ export async function createGroup(
   if (input.privacy !== 'public' && input.privacy !== 'private') return { ok: false, error: 'INVALID' };
   if (hasLink(name) || hasLink(description)) return { ok: false, error: 'HAS_LINK' };
   const u = await db.user.findUnique({ where: { id: userId }, select: { createdAt: true, lockedAt: true } });
-  if (!u || u.lockedAt || u.createdAt.getTime() > now().getTime() - MIN_ACCOUNT_DAYS * DAY)
-    return { ok: false, error: 'TOO_NEW' };
+  if (!u || u.lockedAt) return { ok: false, error: 'TOO_NEW' };
+  if (await accountTooNew(u.createdAt, MIN_ACCOUNT_DAYS)) return { ok: false, error: 'TOO_NEW' };
   return db.$transaction(async (tx) => {
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`group:${userId}`}))`;
     if ((await tx.communityGroup.count({ where: { ownerId: userId } })) >= MAX_GROUPS_OWNED)

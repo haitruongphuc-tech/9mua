@@ -10,7 +10,7 @@ export const post: PostMessages = {
     'Les Stories durent 30 secondes maximum, disparaissent après 24 heures et s’affichent en haut de la page Live.',
   'post.duetWith': 'Duo avec @{name}',
   'post.duetHint': 'Votre vidéo sera placée à côté de l’originale : l’originale à gauche, la vôtre à droite.',
-  'post.pick': 'Choisir une vidéo (≤ {sec} secondes, ≤ 100 Mo)',
+  'post.pick': 'Choisir une vidéo (≤ {sec} secondes, ≤ {mb} Mo)',
   'post.caption': 'Légende ({count}/{max})',
   'post.captionPlaceholder': 'Présentez votre produit… #pitaya',
   'post.products': 'Lier des produits ({count}/3)',

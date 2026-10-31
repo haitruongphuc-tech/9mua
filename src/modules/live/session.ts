@@ -1,7 +1,7 @@
 import type { LiveSession } from '@prisma/client';
 import { now } from '@/lib/clock';
 import { db } from '@/lib/db';
-import { getIntSetting } from '@/lib/settings';
+import { accountTooNew, getIntSetting } from '@/lib/settings';
 import { hasCurrentCommitment } from '@/modules/identity';
 import { getKiotByOwner, getProductForCheckout, isKiotActive } from '@/modules/kiot';
 import { runLiveEndedHooks } from './hooks';
@@ -50,7 +50,7 @@ export async function startLive(
   });
   if (!user || user.lockedAt) return { ok: false, error: 'LIVE_BANNED' };
   if (await activeLiveBan(userId)) return { ok: false, error: 'LIVE_BANNED' };
-  if (now().getTime() - user.createdAt.getTime() < MIN_ACCOUNT_AGE_MS)
+  if (await accountTooNew(user.createdAt, MIN_ACCOUNT_AGE_MS / 86_400_000))
     return { ok: false, error: 'ACCOUNT_TOO_NEW' };
   const kiot = await getKiotByOwner(userId);
   const maxSessions = await getIntSetting('live_max_sessions');

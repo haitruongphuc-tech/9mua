@@ -1,3 +1,4 @@
+import { now } from './clock';
 import { db, type Tx } from './db';
 
 // Cài đặt CEO chỉnh được trong trang admin. Giá trị lưu dạng chuỗi, đọc kèm mặc định.
@@ -36,6 +37,9 @@ export const SETTING_DEFAULTS = {
   video_long_daily_minutes: '120',
   // Phụ đề tự động (SPEC-creator.md V5.4): ngân sách tháng cho dịch vụ nghe giọng nói (OpenAI Whisper).
   stt_monthly_budget_vnd: '200000',
+  // Giới hạn tài khoản mới (CEO chốt 31/10): bật thì tài khoản mới phải chờ trước khi phát live, đăng video dài, tạo
+  // nhóm; tắt thì không chờ. Các giới hạn liên quan tiền (xu thưởng live, đổi điểm, voucher) không theo công tắc này.
+  new_account_limits: 'true',
   video_enable_1080: 'false', // thêm mức HLS 1080p khi video gốc ≥ 1080p (tốn thêm dung lượng và thời gian xử lý)
   // Điểm thưởng (SPEC-social.md V5.6): luật cộng điểm và đổi điểm ra xu.
   points_like: '5',
@@ -71,4 +75,14 @@ export async function setSetting(key: SettingKey, value: string, actorId: string
     create: { key, value, updatedById: actorId },
     update: { value, updatedById: actorId },
   });
+}
+
+// Tài khoản mới còn phải chờ không (công tắc new_account_limits ở /admin/cai-dat). Tắt thì luôn false.
+export async function accountTooNew(
+  createdAt: Date,
+  minDays: number,
+  tx: Tx | typeof db = db,
+): Promise<boolean> {
+  if ((await getSetting('new_account_limits', tx)) === 'false') return false;
+  return now().getTime() - createdAt.getTime() < minDays * 86_400_000;
 }

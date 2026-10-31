@@ -9,7 +9,7 @@ export const post: PostMessages = {
   'post.storyHint': 'ストーリーは最長30秒、24時間で非表示になり、ライブページの上部に表示されます。',
   'post.duetWith': '@{name}さんとデュエット',
   'post.duetHint': 'あなたの動画は元の動画の横に並びます（左が元の動画、右があなたの動画）。',
-  'post.pick': '動画を選択（{sec}秒以内、100MB以内）',
+  'post.pick': '動画を選択（{sec}秒以内、{mb} MB以内）',
   'post.caption': '説明（{count}/{max}）',
   'post.captionPlaceholder': '商品を紹介…#ドラゴンフルーツ',
   'post.products': '商品をタグ付け（{count}/3）',

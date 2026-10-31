@@ -526,7 +526,12 @@ export function VideoUploadForm({
         <span aria-hidden className="text-3xl">
           🎬
         </span>
-        {file ? file.name : t('post.pick', { sec: maxSec(mode) })}
+        {file
+          ? file.name
+          : t('post.pick', {
+              sec: maxSec(mode),
+              mb: Math.round(limits.maxBytes / 1024 / 1024),
+            })}
         <input
           type="file"
           accept={

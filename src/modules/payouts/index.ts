@@ -13,6 +13,7 @@ export {
   submitKyc,
   getKycStatus,
   isKycApproved,
+  isBankVerified,
   listKycForReview,
   reviewKyc,
   readKycImage,

@@ -98,3 +98,12 @@ export async function readKycImage(kycId: string, side: 'front' | 'back'): Promi
   if (!sub) return null;
   return readPrivate(side === 'front' ? sub.frontImage : sub.backImage);
 }
+
+// Huy hiệu "Đã xác thực ngân hàng" (SPEC-kiot.md V5.2 mục 4): KYC đã duyệt và tên tài khoản nhận tiền khớp tên CCCD.
+export async function isBankVerified(userId: string): Promise<boolean> {
+  const kyc = await getKycStatus(userId);
+  if (kyc?.status !== 'approved') return false;
+  const kiot = await getKiotByOwner(userId);
+  const account = kiot ? await getPayoutAccount(kiot.id) : null;
+  return Boolean(account && account.accountName === kyc.fullName);
+}

@@ -9,6 +9,7 @@ const TABS = [
   { href: '/kiot-cua-toi/san-pham', key: 'seller.nav.products' },
   { href: '/kiot-cua-toi/don-hang', key: 'seller.nav.orders' },
   { href: '/kiot-cua-toi/danh-gia', key: 'seller.nav.reviews' },
+  { href: '/kiot-cua-toi/nguon-goc', key: 'seller.nav.origin' },
   { href: '/kiot-cua-toi/so-du', key: 'seller.nav.balance' },
   { href: '/kiot-cua-toi/thanh-toan', key: 'seller.nav.billing' },
   { href: '/kiot-cua-toi/cai-dat', key: 'seller.nav.settings' },

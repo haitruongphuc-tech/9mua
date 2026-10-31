@@ -48,6 +48,8 @@ export const SETTING_DEFAULTS = {
   points_xu_month_budget: '10000',
   // Từ khoá không cho hiện ở "Từ khoá đang hot" (SPEC-marketplace.md V5.4 mục 3), CEO sửa ở /admin/noi-dung.
   search_hidden_json: '{"words":[]}',
+  // Tên và màu huy hiệu Kiot (SPEC-kiot.md V5.2 mục 4); trống thì dùng mặc định trong src/server/kiot-badges.ts.
+  badges_json: '{}',
 } as const;
 
 export type SettingKey = keyof typeof SETTING_DEFAULTS;

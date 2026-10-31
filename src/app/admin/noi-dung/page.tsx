@@ -6,7 +6,13 @@ import { LEGAL_DEFAULTS, LEGAL_FIELDS, parseLegal } from '@/lib/legal';
 import { getAllSettings, requireAdminVerified } from '@/modules/admin';
 import type { FlashParams } from '../flash';
 import { currentCommitment } from '@/modules/identity';
-import { publishCommitmentAction, saveContentAction, saveHiddenKeywordsAction } from './actions';
+import {
+  publishCommitmentAction,
+  saveBadgesAction,
+  saveContentAction,
+  saveHiddenKeywordsAction,
+} from './actions';
+import { badgeStyle } from '@/server/kiot-badges';
 import { SLOGAN_KEYS, SLOGAN_PAGES } from './keys';
 
 export const dynamic = 'force-dynamic';
@@ -33,6 +39,7 @@ export default async function ContentPage({ searchParams }: { searchParams: Flas
     /* trống */
   }
   const legal = parseLegal(s.legal_info_json);
+  const badges = await badgeStyle();
   const hiddenWords = (() => {
     try {
       const v = JSON.parse(s.search_hidden_json) as { words?: unknown };
@@ -87,6 +94,30 @@ export default async function ContentPage({ searchParams }: { searchParams: Flas
           ))}
         </div>
         <ConfirmSubmit confirm="Lưu slogan và thông tin pháp lý?">Lưu</ConfirmSubmit>
+      </form>
+
+      {/* Tên và màu huy hiệu Kiot (SPEC-kiot.md V5.2 mục 4): 1 huy hiệu, 2 huy hiệu, 3 huy hiệu. */}
+      <form
+        action={saveBadgesAction}
+        className="flex flex-col gap-3 rounded-[18px] border border-white/10 bg-white/5 p-4"
+        data-testid="admin-badges"
+      >
+        <h2 className="text-lg font-extrabold">Huy hiệu Kiot</h2>
+        {(['origin', 'bank', 'video'] as const).map((k) => (
+          <label key={k} className="flex flex-col gap-1 text-sm font-bold">
+            {k === 'origin' ? 'Nguồn gốc' : k === 'bank' ? 'Ngân hàng' : 'Video'}
+            <input name={`name.${k}`} defaultValue={badges.names[k]} maxLength={40} className={field} />
+          </label>
+        ))}
+        <div className="flex gap-3">
+          {[1, 2, 3].map((n) => (
+            <label key={n} className="flex items-center gap-2 text-sm font-bold">
+              {n} huy hiệu
+              <input type="color" name={`color.${n}`} defaultValue={badges.colors[n - 1]} />
+            </label>
+          ))}
+        </div>
+        <ConfirmSubmit confirm="Lưu tên và màu huy hiệu?">Lưu huy hiệu</ConfirmSubmit>
       </form>
 
       {/* Từ khoá ẩn khỏi "Từ khoá đang hot" (SPEC-marketplace.md V5.4 mục 3). */}

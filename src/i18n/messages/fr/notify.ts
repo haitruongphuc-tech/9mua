@@ -8,6 +8,11 @@ export const notify: NotifyMessages = {
   'notify.reposted': '{name} a republié votre contenu',
   'notify.reviewReminder':
     'La commande {code} a été livrée. Laissez un avis pour aider les autres acheteurs !',
+  'notify.originApproved':
+    "Vos justificatifs d'origine sont validés. Votre Kiot a le badge « Origine vérifiée ».",
+  'notify.originRejected': 'Justificatifs refusés : {reason}',
+  'notify.originRevoked': "Badge d'origine retiré : {reason}",
+  'notify.originRenew': 'Vos justificatifs expirent dans 30 jours. Renvoyez-les pour garder le badge.',
   'notify.followRequest': '{name} souhaite vous suivre',
   'notify.followAccepted': '{name} a accepté votre demande',
   'notify.eventSoon': 'Un événement qui vous intéresse commence bientôt',

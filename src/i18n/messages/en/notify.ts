@@ -7,6 +7,11 @@ export const notify: NotifyMessages = {
   'notify.videoReply': '{name} replied to your comment with a video',
   'notify.reposted': '{name} reposted your content',
   'notify.reviewReminder': 'Order {code} was delivered. Leave a review to help other buyers!',
+  'notify.originApproved':
+    'Your origin documents were approved. Your Kiot now has the "Verified origin" badge.',
+  'notify.originRejected': 'Origin documents rejected: {reason}',
+  'notify.originRevoked': 'Origin badge revoked: {reason}',
+  'notify.originRenew': 'Your origin documents expire within 30 days. Submit again to keep the badge.',
   'notify.followRequest': '{name} wants to follow you',
   'notify.followAccepted': '{name} accepted your follow request',
   'notify.eventSoon': "An event you're interested in starts soon",

@@ -55,6 +55,27 @@ export async function saveHiddenKeywordsAction(form: FormData): Promise<void> {
   );
 }
 
+// Tên và màu huy hiệu Kiot (SPEC-kiot.md V5.2 mục 4).
+export async function saveBadgesAction(form: FormData): Promise<void> {
+  const admin = await requireAdminVerified();
+  const color = (v: FormDataEntryValue | null, d: string) =>
+    /^#[0-9a-f]{6}$/i.test(String(v ?? '')) ? String(v) : d;
+  const value = {
+    names: {
+      origin: clean(form.get('name.origin'), 40) || 'Đã xác thực nguồn gốc',
+      bank: clean(form.get('name.bank'), 40) || 'Đã xác thực ngân hàng',
+      video: clean(form.get('name.video'), 40) || 'Đã xác thực video',
+    },
+    colors: [
+      color(form.get('color.1'), '#16a34a'),
+      color(form.get('color.2'), '#eab308'),
+      color(form.get('color.3'), '#9333ea'),
+    ],
+  };
+  const r = await updateSettings(admin.id, { badges_json: JSON.stringify(value) });
+  back('/admin/noi-dung', r.ok ? { ok: true, message: 'Đã lưu huy hiệu.' } : { ok: false, message: r.error });
+}
+
 // Đăng bản cam kết nội dung mới (SPEC-identity.md V5.6): 4 dòng; mọi người được hỏi lại ở lần làm việc cần cam kết.
 export async function publishCommitmentAction(form: FormData): Promise<void> {
   const admin = await requireAdminVerified();

@@ -15,6 +15,8 @@ import { EventCardView } from '@/components/social/EventCardView';
 import { isFeatureOn } from '@/lib/features';
 import { upcomingEvents } from '@/modules/social';
 import { kiotRating } from '@/modules/orders';
+import { badgesForKiot, badgeStyle } from '@/server/kiot-badges';
+import { KiotBadgeRow } from '@/components/kiot/KiotBadgeRow';
 import { ClientMessages } from '@/i18n/ClientMessages';
 import { getT } from '@/i18n/server';
 import { env } from '@/lib/env';
@@ -75,6 +77,9 @@ export default async function KiotPage({
   const ownerId = await kiotOwnerId(kiot.id);
   // Sao Kiot (SPEC-orders.md V5.1 mục 7): chỉ khi từ 3 đánh giá, công tắc reviews.
   const rating = (await isFeatureOn('reviews')) ? await kiotRating(kiot.id) : null;
+  // Huy hiệu (SPEC-kiot.md V5.2 mục 4), công tắc origin.
+  const badges = (await isFeatureOn('origin')) ? await badgesForKiot(kiot.id) : null;
+  const badgeLook = badges?.level ? await badgeStyle() : null;
   // Sự kiện sắp diễn ra của chủ Kiot (SPEC-social.md V5.7), công tắc events.
   const events =
     ownerId && (await isFeatureOn('events')) ? await upcomingEvents(undefined, { ownerId }, 4) : [];
@@ -170,6 +175,7 @@ export default async function KiotPage({
               }}
               loginHref={loginHref}
             >
+              {badges && badgeLook ? <KiotBadgeRow badges={badges} style={badgeLook} /> : null}
               {rating ? (
                 <p className="mt-2 text-[13px] font-bold text-amber-300" data-testid="kiot-rating">
                   ★ {rating.avg.toLocaleString(t.lang)} · {t('shop.review.section', { count: rating.count })}

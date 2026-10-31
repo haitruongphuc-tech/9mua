@@ -156,6 +156,7 @@ model Kiot {
   payoutAccounts        KiotPayoutAccount[]
   subscriptions         KiotSubscription[]
   orders                Order[]
+  originDossiers        OriginDossier[]
 }
 
 // Lịch sử tài khoản nhận tiền: mỗi lần đổi thêm 1 dòng, bản mới nhất là bản đang dùng.
@@ -964,6 +965,37 @@ model ReviewReport {
 
   @@unique([reviewId, userId])
   @@index([status, createdAt])
+}
+
+// Hồ sơ nguồn gốc (SPEC-kiot.md V5.2): pending → approved / rejected → revoked. Hạn 12 tháng (expiresAt).
+model OriginDossier {
+  id              String       @id @default(cuid(2))
+  kiotId          String
+  kiot            Kiot         @relation(fields: [kiotId], references: [id])
+  status          String       @default("pending")
+  commitAt        DateTime
+  reviewedBy      String?
+  reviewedAt      DateTime?
+  reason          String?
+  expiresAt       DateTime?
+  renewRemindedAt DateTime?
+  createdAt       DateTime     @default(now())
+  files           OriginFile[]
+
+  @@index([kiotId, createdAt])
+  @@index([status, createdAt])
+}
+
+// File hồ sơ ở PRIVATE_DIR (không công khai). kind: invoice | certificate | photo | video.
+model OriginFile {
+  id        String        @id @default(cuid(2))
+  dossierId String
+  dossier   OriginDossier @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+  kind      String
+  path      String
+  bytes     Int
+
+  @@index([dossierId])
 }
 
 // Đăng lại (SPEC-social.md V5.9): mỗi người đăng lại một video / bài public tối đa 1 lần.

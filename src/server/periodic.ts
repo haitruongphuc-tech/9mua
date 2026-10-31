@@ -10,6 +10,7 @@ import { remindEvents, revokeLockedPoints } from '@/modules/social';
 import { isFeatureOn } from '@/lib/features';
 import { cleanupSearchLog } from '@/modules/marketplace';
 import { remindReviews } from '@/modules/orders';
+import { remindOriginRenewal } from '@/modules/kiot';
 import { finalizeAccountDeletions } from './account-delete';
 import { publishScheduledVideos } from './creator';
 
@@ -40,6 +41,8 @@ const DAILY_JOBS: Job[] = [
   // Lịch sử tìm cũ hơn 90 ngày (SPEC-marketplace.md V5.4 mục 5).
   { name: 'search-log-cleanup', run: () => cleanupSearchLog() },
   // Nhắc đánh giá 3 ngày sau khi giao (SPEC-orders.md V5.1 mục 3), công tắc reviews.
+  // Nhắc gia hạn hồ sơ nguồn gốc trước 30 ngày (SPEC-kiot.md V5.2 mục 3).
+  { name: 'origin-renewal', run: () => remindOriginRenewal() },
   { name: 'review-reminders', run: async () => ((await isFeatureOn('reviews')) ? remindReviews() : 0) },
   // Ảnh tải lên cho bài viết nhưng không đăng trong 24 giờ.
   { name: 'post-uploads', run: () => cleanupPostUploads() },

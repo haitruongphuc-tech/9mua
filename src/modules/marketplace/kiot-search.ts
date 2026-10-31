@@ -24,6 +24,7 @@ export type KiotSearchCard = {
   distanceKm: number | null;
   approx: boolean; // Kiot chưa đặt ghim: tính theo tâm tỉnh ("khoảng 12 km")
   stars: number | null; // sao Kiot (SPEC-orders.md V5.1 mục 7), null khi chưa đủ 3 đánh giá
+  badges: number; // số huy hiệu 0–3 (SPEC-kiot.md V5.2 mục 4)
 };
 
 type Row = {
@@ -38,6 +39,7 @@ type Row = {
   approx: boolean;
   stars: number | null;
   reviews: number;
+  badges: number;
 };
 
 // Khớp tên Kiot gần đúng (gõ sai nhẹ), giới thiệu khớp nguyên cụm đã bỏ dấu — cùng cách tìm sản phẩm.
@@ -90,11 +92,19 @@ export async function searchKiots(params: {
           (SELECT MAX(p.price)::int FROM "Product" p WHERE p."kiotId" = k.id AND ${visibleOnMarket(at)}) AS price_max,
           (SELECT COUNT(DISTINCT ps."orderId")::int FROM "ProductSale" ps WHERE ps."kiotId" = k.id) AS orders,
           (SELECT AVG(r.stars)::float8 FROM "ProductReview" r WHERE r."kiotId" = k.id AND r."hiddenAt" IS NULL) AS stars,
-          (SELECT COUNT(*)::int FROM "ProductReview" r WHERE r."kiotId" = k.id AND r."hiddenAt" IS NULL) AS reviews
+          (SELECT COUNT(*)::int FROM "ProductReview" r WHERE r."kiotId" = k.id AND r."hiddenAt" IS NULL) AS reviews,
+          (
+            (EXISTS (SELECT 1 FROM "OriginDossier" od WHERE od."kiotId" = k.id AND od.status = 'approved'
+              AND od."expiresAt" > ${at}))::int
+            + (EXISTS (SELECT 1 FROM "OriginDossier" od JOIN "OriginFile" f ON f."dossierId" = od.id
+              WHERE od."kiotId" = k.id AND od.status = 'approved' AND od."expiresAt" > ${at} AND f.kind = 'video'))::int
+            + (EXISTS (SELECT 1 FROM "KycSubmission" ks JOIN "KiotPayoutAccount" pa ON pa."kiotId" = k.id
+              WHERE ks."userId" = k."ownerId" AND ks.status = 'approved' AND pa."accountName" = ks."fullName"))::int
+          ) AS badges
         FROM "Kiot" k LEFT JOIN ${provinceCentersSql} ON pc.slug = k.province
         WHERE ${Prisma.join(filters, ' AND ')}
       )
-      SELECT slug, name, "logoUrl", province, products, price_min, price_max, dist, approx, stars, reviews FROM kiots
+      SELECT slug, name, "logoUrl", province, products, price_min, price_max, dist, approx, stars, reviews, badges FROM kiots
       WHERE products > 0
         ${params.minStars ? Prisma.sql`AND reviews >= 3 AND stars >= ${params.minStars}::float8` : Prisma.empty} ${near ? Prisma.sql`AND dist IS NOT NULL AND dist <= ${near.radiusKm}::float8` : Prisma.empty}
       ORDER BY ${order}, "createdAt" DESC, id
@@ -113,6 +123,7 @@ export async function searchKiots(params: {
       distanceKm: r.dist === null ? null : Math.round(r.dist * 10) / 10,
       approx: r.approx,
       stars: r.reviews >= 3 && r.stars !== null ? Math.round(r.stars * 10) / 10 : null,
+      badges: r.badges,
     })),
     nextOffset: rows.length > limit ? offset + limit : null,
   };

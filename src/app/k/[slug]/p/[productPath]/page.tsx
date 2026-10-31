@@ -18,6 +18,8 @@ import { CATEGORIES, getPublicProduct, kiotOwnerId, productPath } from '@/module
 import { productReviews } from '@/modules/orders';
 import { isFeatureOn } from '@/lib/features';
 import { ProductReviews } from './ProductReviews';
+import { badgesForKiot, badgeStyle } from '@/server/kiot-badges';
+import { KiotBadgeRow } from '@/components/kiot/KiotBadgeRow';
 import { kiotBasePath, kiotCanonical } from '../../../kiot-context';
 
 const viewer = cache(getCurrentUser);
@@ -76,6 +78,8 @@ export default async function ProductPage({ params, searchParams }: Params) {
     stars: [1, 2, 3, 4, 5].find((s) => String(s) === query.sao),
     withMedia: query['co-anh'] === '1',
   };
+  const badges = (await isFeatureOn('origin')) ? await badgesForKiot(kiot.id) : null;
+  const badgeLook = badges?.level ? await badgeStyle() : null;
   const reviews =
     !preview && (await isFeatureOn('reviews')) ? await productReviews(product.id, reviewFilter) : null;
 
@@ -91,6 +95,7 @@ export default async function ProductPage({ params, searchParams }: Params) {
             ← {kiot.name}
           </Link>
           <h1 className="font-display text-[24px] font-black leading-tight">{product.name}</h1>
+          {badges && badgeLook ? <KiotBadgeRow badges={badges} style={badgeLook} /> : null}
           <p className="flex items-baseline gap-3">
             <span className="text-3xl font-black text-brand" data-testid="product-price">
               {formatVnd(product.price)}

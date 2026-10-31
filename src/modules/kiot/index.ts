@@ -69,3 +69,17 @@ export {
   getProductForCheckout,
   type CheckoutProduct,
 } from './admin';
+// Bổ sung 31/10/2026 (SPEC-kiot.md V5.2): hồ sơ nguồn gốc và huy hiệu.
+export {
+  submitOrigin,
+  latestOrigin,
+  listOriginQueue,
+  listApprovedOrigins,
+  reviewOrigin,
+  readOriginFile,
+  kiotBadges,
+  remindOriginRenewal,
+  ORIGIN_VALID_DAYS,
+  type KiotBadges,
+  type OriginError,
+} from './origin';

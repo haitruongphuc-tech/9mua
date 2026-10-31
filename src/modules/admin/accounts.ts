@@ -200,6 +200,7 @@ const RULES: Record<SettingKey, { min?: number; max?: number; bool?: true; json?
   slogans_json: { json: true, label: 'Slogan' },
   legal_info_json: { json: true, label: 'Thông tin pháp lý' },
   search_hidden_json: { json: true, label: 'Từ khoá ẩn khỏi "đang hot"' },
+  badges_json: { json: true, label: 'Tên và màu huy hiệu Kiot' },
   video_long_max_seconds: { min: 61, max: 3 * 3600, label: 'Video dài tối đa (giây)' },
   video_max_mb: { min: 100, max: 4096, label: 'Dung lượng video tối đa (MB)' },
   video_long_daily_minutes: { min: 1, max: 600, label: 'Phút video dài mỗi ngày' },

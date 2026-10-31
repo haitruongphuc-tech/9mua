@@ -8,6 +8,12 @@ export const notify: NotifyMessages = {
   'notify.reposted': '{name} volvió a publicar tu contenido',
   'notify.reviewReminder':
     'El pedido {code} fue entregado. ¡Deja una reseña para ayudar a otros compradores!',
+  'notify.originApproved':
+    'Tus documentos de origen fueron aprobados. Tu Kiot tiene la insignia "Origen verificado".',
+  'notify.originRejected': 'Documentos de origen rechazados: {reason}',
+  'notify.originRevoked': 'Insignia de origen retirada: {reason}',
+  'notify.originRenew':
+    'Tus documentos de origen vencen en 30 días. Envíalos de nuevo para mantener la insignia.',
   'notify.followRequest': '{name} quiere seguirte',
   'notify.followAccepted': '{name} aceptó tu solicitud',
   'notify.eventSoon': 'Un evento que te interesa empieza pronto',

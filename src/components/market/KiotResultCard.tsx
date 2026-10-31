@@ -26,6 +26,16 @@ export function KiotResultCard({
           {kiot.stars !== null ? (
             <span className="ml-1 text-[12px] text-amber-300">★ {kiot.stars}</span>
           ) : null}
+          {kiot.badges ? (
+            <span
+              className={`ml-1 rounded-full px-1.5 text-[10px] font-black text-white ${
+                kiot.badges === 3 ? 'bg-purple-600' : kiot.badges === 2 ? 'bg-yellow-500' : 'bg-green-600'
+              }`}
+              data-testid="kiot-badge-count"
+            >
+              ✓{kiot.badges}
+            </span>
+          ) : null}
         </span>
         <span className="text-[12px] text-white/60">
           {[kiot.province, labels.products, labels.price].filter(Boolean).join(' · ')}

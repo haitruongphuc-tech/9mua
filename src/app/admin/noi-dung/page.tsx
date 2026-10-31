@@ -6,7 +6,7 @@ import { LEGAL_DEFAULTS, LEGAL_FIELDS, parseLegal } from '@/lib/legal';
 import { getAllSettings, requireAdminVerified } from '@/modules/admin';
 import type { FlashParams } from '../flash';
 import { currentCommitment } from '@/modules/identity';
-import { publishCommitmentAction, saveContentAction } from './actions';
+import { publishCommitmentAction, saveContentAction, saveHiddenKeywordsAction } from './actions';
 import { SLOGAN_KEYS, SLOGAN_PAGES } from './keys';
 
 export const dynamic = 'force-dynamic';
@@ -33,6 +33,14 @@ export default async function ContentPage({ searchParams }: { searchParams: Flas
     /* trống */
   }
   const legal = parseLegal(s.legal_info_json);
+  const hiddenWords = (() => {
+    try {
+      const v = JSON.parse(s.search_hidden_json) as { words?: unknown };
+      return Array.isArray(v.words) ? v.words.filter((w): w is string => typeof w === 'string') : [];
+    } catch {
+      return [];
+    }
+  })();
   return (
     <section className="flex flex-col gap-5 px-4 py-5">
       <h1 className="text-xl font-extrabold">Slogan & thông tin pháp lý</h1>
@@ -79,6 +87,25 @@ export default async function ContentPage({ searchParams }: { searchParams: Flas
           ))}
         </div>
         <ConfirmSubmit confirm="Lưu slogan và thông tin pháp lý?">Lưu</ConfirmSubmit>
+      </form>
+
+      {/* Từ khoá ẩn khỏi "Từ khoá đang hot" (SPEC-marketplace.md V5.4 mục 3). */}
+      <form
+        action={saveHiddenKeywordsAction}
+        className="flex flex-col gap-3 rounded-[18px] border border-white/10 bg-white/5 p-4"
+        data-testid="admin-hidden-keywords"
+      >
+        <h2 className="text-lg font-extrabold">Từ khoá không cho hiện ở &quot;đang hot&quot;</h2>
+        <p className="text-sm text-white/60">
+          Mỗi dòng một từ. Từ khoá hot nào chứa từ này (không dấu) sẽ bị ẩn.
+        </p>
+        <textarea
+          name="words"
+          rows={4}
+          defaultValue={hiddenWords.join('\n')}
+          className="rounded-[14px] border border-white/15 bg-white/10 p-3 text-base text-white"
+        />
+        <ConfirmSubmit confirm="Lưu danh sách từ khoá ẩn?">Lưu từ khoá ẩn</ConfirmSubmit>
       </form>
 
       {/* Cam kết nội dung (SPEC-identity.md V5.6): đăng bản mới thì mọi người được hỏi lại. */}

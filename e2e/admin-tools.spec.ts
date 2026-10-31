@@ -108,7 +108,7 @@ test('CEO ghim video lên đầu feed và Kiot lên đầu danh bạ; sửa slog
   await ceo.goto('/admin/noi-dung');
   await ceo.locator('summary', { hasText: /^Chợ$/ }).click();
   await ceo.locator('input[name="slogan.explore.ko"]').fill('CEO가 바꾼 슬로건');
-  await ceo.getByRole('button', { name: 'Lưu' }).click();
+  await ceo.getByRole('button', { name: 'Lưu', exact: true }).click();
   await ceo.waitForURL((u) => u.searchParams.has('xong') || u.searchParams.has('loi'));
   await expect(ceo.getByText(/Đã lưu/)).toBeVisible();
   const ko = await browser.newPage({ locale: 'ko-KR' });
@@ -116,6 +116,6 @@ test('CEO ghim video lên đầu feed và Kiot lên đầu danh bạ; sửa slog
   await expect(ko.getByTestId('page-slogan')).toHaveText('CEO가 바꾼 슬로건');
   await ceo.locator('summary', { hasText: /^Chợ$/ }).click(); // trang tải lại, mục đóng lại
   await ceo.locator('input[name="slogan.explore.ko"]').fill('');
-  await ceo.getByRole('button', { name: 'Lưu' }).click();
+  await ceo.getByRole('button', { name: 'Lưu', exact: true }).click();
   await expect(ceo.getByText(/Đã lưu/)).toBeVisible();
 });

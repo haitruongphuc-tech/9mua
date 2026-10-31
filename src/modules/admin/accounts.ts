@@ -199,6 +199,7 @@ const RULES: Record<SettingKey, { min?: number; max?: number; bool?: true; json?
   xu_rules_json: { json: true, label: 'Luật thưởng xu' },
   slogans_json: { json: true, label: 'Slogan' },
   legal_info_json: { json: true, label: 'Thông tin pháp lý' },
+  search_hidden_json: { json: true, label: 'Từ khoá ẩn khỏi "đang hot"' },
   video_long_max_seconds: { min: 61, max: 3 * 3600, label: 'Video dài tối đa (giây)' },
   video_max_mb: { min: 100, max: 4096, label: 'Dung lượng video tối đa (MB)' },
   video_long_daily_minutes: { min: 1, max: 600, label: 'Phút video dài mỗi ngày' },

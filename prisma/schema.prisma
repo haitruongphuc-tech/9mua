@@ -900,6 +900,22 @@ model FollowRequest {
   @@index([targetId, createdAt])
 }
 
+// Lịch sử tìm (SPEC-marketplace.md V5.4 mục 5): userId hoặc mã ẩn danh, từ khoá đã chuẩn hoá. Không lưu vị trí.
+// hiddenAt: người dùng xoá khỏi lịch sử (vẫn tính vào từ khoá hot). Dòng cũ hơn 90 ngày bị xoá hằng ngày.
+model SearchLog {
+  id        String    @id @default(cuid(2))
+  userId    String?
+  anonId    String?
+  query     String
+  tab       String
+  results   Int
+  hiddenAt  DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, createdAt])
+  @@index([createdAt])
+}
+
 // Đăng lại (SPEC-social.md V5.9): mỗi người đăng lại một video / bài public tối đa 1 lần.
 model Repost {
   id        String   @id @default(cuid(2))

@@ -8,6 +8,7 @@ import {
 import { assignMissingHandles } from '@/modules/identity';
 import { remindEvents, revokeLockedPoints } from '@/modules/social';
 import { isFeatureOn } from '@/lib/features';
+import { cleanupSearchLog } from '@/modules/marketplace';
 import { finalizeAccountDeletions } from './account-delete';
 import { publishScheduledVideos } from './creator';
 
@@ -35,6 +36,8 @@ const DAILY_JOBS: Job[] = [
   { name: 'points-revoke', run: () => revokeLockedPoints() },
   // Tự xoá tài khoản hết 30 ngày chờ: gỡ nội dung, ẩn danh hoá (SPEC-identity.md V5.3).
   { name: 'account-deletions', run: () => finalizeAccountDeletions() },
+  // Lịch sử tìm cũ hơn 90 ngày (SPEC-marketplace.md V5.4 mục 5).
+  { name: 'search-log-cleanup', run: () => cleanupSearchLog() },
   // Ảnh tải lên cho bài viết nhưng không đăng trong 24 giờ.
   { name: 'post-uploads', run: () => cleanupPostUploads() },
   // Nháp quá 90 ngày tự xoá, báo trước 7 ngày. Công tắc tắt thì người dùng không thấy tab Nháp nên không xoá.

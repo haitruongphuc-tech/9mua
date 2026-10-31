@@ -36,7 +36,7 @@ export const SETTING_DEFAULTS = {
   video_long_daily_minutes: '120',
   // Phụ đề tự động (SPEC-creator.md V5.4): ngân sách tháng cho dịch vụ nghe giọng nói (OpenAI Whisper).
   stt_monthly_budget_vnd: '200000',
-  video_enable_1080: 'false',
+  video_enable_1080: 'false', // thêm mức HLS 1080p khi video gốc ≥ 1080p (tốn thêm dung lượng và thời gian xử lý)
   // Điểm thưởng (SPEC-social.md V5.6): luật cộng điểm và đổi điểm ra xu.
   points_like: '5',
   points_follow: '10',
@@ -45,7 +45,9 @@ export const SETTING_DEFAULTS = {
   points_min_account_days: '3',
   points_per_xu: '1000',
   points_xu_month_cap: '30',
-  points_xu_month_budget: '10000', // thêm mức HLS 1080p khi video gốc ≥ 1080p (tốn thêm dung lượng và thời gian xử lý)
+  points_xu_month_budget: '10000',
+  // Từ khoá không cho hiện ở "Từ khoá đang hot" (SPEC-marketplace.md V5.4 mục 3), CEO sửa ở /admin/noi-dung.
+  search_hidden_json: '{"words":[]}',
 } as const;
 
 export type SettingKey = keyof typeof SETTING_DEFAULTS;

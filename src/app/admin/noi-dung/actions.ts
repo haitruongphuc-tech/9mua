@@ -39,6 +39,22 @@ export async function saveContentAction(form: FormData): Promise<void> {
   );
 }
 
+// Từ khoá không cho hiện ở "Từ khoá đang hot" (SPEC-marketplace.md V5.4 mục 3), mỗi dòng một từ.
+export async function saveHiddenKeywordsAction(form: FormData): Promise<void> {
+  const admin = await requireAdminVerified();
+  const words = String(form.get('words') ?? '')
+    .split('\n')
+    .map((w) => w.trim().slice(0, 50))
+    .filter(Boolean)
+    .slice(0, 200);
+  const r = await updateSettings(admin.id, { search_hidden_json: JSON.stringify({ words }) });
+  invalidateCached('hot-keywords');
+  back(
+    '/admin/noi-dung',
+    r.ok ? { ok: true, message: 'Đã lưu từ khoá ẩn.' } : { ok: false, message: r.error },
+  );
+}
+
 // Đăng bản cam kết nội dung mới (SPEC-identity.md V5.6): 4 dòng; mọi người được hỏi lại ở lần làm việc cần cam kết.
 export async function publishCommitmentAction(form: FormData): Promise<void> {
   const admin = await requireAdminVerified();

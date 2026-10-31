@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Search } from 'lucide-react';
 import { MarketProductCard } from '@/components/market/MarketProductCard';
 import { Avatar } from '@/components/ui/Avatar';
 import { VideoGrid } from '@/components/video/VideoGrid';
@@ -8,7 +7,10 @@ import { ClientMessages } from '@/i18n/ClientMessages';
 import { getT } from '@/i18n/server';
 import { searchVideos } from '@/modules/creator';
 import { searchPublicUsers } from '@/modules/identity';
-import { searchKiots, searchProducts } from '@/modules/marketplace';
+import { logSearch, searchKiots, searchProducts } from '@/modules/marketplace';
+import { SearchBox } from '@/components/market/SearchBox';
+import { readAnonId } from '@/lib/anon-id';
+import { getCurrentUser } from '@/modules/identity';
 import { KiotResultCard } from '@/components/market/KiotResultCard';
 import { NearMe } from '@/components/market/NearMe';
 import { isFeatureOn } from '@/lib/features';
@@ -61,6 +63,17 @@ export default async function SearchPage({
       : Promise.resolve([]),
   ]);
   const href = (to: Tab) => `/tim-kiem?q=${encodeURIComponent(q)}${to === 'tat-ca' ? '' : `&tab=${to}`}`;
+  // Ghi lịch sử tìm (SPEC-marketplace.md V5.4 mục 5): không có vị trí; Gần tôi đi đường POST riêng, không ghi.
+  if (q && searchMore) {
+    const user = await getCurrentUser();
+    await logSearch({
+      userId: user?.id,
+      anonId: await readAnonId(),
+      q,
+      tab,
+      results: users.length + videos.length + hashtags.length + products.length + kiots.length,
+    }).catch(() => {});
+  }
   const nothing =
     q && !users.length && !videos.length && !hashtags.length && !products.length && !kiots.length;
 
@@ -78,25 +91,7 @@ export default async function SearchPage({
   return (
     <ClientMessages prefixes={['market.']}>
       <section className="mx-auto flex w-full max-w-[900px] flex-col gap-5 px-4 py-5">
-        <form
-          action="/tim-kiem"
-          role="search"
-          className="flex h-11 items-center gap-2 rounded-full bg-white/10 px-4"
-        >
-          <Search className="h-4 w-4 shrink-0 text-white/50" aria-hidden />
-          <input
-            type="search"
-            name="q"
-            defaultValue={q}
-            enterKeyHint="search"
-            maxLength={100}
-            autoFocus={!q}
-            placeholder={t('common.search.placeholder')}
-            aria-label={t('common.search.label')}
-            className="min-w-0 flex-1 bg-transparent text-[14px] text-white outline-none placeholder:text-white/40"
-          />
-          {tab === 'tat-ca' ? null : <input type="hidden" name="tab" value={tab} />}
-        </form>
+        <SearchBox q={q} tab={tab === 'tat-ca' ? null : tab} smart={searchMore} />
 
         {q ? (
           <nav

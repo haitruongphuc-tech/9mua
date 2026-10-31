@@ -11,6 +11,9 @@ import { KiotProductGrid } from '@/components/profile/KiotProductGrid';
 import { ProfileActions } from '@/components/profile/ProfileActions';
 import { SocialLinks } from '@/components/profile/SocialLinks';
 import { VideoGrid } from '@/components/video/VideoGrid';
+import { EventCardView } from '@/components/social/EventCardView';
+import { isFeatureOn } from '@/lib/features';
+import { upcomingEvents } from '@/modules/social';
 import { ClientMessages } from '@/i18n/ClientMessages';
 import { getT } from '@/i18n/server';
 import { env } from '@/lib/env';
@@ -69,6 +72,9 @@ export default async function KiotPage({
   const tabHref = (id: Tab) => (id === 'san-pham' ? home : `${home}?tab=${id}`);
   const loginHref = `${env().APP_URL}/dang-nhap?next=${encodeURIComponent(`/k/${slug}`)}`;
   const ownerId = await kiotOwnerId(kiot.id);
+  // Sự kiện sắp diễn ra của chủ Kiot (SPEC-social.md V5.7), công tắc events.
+  const events =
+    ownerId && (await isFeatureOn('events')) ? await upcomingEvents(undefined, { ownerId }, 4) : [];
   const icons = { video: Grid3x3, 'san-pham': ShoppingBag, live: Radio } as const;
   const tabLabel = {
     video: t('profile.tab.video'),
@@ -207,6 +213,22 @@ export default async function KiotPage({
               })}
             </nav>
 
+            {tab === 'video' && events.length ? (
+              <ul className="mt-3 grid gap-2 sm:grid-cols-2" data-testid="kiot-events">
+                {events.map((e) => (
+                  <li key={e.id}>
+                    <EventCardView
+                      event={e}
+                      lang={t.lang}
+                      labels={{
+                        live: t('feed.event.modeLive'),
+                        interested: t('feed.event.interestedCount', { count: e.interested }),
+                      }}
+                    />
+                  </li>
+                ))}
+              </ul>
+            ) : null}
             {tab === 'video' ? (
               <div className="mt-2">
                 {videos.length === 0 ? (

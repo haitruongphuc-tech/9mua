@@ -5,7 +5,8 @@ import { requireAdminVerified } from '@/modules/admin';
 import { listFailedVideoJobs, listVideoReports, VIDEO_REPORT_REASONS } from '@/modules/creator';
 import { listReports, REPORT_REASONS } from '@/modules/marketplace';
 import type { FlashParams } from '../flash';
-import { resolvePostAction, resolveProductAction, resolveVideoAction } from './actions';
+import { resolveEventAction, resolvePostAction, resolveProductAction, resolveVideoAction } from './actions';
+import { listEventReports } from '@/modules/social';
 import { listPostReports } from '@/modules/creator';
 
 export const dynamic = 'force-dynamic';
@@ -24,6 +25,7 @@ export default async function ReportsQueuePage({ searchParams }: { searchParams:
     searchParams,
     listPostReports(),
   ]);
+  const eventReports = await listEventReports();
   return (
     <section className="flex flex-col gap-4 px-4 py-5">
       <h1 className="text-xl font-extrabold">Báo cáo vi phạm</h1>
@@ -121,6 +123,36 @@ export default async function ReportsQueuePage({ searchParams }: { searchParams:
                   Bỏ qua
                 </ConfirmSubmit>
               </form>
+            </li>
+          ) : null,
+        )}
+      </ul>
+      <h2 className="font-extrabold">Sự kiện ({eventReports.length})</h2>
+      <ul className="flex flex-col gap-2" data-testid="event-reports">
+        {eventReports.map((r) =>
+          r.event ? (
+            <li
+              key={r.event.id}
+              className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-white/5 p-3"
+            >
+              <a href={`/su-kien/${r.event.id}`} className="text-sm font-bold">
+                {r.event.title}
+              </a>
+              <p className="text-xs text-white/60">
+                {r.count} báo cáo · {r.event.status === 'removed' ? 'đang ẩn' : 'đang hiện'}
+              </p>
+              <div className="flex gap-2">
+                <form action={resolveEventAction.bind(null, r.event.id, 'remove')}>
+                  <ConfirmSubmit confirm="Gỡ sự kiện này?" tone="danger">
+                    Gỡ
+                  </ConfirmSubmit>
+                </form>
+                <form action={resolveEventAction.bind(null, r.event.id, 'dismiss')}>
+                  <ConfirmSubmit confirm="Bỏ qua báo cáo, hiện lại sự kiện?" tone="plain">
+                    Bỏ qua
+                  </ConfirmSubmit>
+                </form>
+              </div>
             </li>
           ) : null,
         )}

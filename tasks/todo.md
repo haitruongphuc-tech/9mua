@@ -711,7 +711,7 @@ Nhánh `nang-cap-mot-dot`. Trừ App (C32–C36). Mỗi task: test trước → 
 - [x] **T101: Bạn chung, gợi ý follow, tab Đã thích** (C23, C24, C62).
 - [x] **T102: Cảm xúc + đăng lại** (C87, C88).
 - [x] **T103: Điểm thưởng + đổi điểm ra xu (đổi xu tắt sẵn)** (C01).
-- [ ] **T104: Sự kiện + Kỷ niệm** (C26).
+- [x] **T104: Sự kiện + Kỷ niệm** (C26).
 - [ ] **T105: Nhóm** (C91).
 
 ### Tài khoản

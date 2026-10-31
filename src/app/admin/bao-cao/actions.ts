@@ -3,6 +3,21 @@
 import { requireAdminVerified, resolveProductReport, resolveVideoReport } from '@/modules/admin';
 import { audit } from '@/lib/audit';
 import { resolvePostReports } from '@/modules/creator';
+import { resolveEventReports } from '@/modules/social';
+
+// Sự kiện bị báo cáo (SPEC-social.md V5.7): gỡ hoặc bỏ qua (sự kiện tự ẩn thì hiện lại).
+export async function resolveEventAction(eventId: string, decision: 'remove' | 'dismiss'): Promise<void> {
+  const admin = await requireAdminVerified();
+  const ok = await resolveEventReports(eventId, decision);
+  if (ok)
+    await audit({ adminId: admin.id, action: `event.${decision}`, targetType: 'event', targetId: eventId });
+  back(
+    '/admin/bao-cao',
+    ok
+      ? { ok: true, message: decision === 'remove' ? 'Đã gỡ sự kiện.' : 'Đã bỏ qua báo cáo.' }
+      : { ok: false, message: 'Sự kiện không còn.' },
+  );
+}
 import { back } from '../flash';
 
 // Bài viết bị báo cáo (SPEC-creator.md V5.10 mục 3): gỡ bài hoặc bỏ qua (bài tự ẩn thì hiện lại).

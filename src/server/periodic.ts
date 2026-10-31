@@ -6,7 +6,7 @@ import {
   publishScheduledPosts,
 } from '@/modules/creator';
 import { assignMissingHandles } from '@/modules/identity';
-import { revokeLockedPoints } from '@/modules/social';
+import { remindEvents, revokeLockedPoints } from '@/modules/social';
 import { isFeatureOn } from '@/lib/features';
 import { publishScheduledVideos } from './creator';
 
@@ -23,6 +23,8 @@ const TICK_JOBS: Job[] = [
   { name: 'upload-sessions', run: () => cleanupUploadSessions() },
   // Bài viết hẹn giờ (SPEC-creator.md V5.10): worker chạy mỗi phút, cron này là dự phòng.
   { name: 'scheduled-posts', run: () => publishScheduledPosts() },
+  // Sự kiện sắp bắt đầu (≤ 1 giờ): báo người "Quan tâm" (SPEC-social.md V5.7).
+  { name: 'event-reminders', run: () => remindEvents() },
 ];
 
 const DAILY_JOBS: Job[] = [

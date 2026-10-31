@@ -49,6 +49,23 @@ export {
 export { decorateFeed, type SocialFeedVideo } from './decorate';
 export { hasLink } from './links';
 export {
+  createEvent,
+  cancelEvent,
+  setEventCover,
+  upcomingEvents,
+  eventPage,
+  toggleEventInterest,
+  remindEvents,
+  reportEvent,
+  listEventReports,
+  resolveEventReports,
+  MAX_UPCOMING_EVENTS,
+  type EventCard,
+  type EventInput,
+  type EventError,
+} from './events';
+export { memoriesOf, setShowMemories } from './memories';
+export {
   awardLikePoints,
   awardFollowPoints,
   pointBalance,

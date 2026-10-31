@@ -11,8 +11,9 @@ import {
   setMentionPolicyAction,
   setNotifyTypesAction,
   setShowLikedAction,
+  setShowMemoriesAction,
 } from './social-actions';
-import { likedTabPublic } from '@/modules/social';
+import { likedTabPublic, memoriesOf } from '@/modules/social';
 import { NOTIFY_TYPES, notifyOffTypes } from '@/lib/notify-events';
 import { Avatar } from '@/components/ui/Avatar';
 import { BlockButton } from '@/components/social/BlockButton';
@@ -43,6 +44,8 @@ export default async function AccountSettingsPage({
   const mutedError = params['loi-tu-cam'];
   const notifyOff = blockOn ? await notifyOffTypes(user.id) : [];
   const likedPublic = blockOn ? await likedTabPublic(user.id) : false;
+  const eventsOn = await isFeatureOn('events');
+  const memoriesOn = eventsOn ? (await memoriesOf(user.id)) !== null : false;
   const handle = handleOn ? await handleInfo(user.id) : null;
   return (
     <ClientMessages prefixes={['me.settings.', 'auth.otp.', 'auth.addEmail.']}>
@@ -58,6 +61,28 @@ export default async function AccountSettingsPage({
               handle={handle.handle}
               nextChange={handle.nextChangeAt ? formatDate(handle.nextChangeAt, t.lang) : null}
             />
+          ) : null}
+          {eventsOn ? (
+            <Card title={t('me.settings.memories.title')} id="ky-niem">
+              <form action={setShowMemoriesAction} className="flex flex-col gap-2">
+                <label className="flex items-center gap-2 text-[13px]">
+                  <input
+                    type="checkbox"
+                    name="show"
+                    defaultChecked={memoriesOn}
+                    className="h-4 w-4 accent-[#ff6b00]"
+                    data-testid="memories-on"
+                  />
+                  {t('me.settings.memories.on')}
+                </label>
+                <button
+                  type="submit"
+                  className="h-10 w-fit rounded-full bg-white/10 px-4 text-[12px] font-black"
+                >
+                  {t('me.settings.save')}
+                </button>
+              </form>
+            </Card>
           ) : null}
           {blockOn ? (
             <Card title={t('me.settings.liked.title')} id="da-thich">

@@ -24,7 +24,7 @@ import { logoutAction } from '@/app/(auth)/actions';
 import { getT } from '@/i18n/server';
 import { isTemporaryName, requireUser } from '@/modules/identity';
 import { loadMePage } from '@/server/me-page';
-import { followSuggestions, pointBalance } from '@/modules/social';
+import { followSuggestions, memoriesOf, pointBalance } from '@/modules/social';
 import { exchangePointsAction } from './points-actions';
 import { isFeatureOn } from '@/lib/features';
 import { ClientMessages } from '@/i18n/ClientMessages';
@@ -49,6 +49,8 @@ export default async function MePage({
   const [pointsOn, exchangeOn] = await Promise.all([isFeatureOn('points'), isFeatureOn('points_exchange')]);
   const points = pointsOn ? await pointBalance(user.id) : 0;
   const query = await searchParams;
+  // Kỷ niệm "Ngày này năm trước" (SPEC-social.md V5.7 mục 2), công tắc events.
+  const memories = (await isFeatureOn('events')) ? await memoriesOf(user.id) : null;
   const { role, follow, free, voucher, kiot, notifications, socialCount, saved, xu } = data;
 
   const links = [
@@ -287,6 +289,46 @@ export default async function MePage({
           </section>
         ) : null}
 
+        {memories && (memories.videos.length || memories.posts.length) ? (
+          <section
+            className="mt-6 flex flex-col gap-2 rounded-[18px] border border-white/10 bg-white/5 p-4"
+            data-testid="me-memories"
+          >
+            <h2 className="text-[13px] font-black">🕰 {t('me.memories.title')}</h2>
+            <ul className="flex gap-2 overflow-x-auto pb-1">
+              {memories.videos.map((v) => (
+                <li key={v.id} className="w-24 shrink-0">
+                  <Link
+                    href={`/v/${v.id}`}
+                    className="relative block aspect-[9/16] overflow-hidden rounded-[10px] bg-black"
+                  >
+                    {v.posterUrl ? (
+                      <Image
+                        src={v.posterUrl}
+                        alt=""
+                        fill
+                        sizes="96px"
+                        className="object-cover"
+                        unoptimized
+                      />
+                    ) : null}
+                  </Link>
+                </li>
+              ))}
+              {memories.posts.map((p) => (
+                <li key={p.id} className="w-40 shrink-0">
+                  <Link
+                    href={`/p/${p.id}`}
+                    className="line-clamp-4 block rounded-[10px] bg-white/10 p-2 text-[12px]"
+                  >
+                    {p.text || '🖼'}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <p className="text-[11px] text-white/50">{t('me.memories.hint')}</p>
+          </section>
+        ) : null}
         {pointsOn ? (
           <section
             className="mt-6 flex flex-col gap-2 rounded-[18px] border border-white/10 bg-white/5 p-4"

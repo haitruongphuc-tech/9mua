@@ -23,9 +23,11 @@ import {
   likedVideos,
   listBlockedUsers,
   repostedContent,
+  upcomingEvents,
   mutualFollowers,
 } from '@/modules/social';
 import { SuggestRow } from '@/components/profile/SuggestRow';
+import { EventCardView } from '@/components/social/EventCardView';
 
 // Trang creator kiểu V4 (SPEC-creator.md mục 7, SPEC-social.md mục 1): số liệu thật, Follow, link mạng xã hội.
 export async function CreatorProfileView({
@@ -71,6 +73,8 @@ export async function CreatorProfileView({
     socialMore && viewer ? (await followSuggestions(viewer.id)).filter((x) => x.id !== p.id) : [];
   const liked = socialMore ? await likedVideos(p.id, viewer?.id) : null;
   const likedPublic = isSelf && liked ? await likedTabPublic(p.id) : false;
+  // Khối Sự kiện (SPEC-social.md V5.7), công tắc events.
+  const events = (await isFeatureOn('events')) ? await upcomingEvents(viewer?.id, { ownerId: p.id }, 6) : [];
   // Tab "Đăng lại" (SPEC-social.md V5.9), công tắc posts.
   const reposts = (await isFeatureOn('posts'))
     ? await repostedContent(p.id, viewer?.id)
@@ -218,6 +222,27 @@ export async function CreatorProfileView({
             <div className="mt-6">
               <SuggestRow people={suggestions} />
             </div>
+          ) : null}
+          {events.length ? (
+            <section className="mt-6" data-testid="profile-events">
+              <h2 className="border-b border-white/10 pb-2 text-[13px] font-bold">
+                📅 {t('feed.event.title')}
+              </h2>
+              <ul className="mt-2 grid gap-2 sm:grid-cols-2">
+                {events.map((e) => (
+                  <li key={e.id}>
+                    <EventCardView
+                      event={e}
+                      lang={t.lang}
+                      labels={{
+                        live: t('feed.event.modeLive'),
+                        interested: t('feed.event.interestedCount', { count: e.interested }),
+                      }}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </section>
           ) : null}
           {liked ? (
             <>

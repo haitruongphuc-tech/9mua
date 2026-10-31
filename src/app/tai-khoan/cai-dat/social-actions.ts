@@ -2,7 +2,13 @@
 
 import { redirect } from 'next/navigation';
 import { requireUser } from '@/modules/identity';
-import { addMutedKeyword, removeMutedKeyword, setMentionPolicy, setShowLikedVideos } from '@/modules/social';
+import {
+  addMutedKeyword,
+  removeMutedKeyword,
+  setMentionPolicy,
+  setShowLikedVideos,
+  setShowMemories,
+} from '@/modules/social';
 import { NOTIFY_TYPES, setNotifyTypes } from '@/lib/notify-events';
 
 // Cài đặt bình luận (SPEC-social.md V5.4): "Ai được nhắc tên tôi" và từ cấm.
@@ -39,4 +45,11 @@ export async function setShowLikedAction(form: FormData): Promise<void> {
   const user = await requireUser();
   await setShowLikedVideos(user.id, form.get('show') === 'on');
   redirect('/tai-khoan/cai-dat?da-luu=da-thich#da-thich');
+}
+
+// Kỷ niệm "Ngày này năm trước" (SPEC-social.md V5.7 mục 2).
+export async function setShowMemoriesAction(form: FormData): Promise<void> {
+  const user = await requireUser();
+  await setShowMemories(user.id, form.get('show') === 'on');
+  redirect('/tai-khoan/cai-dat?da-luu=ky-niem#ky-niem');
 }

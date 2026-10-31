@@ -39,6 +39,8 @@ model User {
   notifyOff           String[]             @default([])
   // Tab "Đã thích" công khai với người khác (SPEC-social.md V5.2), mặc định tắt.
   showLikedVideos     Boolean              @default(false)
+  // Kỷ niệm "Ngày này năm trước" trên trang Tôi (SPEC-social.md V5.7), tắt được trong Cài đặt.
+  showMemories        Boolean              @default(true)
   handleChangedAt     DateTime?
   previousHandle      String?              @unique
   previousHandleUntil DateTime?
@@ -771,6 +773,49 @@ model PointEntry {
 
   @@unique([userId, kind, refId])
   @@index([userId, vnDay])
+}
+
+// Sự kiện (SPEC-social.md V5.7): mode live | place; status active | cancelled | removed.
+model Event {
+  id             String    @id @default(cuid(2))
+  ownerId        String
+  title          String
+  coverPath      String?
+  startsAt       DateTime
+  endsAt         DateTime
+  mode           String
+  province       String?
+  address        String?
+  description    String    @default("")
+  productIds     String[]  @default([])
+  status         String    @default("active")
+  reminderSentAt DateTime? // đã báo người "Quan tâm" 1 giờ trước giờ bắt đầu
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @default(now())
+
+  @@index([status, startsAt])
+  @@index([ownerId, endsAt])
+}
+
+model EventInterest {
+  userId    String
+  eventId   String
+  createdAt DateTime @default(now())
+
+  @@id([userId, eventId])
+  @@index([eventId])
+}
+
+model EventReport {
+  id        String   @id @default(cuid(2))
+  eventId   String
+  userId    String
+  reason    String
+  status    String   @default("open")
+  createdAt DateTime @default(now())
+
+  @@unique([eventId, userId])
+  @@index([status, createdAt])
 }
 
 // Đăng lại (SPEC-social.md V5.9): mỗi người đăng lại một video / bài public tối đa 1 lần.

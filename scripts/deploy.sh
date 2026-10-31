@@ -56,7 +56,7 @@ if [ "${1:-}" = '--rollback' ]; then
   [ -f "$GITDIR/deploy-previous" ] && docker image inspect ninemua-app:rollback >/dev/null 2>&1 ||
     die 'Không có bản trước để quay về (chỉ quay về được 1 lần sau mỗi lần cập nhật).'
   PREV=$(cat "$GITDIR/deploy-previous")
-  say "Quay về $(git log -1 --format='%h %s' "$PREV")"
+  say "Quay về $(git --no-pager log -1 --format='%h %s' "$PREV")"
   retag rollback latest
   git reset --quiet --hard "$PREV"
   docker compose up -d --no-build app worker
@@ -71,12 +71,12 @@ git fetch --quiet origin "$BRANCH"
 OLD=$(git rev-parse HEAD)
 NEW=$(git rev-parse "origin/$BRANCH")
 if [ "$OLD" = "$NEW" ]; then
-  echo "Đang chạy bản mới nhất: $(git log -1 --format='%h %s')"
+  echo "Đang chạy bản mới nhất: $(git --no-pager log -1 --format='%h %s')"
   exit 0
 fi
 git merge-base --is-ancestor "$OLD" "$NEW" ||
   die "Lịch sử trên GitHub không nối tiếp bản đang chạy ($OLD). Dừng lại, cần kiểm tra tay."
-git log --reverse --format='  %h %s' "$OLD..$NEW"
+git --no-pager log --reverse --format='  %h %s' "$OLD..$NEW"
 
 SWITCHED=0
 BACKUP=
@@ -86,7 +86,7 @@ fail() {
   retag rollback latest
   if [ "$SWITCHED" = 1 ]; then
     docker compose up -d --no-build app worker
-    if healthy; then echo "Đã quay về bản cũ ($(git log -1 --format=%h)), web chạy bình thường."
+    if healthy; then echo "Đã quay về bản cũ ($(git --no-pager log -1 --format=%h)), web chạy bình thường."
     else echo 'Đã quay về bản cũ nhưng web vẫn chưa lên. Xem: docker compose logs --tail 100 app'; fi
   else
     echo 'Web vẫn chạy bản cũ, chưa bị đụng tới.'
@@ -129,7 +129,7 @@ docker compose up -d $recreate mediamtx >/dev/null 2>&1 ||
 echo "$OLD" >"$GITDIR/deploy-previous"
 docker image prune -f >/dev/null
 docker builder prune -f --filter until=168h >/dev/null 2>&1 || true
-say "Xong: đang chạy $(git log -1 --format='%h %s')"
+say "Xong: đang chạy $(git --no-pager log -1 --format='%h %s')"
 echo "Bản sao lưu DB ngay trước lần deploy này: $BACKUP"
 changed=$(git diff --name-only "$OLD" "$NEW" -- deploy/cron deploy/nginx)
 if [ -n "$changed" ]; then

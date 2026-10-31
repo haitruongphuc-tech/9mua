@@ -158,6 +158,28 @@ describe('tải lên từng phần + video dài (SPEC-creator.md V5.1)', () => {
     },
   );
 
+  it(
+    'lúc đăng chưa đo được thời lượng (web không có ffmpeg, việc ở hàng short): worker tự đo, video 75 giây vẫn lên',
+    { timeout: 90_000 },
+    async () => {
+      await saveFeature('long_video', true, null);
+      const u = await oldUser();
+      const saved = await saveUpload(u.id, createReadStream(path.join(FIX, 'long-75s.mp4')));
+      if (!saved.ok) throw new Error(saved.error);
+      const r = await createVideoUpload(u.id, saved.uploadId, { caption: 'dài', productIds: [] });
+      if (!r.ok) throw new Error(r.error);
+      // Giả như trên VPS: web không đo được nên video chưa có thời lượng và việc nằm hàng short.
+      await db.video.update({ where: { id: r.videoId }, data: { sourceSec: null } });
+      await db.videoJob.update({ where: { videoId: r.videoId }, data: { lane: 'short' } });
+      expect(await processNextJob()).toBe(true);
+      const v = await db.video.findUniqueOrThrow({ where: { id: r.videoId } });
+      expect(v.status).toBe('ready');
+      expect(v.durationSec).toBeGreaterThan(74);
+      expect(v.sourceSec).toBeCloseTo(75, 0);
+      expect((await db.videoJob.findUniqueOrThrow({ where: { videoId: r.videoId } })).lane).toBe('long');
+    },
+  );
+
   it('hàng chờ: có việc short thì việc long không được lấy trước; mỗi lúc chỉ 1 việc long', async () => {
     const u = await createUser();
     const job = async (lane: string, minute: number) => {

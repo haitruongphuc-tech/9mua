@@ -14,7 +14,13 @@ import { overlayFilter, parseEditSpec } from './edit-spec';
 import { runVideoReadyHooks } from './hooks';
 import { initialScore } from './score';
 import { createOriginalSound, mixSound } from './sounds';
-import { videoLimits } from './limits';
+import { checkLongVideo, SHORT_MAX_SEC, videoLimits, type LongVideoError } from './limits';
+
+const LONG_ERROR_TEXT: Record<LongVideoError, string> = {
+  TOO_LONG: 'Video dài hơn mức cho phép',
+  ACCOUNT_TOO_NEW: 'Video dài hơn 60 giây cần tài khoản tạo từ 3 ngày trở lên',
+  LONG_DAILY_LIMIT: 'Đã hết số phút video dài hôm nay',
+};
 import {
   hlsInitFile,
   hlsLevels,
@@ -89,18 +95,32 @@ export async function processNextJob(): Promise<boolean> {
   }
 
   const work = path.join(env().PRIVATE_DIR, 'video-work', job.id);
-  const long = job.lane === 'long';
+  let long = job.lane === 'long';
   try {
     const source = await probe(job.sourcePath).catch(() => null);
     const story = video.kind === 'story';
-    // Video dài (hàng long) theo giới hạn CEO đặt; hàng short giữ ≤ 60 giây, Story ≤ 30 giây.
+    // Video thường theo giới hạn CEO đặt (công tắc long_video); Duet/Stitch ≤ 60 giây, Story ≤ 30 giây.
     const limits = await videoLimits();
-    const maxSec = story ? MAX_STORY_SEC : long && limits.long ? limits.maxSec : MAX_DURATION_SEC;
+    // Duet / Stitch: cần file video gốc còn trên feed (SPEC-creator.md bổ sung 27/10, V5.5 mục 4).
+    const remixOfId = video.duetOfId ?? video.stitchOfId;
+    // Không phân hàng ngắn/dài khi kiểm thời lượng (CEO chốt 31/10): worker tự đo bằng ffprobe. Container web không có
+    // ffmpeg nên lúc đăng có thể chưa đo được và xếp nhầm hàng short.
+    const maxSec = story ? MAX_STORY_SEC : limits.long && !remixOfId ? limits.maxSec : MAX_DURATION_SEC;
     let reason = source
       ? rejectReason(source, maxSec, limits.long)
       : 'File không phải video MP4, MOV hoặc WebM';
-    // Duet / Stitch: cần file video gốc còn trên feed (SPEC-creator.md bổ sung 27/10, V5.5 mục 4).
-    const remixOfId = video.duetOfId ?? video.stitchOfId;
+    const isLong = !reason && !story && !remixOfId && source!.durationSec > SHORT_MAX_SEC + 0.5;
+    if (isLong && video.sourceSec === null) {
+      // Lúc đăng chưa đo được: kiểm giới hạn video dài ở đây (tài khoản mới, tổng phút mỗi ngày) rồi lưu thời lượng.
+      const longError = await checkLongVideo(video.authorId, source!.durationSec, limits);
+      if (longError) reason = LONG_ERROR_TEXT[longError];
+      else {
+        await db.video.update({ where: { id: video.id }, data: { sourceSec: source!.durationSec } });
+        // Chuyển sang hàng long để hạn khoá và thời gian chạy tối đa theo video dài.
+        await db.videoJob.update({ where: { id: job.id }, data: { lane: 'long' } });
+        long = true;
+      }
+    }
     const original = remixOfId
       ? await db.video.findFirst({
           where: { id: remixOfId, status: 'ready', kind: 'video', fileUrl: { endsWith: '.mp4' } },

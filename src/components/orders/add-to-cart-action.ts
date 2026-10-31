@@ -26,7 +26,8 @@ export async function addToCartAction(
   // Chỉ ghi nguồn video khi video đó thật sự gắn sản phẩm này (thống kê creator không bị ghi giả).
   const source =
     sourceVideoId && (await isProductTagged(sourceVideoId, productId)) ? sourceVideoId : undefined;
-  const result = await addToCart(user.id, productId, qty, source);
+  const variantId = String(form.get('variantId') ?? '') || null;
+  const result = await addToCart(user.id, productId, qty, source, variantId);
   if (!result.ok) {
     return {
       message:

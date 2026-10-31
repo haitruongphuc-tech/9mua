@@ -19,6 +19,8 @@ export const shop: ShopMessages = {
   'shop.cart.err.UNAVAILABLE': '该商品目前不出售。',
   'shop.cart.err.OWN_PRODUCT': '你不能购买自己店铺的商品。',
   'shop.cart.err.CART_FULL': '购物车最多50件商品，请先下单一部分。',
+  'shop.add.variant': '选择规格',
+  'shop.cart.err.VARIANT_REQUIRED': '请在商品页选择规格（颜色、尺码…）。',
   'shop.cart.err.EXCEEDS_STOCK': '超过库存数量。',
   'shop.cart.err.INVALID_QTY': '数量无效。',
   'shop.cart.err.onlyLeft': '只剩{stock}件。',

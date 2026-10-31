@@ -19,6 +19,8 @@ export const shop: ShopMessages = {
   'shop.cart.err.UNAVAILABLE': 'Este producto no está a la venta ahora.',
   'shop.cart.err.OWN_PRODUCT': 'No puedes comprar productos de tu propio Kiot.',
   'shop.cart.err.CART_FULL': 'El carrito admite 50 productos como máximo. Pide algunos primero.',
+  'shop.add.variant': 'Elige una opción',
+  'shop.cart.err.VARIANT_REQUIRED': 'Elige una opción (color, talla…) en la página del producto.',
   'shop.cart.err.EXCEEDS_STOCK': 'Supera la cantidad en stock.',
   'shop.cart.err.INVALID_QTY': 'Cantidad no válida.',
   'shop.cart.err.onlyLeft': 'Solo quedan {stock}.',

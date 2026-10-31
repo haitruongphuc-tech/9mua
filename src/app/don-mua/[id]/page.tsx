@@ -53,7 +53,8 @@ export default async function BuyerOrderPage({ params }: { params: Promise<{ id:
               ) : null}
             </span>
             <span className="flex-1">
-              {i.name} × {i.qty}
+              {i.name}
+              {i.variantLabel ? ` · ${i.variantLabel}` : ''} × {i.qty}
             </span>
             <span>{formatVnd(i.price * i.qty)}</span>
             {reviewsOn && (order.status === 'delivered' || order.status === 'completed') ? (

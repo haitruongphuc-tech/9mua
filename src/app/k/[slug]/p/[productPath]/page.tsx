@@ -16,6 +16,7 @@ import { formatVnd } from '@/lib/format';
 import { getCurrentUser } from '@/modules/identity';
 import { CATEGORIES, getPublicProduct, kiotOwnerId, productPath } from '@/modules/kiot';
 import { productReviews } from '@/modules/orders';
+import { productVariants, variantPriceRange } from '@/modules/kiot';
 import { isFeatureOn } from '@/lib/features';
 import { ProductReviews } from './ProductReviews';
 import { badgesForKiot, badgeStyle } from '@/server/kiot-badges';
@@ -78,6 +79,9 @@ export default async function ProductPage({ params, searchParams }: Params) {
     stars: [1, 2, 3, 4, 5].find((s) => String(s) === query.sao),
     withMedia: query['co-anh'] === '1',
   };
+  // Biến thể (SPEC-kiot.md V5.6): sản phẩm đã có biến thể vẫn bán khi công tắc tắt.
+  const variants = await productVariants(product.id);
+  const priceRange = variants.length ? await variantPriceRange(product.id) : null;
   const badges = (await isFeatureOn('origin')) ? await badgesForKiot(kiot.id) : null;
   const badgeLook = badges?.level ? await badgeStyle() : null;
   const reviews =
@@ -98,7 +102,9 @@ export default async function ProductPage({ params, searchParams }: Params) {
           {badges && badgeLook ? <KiotBadgeRow badges={badges} style={badgeLook} /> : null}
           <p className="flex items-baseline gap-3">
             <span className="text-3xl font-black text-brand" data-testid="product-price">
-              {formatVnd(product.price)}
+              {priceRange && priceRange.min !== priceRange.max
+                ? `${formatVnd(priceRange.min)} – ${formatVnd(priceRange.max)}`
+                : formatVnd(priceRange?.min ?? product.price)}
             </span>
             {product.compareAtPrice ? (
               <span className="text-white/50 line-through">{formatVnd(product.compareAtPrice)}</span>
@@ -114,7 +120,17 @@ export default async function ProductPage({ params, searchParams }: Params) {
             {product.stock > 0 ? t('market.p.left', { stock: product.stock }) : t('market.soldOut')}
           </p>
           {preview ? null : (
-            <AddToCart productId={product.id} maxQty={product.stock} cartUrl={`${env().APP_URL}/gio-hang`} />
+            <AddToCart
+              productId={product.id}
+              maxQty={variants.length ? Math.max(0, ...variants.map((v) => v.stock)) : product.stock}
+              cartUrl={`${env().APP_URL}/gio-hang`}
+              variants={variants.map((v) => ({
+                id: v.id,
+                label: v.label,
+                priceText: formatVnd(v.price),
+                stock: v.stock,
+              }))}
+            />
           )}
           {preview || !ownerId ? null : (
             <MessageButton

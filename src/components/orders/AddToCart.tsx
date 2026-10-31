@@ -11,11 +11,14 @@ export function AddToCart({
   sourceVideoId,
   maxQty,
   cartUrl,
+  variants,
 }: {
   productId: string;
   sourceVideoId?: string;
   maxQty: number;
   cartUrl: string;
+  // Biến thể (SPEC-kiot.md V5.6): có thì phải chọn trước khi thêm vào giỏ.
+  variants?: { id: string; label: string; priceText: string; stock: number }[];
 }) {
   const t = useT();
   const [state, action] = useActionState<AddToCartState, FormData>(
@@ -29,6 +32,26 @@ export function AddToCart({
     return <p className="rounded-[14px] bg-white/10 px-4 py-3 font-bold">{t('shop.add.soldOut')}</p>;
   return (
     <form action={action} className="flex flex-col gap-2">
+      {variants?.length ? (
+        <select
+          name="variantId"
+          required
+          defaultValue=""
+          aria-label={t('shop.add.variant')}
+          className="h-12 rounded-full border border-white/15 bg-white/10 px-4 text-[14px] font-bold text-white"
+          data-testid="variant-select"
+        >
+          <option value="" disabled>
+            {t('shop.add.variant')}
+          </option>
+          {variants.map((v) => (
+            <option key={v.id} value={v.id} disabled={v.stock <= 0}>
+              {v.label} · {v.priceText}
+              {v.stock <= 0 ? ` · ${t('shop.add.soldOut')}` : ''}
+            </option>
+          ))}
+        </select>
+      ) : null}
       <div className="flex gap-2">
         <label className="sr-only" htmlFor={`qty-${productId}`}>
           {t('shop.cart.qty')}

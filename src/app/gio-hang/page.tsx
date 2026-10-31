@@ -85,7 +85,14 @@ export default async function CartPage({
                         ) : null}
                       </span>
                       <div className="flex min-w-0 flex-1 flex-col gap-1">
-                        <span className="truncate text-[13px] font-bold">{l.name}</span>
+                        <span className="truncate text-[13px] font-bold">
+                          {l.name}
+                          {l.variantLabel ? (
+                            <span className="ml-1 font-normal text-white/60" data-testid="cart-variant">
+                              · {l.variantLabel}
+                            </span>
+                          ) : null}
+                        </span>
                         <span className="text-[13px] font-black text-brand">{formatVnd(l.price)}</span>
                         {l.problem ? (
                           <span className="text-[12px] font-bold text-red-400" data-testid="cart-problem">

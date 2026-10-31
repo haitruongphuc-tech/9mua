@@ -18,6 +18,8 @@ export const shop = {
   'shop.cart.err.UNAVAILABLE': 'Sản phẩm hiện không bán.',
   'shop.cart.err.OWN_PRODUCT': 'Bạn không thể mua sản phẩm của Kiot mình.',
   'shop.cart.err.CART_FULL': 'Giỏ hàng tối đa 50 món. Hãy đặt bớt trước.',
+  'shop.add.variant': 'Chọn phân loại',
+  'shop.cart.err.VARIANT_REQUIRED': 'Hãy chọn phân loại (màu, cỡ…) ở trang sản phẩm.',
   'shop.cart.err.EXCEEDS_STOCK': 'Vượt quá số lượng còn trong kho.',
   'shop.cart.err.INVALID_QTY': 'Số lượng không hợp lệ.',
   'shop.cart.err.onlyLeft': 'Chỉ còn {stock} sản phẩm.',

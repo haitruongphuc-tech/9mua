@@ -198,6 +198,8 @@ model Product {
   ratingAvg       Float          @default(0)
   // Bảo hành (SPEC-kiot.md V5.5), ≤ 60 ký tự; trống thì không hiện.
   warranty        String?
+  // Tên nhóm tuỳ chọn của biến thể (SPEC-kiot.md V5.6), vd. ["Màu", "Size"]; rỗng = không có biến thể.
+  optionNames     String[]       @default([])
   ratingCount     Int            @default(0)
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
@@ -335,6 +337,8 @@ model CartItem {
   qty           Int
   sourceVideoId String? // món được thêm từ video Creator nào
   sourceLiveId  String? // món được thêm từ buổi live nào (SPEC-live.md)
+  // Biến thể đã chọn (SPEC-kiot.md V5.6). Giữ khoá cũ (userId, productId): mỗi sản phẩm 1 biến thể trong giỏ.
+  variantId     String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -430,6 +434,9 @@ model OrderItem {
   imageUrl      String?
   sourceVideoId String?
   sourceLiveId  String?
+  // Biến thể lúc đặt (SPEC-kiot.md V5.6): mã và nhãn chụp lại, đổi biến thể sau không ảnh hưởng đơn cũ.
+  variantId     String?
+  variantLabel  String?
 
   @@index([productId])
   @@index([sourceVideoId])
@@ -1045,6 +1052,23 @@ model PageImport {
 
   @@unique([userId, network, externalId])
   @@index([updatedAt])
+}
+
+// Biến thể sản phẩm (SPEC-kiot.md V5.6). Không xoá (đơn cũ trỏ tới): bỏ khỏi danh sách thì ẩn.
+model ProductVariant {
+  id             String   @id @default(cuid(2))
+  productId      String
+  option1        String
+  option2        String?
+  price          Int
+  compareAtPrice Int?
+  stock          Int      @default(0)
+  imageId        String?
+  position       Int      @default(0)
+  hidden         Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  @@index([productId, position])
 }
 
 // Đăng lại (SPEC-social.md V5.9): mỗi người đăng lại một video / bài public tối đa 1 lần.

@@ -62,7 +62,7 @@ export async function applyAction(
     const items = await tx.orderItem.findMany({ where: { orderId } });
     await restoreStock(
       tx,
-      items.map((i) => ({ productId: i.productId, qty: i.qty })),
+      items.map((i) => ({ productId: i.productId, qty: i.qty, variantId: i.variantId })),
     );
   }
   if (to === 'completed') await runCompletionHooks(tx, order);

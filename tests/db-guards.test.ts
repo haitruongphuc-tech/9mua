@@ -34,6 +34,7 @@ describe('chốt chặn trong database', () => {
     expect(rows.map((r) => r.conname)).toEqual(
       expect.arrayContaining([
         'Product_stock_nonnegative',
+        'ProductVariant_stock_nonnegative',
         'AiUsage_cost_nonnegative',
         'SttUsage_cost_nonnegative',
         'Product_price_range',

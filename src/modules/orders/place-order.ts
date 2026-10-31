@@ -51,8 +51,16 @@ export async function placeOrder(
       // Giữ hàng trước: UPDATE có điều kiện nên 2 người mua món cuối thì chỉ 1 người qua.
       await decrementStock(
         tx,
-        lines.map((l) => ({ productId: l.productId, qty: l.qty })),
+        lines.map((l) => ({ productId: l.productId, qty: l.qty, variantId: l.variantId })),
       );
+
+      // Biến thể (SPEC-kiot.md V5.6): giá đọc lại từ biến thể trong transaction.
+      const variantRows = await tx.productVariant.findMany({
+        where: { id: { in: lines.flatMap((l) => (l.variantId ? [l.variantId] : [])) } },
+      });
+      const variantById = new Map(variantRows.map((v) => [v.id, v]));
+      const priceOf = (l: (typeof lines)[number]) =>
+        l.variantId ? variantById.get(l.variantId)!.price : byId.get(l.productId)!.price;
 
       // Đọc lại giá và trạng thái trong transaction — không tin số liệu đã hiển thị cho người mua.
       const products = await tx.product.findMany({
@@ -83,7 +91,7 @@ export async function placeOrder(
       const orderIds: string[] = [];
       for (const [kiotId, groupLines] of groups) {
         const kiot = byId.get(groupLines[0]!.productId)!.kiot;
-        const subtotal = groupLines.reduce((s, l) => s + byId.get(l.productId)!.price * l.qty, 0);
+        const subtotal = groupLines.reduce((s, l) => s + priceOf(l) * l.qty, 0);
         const shippingFee = shippingFeeFor(subtotal, kiot);
         const seq = await tx.$queryRaw<{ n: bigint }[]>`SELECT nextval('order_code_seq') AS n`;
         const code = `DH${seq[0]!.n}`;
@@ -104,10 +112,13 @@ export async function placeOrder(
             items: {
               create: groupLines.map((l) => {
                 const p = byId.get(l.productId)!;
+                const v = l.variantId ? variantById.get(l.variantId) : undefined;
                 return {
                   productId: p.id,
+                  variantId: v?.id ?? null,
+                  variantLabel: v ? [v.option1, v.option2].filter(Boolean).join(' / ') : null,
                   name: p.name,
-                  price: p.price,
+                  price: priceOf(l),
                   qty: l.qty,
                   imageUrl: p.images[0]?.thumbUrl ?? null,
                   sourceVideoId: l.sourceVideoId,
@@ -194,7 +205,7 @@ export async function onOrderPaid(tx: Tx, intent: PaidIntent): Promise<AfterComm
       // Trả muộn sau khi đơn tự huỷ: giữ hàng lại nếu còn, không thì chờ hoàn tiền.
       const reserved = await tryDecrementStock(
         tx,
-        order.items.map((i) => ({ productId: i.productId, qty: i.qty })),
+        order.items.map((i) => ({ productId: i.productId, qty: i.qty, variantId: i.variantId })),
       );
       if (reserved) {
         await applyAction(tx, order.id, 'late_pay', system, {

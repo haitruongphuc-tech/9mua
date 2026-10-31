@@ -19,6 +19,8 @@ export const shop: ShopMessages = {
   'shop.cart.err.UNAVAILABLE': '지금은 판매하지 않는 상품이에요.',
   'shop.cart.err.OWN_PRODUCT': '내 Kiot의 상품은 살 수 없어요.',
   'shop.cart.err.CART_FULL': '장바구니는 최대 50개예요. 먼저 일부를 주문해 주세요.',
+  'shop.add.variant': '옵션 선택',
+  'shop.cart.err.VARIANT_REQUIRED': '상품 페이지에서 옵션(색상, 사이즈…)을 선택하세요.',
   'shop.cart.err.EXCEEDS_STOCK': '재고 수량을 넘었어요.',
   'shop.cart.err.INVALID_QTY': '수량이 올바르지 않아요.',
   'shop.cart.err.onlyLeft': '{stock}개만 남았어요.',

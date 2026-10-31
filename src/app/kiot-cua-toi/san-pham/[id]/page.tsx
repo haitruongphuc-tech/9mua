@@ -2,7 +2,9 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getT } from '@/i18n/server';
 import { requireUser } from '@/modules/identity';
-import { getProductForOwner, MAX_IMAGES_PER_PRODUCT } from '@/modules/kiot';
+import { getProductForOwner, MAX_IMAGES_PER_PRODUCT, MAX_VARIANTS, productVariants } from '@/modules/kiot';
+import { ClientMessages } from '@/i18n/ClientMessages';
+import { VariantEditor } from './VariantEditor';
 import { deleteProductAction, updateProductAction } from '../actions';
 import { ProductForm } from '../ProductForm';
 import { DeleteButton } from './DeleteButton';
@@ -15,6 +17,7 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
   const user = await requireUser();
   const [product, t] = await Promise.all([getProductForOwner(user.id, (await params).id), getT()]);
   if (!product) notFound();
+  const variants = await productVariants(product.id, false);
   return (
     <section className="flex flex-col gap-4 px-4 py-6">
       <h1 className="font-display text-xl font-black">{t('seller.pedit.title')}</h1>
@@ -59,6 +62,27 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
               {t('seller.warranty.save')}
             </button>
           </form>
+        </section>
+      ) : null}
+      {(await isFeatureOn('variants')) || variants.length ? (
+        <section className="flex flex-col gap-2" id="bien-the">
+          <h2 className="text-[13px] font-bold text-white/70">{t('seller.variant.title')}</h2>
+          <ClientMessages prefixes={['seller.variant.']}>
+            <VariantEditor
+              productId={product.id}
+              optionNames={product.optionNames}
+              max={MAX_VARIANTS}
+              initial={variants.map((v) => ({
+                id: v.id,
+                option1: v.option1,
+                option2: v.option2 ?? '',
+                price: String(v.price),
+                compareAtPrice: v.compareAtPrice ? String(v.compareAtPrice) : '',
+                stock: String(v.stock),
+                hidden: v.hidden,
+              }))}
+            />
+          </ClientMessages>
         </section>
       ) : null}
       <DeleteButton action={deleteProductAction.bind(null, product.id)} />

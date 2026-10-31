@@ -104,3 +104,15 @@ export {
   type KiotPalette,
 } from './layout';
 export { featuredProducts } from './public';
+// Bổ sung 31/10/2026 (SPEC-kiot.md V5.6): biến thể sản phẩm.
+export {
+  upsertVariants,
+  productVariants,
+  getVariant,
+  hasVariants,
+  variantPriceRange,
+  variantLabel,
+  MAX_VARIANTS,
+  type VariantInput,
+  type VariantView,
+} from './variants';

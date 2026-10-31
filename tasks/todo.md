@@ -731,7 +731,7 @@ Nhánh `nang-cap-mot-dot`. Trừ App (C32–C36). Mỗi task: test trước → 
 - [x] **T117: Nhập Page (tắt tới khi có khoá)** (C28).
 
 ### Phần đụng tiền (tắt sẵn)
-- [ ] **T118: Biến thể sản phẩm** (C83).
+- [x] **T118: Biến thể sản phẩm** (C83).
 - [ ] **T119: Mã giảm giá, giảm giá theo giờ, công thức cộng số dư mới** (C84).
 - [ ] **T120: GHN/GHTK** (C31).
 - [ ] **T121: Thanh toán khi nhận hàng + đối soát** (C85).

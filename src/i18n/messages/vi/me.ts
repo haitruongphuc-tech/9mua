@@ -96,6 +96,8 @@ export const me = {
   'me.settings.notify.type.event': 'Sự kiện sắp diễn ra',
   'me.settings.notify.type.episode': 'Phim đã lưu có tập mới',
   'me.settings.notify.type.repost': 'Nội dung của tôi được đăng lại',
+  'me.settings.liked.title': 'Video đã thích',
+  'me.settings.liked.public': 'Cho người khác xem tab "Đã thích" trên trang cá nhân của tôi',
   'me.settings.saving': 'Đang lưu…',
   'me.settings.nameSaved': 'Đã lưu tên hiển thị.',
   'me.settings.email': 'Email',

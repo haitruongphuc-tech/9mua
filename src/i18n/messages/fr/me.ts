@@ -98,6 +98,8 @@ export const me: MeMessages = {
   'me.settings.notify.type.event': 'Événements à venir',
   'me.settings.notify.type.episode': 'Nouveaux épisodes des séries enregistrées',
   'me.settings.notify.type.repost': 'Mon contenu a été republié',
+  'me.settings.liked.title': 'Vidéos aimées',
+  'me.settings.liked.public': "Montrer l'onglet « Aimées » de mon profil aux autres",
   'me.settings.saving': 'Enregistrement…',
   'me.settings.nameSaved': 'Nom affiché enregistré.',
   'me.settings.email': 'E-mail',

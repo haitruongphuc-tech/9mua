@@ -708,7 +708,7 @@ Nhánh `nang-cap-mot-dot`. Trừ App (C32–C36). Mỗi task: test trước → 
 - [x] **T98: Tim bình luận, @nhắc tên, từ cấm** (C25, C52, C67).
 - [x] **T99: Trả lời bình luận bằng video** (C64).
 - [x] **T100: Thông báo mới + cài đặt thông báo** (C66).
-- [ ] **T101: Bạn chung, gợi ý follow, tab Đã thích** (C23, C24, C62).
+- [x] **T101: Bạn chung, gợi ý follow, tab Đã thích** (C23, C24, C62).
 - [ ] **T102: Cảm xúc + đăng lại** (C87, C88).
 - [ ] **T103: Điểm thưởng + đổi điểm ra xu (đổi xu tắt sẵn)** (C01).
 - [ ] **T104: Sự kiện + Kỷ niệm** (C26).

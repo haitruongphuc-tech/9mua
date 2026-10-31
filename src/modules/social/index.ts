@@ -49,6 +49,17 @@ export {
 export { decorateFeed, type SocialFeedVideo } from './decorate';
 export { hasLink } from './links';
 export {
+  mutualFollowers,
+  followSuggestions,
+  dismissSuggestion,
+  likedVideos,
+  likedVideoIds,
+  setShowLikedVideos,
+  likedTabPublic,
+  mutualFollowerList,
+  type PersonCard,
+} from './suggest';
+export {
   parseMentions,
   recordMentions,
   mentionSuggestions,

@@ -95,6 +95,8 @@ export const me: MeMessages = {
   'me.settings.notify.type.event': '即将开始的活动',
   'me.settings.notify.type.episode': '收藏的短剧有新集',
   'me.settings.notify.type.repost': '我的内容被转发',
+  'me.settings.liked.title': '已赞视频',
+  'me.settings.liked.public': '允许别人在我的主页查看“已赞”',
   'me.settings.saving': '正在保存…',
   'me.settings.nameSaved': '显示名称已保存。',
   'me.settings.email': '邮箱',

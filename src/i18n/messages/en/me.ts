@@ -97,6 +97,8 @@ export const me: MeMessages = {
   'me.settings.notify.type.event': 'Upcoming events',
   'me.settings.notify.type.episode': 'New episodes of saved series',
   'me.settings.notify.type.repost': 'My content was reposted',
+  'me.settings.liked.title': 'Liked videos',
+  'me.settings.liked.public': 'Let others see the "Liked" tab on my profile',
   'me.settings.saving': 'Saving…',
   'me.settings.nameSaved': 'Display name saved.',
   'me.settings.email': 'Email',

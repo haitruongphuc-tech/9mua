@@ -4,7 +4,9 @@ import { notFound } from 'next/navigation';
 import { Avatar } from '@/components/ui/Avatar';
 import { getT } from '@/i18n/server';
 import { getPublicProfile } from '@/modules/identity';
-import { followList } from '@/modules/social';
+import { followList, mutualFollowerList } from '@/modules/social';
+import { getCurrentUser } from '@/modules/identity';
+import { isFeatureOn } from '@/lib/features';
 
 export const metadata: Metadata = { robots: { index: false } };
 
@@ -15,14 +17,19 @@ export default async function FollowListPage({
   searchParams,
 }: {
   params: Promise<{ userId: string }>;
-  searchParams: Promise<{ dang?: string; trang?: string }>;
+  searchParams: Promise<{ dang?: string; trang?: string; 'ban-chung'?: string }>;
 }) {
   const [{ userId }, query, t] = await Promise.all([params, searchParams, getT()]);
   const profile = await getPublicProfile(userId);
   if (!profile) notFound();
   const kind = query.dang ? 'following' : 'followers';
   const page = Math.max(1, Number.parseInt(query.trang ?? '1', 10) || 1);
-  const { items, hasMore } = await followList(userId, kind, page);
+  // Bạn chung (SPEC-social.md V5.1 mục 1): người mình follow cũng follow trang này.
+  const viewer = query['ban-chung'] && (await isFeatureOn('social_more')) ? await getCurrentUser() : null;
+  const mutual = viewer ? await mutualFollowerList(viewer.id, userId) : null;
+  const { items, hasMore } = mutual
+    ? { items: mutual, hasMore: false }
+    : await followList(userId, kind, page);
   const base = `/creator/${userId}/theo-doi${kind === 'following' ? '?dang=1&' : '?'}`;
   const tab = (on: boolean) =>
     `flex-1 border-b-2 pb-2 text-center text-[14px] font-bold ${on ? 'border-white text-white' : 'border-transparent text-white/50'}`;
@@ -36,9 +43,11 @@ export default async function FollowListPage({
         {profile.displayName}
       </Link>
       <h1 className="font-display text-[20px] font-black">
-        {t(kind === 'followers' ? 'profile.list.followers' : 'profile.list.following', {
-          name: profile.displayName,
-        })}
+        {mutual
+          ? t('profile.mutual.title')
+          : t(kind === 'followers' ? 'profile.list.followers' : 'profile.list.following', {
+              name: profile.displayName,
+            })}
       </h1>
       <nav className="flex border-b border-white/10">
         <Link href={`/creator/${userId}/theo-doi`} className={tab(kind === 'followers')}>

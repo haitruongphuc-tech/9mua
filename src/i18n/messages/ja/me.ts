@@ -97,6 +97,8 @@ export const me: MeMessages = {
   'me.settings.notify.type.event': 'もうすぐ始まるイベント',
   'me.settings.notify.type.episode': '保存したドラマの新しい話',
   'me.settings.notify.type.repost': '自分の投稿が再投稿された',
+  'me.settings.liked.title': 'いいねした動画',
+  'me.settings.liked.public': 'プロフィールの「いいね済み」をほかの人にも見せる',
   'me.settings.saving': '保存中…',
   'me.settings.nameSaved': '表示名を保存しました。',
   'me.settings.email': 'メール',

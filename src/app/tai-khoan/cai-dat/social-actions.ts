@@ -2,7 +2,7 @@
 
 import { redirect } from 'next/navigation';
 import { requireUser } from '@/modules/identity';
-import { addMutedKeyword, removeMutedKeyword, setMentionPolicy } from '@/modules/social';
+import { addMutedKeyword, removeMutedKeyword, setMentionPolicy, setShowLikedVideos } from '@/modules/social';
 import { NOTIFY_TYPES, setNotifyTypes } from '@/lib/notify-events';
 
 // Cài đặt bình luận (SPEC-social.md V5.4): "Ai được nhắc tên tôi" và từ cấm.
@@ -32,4 +32,11 @@ export async function setNotifyTypesAction(form: FormData): Promise<void> {
     NOTIFY_TYPES.filter((t) => form.get(`n.${t}`) === 'on'),
   );
   redirect('/tai-khoan/cai-dat?da-luu=thong-bao#thong-bao');
+}
+
+// Tab "Đã thích" công khai (SPEC-social.md V5.2).
+export async function setShowLikedAction(form: FormData): Promise<void> {
+  const user = await requireUser();
+  await setShowLikedVideos(user.id, form.get('show') === 'on');
+  redirect('/tai-khoan/cai-dat?da-luu=da-thich#da-thich');
 }

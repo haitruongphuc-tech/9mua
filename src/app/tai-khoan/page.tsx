@@ -24,6 +24,10 @@ import { logoutAction } from '@/app/(auth)/actions';
 import { getT } from '@/i18n/server';
 import { isTemporaryName, requireUser } from '@/modules/identity';
 import { loadMePage } from '@/server/me-page';
+import { followSuggestions } from '@/modules/social';
+import { isFeatureOn } from '@/lib/features';
+import { ClientMessages } from '@/i18n/ClientMessages';
+import { SuggestRow } from '@/components/profile/SuggestRow';
 import { Avatar } from '@/components/ui/Avatar';
 
 export const metadata: Metadata = { title: 'Tài khoản', robots: { index: false } };
@@ -34,6 +38,8 @@ export default async function MePage() {
   const user = await requireUser();
   if (user.mustChangePassword) redirect('/tai-khoan/cai-dat?doi-mat-khau=1');
   const [data, t] = await Promise.all([loadMePage(user), getT()]);
+  // Gợi ý follow (SPEC-social.md V5.1 mục 2), công tắc social_more.
+  const suggestions = (await isFeatureOn('social_more')) ? await followSuggestions(user.id) : [];
   const { role, follow, free, voucher, kiot, notifications, socialCount, saved, xu } = data;
 
   const links = [
@@ -272,6 +278,13 @@ export default async function MePage() {
           </section>
         ) : null}
 
+        {suggestions.length ? (
+          <div className="mt-6">
+            <ClientMessages prefixes={['profile.suggest.']}>
+              <SuggestRow people={suggestions} />
+            </ClientMessages>
+          </div>
+        ) : null}
         <form action={logoutAction} className="mt-6">
           <button
             type="submit"

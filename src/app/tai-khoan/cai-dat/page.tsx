@@ -10,7 +10,9 @@ import {
   removeMutedKeywordAction,
   setMentionPolicyAction,
   setNotifyTypesAction,
+  setShowLikedAction,
 } from './social-actions';
+import { likedTabPublic } from '@/modules/social';
 import { NOTIFY_TYPES, notifyOffTypes } from '@/lib/notify-events';
 import { Avatar } from '@/components/ui/Avatar';
 import { BlockButton } from '@/components/social/BlockButton';
@@ -40,6 +42,7 @@ export default async function AccountSettingsPage({
   const policy = blockOn ? await mentionPolicyOf(user.id) : 'everyone';
   const mutedError = params['loi-tu-cam'];
   const notifyOff = blockOn ? await notifyOffTypes(user.id) : [];
+  const likedPublic = blockOn ? await likedTabPublic(user.id) : false;
   const handle = handleOn ? await handleInfo(user.id) : null;
   return (
     <ClientMessages prefixes={['me.settings.', 'auth.otp.', 'auth.addEmail.']}>
@@ -55,6 +58,29 @@ export default async function AccountSettingsPage({
               handle={handle.handle}
               nextChange={handle.nextChangeAt ? formatDate(handle.nextChangeAt, t.lang) : null}
             />
+          ) : null}
+          {blockOn ? (
+            <Card title={t('me.settings.liked.title')} id="da-thich">
+              <form action={setShowLikedAction} className="flex flex-col gap-2">
+                <label className="flex items-center gap-2 text-[13px]">
+                  <input
+                    type="checkbox"
+                    name="show"
+                    defaultChecked={likedPublic}
+                    className="h-4 w-4 accent-[#ff6b00]"
+                    data-testid="liked-public"
+                  />
+                  {t('me.settings.liked.public')}
+                </label>
+                <button
+                  type="submit"
+                  className="h-10 w-fit rounded-full bg-white/10 px-4 text-[12px] font-black"
+                  data-testid="liked-save"
+                >
+                  {t('me.settings.save')}
+                </button>
+              </form>
+            </Card>
           ) : null}
           {blockOn ? (
             <Card title={t('me.settings.notify.title')} id="thong-bao">

@@ -97,6 +97,8 @@ export const me: MeMessages = {
   'me.settings.notify.type.event': '곧 열리는 이벤트',
   'me.settings.notify.type.episode': '저장한 드라마의 새 회차',
   'me.settings.notify.type.repost': '내 콘텐츠가 리포스트됨',
+  'me.settings.liked.title': '좋아요한 영상',
+  'me.settings.liked.public': '다른 사람도 내 프로필의 "좋아요" 탭을 볼 수 있게 하기',
   'me.settings.saving': '저장 중…',
   'me.settings.nameSaved': '표시 이름을 저장했어요.',
   'me.settings.email': '이메일',

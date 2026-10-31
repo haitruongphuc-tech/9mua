@@ -15,7 +15,16 @@ import { BlockButton } from '@/components/social/BlockButton';
 import { postsByAuthor, type CreatorProfile } from '@/modules/creator';
 import { liveIdOfHost } from '@/modules/live';
 import { getCurrentUser } from '@/modules/identity';
-import { followStats, getSocialLinks, listBlockedUsers } from '@/modules/social';
+import {
+  followStats,
+  followSuggestions,
+  getSocialLinks,
+  likedTabPublic,
+  likedVideos,
+  listBlockedUsers,
+  mutualFollowers,
+} from '@/modules/social';
+import { SuggestRow } from '@/components/profile/SuggestRow';
 
 // Trang creator kiểu V4 (SPEC-creator.md mục 7, SPEC-social.md mục 1): số liệu thật, Follow, link mạng xã hội.
 export async function CreatorProfileView({
@@ -54,6 +63,13 @@ export async function CreatorProfileView({
     isFeatureOn('social_more'),
   ]);
   const isSelf = viewer?.id === p.id;
+  // Bạn chung, gợi ý follow, tab Đã thích (SPEC-social.md V5.1–V5.2), công tắc social_more.
+  const socialMore = await isFeatureOn('social_more');
+  const mutual = socialMore && viewer && !isSelf ? await mutualFollowers(viewer.id, p.id) : null;
+  const suggestions =
+    socialMore && viewer ? (await followSuggestions(viewer.id)).filter((x) => x.id !== p.id) : [];
+  const liked = socialMore ? await likedVideos(p.id, viewer?.id) : null;
+  const likedPublic = isSelf && liked ? await likedTabPublic(p.id) : false;
   // Tab "Bài viết" (SPEC-creator.md V5.10 mục 2), công tắc posts.
   const posts = (await isFeatureOn('posts')) ? await postsByAuthor(p.id, { userId: viewer?.id }) : [];
   // Có @tên thì link chia sẻ là 9mua.com/@<tên> (SPEC-identity.md V5.1).
@@ -110,6 +126,35 @@ export async function CreatorProfileView({
               {p.bio}
             </p>
           ) : null}
+          {mutual && mutual.total > 0 ? (
+            <Link
+              href={`/creator/${p.id}/theo-doi?ban-chung=1`}
+              className="mt-3 flex items-center gap-2 text-[12px] text-white/70"
+              data-testid="mutual-followers"
+            >
+              <span className="flex -space-x-2">
+                {mutual.people.map((m) => (
+                  <Avatar
+                    key={m.id}
+                    name={m.displayName}
+                    url={m.avatarUrl}
+                    className="h-6 w-6 border border-ink text-[10px]"
+                  />
+                ))}
+              </span>
+              <span>
+                {mutual.total > 2
+                  ? t('profile.mutual.many', {
+                      names: mutual.people
+                        .slice(0, 2)
+                        .map((m) => m.displayName)
+                        .join(', '),
+                      others: mutual.total - 2,
+                    })
+                  : t('profile.mutual.few', { names: mutual.people.map((m) => m.displayName).join(', ') })}
+              </span>
+            </Link>
+          ) : null}
           <ProfileActions
             target={{ userId: p.id }}
             stats={[
@@ -164,6 +209,43 @@ export async function CreatorProfileView({
               />
             )}
           </div>
+          {suggestions.length ? (
+            <div className="mt-6">
+              <SuggestRow people={suggestions} />
+            </div>
+          ) : null}
+          {liked ? (
+            <>
+              <h2
+                className="mt-6 border-b border-white/10 pb-2 text-[13px] font-bold"
+                data-testid="profile-liked"
+              >
+                ♥ {t('profile.tab.liked')}
+                {isSelf ? (
+                  <span className="ml-2 text-[11px] font-normal text-white/50">
+                    {t(likedPublic ? 'profile.liked.public' : 'profile.liked.private')}
+                  </span>
+                ) : null}
+              </h2>
+              <div className="mt-2">
+                {liked.length ? (
+                  <VideoGrid
+                    showAuthor
+                    videos={liked.map((v) => ({
+                      id: v.id,
+                      posterUrl: v.posterUrl,
+                      caption: v.caption,
+                      views: v.views,
+                      likes: v.likes,
+                      authorName: v.author.displayName,
+                    }))}
+                  />
+                ) : (
+                  <p className="py-6 text-center text-[13px] text-white/50">{t('profile.liked.empty')}</p>
+                )}
+              </div>
+            </>
+          ) : null}
           {posts.length ? (
             <>
               <h2

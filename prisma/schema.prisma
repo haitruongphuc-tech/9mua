@@ -37,6 +37,8 @@ model User {
   mentionPolicy       String               @default("everyone")
   // Loại thông báo người dùng đã tắt (SPEC-social.md V5.5). Mặc định bật hết.
   notifyOff           String[]             @default([])
+  // Tab "Đã thích" công khai với người khác (SPEC-social.md V5.2), mặc định tắt.
+  showLikedVideos     Boolean              @default(false)
   handleChangedAt     DateTime?
   previousHandle      String?              @unique
   previousHandleUntil DateTime?
@@ -753,6 +755,15 @@ model RateWindow {
   key         String   @id // "<việc>:<userId>"
   windowStart DateTime
   count       Int      @default(0)
+}
+
+// Gợi ý follow bị "Ẩn" (SPEC-social.md V5.1): không gợi ý lại trong 30 ngày.
+model SuggestionDismiss {
+  userId    String
+  targetId  String
+  createdAt DateTime @default(now())
+
+  @@id([userId, targetId])
 }
 
 // Tim bình luận (SPEC-social.md V5.4 mục 1).

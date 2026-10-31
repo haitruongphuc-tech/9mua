@@ -98,6 +98,8 @@ export const me: MeMessages = {
   'me.settings.notify.type.event': 'Próximos eventos',
   'me.settings.notify.type.episode': 'Nuevos episodios de series guardadas',
   'me.settings.notify.type.repost': 'Volvieron a publicar mi contenido',
+  'me.settings.liked.title': 'Videos que me gustan',
+  'me.settings.liked.public': 'Permitir que otros vean la pestaña "Me gusta" de mi perfil',
   'me.settings.saving': 'Guardando…',
   'me.settings.nameSaved': 'Nombre visible guardado.',
   'me.settings.email': 'Correo',

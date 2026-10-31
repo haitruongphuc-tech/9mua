@@ -172,7 +172,7 @@ const card = (r: CardRow): SeriesCard => ({
 });
 
 // Phim hiện ở /watch: có ít nhất 1 tập công khai đã lên, người đăng không bị khoá, không chặn nhau với người xem.
-const LISTED = (viewerId: string | undefined) => Prisma.sql`u."lockedAt" IS NULL
+const LISTED = (viewerId: string | undefined) => Prisma.sql`u."lockedAt" IS NULL AND NOT u."isPrivate"
   AND ${notBlockedWith(viewerId, Prisma.sql`s."ownerId"`)}
   AND EXISTS (SELECT 1 FROM "Video" v WHERE v."seriesId" = s.id AND v.status = 'ready' AND v.visibility = 'public')`;
 

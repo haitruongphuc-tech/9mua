@@ -114,6 +114,17 @@ export const me = {
   'me.memories.hint': 'Chỉ bạn thấy. Có thể đăng lại hoặc tắt trong Cài đặt.',
   'me.settings.memories.title': 'Kỷ niệm',
   'me.settings.memories.on': 'Hiện "Ngày này năm trước" trên trang Tôi',
+  'me.settings.private.title': 'Tài khoản riêng tư',
+  'me.settings.private.on': 'Bật tài khoản riêng tư',
+  'me.settings.private.hint':
+    'Người muốn follow phải gửi yêu cầu. Người chưa follow chỉ thấy tên, ảnh và số follow; video không vào feed Dành cho bạn, không Duet, Stitch, tải về, nhúng.',
+  'me.settings.private.kiot':
+    'Bạn đang có Kiot hoạt động nên không bật được: Kiot phải công khai để bán hàng.',
+  'me.settings.private.requests': 'Yêu cầu follow',
+  'me.requests.title': 'Yêu cầu follow',
+  'me.requests.empty': 'Chưa có yêu cầu nào.',
+  'me.requests.accept': 'Chấp nhận',
+  'me.requests.decline': 'Từ chối',
   'me.settings.saving': 'Đang lưu…',
   'me.settings.nameSaved': 'Đã lưu tên hiển thị.',
   'me.settings.email': 'Email',

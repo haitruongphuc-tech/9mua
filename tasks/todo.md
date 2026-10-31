@@ -715,7 +715,7 @@ Nhánh `nang-cap-mot-dot`. Trừ App (C32–C36). Mỗi task: test trước → 
 - [x] **T105: Nhóm** (C91).
 
 ### Tài khoản
-- [ ] **T106: Tài khoản riêng tư** (C70).
+- [x] **T106: Tài khoản riêng tư** (C70).
 - [ ] **T107: Tự xoá tài khoản** (C71).
 - [ ] **T108: Đăng nhập Apple (tắt tới khi có khoá)** (C72).
 - [ ] **T109: Nhiều tài khoản trên một máy** (C73).

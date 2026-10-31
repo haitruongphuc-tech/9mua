@@ -1,4 +1,5 @@
 import { now } from '@/lib/clock';
+import { privateUserIds } from '@/lib/private-accounts';
 import { db } from '@/lib/db';
 import { notifyEvent } from '@/lib/notify-events';
 import {
@@ -126,11 +127,21 @@ export async function toggleRepost(
   const item =
     'videoId' in target
       ? await db.video.findFirst({
-          where: { id: target.videoId, status: 'ready', visibility: 'public' },
+          where: {
+            id: target.videoId,
+            status: 'ready',
+            visibility: 'public',
+            authorId: { notIn: await privateUserIds() },
+          },
           select: { authorId: true },
         })
       : await db.post.findFirst({
-          where: { id: target.postId, status: 'ready', visibility: 'public' },
+          where: {
+            id: target.postId,
+            status: 'ready',
+            visibility: 'public',
+            authorId: { notIn: await privateUserIds() },
+          },
           select: { authorId: true },
         });
   if (!item) return { ok: false, error: 'NOT_FOUND' };

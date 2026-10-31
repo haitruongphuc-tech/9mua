@@ -8,6 +8,7 @@ import {
   setMentionPolicy,
   setShowLikedVideos,
   setShowMemories,
+  setPrivateAccount,
 } from '@/modules/social';
 import { NOTIFY_TYPES, setNotifyTypes } from '@/lib/notify-events';
 
@@ -52,4 +53,13 @@ export async function setShowMemoriesAction(form: FormData): Promise<void> {
   const user = await requireUser();
   await setShowMemories(user.id, form.get('show') === 'on');
   redirect('/tai-khoan/cai-dat?da-luu=ky-niem#ky-niem');
+}
+
+// Tài khoản riêng tư (SPEC-identity.md V5.2). Chủ Kiot đang hoạt động không bật được.
+export async function setPrivateAccountAction(form: FormData): Promise<void> {
+  const user = await requireUser();
+  const r = await setPrivateAccount(user.id, form.get('on') === 'on');
+  redirect(
+    r.ok ? '/tai-khoan/cai-dat?da-luu=rieng-tu#rieng-tu' : '/tai-khoan/cai-dat?loi-rieng-tu=1#rieng-tu',
+  );
 }

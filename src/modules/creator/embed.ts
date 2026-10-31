@@ -1,4 +1,5 @@
 import { db } from '@/lib/db';
+import { privateUserIds } from '@/lib/private-accounts';
 
 // Trang nhúng /nhung/<id> (SPEC-creator.md V5.7 mục 2): chỉ video công khai đang trên 9MUA, người đăng không bị khoá.
 export async function embedVideo(videoId: string): Promise<{
@@ -9,7 +10,14 @@ export async function embedVideo(videoId: string): Promise<{
   authorName: string;
 } | null> {
   const v = await db.video.findFirst({
-    where: { id: videoId, status: 'ready', kind: 'video', visibility: 'public', fileUrl: { not: null } },
+    where: {
+      id: videoId,
+      status: 'ready',
+      kind: 'video',
+      visibility: 'public',
+      fileUrl: { not: null },
+      authorId: { notIn: await privateUserIds() },
+    },
     select: { id: true, fileUrl: true, posterUrl: true, caption: true, authorId: true },
   });
   if (!v?.fileUrl) return null;

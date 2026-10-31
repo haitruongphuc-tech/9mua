@@ -6,6 +6,8 @@ export const notify: NotifyMessages = {
   'notify.mentioned': '{name} 님이 나를 언급했어요',
   'notify.videoReply': '{name} 님이 내 댓글에 영상으로 답했어요',
   'notify.reposted': '{name} 님이 내 콘텐츠를 리포스트했어요',
+  'notify.followRequest': '{name}님이 팔로우를 요청했어요',
+  'notify.followAccepted': '{name}님이 팔로우 요청을 수락했어요',
   'notify.eventSoon': '관심 있는 이벤트가 곧 시작돼요',
   'notify.newFollower': '{name} 님이 나를 팔로우했어요',
   'notify.newFollowers': '{name} 님 외 {others}명이 나를 팔로우했어요',

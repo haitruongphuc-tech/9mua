@@ -115,6 +115,17 @@ export const me: MeMessages = {
   'me.memories.hint': '나만 볼 수 있어요. 리포스트하거나 설정에서 끌 수 있어요.',
   'me.settings.memories.title': '추억',
   'me.settings.memories.on': '내 페이지에 "과거의 오늘" 표시',
+  'me.settings.private.title': '비공개 계정',
+  'me.settings.private.on': '내 계정을 비공개로 설정',
+  'me.settings.private.hint':
+    '팔로우하려면 요청이 필요해요. 팔로워가 아니면 이름, 사진, 팔로우 수만 보여요. 동영상은 추천 피드에 나오지 않고 듀엣, 스티치, 다운로드, 퍼가기가 안 돼요.',
+  'me.settings.private.kiot':
+    '운영 중인 Kiot이 있어 비공개로 바꿀 수 없어요. Kiot은 판매를 위해 공개여야 해요.',
+  'me.settings.private.requests': '팔로우 요청',
+  'me.requests.title': '팔로우 요청',
+  'me.requests.empty': '아직 요청이 없어요.',
+  'me.requests.accept': '수락',
+  'me.requests.decline': '거절',
   'me.settings.saving': '저장 중…',
   'me.settings.nameSaved': '표시 이름을 저장했어요.',
   'me.settings.email': '이메일',

@@ -71,7 +71,7 @@ async function computeSuggestions(
       : await db.$queryRaw<(PersonCard & { mutual: number; followers: number })[]>`
           SELECT u.id, u."displayName", u.handle, u."avatarUrl", 0 AS mutual, sum(v.likes)::int AS followers
           FROM "Video" v JOIN "User" u ON u.id = v."authorId"
-          WHERE v.status = 'ready' AND v.visibility = 'public'
+          WHERE v.status = 'ready' AND v.visibility = 'public' AND NOT u."isPrivate"
             AND v."readyAt" >= ${new Date(now().getTime() - 30 * 86_400_000)} AND ${exclude}
           GROUP BY u.id
           ORDER BY followers DESC LIMIT ${take}`;

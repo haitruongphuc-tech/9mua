@@ -10,6 +10,8 @@ export const profile: ProfileMessages = {
   'profile.stat.likes': '좋아요',
   'profile.follow': '팔로우',
   'profile.following': '팔로잉',
+  'profile.requested': '요청됨',
+  'profile.privateNotice': '비공개 계정이에요. 팔로우하면 동영상과 게시물을 볼 수 있어요.',
   'profile.message': '메시지',
   'profile.messageTitle': 'Kiot에 문의',
   'profile.call': '전화',

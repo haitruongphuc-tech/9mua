@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client';
+import { notPrivateAuthor } from '@/lib/private-accounts';
 import { isBlockedEither } from '@/lib/blocks';
 import { db } from '@/lib/db';
 
@@ -10,9 +11,10 @@ export const isVisibility = (v: unknown): v is Visibility => VISIBILITIES.includ
 
 // Điều kiện SQL "người xem được thấy video v" cho danh sách theo người (trang cá nhân, tab Đang Follow).
 export function visibleToSql(viewerId: string | undefined | null): Prisma.Sql {
-  if (!viewerId) return Prisma.sql`v.visibility = 'public'`;
-  return Prisma.sql`(v.visibility = 'public' OR v."authorId" = ${viewerId}
-    OR (v.visibility = 'followers' AND EXISTS (SELECT 1 FROM "Follow" fv
+  const open = Prisma.sql`(v.visibility = 'public' AND ${notPrivateAuthor(Prisma.sql`v."authorId"`)})`;
+  if (!viewerId) return open;
+  return Prisma.sql`(${open} OR v."authorId" = ${viewerId}
+    OR (v.visibility IN ('followers', 'public') AND EXISTS (SELECT 1 FROM "Follow" fv
       WHERE fv."followerId" = ${viewerId} AND fv."followeeId" = v."authorId")))`;
 }
 
@@ -25,11 +27,15 @@ export async function canViewVideo(videoId: string, viewerId?: string | null): P
   if (!v || v.status === 'deleted') return false;
   if (viewerId && viewerId === v.authorId) return true;
   if (v.status !== 'ready') return false;
-  const author = await db.user.findUnique({ where: { id: v.authorId }, select: { lockedAt: true } });
+  const author = await db.user.findUnique({
+    where: { id: v.authorId },
+    select: { lockedAt: true, isPrivate: true },
+  });
   if (!author || author.lockedAt) return false;
   if (viewerId && (await isBlockedEither(viewerId, v.authorId))) return false;
-  if (v.visibility === 'public') return true;
-  if (v.visibility !== 'followers' || !viewerId) return false;
+  if (v.visibility === 'public' && !author.isPrivate) return true;
+  // Tài khoản riêng tư (SPEC-identity.md V5.2): video public hiển thị như followers.
+  if (v.visibility === 'private' || !viewerId) return false;
   const follows = await db.follow.count({ where: { followerId: viewerId, followeeId: v.authorId } });
   return follows > 0;
 }

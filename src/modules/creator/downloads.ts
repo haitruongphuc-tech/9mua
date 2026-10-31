@@ -1,4 +1,5 @@
 import { randomBytes } from 'node:crypto';
+import { privateUserIds } from '@/lib/private-accounts';
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { VideoDownload } from '@prisma/client';
@@ -31,6 +32,7 @@ async function downloadable(videoId: string) {
       status: 'ready',
       kind: 'video',
       visibility: 'public',
+      authorId: { notIn: await privateUserIds() },
       allowDownload: true,
       fileUrl: { not: null },
       durationSec: { lte: MAX_DOWNLOAD_SEC + 0.5 },

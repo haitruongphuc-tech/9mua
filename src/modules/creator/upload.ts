@@ -1,4 +1,5 @@
 import { randomBytes } from 'node:crypto';
+import { privateUserIds } from '@/lib/private-accounts';
 import { createWriteStream } from 'node:fs';
 import { mkdir, open, readdir, stat, unlink } from 'node:fs/promises';
 import path from 'node:path';
@@ -220,6 +221,7 @@ export async function createVideoUpload(
         status: 'ready',
         kind: 'video',
         visibility: 'public',
+        authorId: { notIn: await privateUserIds() },
         allowRemix: true,
         fileUrl: { endsWith: '.mp4' },
       },
@@ -237,6 +239,7 @@ export async function createVideoUpload(
         status: 'ready',
         kind: 'video',
         visibility: 'public',
+        authorId: { notIn: await privateUserIds() },
         allowRemix: true,
         fileUrl: { endsWith: '.mp4' },
       },

@@ -10,6 +10,8 @@ export const profile: ProfileMessages = {
   'profile.stat.likes': '点赞',
   'profile.follow': '关注',
   'profile.following': '已关注',
+  'profile.requested': '已申请',
+  'profile.privateNotice': '这是私密账号。关注后可查看视频和帖子。',
   'profile.message': '发消息',
   'profile.messageTitle': '联系店铺',
   'profile.call': '打电话',

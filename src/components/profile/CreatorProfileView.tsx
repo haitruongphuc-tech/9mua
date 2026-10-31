@@ -22,6 +22,8 @@ import {
   likedTabPublic,
   likedVideos,
   listBlockedUsers,
+  canSeeProfileContent,
+  hasFollowRequest,
   repostedContent,
   upcomingEvents,
   mutualFollowers,
@@ -66,19 +68,24 @@ export async function CreatorProfileView({
     isFeatureOn('social_more'),
   ]);
   const isSelf = viewer?.id === p.id;
+  // Tài khoản riêng tư (SPEC-identity.md V5.2): người chưa follow chỉ thấy tên, ảnh, @tên, số follow.
+  const contentOk = await canSeeProfileContent(p.id, viewer?.id);
+  const requested = !contentOk && !follow.isFollowing ? await hasFollowRequest(viewer?.id, p.id) : false;
   // Bạn chung, gợi ý follow, tab Đã thích (SPEC-social.md V5.1–V5.2), công tắc social_more.
   const socialMore = await isFeatureOn('social_more');
   const mutual = socialMore && viewer && !isSelf ? await mutualFollowers(viewer.id, p.id) : null;
   const suggestions =
     socialMore && viewer ? (await followSuggestions(viewer.id)).filter((x) => x.id !== p.id) : [];
-  const liked = socialMore ? await likedVideos(p.id, viewer?.id) : null;
+  const liked = socialMore && contentOk ? await likedVideos(p.id, viewer?.id) : null;
   const likedPublic = isSelf && liked ? await likedTabPublic(p.id) : false;
   // Khối Sự kiện (SPEC-social.md V5.7), công tắc events.
-  const events = (await isFeatureOn('events')) ? await upcomingEvents(viewer?.id, { ownerId: p.id }, 6) : [];
+  const events =
+    contentOk && (await isFeatureOn('events')) ? await upcomingEvents(viewer?.id, { ownerId: p.id }, 6) : [];
   // Tab "Đăng lại" (SPEC-social.md V5.9), công tắc posts.
-  const reposts = (await isFeatureOn('posts'))
-    ? await repostedContent(p.id, viewer?.id)
-    : { videos: [], posts: [] };
+  const reposts =
+    contentOk && (await isFeatureOn('posts'))
+      ? await repostedContent(p.id, viewer?.id)
+      : { videos: [], posts: [] };
   // Tab "Bài viết" (SPEC-creator.md V5.10 mục 2), công tắc posts.
   const posts = (await isFeatureOn('posts')) ? await postsByAuthor(p.id, { userId: viewer?.id }) : [];
   // Có @tên thì link chia sẻ là 9mua.com/@<tên> (SPEC-identity.md V5.1).
@@ -172,7 +179,7 @@ export async function CreatorProfileView({
               { id: 'videos', value: p.videoCount },
               { id: 'likes', value: p.totalLikes },
             ]}
-            initial={{ following: follow.isFollowing }}
+            initial={{ following: follow.isFollowing, requested }}
             isSelf={isSelf}
             selfLink={{ href: '/tai-khoan/ho-so', label: t('profile.edit.button') }}
             share={{
@@ -205,6 +212,14 @@ export async function CreatorProfileView({
               ) : null}
             </div>
           </ProfileActions>
+          {!contentOk ? (
+            <p
+              className="mt-6 rounded-[16px] border border-white/10 bg-white/5 px-4 py-6 text-center text-[13px] font-bold text-white/70"
+              data-testid="profile-private"
+            >
+              🔒 {t('profile.privateNotice')}
+            </p>
+          ) : null}
           <h2 className="mt-6 border-b border-white/10 pb-2 text-[13px] font-bold">
             {t('profile.tab.video')}
           </h2>

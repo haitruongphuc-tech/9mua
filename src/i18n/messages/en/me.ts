@@ -115,6 +115,17 @@ export const me: MeMessages = {
   'me.memories.hint': 'Only you can see this. Repost it, or turn it off in Settings.',
   'me.settings.memories.title': 'Memories',
   'me.settings.memories.on': 'Show "On this day" on my Me page',
+  'me.settings.private.title': 'Private account',
+  'me.settings.private.on': 'Make my account private',
+  'me.settings.private.hint':
+    "People must request to follow you. Non-followers only see your name, photo and follower counts; your videos stay out of For You and can't be Duetted, Stitched, downloaded or embedded.",
+  'me.settings.private.kiot':
+    "You have an active Kiot, so you can't go private: a Kiot must be public to sell.",
+  'me.settings.private.requests': 'Follow requests',
+  'me.requests.title': 'Follow requests',
+  'me.requests.empty': 'No requests yet.',
+  'me.requests.accept': 'Accept',
+  'me.requests.decline': 'Decline',
   'me.settings.saving': 'Saving…',
   'me.settings.nameSaved': 'Display name saved.',
   'me.settings.email': 'Email',

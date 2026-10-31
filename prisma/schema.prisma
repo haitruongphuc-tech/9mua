@@ -41,6 +41,8 @@ model User {
   showLikedVideos     Boolean              @default(false)
   // Kỷ niệm "Ngày này năm trước" trên trang Tôi (SPEC-social.md V5.7), tắt được trong Cài đặt.
   showMemories        Boolean              @default(true)
+  // Tài khoản riêng tư (SPEC-identity.md V5.2): follow mới thành yêu cầu, nội dung public hiển thị như followers.
+  isPrivate           Boolean              @default(false)
   handleChangedAt     DateTime?
   previousHandle      String?              @unique
   previousHandleUntil DateTime?
@@ -877,6 +879,16 @@ model GroupReport {
 
   @@unique([userId, target])
   @@index([status, createdAt])
+}
+
+// Yêu cầu follow tài khoản riêng tư (SPEC-identity.md V5.2). Bảng riêng để bảng Follow giữ nghĩa "đang follow".
+model FollowRequest {
+  requesterId String
+  targetId    String
+  createdAt   DateTime @default(now())
+
+  @@id([requesterId, targetId])
+  @@index([targetId, createdAt])
 }
 
 // Đăng lại (SPEC-social.md V5.9): mỗi người đăng lại một video / bài public tối đa 1 lần.

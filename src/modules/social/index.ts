@@ -66,6 +66,14 @@ export {
 } from './events';
 export { memoriesOf, setShowMemories } from './memories';
 export {
+  setPrivateAccount,
+  hasFollowRequest,
+  followRequests,
+  respondFollowRequest,
+  canSeeProfileContent,
+  type FollowRequestView,
+} from './privacy';
+export {
   createGroup,
   setGroupAvatar,
   groupPage,

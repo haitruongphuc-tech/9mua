@@ -10,6 +10,8 @@ export const profile: ProfileMessages = {
   'profile.stat.likes': 'いいね',
   'profile.follow': 'フォロー',
   'profile.following': 'フォロー中',
+  'profile.requested': 'リクエスト済み',
+  'profile.privateNotice': '非公開アカウントです。フォローすると動画と投稿が見られます。',
   'profile.message': 'メッセージ',
   'profile.messageTitle': 'Kiotに連絡',
   'profile.call': '電話',

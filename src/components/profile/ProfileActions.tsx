@@ -30,7 +30,7 @@ export function ProfileActions({
 }: {
   target: { kiotId: string } | { userId: string };
   stats: Stat[];
-  initial: { following: boolean; hearted?: boolean };
+  initial: { following: boolean; hearted?: boolean; requested?: boolean };
   isSelf: boolean;
   selfLink?: { href: string; label: string };
   phone?: string;
@@ -43,6 +43,8 @@ export function ProfileActions({
   const { me } = useMe();
   const [values, setValues] = useState(() => Object.fromEntries(stats.map((s) => [s.id, s.value])));
   const [following, setFollowing] = useState(initial.following);
+  // Đã gửi yêu cầu follow tài khoản riêng tư (SPEC-identity.md V5.2).
+  const [requested, setRequested] = useState(Boolean(initial.requested));
   const [hearted, setHearted] = useState(Boolean(initial.hearted));
   const [busy, setBusy] = useState(false);
   const [sheet, setSheet] = useState<'message' | 'share' | null>(null);
@@ -82,6 +84,7 @@ export function ProfileActions({
     if (!data) return;
     if (data.ok) {
       setFollowing(Boolean(data.following));
+      setRequested(Boolean(data.requested));
       setValues((v) => ({ ...v, followers: Number(data.followers) }));
     } else if (data.error === 'FREE_LIMIT') limitToast(data.limit);
   }
@@ -143,10 +146,10 @@ export function ProfileActions({
             onClick={() => void follow()}
             aria-pressed={following}
             disabled={busy}
-            className={`h-11 flex-1 rounded-[12px] text-[14px] font-black ${following ? 'bg-zinc-600' : 'bg-brand'}`}
+            className={`h-11 flex-1 rounded-[12px] text-[14px] font-black ${following || requested ? 'bg-zinc-600' : 'bg-brand'}`}
             data-testid="profile-follow"
           >
-            {following ? t('profile.following') : t('profile.follow')}
+            {following ? t('profile.following') : requested ? t('profile.requested') : t('profile.follow')}
           </button>
         )}
         {phone ? (

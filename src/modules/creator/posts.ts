@@ -1,4 +1,5 @@
 import { randomBytes } from 'node:crypto';
+import { isPrivateAccount } from '@/lib/private-accounts';
 import { Prisma } from '@prisma/client';
 import { blockedEitherIds, isBlockedEither, notBlockedWith } from '@/lib/blocks';
 import { now, startOfVnDay } from '@/lib/clock';
@@ -318,13 +319,17 @@ export async function canViewPost(postId: string, viewerId?: string | null): Pro
   if (!p || p.status === 'deleted' || p.status === 'removed') return false;
   if (viewerId && viewerId === p.authorId) return true;
   if (p.status !== 'ready') return false;
-  const author = await db.user.findUnique({ where: { id: p.authorId }, select: { lockedAt: true } });
+  const author = await db.user.findUnique({
+    where: { id: p.authorId },
+    select: { lockedAt: true, isPrivate: true },
+  });
   if (!author || author.lockedAt) return false;
   if (viewerId && (await isBlockedEither(viewerId, p.authorId))) return false;
-  if (p.visibility === 'public') return true;
+  if (p.visibility === 'public' && !author.isPrivate) return true;
   // Bài trong nhóm (SPEC-social.md V5.10) là bài riêng tư: nhóm công khai ai cũng xem, nhóm riêng tư chỉ thành viên.
   if (p.visibility === 'private') return groupPostVisible(postId, viewerId);
-  if (p.visibility !== 'followers' || !viewerId) return false;
+  // Tài khoản riêng tư (SPEC-identity.md V5.2): bài public hiển thị như followers.
+  if (p.visibility === 'private' || !viewerId) return false;
   return Boolean(await db.follow.findFirst({ where: { followerId: viewerId, followeeId: p.authorId } }));
 }
 
@@ -430,7 +435,7 @@ export async function postFeed(
   const after = at && id ? Prisma.sql`AND (p."createdAt", p.id) < (${new Date(at)}, ${id})` : Prisma.empty;
   const rows = await db.$queryRaw<{ id: string; createdAt: Date }[]>`
     SELECT p.id, p."createdAt" FROM "Post" p JOIN "User" u ON u.id = p."authorId"
-    WHERE ${LISTED(viewer.userId)} AND p.visibility = 'public' ${after}
+    WHERE ${LISTED(viewer.userId)} AND p.visibility = 'public' AND NOT u."isPrivate" ${after}
     ORDER BY p."createdAt" DESC, p.id DESC LIMIT ${take + 1}`;
   const page = rows.slice(0, take);
   const last = page.at(-1);
@@ -455,7 +460,13 @@ export async function postsByAuthor(authorId: string, viewer: Viewer, take = 60)
     where: {
       authorId,
       status: mine ? { notIn: ['deleted', 'removed'] } : 'ready',
-      ...(mine ? {} : { visibility: { in: follows ? ['public', 'followers'] : ['public'] } }),
+      ...(mine
+        ? {}
+        : {
+            visibility: {
+              in: follows ? ['public', 'followers'] : (await isPrivateAccount(authorId)) ? [] : ['public'],
+            },
+          }),
     },
     orderBy: { createdAt: 'desc' },
     take,
@@ -471,7 +482,7 @@ export async function hashtagPosts(tag: string, viewer: Viewer, take = 30): Prom
   if (!tag) return [];
   const rows = await db.$queryRaw<{ id: string }[]>`
     SELECT p.id FROM "Post" p JOIN "User" u ON u.id = p."authorId"
-    WHERE ${LISTED(viewer.userId)} AND p.visibility = 'public' AND ${tag} = ANY(p.hashtags)
+    WHERE ${LISTED(viewer.userId)} AND p.visibility = 'public' AND NOT u."isPrivate" AND ${tag} = ANY(p.hashtags)
     ORDER BY p."createdAt" DESC LIMIT ${take}`;
   return hydratePosts(
     rows.map((r) => r.id),

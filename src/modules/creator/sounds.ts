@@ -1,4 +1,5 @@
 import { randomBytes } from 'node:crypto';
+import { privateUserIds } from '@/lib/private-accounts';
 import { mkdir, rm } from 'node:fs/promises';
 import path from 'node:path';
 import { Prisma } from '@prisma/client';
@@ -59,7 +60,7 @@ type SoundRow = {
 const FROM = Prisma.sql`"Sound" s LEFT JOIN "Video" v ON v.id = s."sourceVideoId" LEFT JOIN "User" u ON u.id = v."authorId"`;
 // Chọn mới được: đang hoạt động; âm thanh gốc thì video gốc còn công khai, cho phép dùng lại, tài khoản không bị khoá.
 const SELECTABLE = Prisma.sql`s.status = 'active' AND (s.kind = 'library' OR (v.status = 'ready' AND v.visibility = 'public'
-  AND v."allowRemix" = true AND u."lockedAt" IS NULL))`;
+  AND v."allowRemix" = true AND u."lockedAt" IS NULL AND NOT u."isPrivate"))`;
 
 const view = (r: SoundRow): SoundView => ({
   id: r.id,
@@ -119,11 +120,13 @@ export async function soundPage(soundId: string, viewer: Viewer): Promise<SoundP
     db.$queryRaw<{ id: string }[]>`
       SELECT v.id FROM "Video" v JOIN "User" u ON u.id = v."authorId"
       WHERE v.status = 'ready' AND v.kind = 'video' AND v.visibility = 'public' AND u."lockedAt" IS NULL
-        AND (v."soundId" = ${soundId} OR v.id = ${src})
+        AND NOT u."isPrivate" AND (v."soundId" = ${soundId} OR v.id = ${src})
         AND ${notBlockedWith(viewer.userId, Prisma.sql`v."authorId"`)}
       ORDER BY (v.id = ${src}) DESC, v.score DESC, v."readyAt" DESC
       LIMIT 60`,
-    db.video.count({ where: { soundId, status: 'ready', visibility: 'public' } }),
+    db.video.count({
+      where: { soundId, status: 'ready', visibility: 'public', authorId: { notIn: await privateUserIds() } },
+    }),
     selectableSound(soundId),
   ]);
   return {

@@ -1,4 +1,6 @@
+import { Prisma } from '@prisma/client';
 import { now } from '@/lib/clock';
+import { notPrivateAuthor, privateUserIds } from '@/lib/private-accounts';
 import { db } from '@/lib/db';
 import { normalizeSearchText } from '@/lib/search-text';
 import { extractHashtags, hydrateVideos, type FeedVideo, type Viewer } from '@/modules/creator';
@@ -11,7 +13,13 @@ export async function hashtagVideos(tag: string, viewer: Viewer, take = 60): Pro
   const t = normalizeTag(tag);
   if (!t) return [];
   const rows = await db.video.findMany({
-    where: { status: 'ready', kind: 'video', visibility: 'public', hashtags: { has: t } },
+    where: {
+      status: 'ready',
+      kind: 'video',
+      visibility: 'public',
+      hashtags: { has: t },
+      authorId: { notIn: await privateUserIds() },
+    },
     orderBy: [{ score: 'desc' }, { readyAt: 'desc' }],
     take,
     select: { id: true },
@@ -27,6 +35,7 @@ export async function trendingHashtags(limit = 10): Promise<{ tag: string; video
   const rows = await db.$queryRaw<{ tag: string; videos: number }[]>`
     SELECT tag, COUNT(*)::int AS videos FROM "Video" v, unnest(v.hashtags) AS tag
     WHERE v.status = 'ready' AND v.kind = 'video' AND v.visibility = 'public' AND v."readyAt" >= ${since}
+      AND ${notPrivateAuthor(Prisma.sql`v."authorId"`)}
     GROUP BY tag ORDER BY videos DESC, tag ASC LIMIT ${limit}`;
   return rows;
 }
@@ -42,6 +51,6 @@ export async function searchHashtags(
     SELECT tag, COUNT(*)::int AS videos
     FROM "Video" v JOIN "User" u ON u.id = v."authorId", unnest(v.hashtags) AS tag
     WHERE v.status = 'ready' AND v.kind = 'video' AND v.visibility = 'public' AND u."lockedAt" IS NULL
-      AND tag LIKE ${`%${q}%`}
+      AND NOT u."isPrivate" AND tag LIKE ${`%${q}%`}
     GROUP BY tag ORDER BY videos DESC, tag ASC LIMIT ${limit}`;
 }

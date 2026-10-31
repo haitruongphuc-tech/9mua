@@ -4,6 +4,7 @@ import { logoutAction, logoutOtherDevicesAction } from '@/app/(auth)/actions';
 import { ClientMessages } from '@/i18n/ClientMessages';
 import { getT } from '@/i18n/server';
 import { handleInfo, requireUser } from '@/modules/identity';
+import { isPrivateAccount } from '@/lib/private-accounts';
 import { listBlockedUsers, listMutedKeywords, MENTION_POLICIES, mentionPolicyOf } from '@/modules/social';
 import {
   addMutedKeywordAction,
@@ -12,6 +13,7 @@ import {
   setNotifyTypesAction,
   setShowLikedAction,
   setShowMemoriesAction,
+  setPrivateAccountAction,
 } from './social-actions';
 import { likedTabPublic, memoriesOf } from '@/modules/social';
 import { NOTIFY_TYPES, notifyOffTypes } from '@/lib/notify-events';
@@ -28,7 +30,12 @@ export const metadata: Metadata = { title: 'Cài đặt tài khoản', robots: {
 export default async function AccountSettingsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ 'da-dang-xuat-thiet-bi-khac'?: string; 'da-luu'?: string; 'loi-tu-cam'?: string }>;
+  searchParams: Promise<{
+    'da-dang-xuat-thiet-bi-khac'?: string;
+    'da-luu'?: string;
+    'loi-tu-cam'?: string;
+    'loi-rieng-tu'?: string;
+  }>;
 }) {
   const user = await requireUser();
   const [params, t, handleOn, blockOn] = await Promise.all([
@@ -47,6 +54,8 @@ export default async function AccountSettingsPage({
   const eventsOn = await isFeatureOn('events');
   const memoriesOn = eventsOn ? (await memoriesOf(user.id)) !== null : false;
   const handle = handleOn ? await handleInfo(user.id) : null;
+  // Tài khoản riêng tư (SPEC-identity.md V5.2), công tắc account_more.
+  const isPrivate = handleOn ? await isPrivateAccount(user.id) : false;
   return (
     <ClientMessages prefixes={['me.settings.', 'auth.otp.', 'auth.addEmail.']}>
       <div>
@@ -61,6 +70,44 @@ export default async function AccountSettingsPage({
               handle={handle.handle}
               nextChange={handle.nextChangeAt ? formatDate(handle.nextChangeAt, t.lang) : null}
             />
+          ) : null}
+          {handleOn ? (
+            <Card title={t('me.settings.private.title')} id="rieng-tu">
+              <form action={setPrivateAccountAction} className="flex flex-col gap-2">
+                <label className="flex items-center gap-2 text-[13px]">
+                  <input
+                    type="checkbox"
+                    name="on"
+                    defaultChecked={isPrivate}
+                    className="h-4 w-4 accent-[#ff6b00]"
+                    data-testid="private-on"
+                  />
+                  {t('me.settings.private.on')}
+                </label>
+                <p className="text-[11px] text-white/50">{t('me.settings.private.hint')}</p>
+                {params['loi-rieng-tu'] ? (
+                  <p role="alert" className="text-[12px] font-bold text-red-300" data-testid="private-error">
+                    {t('me.settings.private.kiot')}
+                  </p>
+                ) : null}
+                <button
+                  type="submit"
+                  className="h-10 w-fit rounded-full bg-white/10 px-4 text-[12px] font-black"
+                  data-testid="private-save"
+                >
+                  {t('me.settings.save')}
+                </button>
+                {isPrivate ? (
+                  <Link
+                    href="/tai-khoan/yeu-cau-follow"
+                    className="text-[12px] font-bold text-brand"
+                    data-testid="follow-requests-link"
+                  >
+                    {t('me.settings.private.requests')} →
+                  </Link>
+                ) : null}
+              </form>
+            </Card>
           ) : null}
           {eventsOn ? (
             <Card title={t('me.settings.memories.title')} id="ky-niem">

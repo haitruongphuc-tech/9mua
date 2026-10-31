@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client';
+import { notPrivateAuthor } from '@/lib/private-accounts';
 import { isBlockedEither } from '@/lib/blocks';
 import { now } from '@/lib/clock';
 import { db } from '@/lib/db';
@@ -8,6 +9,7 @@ import { notifyKey } from '@/lib/notifications';
 import { hydrateVideos, type FeedVideo, type Viewer } from '@/modules/creator';
 import { consumeDailyAction } from './limits';
 import { awardFollowPoints, type PointAward } from './points';
+import { toggleFollowRequest } from './privacy';
 
 // Một trong hai người follow người kia (SPEC-messages.md: nhắn tin vào thẳng hộp thư chính).
 export async function followRelation(a: string, b: string): Promise<boolean> {
@@ -27,16 +29,29 @@ export async function toggleFollow(
   followerId: string,
   followeeId: string,
 ): Promise<
-  | { ok: true; following: boolean; followers: number; points?: PointAward }
+  | { ok: true; following: boolean; followers: number; points?: PointAward; requested?: boolean }
   | { ok: false; error: 'SELF' | 'FREE_LIMIT' | 'NOT_FOUND' | 'BLOCKED' }
 > {
   if (followerId === followeeId) return { ok: false, error: 'SELF' };
-  const target = await db.user.findUnique({ where: { id: followeeId }, select: { lockedAt: true } });
+  const target = await db.user.findUnique({
+    where: { id: followeeId },
+    select: { lockedAt: true, isPrivate: true },
+  });
   if (!target || target.lockedAt) return { ok: false, error: 'NOT_FOUND' };
   // Chặn nhau (SPEC-social.md V5.3) thì không follow được, kể cả bỏ follow đã bị gỡ sẵn khi chặn.
   if (await isBlockedEither(followerId, followeeId)) return { ok: false, error: 'BLOCKED' };
   const removed = await db.follow.deleteMany({ where: { followerId, followeeId } });
   let following = false;
+  // Tài khoản riêng tư (SPEC-identity.md V5.2): follow mới thành yêu cầu; bấm lần nữa là huỷ yêu cầu.
+  if (removed.count === 0 && target.isPrivate) {
+    const r = await toggleFollowRequest(followerId, followeeId);
+    return {
+      ok: true,
+      following: false,
+      requested: r.requested,
+      followers: await db.follow.count({ where: { followeeId } }),
+    };
+  }
   if (removed.count === 0) {
     const allowed = await consumeDailyAction(followerId);
     if (!allowed.ok) return allowed;
@@ -121,6 +136,7 @@ export async function followingFeed(
       JOIN "Video" v ON v.id = r."videoId"
       WHERE r."videoId" IS NOT NULL AND r."createdAt" >= ${since} AND v.status = 'ready'
         AND v.visibility = 'public' AND v."authorId" <> ${viewer.userId}
+        AND ${notPrivateAuthor(Prisma.sql`v."authorId"`)}
       ORDER BY r."videoId", r."createdAt" DESC LIMIT 10`;
     const fresh = reposts.filter((r) => !items.some((v) => v.id === r.videoId)).slice(0, 5);
     const hydrated = await hydrateVideos(

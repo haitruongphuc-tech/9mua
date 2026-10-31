@@ -13,6 +13,7 @@ export async function searchVideos(query: string, limit: number): Promise<VideoT
   const rows = await db.$queryRaw<{ id: string }[]>`
     SELECT v.id FROM "Video" v JOIN "User" u ON u.id = v."authorId"
     WHERE v.status = 'ready' AND v.kind = 'video' AND v.visibility = 'public' AND u."lockedAt" IS NULL
+      AND NOT u."isPrivate"
       AND (${allWordsMatch(Prisma.sql`public.search_norm(v.caption)`, q)} OR ${tag} = ANY(v.hashtags))
     ORDER BY v.score DESC, v."readyAt" DESC
     LIMIT ${limit}`;

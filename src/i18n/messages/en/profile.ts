@@ -10,6 +10,8 @@ export const profile: ProfileMessages = {
   'profile.stat.likes': 'Likes',
   'profile.follow': 'Follow',
   'profile.following': 'Following',
+  'profile.requested': 'Requested',
+  'profile.privateNotice': 'This account is private. Follow to see their videos and posts.',
   'profile.message': 'Message',
   'profile.messageTitle': 'Message the Kiot',
   'profile.call': 'Call',

@@ -1,4 +1,5 @@
 import { db } from '@/lib/db';
+import { privateUserIds } from '@/lib/private-accounts';
 
 export type VideoThumb = {
   id: string;
@@ -31,7 +32,15 @@ export async function getCreatorProfile(
 ): Promise<CreatorProfile | null> {
   const user = await db.user.findUnique({
     where: { id: userId },
-    select: { id: true, displayName: true, avatarUrl: true, coverUrl: true, bio: true, lockedAt: true },
+    select: {
+      id: true,
+      displayName: true,
+      avatarUrl: true,
+      coverUrl: true,
+      bio: true,
+      lockedAt: true,
+      isPrivate: true,
+    },
   });
   if (!user || user.lockedAt) return null;
   const follower =
@@ -39,7 +48,10 @@ export async function getCreatorProfile(
       ? (await db.follow.count({ where: { followerId: viewerId, followeeId: userId } })) > 0
       : false;
   const visibility =
-    viewerId === userId ? undefined : { in: follower ? ['public', 'followers'] : ['public'] };
+    viewerId === userId
+      ? undefined
+      : // Tài khoản riêng tư (SPEC-identity.md V5.2): người chưa follow không thấy video.
+        { in: follower ? ['public', 'followers'] : user.isPrivate ? [] : ['public'] };
   const where = { authorId: userId, status: 'ready', kind: 'video', visibility };
   const [videos, agg] = await Promise.all([
     // Video ghim (tối đa 3) đứng đầu lưới, ghim mới nhất trước.
@@ -74,7 +86,13 @@ export async function getCreatorProfile(
 // Khối "Video hot" trên trang chủ: điểm feed cao nhất, chỉ video đang hiện của tài khoản không bị khoá.
 export async function getHotVideos(limit = 8): Promise<VideoThumb[]> {
   const rows = await db.video.findMany({
-    where: { status: 'ready', kind: 'video', visibility: 'public', fileUrl: { not: null } },
+    where: {
+      status: 'ready',
+      kind: 'video',
+      visibility: 'public',
+      fileUrl: { not: null },
+      authorId: { notIn: await privateUserIds() },
+    },
     orderBy: [{ score: 'desc' }, { readyAt: 'desc' }],
     take: limit * 3,
   });

@@ -58,7 +58,7 @@ const MAX_SERVED_IN_CURSOR = 300;
 // Video được lên feed: đã xử lý xong, không phải Story 24 giờ, và tài khoản người đăng không bị khoá.
 const VISIBLE = Prisma.sql`v.status = 'ready' AND v.kind = 'video' AND u."lockedAt" IS NULL`;
 // Feed Dành cho bạn, video ghim: chỉ video công khai (SPEC-creator.md V5.3).
-const PUBLIC = Prisma.sql`${VISIBLE} AND v.visibility = 'public'`;
+const PUBLIC = Prisma.sql`${VISIBLE} AND v.visibility = 'public' AND NOT u."isPrivate"`;
 
 type Row = { id: string };
 
@@ -224,6 +224,15 @@ export async function hydrateVideos(ids: string[], viewer: Viewer): Promise<Feed
     select: { id: true, displayName: true, avatarUrl: true },
   });
   const authorById = new Map(authors.map((a) => [a.id, a]));
+  // Tài khoản riêng tư (SPEC-identity.md V5.2): video public hiển thị như followers (không tải về, không đăng lại).
+  const privateAuthors = new Set(
+    (
+      await db.user.findMany({
+        where: { id: { in: videos.map((v) => v.authorId) }, isPrivate: true },
+        select: { id: true },
+      })
+    ).map((u) => u.id),
+  );
   const liked = new Set(likes.map((l) => l.videoId));
   const byId = new Map(videos.map((v) => [v.id, v]));
   const out: FeedVideo[] = [];
@@ -255,9 +264,12 @@ export async function hydrateVideos(ids: string[], viewer: Viewer): Promise<Feed
       stitchOf: v.stitchOfId ? { id: v.stitchOfId, authorName: stitchName.get(v.stitchOfId) ?? '' } : null,
       sound: soundOf(v),
       replyTo: replyOf(v),
-      isPublic: v.visibility === 'public',
+      isPublic: v.visibility === 'public' && !privateAuthors.has(v.authorId),
       canDownload:
-        v.visibility === 'public' && v.allowDownload && (v.durationSec ?? 0) <= MAX_DOWNLOAD_SEC + 0.5,
+        v.visibility === 'public' &&
+        !privateAuthors.has(v.authorId) &&
+        v.allowDownload &&
+        (v.durationSec ?? 0) <= MAX_DOWNLOAD_SEC + 0.5,
       captionsUrl:
         captionsOn && v.captions?.status === 'ready' && v.captions.published
           ? `/api/video/${v.id}/phu-de`

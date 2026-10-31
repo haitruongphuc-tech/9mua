@@ -9,6 +9,8 @@ export const profile = {
   'profile.stat.likes': 'Lượt thích',
   'profile.follow': 'Follow',
   'profile.following': 'Đang follow',
+  'profile.requested': 'Đã gửi yêu cầu',
+  'profile.privateNotice': 'Tài khoản riêng tư. Follow để xem video và bài viết.',
   'profile.message': 'Nhắn tin',
   'profile.messageTitle': 'Nhắn cho Kiot',
   'profile.call': 'Gọi',

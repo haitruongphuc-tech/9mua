@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import { isFeatureOn } from '@/lib/features';
+import { savedAccounts } from '@/modules/identity';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { EmailOtpForm } from '@/components/auth/EmailOtpForm';
@@ -69,8 +71,26 @@ export default async function LoginPage({
                     : t('auth.oauth.error', { provider: errorProvider }),
             }
           : null;
+  const saved = (await isFeatureOn('account_more')) ? await savedAccounts() : [];
   return (
     <AuthShell title={t('auth.login.title')} lead={t('auth.login.lead')}>
+      {saved.length ? (
+        <div className="mb-4 flex flex-col gap-2" data-testid="login-saved-accounts">
+          {saved.map((a) => (
+            <form key={a.userId} action="/api/auth/accounts" method="post">
+              <input type="hidden" name="action" value="switch" />
+              <input type="hidden" name="userId" value={a.userId} />
+              <button
+                type="submit"
+                className="h-11 w-full rounded-full bg-white/10 text-[13px] font-bold"
+                data-testid="login-back-account"
+              >
+                {t('me.accounts.back', { name: a.displayName })}
+              </button>
+            </form>
+          ))}
+        </div>
+      ) : null}
       {notice ? (
         <p
           role="status"

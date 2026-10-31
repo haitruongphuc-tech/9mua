@@ -116,3 +116,13 @@ export {
   type DeleteConfirm,
   type DeleteRequestError,
 } from './account-delete';
+// Bổ sung 31/10/2026 (SPEC-identity.md V5.5): nhiều tài khoản trên một máy.
+export {
+  savedAccounts,
+  stashCurrentAccount,
+  switchAccount,
+  switchToNextSaved,
+  endAllSavedSessions,
+  MAX_ACCOUNTS,
+  type SavedAccount,
+} from './multi-account';

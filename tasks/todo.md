@@ -718,7 +718,7 @@ Nhánh `nang-cap-mot-dot`. Trừ App (C32–C36). Mỗi task: test trước → 
 - [x] **T106: Tài khoản riêng tư** (C70).
 - [x] **T107: Tự xoá tài khoản** (C71).
 - [x] **T108: Đăng nhập Apple (tắt tới khi có khoá)** (C72).
-- [ ] **T109: Nhiều tài khoản trên một máy** (C73).
+- [x] **T109: Nhiều tài khoản trên một máy** (C73).
 
 ### Tìm kiếm, Kiot, mua bán
 - [ ] **T110: Vị trí Kiot, tìm Kiot theo tên, Gần tôi** (C12, C13).

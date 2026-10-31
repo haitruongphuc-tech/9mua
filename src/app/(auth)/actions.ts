@@ -2,11 +2,18 @@
 
 import { redirect } from 'next/navigation';
 import { forgetTrustedDevices } from '@/modules/admin';
-import { endSession, getCurrentSessionId, getCurrentUser, invalidateOtherSessions } from '@/modules/identity';
+import {
+  endSession,
+  getCurrentSessionId,
+  getCurrentUser,
+  invalidateOtherSessions,
+  switchToNextSaved,
+} from '@/modules/identity';
 
+// Đăng xuất tài khoản đang dùng; còn tài khoản khác đã lưu trên máy thì chuyển sang (SPEC-identity.md V5.5).
 export async function logoutAction(): Promise<void> {
   await endSession();
-  redirect('/');
+  redirect((await switchToNextSaved()) ? '/tai-khoan' : '/');
 }
 
 export async function logoutOtherDevicesAction(): Promise<void> {

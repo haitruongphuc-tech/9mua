@@ -23,7 +23,8 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { logoutAction } from '@/app/(auth)/actions';
 import { getT } from '@/i18n/server';
-import { isTemporaryName, requireUser } from '@/modules/identity';
+import { isTemporaryName, MAX_ACCOUNTS, requireUser, savedAccounts } from '@/modules/identity';
+import { AccountSwitcher } from '@/components/auth/AccountSwitcher';
 import { loadMePage } from '@/server/me-page';
 import { followSuggestions, memoriesOf, pointBalance } from '@/modules/social';
 import { exchangePointsAction } from './points-actions';
@@ -39,7 +40,7 @@ export const metadata: Metadata = { title: 'Tài khoản', robots: { index: fals
 export default async function MePage({
   searchParams,
 }: {
-  searchParams: Promise<{ 'doi-diem'?: string; 'loi-doi-diem'?: string }>;
+  searchParams: Promise<{ 'doi-diem'?: string; 'loi-doi-diem'?: string; 'loi-tai-khoan'?: string }>;
 }) {
   const user = await requireUser();
   if (user.mustChangePassword) redirect('/tai-khoan/cai-dat?doi-mat-khau=1');
@@ -55,6 +56,9 @@ export default async function MePage({
   const { role, follow, free, voucher, kiot, notifications, socialCount, saved, xu } = data;
 
   const groupsOn = await isFeatureOn('groups');
+  // Nhiều tài khoản trên một máy (SPEC-identity.md V5.5), công tắc account_more. Admin không dùng.
+  const accountsOn = user.role !== 'admin' && (await isFeatureOn('account_more'));
+  const otherAccounts = accountsOn ? await savedAccounts(user.id) : [];
   const links = [
     {
       href: '/thong-bao',
@@ -342,6 +346,25 @@ export default async function MePage({
             </ul>
             <p className="text-[11px] text-white/50">{t('me.memories.hint')}</p>
           </section>
+        ) : null}
+        {accountsOn ? (
+          <>
+            {query['loi-tai-khoan'] === 'FULL' || query['loi-tai-khoan'] === 'ADMIN' ? (
+              <p role="alert" className="mt-6 text-[12px] font-bold text-red-300">
+                {t(`me.accounts.err.${query['loi-tai-khoan']}`)}
+              </p>
+            ) : null}
+            <AccountSwitcher
+              accounts={otherAccounts}
+              canAdd={otherAccounts.length + 1 < MAX_ACCOUNTS}
+              labels={{
+                title: t('me.accounts.title'),
+                switchTo: t('me.accounts.switchTo'),
+                add: t('me.accounts.add'),
+                logoutAll: t('me.accounts.logoutAll'),
+              }}
+            />
+          </>
         ) : null}
         {pointsOn ? (
           <section

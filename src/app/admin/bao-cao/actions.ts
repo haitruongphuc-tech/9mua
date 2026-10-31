@@ -3,7 +3,32 @@
 import { requireAdminVerified, resolveProductReport, resolveVideoReport } from '@/modules/admin';
 import { audit } from '@/lib/audit';
 import { resolvePostReports } from '@/modules/creator';
-import { resolveEventReports } from '@/modules/social';
+import { resolveEventReports, resolveGroupReports } from '@/modules/social';
+
+// Nhóm bị báo cáo (SPEC-social.md V5.10 mục 5): CEO khoá nhóm kèm lý do hoặc bỏ qua.
+export async function resolveGroupAction(
+  groupId: string,
+  decision: 'lock' | 'dismiss',
+  form: FormData,
+): Promise<void> {
+  const admin = await requireAdminVerified();
+  const reason = String(form.get('reason') ?? '').trim();
+  const ok = await resolveGroupReports(groupId, decision, reason);
+  if (ok)
+    await audit({
+      adminId: admin.id,
+      action: `group.${decision}`,
+      targetType: 'group',
+      targetId: groupId,
+      reason: reason || null,
+    });
+  back(
+    '/admin/bao-cao',
+    ok
+      ? { ok: true, message: decision === 'lock' ? 'Đã khoá nhóm.' : 'Đã bỏ qua báo cáo.' }
+      : { ok: false, message: 'Nhóm không còn.' },
+  );
+}
 
 // Sự kiện bị báo cáo (SPEC-social.md V5.7): gỡ hoặc bỏ qua (sự kiện tự ẩn thì hiện lại).
 export async function resolveEventAction(eventId: string, decision: 'remove' | 'dismiss'): Promise<void> {

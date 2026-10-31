@@ -66,6 +66,33 @@ export {
 } from './events';
 export { memoriesOf, setShowMemories } from './memories';
 export {
+  createGroup,
+  setGroupAvatar,
+  groupPage,
+  joinGroup,
+  leaveGroup,
+  approveMember,
+  setGroupAdmin,
+  banMember,
+  setApprovePosts,
+  postToGroup,
+  moderateGroupPost,
+  groupFeed,
+  groupAdminData,
+  myGroups,
+  suggestedGroups,
+  myShareableVideos,
+  reportGroup,
+  listGroupReports,
+  resolveGroupReports,
+  MAX_GROUP_NAME,
+  MAX_GROUP_DESCRIPTION,
+  type GroupView,
+  type GroupCard,
+  type GroupItem,
+  type GroupError,
+} from './groups';
+export {
   awardLikePoints,
   awardFollowPoints,
   pointBalance,

@@ -3,6 +3,7 @@ import {
   Bookmark,
   ChevronRight,
   Clapperboard,
+  UsersRound,
   Coins,
   Crown,
   Film,
@@ -53,6 +54,7 @@ export default async function MePage({
   const memories = (await isFeatureOn('events')) ? await memoriesOf(user.id) : null;
   const { role, follow, free, voucher, kiot, notifications, socialCount, saved, xu } = data;
 
+  const groupsOn = await isFeatureOn('groups');
   const links = [
     {
       href: '/thong-bao',
@@ -76,6 +78,18 @@ export default async function MePage({
     ...(role === 'free' ? [] : [{ href: '/ai', label: t('ai.link'), sub: t('ai.linkSub'), Icon: Sparkles }]),
     { href: '/video/dang', label: t('me.link.post'), sub: t('me.link.postSub'), Icon: Clapperboard },
     { href: '/video/cua-toi', label: t('me.link.myVideos'), sub: t('me.link.myVideosSub'), Icon: Film },
+    // Nhóm cộng đồng (SPEC-social.md V5.10), công tắc groups.
+    ...(groupsOn
+      ? [
+          {
+            href: '/nhom',
+            label: t('feed.group.title'),
+            sub: t('feed.group.mine'),
+            Icon: UsersRound,
+            testId: 'me-groups',
+          },
+        ]
+      : []),
     {
       href: '/tai-khoan/lich-su-xem',
       label: t('me.link.history'),

@@ -297,6 +297,18 @@ export async function cleanupPostUploads(): Promise<number> {
   return old.length;
 }
 
+// Chỉ đọc bảng nhóm (social ghi). Quản trị nhóm thấy cả bài chờ duyệt; thành viên bị cấm / nhóm bị khoá không thấy.
+async function groupPostVisible(postId: string, viewerId?: string | null): Promise<boolean> {
+  const rows = await db.$queryRaw<{ ok: number }[]>`
+    SELECT 1 AS ok FROM "CommunityPost" cp JOIN "CommunityGroup" g ON g.id = cp."groupId"
+    LEFT JOIN "CommunityMember" m ON m."groupId" = g.id AND m."userId" = ${viewerId ?? ''}
+    WHERE cp."postId" = ${postId} AND g.status = 'active' AND (
+      (cp.status = 'published' AND (g.privacy = 'public' OR m.status = 'active'))
+      OR (m.status = 'active' AND m.role IN ('owner', 'admin')))
+    LIMIT 1`;
+  return rows.length > 0;
+}
+
 // Quyền xem bài: như video (công khai / người follow / riêng tư), không chặn nhau, người đăng không bị khoá.
 export async function canViewPost(postId: string, viewerId?: string | null): Promise<boolean> {
   const p = await db.post.findUnique({
@@ -310,6 +322,8 @@ export async function canViewPost(postId: string, viewerId?: string | null): Pro
   if (!author || author.lockedAt) return false;
   if (viewerId && (await isBlockedEither(viewerId, p.authorId))) return false;
   if (p.visibility === 'public') return true;
+  // Bài trong nhóm (SPEC-social.md V5.10) là bài riêng tư: nhóm công khai ai cũng xem, nhóm riêng tư chỉ thành viên.
+  if (p.visibility === 'private') return groupPostVisible(postId, viewerId);
   if (p.visibility !== 'followers' || !viewerId) return false;
   return Boolean(await db.follow.findFirst({ where: { followerId: viewerId, followeeId: p.authorId } }));
 }

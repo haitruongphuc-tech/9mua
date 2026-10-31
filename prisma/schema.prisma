@@ -818,6 +818,67 @@ model EventReport {
   @@index([status, createdAt])
 }
 
+// Nhóm cộng đồng (SPEC-social.md V5.10). privacy public | private; status active | locked.
+model CommunityGroup {
+  id           String   @id @default(cuid(2))
+  ownerId      String
+  name         String
+  description  String   @default("")
+  avatarPath   String?
+  privacy      String   @default("public")
+  approvePosts Boolean  @default(false)
+  status       String   @default("active")
+  lockReason   String?
+  memberCount  Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now())
+
+  @@index([ownerId])
+  @@index([status, privacy, memberCount])
+}
+
+// role owner | admin | member; status active | pending | banned.
+model CommunityMember {
+  groupId   String
+  userId    String
+  role      String   @default("member")
+  status    String   @default("active")
+  createdAt DateTime @default(now())
+
+  @@id([groupId, userId])
+  @@index([userId, status])
+  @@index([groupId, status])
+}
+
+// Bài trong nhóm: postId (Post riêng tư của người đăng) hoặc videoId. status pending | published | removed.
+model CommunityPost {
+  id        String   @id @default(cuid(2))
+  groupId   String
+  authorId  String
+  postId    String?  @unique
+  videoId   String?
+  status    String   @default("published")
+  createdAt DateTime @default(now())
+
+  @@index([groupId, status, createdAt])
+  @@index([videoId])
+}
+
+// Báo cáo nhóm (target = groupId) hoặc bài trong nhóm (target = communityPostId).
+model GroupReport {
+  id              String   @id @default(cuid(2))
+  groupId         String
+  communityPostId String?
+  target          String
+  userId          String
+  reason          String
+  status          String   @default("open")
+  createdAt       DateTime @default(now())
+
+  @@unique([userId, target])
+  @@index([status, createdAt])
+}
+
 // Đăng lại (SPEC-social.md V5.9): mỗi người đăng lại một video / bài public tối đa 1 lần.
 model Repost {
   id        String   @id @default(cuid(2))
